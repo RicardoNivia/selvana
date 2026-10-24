@@ -1,0 +1,70 @@
+trigger:
+  branches:
+    include: [main]
+
+pr:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Backend
+    jobs:
+      - job: BuildTest
+        displayName: Build, pruebas y cobertura (.NET)
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              useGlobalJson: true
+              workingDirectory: backend
+
+          - script: dotnet restore Selvana.slnx
+            workingDirectory: backend
+            displayName: Restaurar
+
+          - script: dotnet build Selvana.slnx -c Release --no-restore
+            workingDirectory: backend
+            displayName: Compilar
+
+          # Incluye pruebas de arquitectura (NetArchTest) e integración con Testcontainers (Docker del agente)
+          - script: dotnet test Selvana.slnx -c Release --no-build --logger trx --collect:"XPlat Code Coverage" --results-directory $(Agent.TempDirectory)/resultados
+            workingDirectory: backend
+            displayName: Pruebas
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: $(Agent.TempDirectory)/resultados/**/*.trx
+
+          - task: PublishCodeCoverageResults@2
+            inputs:
+              summaryFileLocation: $(Agent.TempDirectory)/resultados/**/coverage.cobertura.xml
+
+  - stage: Frontend
+    dependsOn: []
+    jobs:
+      - job: Build
+        displayName: Build y lint (React)
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: 24.x
+
+          - script: npm ci && npm run lint && npm run build
+            workingDirectory: frontend
+            displayName: Instalar, lint y compilar
+
+  - stage: Docker
+    dependsOn: [Backend, Frontend]
+    jobs:
+      - job: Imagenes
+        displayName: Construir imágenes
+        steps:
+          - script: docker compose build
+            env:
+              POSTGRES_PASSWORD: ci
+              RABBITMQ_PASSWORD: ci
+            displayName: docker compose build

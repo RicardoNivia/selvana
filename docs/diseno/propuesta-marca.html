@@ -1,0 +1,915 @@
+<title>Selvana Marca y Diseño</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Unbounded:wght@600;800&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: libro de marca vertical; cada sección es una banda a todo el ancho con contenedor de 1200px. La consola se muestra como pantalla real dentro de un marco. */
+:root{
+  --bg:#F3F6F3; --surface:#FFFFFF; --surface-2:#E9EFEB; --line:#D5DFD9;
+  --ink:#10211B; --ink-2:#465A52; --ink-3:#73867E;
+  --selva:#0B5D52; --selva-strong:#073F38; --selva-soft:#D7ECE6; --on-selva:#FFFFFF;
+  --orq:#8A3FC4; --orq-soft:#F1E6FA; --orq-line:#D9BDF0; --on-orq:#FFFFFF;
+  --ok:#2A8A3E; --ok-soft:#E1F3E4; --warn:#B86E00; --warn-soft:#FCEFD9;
+  --err:#C23A2E; --err-soft:#FBE4E1; --info:#2A62B8; --info-soft:#E2ECFA;
+  --shadow:0 1px 2px rgba(16,33,27,.06),0 8px 24px rgba(16,33,27,.08);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r-s:6px; --r-m:10px; --r-l:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1513; --surface:#13201D; --surface-2:#1A2A26; --line:#273A35;
+  --ink:#E6EFEB; --ink-2:#A6B9B1; --ink-3:#7B8F87;
+  --selva:#3FC2AA; --selva-strong:#7FDCC8; --selva-soft:#123A34; --on-selva:#04211C;
+  --orq:#C590F0; --orq-soft:#2A1A3A; --orq-line:#5A3A7A; --on-orq:#1B0A2A;
+  --ok:#5CC774; --ok-soft:#163222; --warn:#F0A63A; --warn-soft:#352711;
+  --err:#F07A6E; --err-soft:#3A1A17; --info:#7AA8F0; --info-soft:#172740;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0C1513; --surface:#13201D; --surface-2:#1A2A26; --line:#273A35;
+  --ink:#E6EFEB; --ink-2:#A6B9B1; --ink-3:#7B8F87;
+  --selva:#3FC2AA; --selva-strong:#7FDCC8; --selva-soft:#123A34; --on-selva:#04211C;
+  --orq:#C590F0; --orq-soft:#2A1A3A; --orq-line:#5A3A7A; --on-orq:#1B0A2A;
+  --ok:#5CC774; --ok-soft:#163222; --warn:#F0A63A; --warn-soft:#352711;
+  --err:#F07A6E; --err-soft:#3A1A17; --info:#7AA8F0; --info-soft:#172740;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.02em;line-height:1.1}
+p{margin:0}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+section{padding-block:72px;border-top:1px solid var(--line)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.sec-head{display:grid;gap:10px;max-width:68ch;margin-bottom:36px}
+.sec-head h2{font-size:clamp(28px,4vw,40px);font-weight:800}
+.sec-head p{color:var(--ink-2);font-size:16px}
+.mono{font-family:var(--f-mono)}
+:focus-visible{outline:2px solid var(--orq);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* nav */
+.topnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topnav .wrap{display:flex;align-items:center;gap:20px;height:56px}
+.topnav nav{display:flex;gap:18px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+.topnav nav a{color:var(--ink-2);text-decoration:none;font-size:14px;white-space:nowrap}
+.topnav nav a:hover{color:var(--ink)}
+.brandmark{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;font-size:20px;letter-spacing:-.03em;color:var(--ink)}
+.brandmark svg{width:26px;height:26px}
+.themebtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:500 13px var(--f-body);cursor:pointer;white-space:nowrap}
+
+/* hero */
+.hero{padding-block:72px 56px;border-top:0}
+.hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(44px,7.5vw,96px);font-weight:800;letter-spacing:-.045em;line-height:.95}
+.hero h1 .ai{color:var(--orq)}
+.hero h1 .hu{color:var(--selva)}
+.hero .lede{margin-top:24px;font-size:18px;color:var(--ink-2);max-width:52ch}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.tag{font-family:var(--f-mono);font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink-2);background:var(--surface)}
+.hero-art{position:relative;aspect-ratio:1;max-width:100%;border-radius:28px;background:var(--selva-strong);overflow:hidden;display:grid;place-items:center}
+.hero-art canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-art svg{position:relative;width:46%;height:auto}
+
+/* rutas */
+.routes{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.route{border:1px solid var(--line);border-radius:var(--r-l);background:var(--surface);overflow:hidden;display:flex;flex-direction:column}
+.route.rec{border-color:var(--selva);box-shadow:0 0 0 1px var(--selva)}
+.route:not(.rec){opacity:.55;filter:grayscale(.6)}
+.route-art{height:200px;position:relative;display:flex;align-items:flex-end;padding:20px;overflow:hidden}
+.route-body{padding:20px;display:grid;gap:14px;flex:1;align-content:start}
+.route-body h3{font-size:22px;font-weight:800}
+.route-body .why{color:var(--ink-2);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.swatches{display:flex;gap:6px}
+.swatches span{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.08)}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;color:var(--ink-2)}
+.pc b{display:block;font-size:11px;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:4px;font-weight:500}
+.rec-badge{position:absolute;top:14px;right:14px;background:var(--surface);color:var(--selva);font:600 12px var(--f-body);padding:4px 10px;border-radius:999px}
+/* ruta A */
+.art-a{background:#073F38}
+.art-a .wm{font-family:var(--f-display);font-weight:800;font-size:44px;color:#fff;letter-spacing:-.04em;display:flex;align-items:center;gap:10px}
+.art-a .wm svg{width:44px;height:44px}
+/* ruta B */
+.art-b{background:#FFF7E6}
+.art-b .wm{font-family:"Unbounded",var(--f-display);font-weight:800;font-size:34px;color:#1A1A2E;letter-spacing:-.02em;position:relative}
+.art-b .feather{position:absolute;width:150px;height:150px;border-radius:50% 0 50% 50%;top:-40px;right:-30px;background:conic-gradient(from 200deg,#E0372C 0 33%,#FFC41F 0 66%,#1F4FD8 0)}
+/* ruta C */
+.art-c{background:#E8ECE8}
+.art-c .wm{font-family:"Instrument Serif",Georgia,serif;font-size:50px;color:#253A5E;font-style:italic;position:relative}
+.art-c .mist{position:absolute;inset:0;background:radial-gradient(circle at 75% 30%,#C9A646 0 22px,transparent 23px),repeating-linear-gradient(170deg,transparent 0 18px,rgba(37,58,94,.07) 18px 19px)}
+
+/* concepto */
+.concept{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.concept-text{display:grid;gap:18px;font-size:16px;color:var(--ink-2);max-width:60ch}
+.concept-text strong{color:var(--ink)}
+.traits{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.trait{padding:18px;border-radius:var(--r-m);background:var(--surface);border:1px solid var(--line);display:grid;gap:6px}
+.trait h4{font-size:18px}
+.trait p{font-size:13px;color:var(--ink-2)}
+.voice{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.voice-card{border-radius:var(--r-m);border:1px solid var(--line);background:var(--surface);overflow:hidden}
+.voice-card .ctx{padding:10px 16px;font-family:var(--f-mono);font-size:12px;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.voice-card .row{padding:12px 16px;display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:14px}
+.voice-card .row+.row{border-top:1px dashed var(--line)}
+.mark-yes{color:var(--ok);font-weight:700}.mark-no{color:var(--err);font-weight:700}
+.voice-card .row.no span:last-child{color:var(--ink-3);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--err) 50%,transparent)}
+
+/* logo */
+.logo-grid{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:16px}
+.logo-tile{border-radius:var(--r-l);border:1px solid var(--line);background:var(--surface);min-height:200px;display:grid;place-items:center;position:relative;padding:28px}
+.logo-tile .cap{position:absolute;left:14px;bottom:12px;font-family:var(--f-mono);font-size:11px;color:var(--ink-3)}
+.logo-tile.big{grid-row:span 2}
+.logo-tile.dark{background:#073F38;border-color:#073F38}
+.logo-tile.dark .cap{color:#8FB8AE}
+.logo-h{display:flex;align-items:center;gap:16px;font-family:var(--f-display);font-weight:800;font-size:clamp(44px,6vw,72px);letter-spacing:-.045em}
+.logo-h svg{width:1.05em;height:1.05em}
+.appicon{width:96px;height:96px;border-radius:24px;background:#0B5D52;display:grid;place-items:center;box-shadow:var(--shadow)}
+.appicon svg{width:60px;height:60px}
+.anatomy{margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;font-size:14px;color:var(--ink-2)}
+.anatomy div{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.anatomy i{width:14px;height:14px;border-radius:50%;margin-top:4px;display:block}
+
+/* color */
+.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.pal{border-radius:var(--r-l);overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.pal .main{height:120px;padding:14px;display:flex;flex-direction:column;justify-content:space-between}
+.pal .main b{font-family:var(--f-display);font-size:20px}
+.pal .main span{font-family:var(--f-mono);font-size:12px;opacity:.85}
+.pal .ramp{display:flex;height:28px}
+.pal .ramp span{flex:1}
+.pal .use{padding:12px 14px;font-size:13px;color:var(--ink-2)}
+.semantic{margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sem{display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--r-m);font-size:14px;font-weight:600}
+.sem small{display:block;font-weight:400;font-family:var(--f-mono);font-size:11px;opacity:.8}
+.rule-box{margin-top:24px;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;padding:20px 22px;border-radius:var(--r-l);background:var(--orq-soft);border:1px solid var(--orq-line)}
+.rule-box p{color:var(--ink);max-width:80ch}
+.rule-box svg{width:36px;height:36px;color:var(--orq)}
+
+/* tipografia */
+.type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px}
+.face{padding:22px;border:1px solid var(--line);border-radius:var(--r-l);background:var(--surface);display:grid;gap:10px}
+.face .aa{font-size:64px;line-height:1}
+.face p{font-size:13px;color:var(--ink-2)}
+.scale{border:1px solid var(--line);border-radius:var(--r-l);background:var(--surface);overflow-x:auto}
+.scale table{width:100%;border-collapse:collapse;min-width:560px}
+.scale td{padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:baseline}
+.scale tr:last-child td{border-bottom:0}
+.scale td:first-child,.scale td:nth-child(2){font-family:var(--f-mono);font-size:12px;color:var(--ink-3);white-space:nowrap;width:1%}
+
+/* tokens */
+.tok-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tok{padding:20px;border:1px solid var(--line);border-radius:var(--r-l);background:var(--surface);display:grid;gap:14px;align-content:start}
+.tok h4{font-size:16px}
+.space-row{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.space-row span{display:block;height:12px;background:var(--selva);border-radius:2px}
+.rad-row{display:flex;gap:12px;flex-wrap:wrap}
+.rad-row div{width:56px;height:56px;border:2px solid var(--selva);background:var(--selva-soft);display:grid;place-items:end center;font-family:var(--f-mono);font-size:10px;color:var(--ink-2);padding-bottom:4px}
+.elev-row{display:flex;gap:14px;flex-wrap:wrap}
+.elev-row div{width:72px;height:56px;border-radius:var(--r-m);background:var(--surface);display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;color:var(--ink-3)}
+
+/* componentes */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.comp{padding:22px;border:1px solid var(--line);border-radius:var(--r-l);background:var(--surface);display:grid;gap:16px;align-content:start;min-width:0}
+.comp > .eyebrow{margin-bottom:-4px}
+.row-wrap{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:600 14px var(--f-body);border-radius:var(--r-s);padding:9px 16px;border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:8px;line-height:1.2;transition:transform .12s, background .12s}
+.btn:active{transform:translateY(1px)}
+.btn svg{width:16px;height:16px}
+.btn-primary{background:var(--selva);color:var(--on-selva)}
+.btn-primary:hover{background:var(--selva-strong)}
+.btn-ai{background:var(--orq);color:var(--on-orq)}
+.btn-sec{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn-sec:hover{background:var(--surface-2)}
+.btn-ghost{background:transparent;color:var(--selva)}
+.btn-danger{background:var(--surface);color:var(--err);border-color:color-mix(in srgb,var(--err) 40%,var(--line))}
+.btn-sm{padding:6px 10px;font-size:13px}
+.field{display:grid;gap:6px;min-width:0}
+.field label{font-size:13px;font-weight:600}
+.field .help{font-size:12px;color:var(--ink-3)}
+.input{font:400 14px var(--f-body);padding:9px 12px;border-radius:var(--r-s);border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.input:focus{outline:2px solid color-mix(in srgb,var(--selva) 40%,transparent);border-color:var(--selva)}
+.input.ai-filled{border-color:var(--orq-line);background:var(--orq-soft)}
+.ai-note{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--orq)}
+.ai-note svg{width:13px;height:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--f-body);padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill i{width:6px;height:6px;border-radius:50%;background:currentColor;display:block}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-err{background:var(--err-soft);color:var(--err)}.p-info{background:var(--info-soft);color:var(--info)}
+.p-ai{background:var(--orq-soft);color:var(--orq)}.p-neutral{background:var(--surface-2);color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-m);padding:3px;background:var(--surface-2);flex-wrap:wrap}
+.seg button{border:0;background:transparent;color:var(--ink-2);font:500 13px var(--f-body);padding:7px 12px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow);font-weight:600}
+.seg-desc{font-size:13px;color:var(--ink-2);min-height:2.6em}
+
+/* patrones IA */
+.explain{border:1px solid var(--orq-line);border-radius:var(--r-l);background:var(--surface);overflow:hidden}
+.explain-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--orq-soft);font-size:13px;font-weight:600;color:var(--orq);flex-wrap:wrap}
+.explain-head svg{width:16px;height:16px}
+.explain-head .conf{margin-left:auto;font-family:var(--f-mono);font-weight:500;color:var(--ink-2)}
+.reasons{list-style:none;margin:0;padding:6px 16px}
+.reasons li{display:grid;grid-template-columns:20px 1fr auto;gap:10px;padding:10px 0;font-size:14px;align-items:start}
+.reasons li+li{border-top:1px solid var(--line)}
+.reasons .sig{font-weight:700;font-family:var(--f-mono);font-size:14px;line-height:1.4}
+.reasons .plus{color:var(--ok)}.reasons .minus{color:var(--warn)}
+.cite{font-family:var(--f-mono);font-size:11px;padding:2px 8px;border-radius:4px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap;cursor:pointer}
+.cite:hover{border-color:var(--orq-line);color:var(--orq)}
+.protected{display:flex;gap:8px;align-items:flex-start;padding:10px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
+.protected svg{width:14px;height:14px;flex:none;margin-top:2px}
+.explain-foot{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+
+.agent-states{display:grid;gap:10px}
+.astate{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-radius:var(--r-m);border:1px solid var(--line);background:var(--surface)}
+.astate .t{font-size:14px;font-weight:600}
+.astate .s{font-size:12px;color:var(--ink-3)}
+.orb{width:28px;height:28px;border-radius:50%;position:relative;display:grid;place-items:center}
+.orb::after{content:"";width:10px;height:10px;border-radius:50%;background:currentColor}
+.orb.working{color:var(--orq);background:var(--orq-soft)}
+.orb.working::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:var(--orq);animation:spin 1s linear infinite}
+.orb.thinking{color:var(--orq);background:var(--orq-soft)}
+.orb.thinking::after{animation:pulse 1.4s ease-in-out infinite}
+.orb.waiting{color:var(--warn);background:var(--warn-soft)}
+.orb.done{color:var(--ok);background:var(--ok-soft)}
+.orb.error{color:var(--err);background:var(--err-soft)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{transform:scale(.5);opacity:.5}}
+
+.chat{display:grid;gap:10px}
+.bubble{max-width:85%;padding:10px 14px;border-radius:14px;font-size:14px}
+.bubble.ai{background:var(--orq-soft);border:1px solid var(--orq-line);border-bottom-left-radius:4px}
+.bubble.me{background:var(--selva);color:var(--on-selva);justify-self:end;border-bottom-right-radius:4px}
+.bubble .src{display:block;margin-top:6px}
+.chat-input{display:flex;gap:8px}
+
+/* pantalla consola */
+.frame{border-radius:18px;border:1px solid var(--line);background:var(--surface-2);box-shadow:var(--shadow);overflow:hidden}
+.frame-bar{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);align-items:center}
+.frame-bar i{width:10px;height:10px;border-radius:50%;background:var(--line);display:block}
+.frame-bar span{margin-left:12px;font-family:var(--f-mono);font-size:12px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:720px;background:var(--bg)}
+.side{background:var(--surface);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px}
+.side .brandmark{padding:0 8px 18px;font-size:19px}
+.side a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--ink-2);text-decoration:none;font-size:14px}
+.side a svg{width:18px;height:18px;flex:none}
+.side a.on{background:var(--selva-soft);color:var(--selva);font-weight:600}
+.side a .count{margin-left:auto;font:600 11px var(--f-mono);background:var(--orq);color:var(--on-orq);border-radius:999px;padding:1px 7px}
+.side .grp{font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:16px 10px 6px}
+.side .tenant{margin-top:auto;padding:10px;border-radius:10px;border:1px solid var(--line);font-size:12px;color:var(--ink-2);display:grid;gap:2px}
+.side .tenant b{color:var(--ink);font-size:13px}
+.main{padding:24px 28px;display:grid;gap:20px;align-content:start;min-width:0}
+.main-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.main-head h3{font-size:28px;font-weight:800}
+.main-head p{color:var(--ink-2);font-size:14px;margin-top:4px}
+.cmd{display:flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink-3);font-size:14px;min-width:280px;max-width:100%}
+.cmd svg{width:16px;height:16px;color:var(--orq)}
+.cmd kbd{margin-left:auto;font:500 11px var(--f-mono);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink-3)}
+.agents-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.agent{padding:14px;border-radius:var(--r-m);background:var(--surface);border:1px solid var(--line);display:grid;gap:10px}
+.agent-top{display:flex;align-items:center;gap:10px}
+.agent-top .orb{width:24px;height:24px}
+.agent-top .orb::after{width:8px;height:8px}
+.agent-top b{font-size:14px}
+.agent-top span{margin-left:auto}
+.agent p{font-size:13px;color:var(--ink-2)}
+.bar{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--orq);border-radius:999px}
+.agent .meta{display:flex;justify-content:space-between;font:12px var(--f-mono);color:var(--ink-3)}
+.inbox{display:grid;grid-template-columns:minmax(260px,1fr) 1.6fr;gap:16px;align-items:start}
+.inbox-list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden}
+.inbox-list header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.inbox-list header b{font-size:15px}
+.item{display:grid;grid-template-columns:4px 1fr;gap:12px;padding:14px 16px 14px 0;border-bottom:1px solid var(--line);cursor:pointer;text-align:left;background:transparent;border-left:0;border-right:0;border-top:0;width:100%;color:inherit;font:inherit}
+.item:last-child{border-bottom:0}
+.item:hover{background:var(--surface-2)}
+.item[aria-selected="true"]{background:var(--selva-soft)}
+.item .stripe{border-radius:0 4px 4px 0}
+.item .t{font-weight:600;font-size:14px}
+.item .d{font-size:13px;color:var(--ink-2);margin-top:2px}
+.item .m{display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.item .m .age{font:11px var(--f-mono);color:var(--ink-3);margin-left:auto}
+.detail{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:20px;display:grid;gap:18px;min-width:0}
+.detail-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.detail-head h4{font-size:20px;font-weight:800}
+.detail-head p{font-size:13px;color:var(--ink-2);margin-top:4px}
+.cands{display:grid;gap:10px}
+.cand{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-m);cursor:pointer;background:var(--surface);color:inherit;font:inherit;text-align:left;width:100%}
+.cand[aria-expanded="true"]{border-color:var(--orq-line);background:var(--orq-soft)}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:700 13px var(--f-body);background:var(--selva-soft);color:var(--selva)}
+.cand .n{font-weight:600;font-size:14px}
+.cand .r{font-size:12px;color:var(--ink-3)}
+.score{display:grid;justify-items:end;gap:4px}
+.score b{font:600 20px var(--f-mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+.score .bar{width:84px}
+.score .bar span{background:var(--selva)}
+.funnel{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--r-m);overflow:hidden;font-size:12px}
+.funnel div{flex:1;padding:10px 12px;display:grid;gap:2px;border-right:1px solid var(--line);min-width:0}
+.funnel div:last-child{border-right:0;background:var(--selva-soft)}
+.funnel b{font:600 18px var(--f-mono);font-variant-numeric:tabular-nums}
+.funnel span{color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.decide{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:4px;border-top:1px solid var(--line);padding-block:16px 0}
+.decide .audit{margin-left:auto;font-size:12px;color:var(--ink-3);display:flex;gap:6px;align-items:center}
+.decide .audit svg{width:14px;height:14px}
+
+/* movil */
+.phones{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;margin-top:56px}
+.phone{width:300px;max-width:100%;border-radius:40px;padding:10px;background:#0E1815;box-shadow:var(--shadow)}
+.screen{border-radius:31px;overflow:hidden;background:var(--bg);height:600px;display:flex;flex-direction:column}
+.p-status{display:flex;justify-content:space-between;padding:10px 22px 6px;font:600 12px var(--f-body);color:var(--ink)}
+.p-body{padding:8px 16px 16px;display:grid;gap:12px;align-content:start;overflow:hidden;flex:1}
+.wl-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.wl-logo i{width:26px;height:26px;border-radius:7px;background:#C2410C;display:block}
+.vac{padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);display:grid;gap:8px}
+.vac h5{margin:0;font:800 18px/1.15 var(--f-display);letter-spacing:-.02em}
+.vac .facts{display:flex;flex-wrap:wrap;gap:6px}
+.drop{border:2px dashed var(--orq-line);border-radius:14px;padding:14px;display:grid;gap:4px;justify-items:center;text-align:center;background:var(--orq-soft);font-size:13px}
+.drop b{color:var(--orq)}
+.drop svg{width:22px;height:22px;color:var(--orq)}
+.consent{display:flex;gap:8px;font-size:11px;color:var(--ink-2);align-items:flex-start}
+.consent input{margin-top:2px;accent-color:var(--selva)}
+.wa-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#075E54;color:#fff}
+.wa-head i{width:32px;height:32px;border-radius:50%;background:#fff;display:grid;place-items:center}
+.wa-head i svg{width:20px;height:20px}
+.wa-head b{font-size:14px;display:block}.wa-head small{font-size:11px;opacity:.8}
+.wa-body{flex:1;background:#ECE5DD;padding:12px;display:grid;gap:8px;align-content:start;font-size:13px;color:#111}
+.wa{max-width:85%;padding:7px 10px;border-radius:8px;background:#fff;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+.wa.me{background:#DCF8C6;justify-self:end}
+.wa small{display:block;text-align:right;font-size:10px;color:#667}
+.wa-quick{display:flex;gap:6px;flex-wrap:wrap}
+.wa-quick span{background:#fff;color:#075E54;border-radius:16px;padding:5px 12px;font-weight:600;font-size:12px;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+.phone-cap{text-align:center;margin-top:14px;font-size:13px;color:var(--ink-2);max-width:300px}
+
+/* principios */
+.princ{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.pr{padding:20px;border-top:3px solid var(--selva);background:var(--surface);border-radius:0 0 var(--r-m) var(--r-m);display:grid;gap:8px;align-content:start}
+.pr:nth-child(2),.pr:nth-child(4){border-top-color:var(--orq)}
+.pr h4{font-size:17px}
+.pr p{font-size:13px;color:var(--ink-2)}
+.next{margin-top:40px;padding:24px;border-radius:var(--r-l);background:var(--selva-strong);color:#E8F4F0;display:grid;gap:12px}
+.next h3{font-size:22px;color:#fff}
+.next ol{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:980px){
+  .hero-grid,.concept{grid-template-columns:1fr}
+  .hero-art{max-width:420px}
+  .routes,.voice,.type-grid,.tok-grid{grid-template-columns:1fr}
+  .palette,.princ{grid-template-columns:1fr 1fr}
+  .semantic{grid-template-columns:1fr 1fr}
+  .comp-grid{grid-template-columns:1fr}
+  .logo-grid{grid-template-columns:1fr 1fr}
+  .logo-tile.big{grid-column:span 2;grid-row:auto}
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  .inbox{grid-template-columns:1fr}
+  .agents-strip{grid-template-columns:1fr}
+  .anatomy{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  section{padding-block:52px}
+  .palette,.princ,.semantic,.traits{grid-template-columns:1fr}
+  .logo-grid{grid-template-columns:1fr}
+  .logo-tile.big{grid-column:auto}
+  .main{padding:16px}
+  .cmd{min-width:0;width:100%}
+  .pc{grid-template-columns:1fr}
+  .funnel{flex-wrap:wrap}
+  .funnel div{flex:1 1 45%;border-bottom:1px solid var(--line)}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="iso" viewBox="0 0 48 48">
+      <path d="M24 24C24 12 31 5 43 5C43 17 36 24 24 24Z" fill="var(--leaf-a,#0B5D52)"/>
+      <path d="M24 24C24 36 17 43 5 43C5 31 12 24 24 24Z" fill="var(--leaf-b,#0B5D52)"/>
+      <circle cx="11" cy="12" r="5.5" fill="var(--seed,#8A3FC4)"/>
+    </symbol>
+    <symbol id="spark" viewBox="0 0 16 16"><path d="M8 0.5c.4 3.6 1.9 5.1 5.5 5.5-3.6.4-5.1 1.9-5.5 5.5-.4-3.6-1.9-5.1-5.5-5.5C6.1 5.6 7.6 4.1 8 .5Z" fill="currentColor"/><circle cx="13" cy="13" r="2" fill="currentColor"/></symbol>
+    <symbol id="shield" viewBox="0 0 16 16"><path d="M8 1l6 2.5v4c0 3.5-2.6 6.4-6 7.5-3.4-1.1-6-4-6-7.5v-4L8 1Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8l1.8 1.8L10.8 6" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 20 20"><path d="M3 11l2-7h10l2 7v5H3v-5Zm0 0h4l1 2h4l1-2h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="i-vac" viewBox="0 0 20 20"><rect x="3" y="6" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 6V4h6v2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-people" viewBox="0 0 20 20"><circle cx="8" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 16c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5M13 4.5a3 3 0 0 1 0 5.5M15 11.8c1.4.6 2.2 1.9 2.5 4.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 20 20"><path d="M5 2.5h7l3 3v12H5v-15Z M8 9h5M8 12h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 20 20"><path d="M3 17h14M6 14V9M10 14V5M14 14v-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 20 20"><path d="M10 16.5S3 12.5 3 7.5A3.5 3.5 0 0 1 10 6a3.5 3.5 0 0 1 7 1.5c0 5-7 9-7 9Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="i-link" viewBox="0 0 20 20"><path d="M8.5 11.5l3-3M7 9.5l-1.8 1.8a2.5 2.5 0 0 0 3.5 3.5L10.5 13M13 10.5l1.8-1.8a2.5 2.5 0 0 0-3.5-3.5L9.5 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-up" viewBox="0 0 20 20"><path d="M10 14V4M6 8l4-4 4 4M4 16h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 20 20"><path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-log" viewBox="0 0 16 16"><path d="M3 2h10v12H3zM5.5 5h5M5.5 8h5M5.5 11h3" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  </defs>
+</svg>
+
+<header class="topnav">
+  <div class="wrap">
+    <div class="brandmark"><svg><use href="#iso"/></svg>selvana</div>
+    <nav aria-label="Secciones">
+      <a href="#rutas">Rutas</a><a href="#concepto">Concepto</a><a href="#logo">Logo</a><a href="#color">Color</a><a href="#tipografia">Tipografía</a><a href="#tokens">Tokens</a><a href="#componentes">Componentes</a><a href="#ia">Patrones IA</a><a href="#pantallas">Pantallas</a>
+    </nav>
+    <button class="themebtn" id="themeBtn" type="button">Cambiar a oscuro</button>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Etapa D · Propuesta de marca y design system · v0.1 · 21 oct 2026</div>
+      <h1 style="margin-top:18px">La <span class="ai">IA</span> trabaja.<br>El <span class="hu">humano</span> decide.</h1>
+      <p class="lede">Selvana es el ecosistema donde crece el talento. La marca toma la selva colombiana como sistema vivo: muchas especies, un solo equilibrio. En la interfaz eso se traduce en una regla visible en cada pantalla: lo que hizo la IA se ve distinto de lo que decide la persona.</p>
+      <div class="hero-meta">
+        <span class="tag">Consola RRHH</span><span class="tag">Portal de empleo</span><span class="tag">Portal del líder</span><span class="tag">Portal del empleado</span><span class="tag">WhatsApp</span><span class="tag">WCAG 2.1 AA</span>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <canvas id="canopy"></canvas>
+      <svg style="--leaf-a:#FFFFFF;--leaf-b:#7FDCC8;--seed:#C590F0"><use href="#iso"/></svg>
+    </div>
+  </div>
+</section>
+
+<section id="rutas">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">01 · Tres rutas exploradas</div>
+      <h2>Ruta aprobada: Dosel</h2>
+      <p>Exploré tres territorios a partir del nombre. El 21 de octubre de 2026 se aprobó <strong>Dosel</strong>: confianza para el comprador de RRHH, claridad para operar todo el día y un lenguaje visual propio para la IA. Guacamaya y Páramo quedan descartadas y se conservan aquí solo como registro.</p>
+    </div>
+    <div class="routes">
+      <article class="route rec">
+        <div class="route-art art-a">
+          <span class="rec-badge">Aprobada</span>
+          <div class="wm"><svg style="--leaf-a:#FFFFFF;--leaf-b:#7FDCC8;--seed:#C590F0"><use href="#iso"/></svg>selvana</div>
+        </div>
+        <div class="route-body">
+          <h3>A · Dosel</h3>
+          <p class="why">La capa alta de la selva, donde llega la luz. Verde selva profundo para lo humano y lo institucional, violeta orquídea (la flor nacional) reservado solo para la IA. Grotesca con carácter, mucho aire y datos en monoespaciada.</p>
+          <div class="swatches"><span style="background:#073F38"></span><span style="background:#0B5D52"></span><span style="background:#D7ECE6"></span><span style="background:#8A3FC4"></span><span style="background:#F3F6F3"></span></div>
+          <div class="pc"><div><b>Gana</b>Confianza enterprise, IA identificable de un vistazo, buen modo oscuro.</div><div><b>Riesgo</b>El verde es común en RRHH; lo diferencia la orquídea y la tipografía.</div></div>
+        </div>
+      </article>
+      <article class="route">
+        <div class="route-art art-b">
+          <div class="feather"></div>
+          <div class="wm">selvana</div>
+        </div>
+        <div class="route-body">
+          <h3>B · Guacamaya</h3>
+          <p class="why">Energía de selección masiva: rojo, amarillo y azul de la guacamaya, tipografía redonda y pesada. Pensada para el candidato operativo que se postula desde un celular de gama baja.</p>
+          <div class="swatches"><span style="background:#E0372C"></span><span style="background:#FFC41F"></span><span style="background:#1F4FD8"></span><span style="background:#1A1A2E"></span><span style="background:#FFF7E6"></span></div>
+          <div class="pc"><div><b>Gana</b>Memorable, juvenil, muy fuerte en redes y portal de empleo.</div><div><b>Riesgo</b>Choca con los colores semánticos y cansa en la consola de 8 horas.</div></div>
+        </div>
+      </article>
+      <article class="route">
+        <div class="route-art art-c">
+          <div class="mist"></div>
+          <div class="wm">Selvana</div>
+        </div>
+        <div class="route-body">
+          <h3>C · Páramo</h3>
+          <p class="why">Niebla, frailejón y azul andino. Serif editorial y paleta fría y silenciosa. Posiciona a Selvana como producto premium para corporativo y salud.</p>
+          <div class="swatches"><span style="background:#253A5E"></span><span style="background:#8FA394"></span><span style="background:#C9A646"></span><span style="background:#E8ECE8"></span><span style="background:#FFFFFF"></span></div>
+          <div class="pc"><div><b>Gana</b>Sofisticada, tranquila, diferente a la competencia local.</div><div><b>Riesgo</b>Se siente distante para EST y BPO, que son el primer mercado.</div></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="concepto">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">02 · Concepto de la ruta Dosel</div>
+      <h2>Un ecosistema donde la IA ilumina y la persona decide</h2>
+    </div>
+    <div class="concept">
+      <div class="concept-text">
+        <p>En el dosel, las copas de los árboles filtran la luz para que todo lo de abajo crezca. Así trabaja Selvana: <strong>los agentes hacen el trabajo pesado</strong> (leer hojas de vida, conversar por WhatsApp, validar soportes) y dejan la decisión lista, explicada y con evidencia.</p>
+        <p>El isotipo son <strong>dos hojas que forman una S</strong>: la empresa y la persona, en equilibrio. La <strong>semilla violeta</strong> es la IA. Ese violeta orquídea es el único color que la IA puede usar en todo el producto, así nadie confunde una sugerencia con una decisión.</p>
+        <p>Frente a Buk, Factorial o Heinsohn, que usan azules y morados genéricos de SaaS, Selvana se siente local sin ser folclórica, y técnica sin ser fría.</p>
+      </div>
+      <div class="traits">
+        <div class="trait"><h4>Clara</h4><p>Dice qué hizo, por qué y qué falta. Nunca esconde la lógica de un puntaje.</p></div>
+        <div class="trait"><h4>Cálida</h4><p>Habla de personas, no de registros. Tutea al candidato, usa usted con el cliente.</p></div>
+        <div class="trait"><h4>Rigurosa</h4><p>Cita la evidencia, registra cada decisión y respeta la Ley 1581.</p></div>
+        <div class="trait"><h4>Colombiana</h4><p>Pesos, cédulas, EPS, ARL y WhatsApp como canal principal, sin acentos forzados.</p></div>
+      </div>
+    </div>
+    <div class="voice">
+      <div class="voice-card">
+        <div class="ctx">Tono · Agente al reclutador</div>
+        <div class="row"><span class="mark-yes">Sí</span><span>Leí 128 hojas de vida. 34 cumplen todo. Te propongo esta terna; revisa las razones antes de aprobar.</span></div>
+        <div class="row no"><span class="mark-no">No</span><span>¡Proceso completado exitosamente! La IA ha seleccionado a los mejores candidatos.</span></div>
+      </div>
+      <div class="voice-card">
+        <div class="ctx">Tono · Candidato por WhatsApp</div>
+        <div class="row"><span class="mark-yes">Sí</span><span>Hola, Andrés. Vi tu hoja de vida para Asesor de servicio. ¿Puedes trabajar turnos rotativos en Chapinero?</span></div>
+        <div class="row no"><span class="mark-no">No</span><span>Estimado aspirante, su postulación ha sido recibida en nuestro sistema de gestión.</span></div>
+      </div>
+      <div class="voice-card">
+        <div class="ctx">Tono · Error</div>
+        <div class="row"><span class="mark-yes">Sí</span><span>No pudimos leer la cédula: la foto salió borrosa. Tómala con buena luz y sin flash.</span></div>
+        <div class="row no"><span class="mark-no">No</span><span>Error 422: documento inválido. Intente nuevamente.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="logo">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">03 · Logo e isotipo</div>
+      <h2>Dos hojas y una semilla</h2>
+      <p>Wordmark en minúscula para que se lea cercano. El isotipo funciona solo desde 16 px (favicon) y como ícono de app.</p>
+    </div>
+    <div class="logo-grid">
+      <div class="logo-tile big"><div class="logo-h"><svg><use href="#iso"/></svg>selvana</div><span class="cap">Horizontal principal</span></div>
+      <div class="logo-tile dark"><div class="logo-h" style="font-size:40px;color:#fff"><svg style="--leaf-a:#FFFFFF;--leaf-b:#7FDCC8;--seed:#C590F0"><use href="#iso"/></svg>selvana</div><span class="cap">Sobre selva</span></div>
+      <div class="logo-tile"><div class="appicon"><svg style="--leaf-a:#FFFFFF;--leaf-b:#9FE3D3;--seed:#E2C2FA"><use href="#iso"/></svg></div><span class="cap">Ícono de app · 1024 px</span></div>
+      <div class="logo-tile"><div class="logo-h" style="font-size:40px;color:var(--ink)"><svg style="--leaf-a:currentColor;--leaf-b:currentColor;--seed:currentColor"><use href="#iso"/></svg>selvana</div><span class="cap">Monocromo</span></div>
+      <div class="logo-tile"><div style="display:flex;gap:18px;align-items:end"><svg width="48" height="48"><use href="#iso"/></svg><svg width="32" height="32"><use href="#iso"/></svg><svg width="16" height="16"><use href="#iso"/></svg></div><span class="cap">Isotipo · 48 / 32 / 16 px</span></div>
+    </div>
+    <div class="anatomy">
+      <div><i style="background:#0B5D52"></i><span><strong>Hoja superior:</strong> la empresa. Crece hacia la luz.</span></div>
+      <div><i style="background:#3FC2AA"></i><span><strong>Hoja inferior:</strong> la persona. Echa raíz.</span></div>
+      <div><i style="background:#8A3FC4"></i><span><strong>Semilla:</strong> la IA. Pequeña, presente, nunca al centro.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="color">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">04 · Color</div>
+      <h2>Verde para decidir, violeta para la IA</h2>
+      <p>Neutros con un sesgo verde leve. Cada color tiene un trabajo y no se presta a otro. Todos los pares texto/fondo cumplen contraste AA en claro y oscuro.</p>
+    </div>
+    <div class="palette">
+      <div class="pal"><div class="main" style="background:#0B5D52;color:#fff"><b>Selva</b><span>#0B5D52 · 7.4:1</span></div><div class="ramp"><span style="background:#D7ECE6"></span><span style="background:#9FD4C6"></span><span style="background:#3FC2AA"></span><span style="background:#0B5D52"></span><span style="background:#073F38"></span></div><p class="use">Acciones humanas, navegación activa, botón primario, marca.</p></div>
+      <div class="pal"><div class="main" style="background:#8A3FC4;color:#fff"><b>Orquídea</b><span>#8A3FC4 · 5.9:1</span></div><div class="ramp"><span style="background:#F1E6FA"></span><span style="background:#D9BDF0"></span><span style="background:#C590F0"></span><span style="background:#8A3FC4"></span><span style="background:#5C2388"></span></div><p class="use">Solo IA: sugerencias, campos prellenados, estados del agente.</p></div>
+      <div class="pal"><div class="main" style="background:#10211B;color:#E6EFEB"><b>Tinta</b><span>#10211B · 16.1:1</span></div><div class="ramp"><span style="background:#10211B"></span><span style="background:#465A52"></span><span style="background:#73867E"></span><span style="background:#D5DFD9"></span><span style="background:#F3F6F3"></span></div><p class="use">Texto, bordes y fondos. Grises verdosos, nunca gris puro.</p></div>
+      <div class="pal"><div class="main" style="background:#F3F6F3;color:#10211B;border-bottom:1px solid var(--line)"><b>Claro de bosque</b><span>#F3F6F3</span></div><div class="ramp"><span style="background:#FFFFFF"></span><span style="background:#F3F6F3"></span><span style="background:#E9EFEB"></span><span style="background:#13201D"></span><span style="background:#0C1513"></span></div><p class="use">Fondos de app. En oscuro pasa a #0C1513, verde casi negro.</p></div>
+    </div>
+    <div class="semantic">
+      <div class="sem p-ok"><span class="pill p-ok"><i></i></span><div>Éxito<small>Aprobado, vigente</small></div></div>
+      <div class="sem p-warn"><span class="pill p-warn"><i></i></span><div>Alerta<small>Por vencer, revisar</small></div></div>
+      <div class="sem p-err"><span class="pill p-err"><i></i></span><div>Error<small>Rechazado, vencido</small></div></div>
+      <div class="sem p-info"><span class="pill p-info"><i></i></span><div>Información<small>Neutral, en curso</small></div></div>
+    </div>
+    <div class="rule-box">
+      <svg><use href="#spark"/></svg>
+      <p><strong>Regla del violeta.</strong> Si un elemento tiene violeta orquídea, lo produjo la IA y todavía no lo ha confirmado una persona. Cuando alguien aprueba, el elemento pierde el violeta y pasa a tinta o verde. Así la auditoría también se ve en la pantalla.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tipografia">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">05 · Tipografía</div>
+      <h2>Una voz con carácter, una que se lee todo el día</h2>
+      <p>Tres familias libres de Google Fonts, sin costo de licencia para el SaaS ni para la marca blanca.</p>
+    </div>
+    <div class="type-grid">
+      <div class="face"><span class="eyebrow">Display</span><div class="aa" style="font-family:var(--f-display);font-weight:800">Aa</div><h4>Bricolage Grotesque</h4><p>Títulos, cifras grandes y wordmark. Ópticas variables: más compacta en tamaños grandes.</p></div>
+      <div class="face"><span class="eyebrow">Texto e interfaz</span><div class="aa" style="font-family:var(--f-body);font-weight:500">Aa</div><h4>Instrument Sans</h4><p>Todo el texto de la UI. Neutra, abierta y muy legible en tablas densas.</p></div>
+      <div class="face"><span class="eyebrow">Datos y evidencia</span><div class="aa" style="font-family:var(--f-mono)">Aa</div><h4>IBM Plex Mono</h4><p>Puntajes, cédulas, montos, citas de evidencia y registros de auditoría.</p></div>
+    </div>
+    <div class="scale">
+      <table>
+        <tr><td>display</td><td>56/60 · 800</td><td style="font:800 56px/1 var(--f-display);letter-spacing:-.04em">Terna lista</td></tr>
+        <tr><td>h1</td><td>32/38 · 800</td><td style="font:800 32px/1.2 var(--f-display);letter-spacing:-.02em">Asesor de servicio al cliente</td></tr>
+        <tr><td>h2</td><td>22/28 · 700</td><td style="font:700 22px/1.3 var(--f-display);letter-spacing:-.01em">Candidatos preseleccionados</td></tr>
+        <tr><td>body</td><td>15/24 · 400</td><td style="font:400 15px/1.6 var(--f-body)">Andrés tiene 3 años en contact center y confirmó disponibilidad para turnos rotativos.</td></tr>
+        <tr><td>label</td><td>13/18 · 600</td><td style="font:600 13px var(--f-body)">Salario aspirado</td></tr>
+        <tr><td>data</td><td>14/20 · 500</td><td style="font:500 14px var(--f-mono)">CC 1.023.456.789 · $1.950.000 · Afinidad 92</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="tokens">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">06 · Tokens</div>
+      <h2>Espaciado, radios y elevación</h2>
+      <p>Base de 4 px. Los tokens se exportan de Claude Design a JSON y a variables CSS (<span class="mono">--sv-space-4</span>, <span class="mono">--sv-radius-m</span>) para el theme de React.</p>
+    </div>
+    <div class="tok-grid">
+      <div class="tok"><h4>Espaciado</h4>
+        <div class="space-row"><span style="width:4px"></span>1 · 4</div>
+        <div class="space-row"><span style="width:8px"></span>2 · 8</div>
+        <div class="space-row"><span style="width:12px"></span>3 · 12</div>
+        <div class="space-row"><span style="width:16px"></span>4 · 16</div>
+        <div class="space-row"><span style="width:24px"></span>6 · 24</div>
+        <div class="space-row"><span style="width:32px"></span>8 · 32</div>
+        <div class="space-row"><span style="width:48px"></span>12 · 48</div>
+      </div>
+      <div class="tok"><h4>Radios</h4>
+        <div class="rad-row"><div style="border-radius:6px">s · 6</div><div style="border-radius:10px">m · 10</div><div style="border-radius:16px">l · 16</div><div style="border-radius:999px">full</div></div>
+        <p style="font-size:13px;color:var(--ink-2)">Controles en s, tarjetas y paneles en m o l, chips y estados en full. Ningún radio se aplica por defecto a todo.</p>
+      </div>
+      <div class="tok"><h4>Elevación</h4>
+        <div class="elev-row"><div style="border:1px solid var(--line)">0</div><div style="box-shadow:0 1px 3px rgba(16,33,27,.12)">1</div><div style="box-shadow:var(--shadow)">2</div></div>
+        <p style="font-size:13px;color:var(--ink-2)">0 para la mayoría, 1 para menús, 2 solo para modales y el panel de decisión. Breakpoints: 400 · 768 · 1024 · 1440.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="componentes">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">07 · Componentes base</div>
+      <h2>Componentes que saben quién los llenó</h2>
+      <p>Cada componente tiene una variante humana y una variante IA. Pruébalos: son interactivos.</p>
+    </div>
+    <div class="comp-grid">
+      <div class="comp">
+        <span class="eyebrow">Botones</span>
+        <div class="row-wrap">
+          <button class="btn btn-primary" type="button"><svg><use href="#i-check"/></svg>Aprobar terna</button>
+          <button class="btn btn-ai" type="button"><svg><use href="#spark"/></svg>Pedir a la IA</button>
+          <button class="btn btn-sec" type="button">Ajustar</button>
+          <button class="btn btn-ghost" type="button">Ver por qué</button>
+          <button class="btn btn-danger" type="button">Descartar</button>
+        </div>
+        <p style="font-size:13px;color:var(--ink-2)">Un solo primario por vista. El botón violeta solo delega trabajo a un agente; nunca confirma una decisión sobre una persona.</p>
+      </div>
+      <div class="comp">
+        <span class="eyebrow">Campos de formulario</span>
+        <div class="field"><label for="f-cargo">Cargo</label><input id="f-cargo" class="input" value="Auxiliar de bodega"></div>
+        <div class="field"><label for="f-sal">Rango salarial</label><input id="f-sal" class="input ai-filled mono" value="$1.750.000 – $2.050.000"><span class="ai-note"><svg><use href="#spark"/></svg>Sugerido por la IA con 42 vacantes similares en Funza · Editar lo confirma</span></div>
+      </div>
+      <div class="comp">
+        <span class="eyebrow">Estados y etiquetas</span>
+        <div class="row-wrap">
+          <span class="pill p-ok"><i></i>Contratado</span><span class="pill p-warn"><i></i>Curso de alturas vence en 12 días</span><span class="pill p-err"><i></i>No cumple requisito</span><span class="pill p-info"><i></i>En pruebas</span><span class="pill p-ai"><svg width="12" height="12"><use href="#spark"/></svg>Sugerencia IA</span><span class="pill p-neutral">Borrador</span>
+        </div>
+      </div>
+      <div class="comp">
+        <span class="eyebrow">Nivel de autonomía del agente</span>
+        <div class="seg" id="autonomy" role="group" aria-label="Nivel de autonomía">
+          <button type="button" aria-pressed="false" data-d="La IA propone y tú haces cada acción.">Sugerir</button>
+          <button type="button" aria-pressed="true" data-d="La IA deja todo listo y tú apruebas con un clic. Es el nivel por defecto.">Preparar y aprobar</button>
+          <button type="button" aria-pressed="false" data-d="La IA envía recordatorios y mensajes por su cuenta y te reporta. Nunca descarta ni contrata.">Autónomo con límites</button>
+        </div>
+        <p class="seg-desc" id="autonomyDesc">La IA deja todo listo y tú apruebas con un clic. Es el nivel por defecto.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ia">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">08 · Patrones de IA</div>
+      <h2>La explicación es parte del componente</h2>
+      <p>Tres patrones que no existen en una aplicación de RRHH tradicional y que son la firma de Selvana: la tarjeta de explicación, los estados del agente y el asistente con fuentes.</p>
+    </div>
+    <div class="comp-grid">
+      <div class="comp" style="grid-row:span 2">
+        <span class="eyebrow">Explicación de sugerencia</span>
+        <div class="explain">
+          <div class="explain-head"><svg><use href="#spark"/></svg>Por qué Andrés Salcedo está en la terna<span class="conf">Afinidad 92 / 100</span></div>
+          <ul class="reasons">
+            <li><span class="sig plus">+</span><span>3 años como asesor en contact center de telecomunicaciones, con indicador de calidad.</span><span class="cite">HV p.1</span></li>
+            <li><span class="sig plus">+</span><span>Confirmó disponibilidad para turnos rotativos y sábados.</span><span class="cite">WhatsApp 14:32</span></li>
+            <li><span class="sig plus">+</span><span>Prueba de servicio al cliente: 86/100, por encima del corte de 70.</span><span class="cite">Prueba #A-221</span></li>
+            <li><span class="sig plus">+</span><span>Vive a 25 min de la sede por TransMilenio (calculado por localidad, sin dirección exacta).</span><span class="cite">Formulario</span></li>
+            <li><span class="sig minus">−</span><span>Aspira $2.100.000, un 5 % por encima del rango aprobado.</span><span class="cite">WhatsApp 14:35</span></li>
+          </ul>
+          <div class="protected"><svg><use href="#shield"/></svg><span>No se usaron para el puntaje: edad, género, estado civil, foto ni dirección exacta.</span></div>
+          <div class="explain-foot">
+            <button class="btn btn-sec btn-sm" type="button">Corregir una razón</button>
+            <button class="btn btn-ghost btn-sm" type="button">Ver hoja de vida</button>
+          </div>
+        </div>
+      </div>
+      <div class="comp">
+        <span class="eyebrow">Estados del agente</span>
+        <div class="agent-states">
+          <div class="astate"><span class="orb thinking"></span><div><div class="t">Pensando</div><div class="s">Interpreta la solicitud</div></div><span class="pill p-ai">IA</span></div>
+          <div class="astate"><span class="orb working"></span><div><div class="t">Trabajando · 94 de 128 HV</div><div class="s">Muestra el avance real, nunca un spinner sin número</div></div><span class="pill p-ai">IA</span></div>
+          <div class="astate"><span class="orb waiting"></span><div><div class="t">Espera tu aprobación</div><div class="s">Llega a la bandeja con todo listo</div></div><span class="pill p-warn">Tú</span></div>
+          <div class="astate"><span class="orb done"></span><div><div class="t">Listo · aprobado por Laura M.</div><div class="s">Queda en el registro de auditoría</div></div><span class="pill p-ok">Hecho</span></div>
+          <div class="astate"><span class="orb error"></span><div><div class="t">Necesita ayuda</div><div class="s">3 HV escaneadas no se pudieron leer</div></div><span class="pill p-err">Revisar</span></div>
+        </div>
+      </div>
+      <div class="comp">
+        <span class="eyebrow">Asistente con fuentes</span>
+        <div class="chat">
+          <div class="bubble me">¿Cuántos días de vacaciones tengo?</div>
+          <div class="bubble ai">Tienes 11 días hábiles disponibles. Causaste 15 en tu último periodo y tomaste 4 en julio.<span class="src"><span class="cite">Nómina · corte 30 sep</span></span></div>
+          <div class="chat-input"><input id="chat-q" class="input" placeholder="Pregúntale a Selvana" aria-label="Pregunta al asistente"><button class="btn btn-primary" type="button">Enviar</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pantallas">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">09 · Propuesta de pantallas</div>
+      <h2>La consola abre en la bandeja, no en un menú</h2>
+      <p>La pantalla de inicio de RRHH es la <strong>bandeja de aprobaciones</strong>: lo que los agentes dejaron listo, ordenado por urgencia. Arriba, qué están haciendo los agentes ahora. A la derecha, la decisión con su explicación. Haz clic en los elementos de la bandeja y en los candidatos. Datos de ejemplo.</p>
+    </div>
+
+    <div class="frame">
+      <div class="frame-bar"><i></i><i></i><i></i><span>app.selvana.co/bandeja</span></div>
+      <div class="app">
+        <aside class="side">
+          <div class="brandmark"><svg><use href="#iso"/></svg>selvana</div>
+          <a href="#pantallas" class="on"><svg><use href="#i-inbox"/></svg>Bandeja<span class="count">7</span></a>
+          <a href="#pantallas"><svg><use href="#i-vac"/></svg>Vacantes</a>
+          <a href="#pantallas"><svg><use href="#i-people"/></svg>Candidatos</a>
+          <a href="#pantallas"><svg><use href="#i-doc"/></svg>Vinculación</a>
+          <a href="#pantallas"><svg><use href="#i-people"/></svg>Empleados</a>
+          <div class="grp">Desarrollo</div>
+          <a href="#pantallas"><svg><use href="#i-chart"/></svg>Desempeño</a>
+          <a href="#pantallas"><svg><use href="#i-heart"/></svg>Clima</a>
+          <div class="grp">Empresa</div>
+          <a href="#pantallas"><svg><use href="#i-link"/></svg>Conexión nómina</a>
+          <a href="#pantallas"><svg><use href="#i-gear"/></svg>Agentes y autonomía</a>
+          <div class="tenant"><b>Servicios Andinos EST</b>Laura Moreno · Líder de selección</div>
+        </aside>
+        <div class="main">
+          <div class="main-head">
+            <div><h3>Buenos días, Laura</h3><p>Los agentes dejaron 7 decisiones listas. 2 son urgentes para hoy.</p></div>
+            <div class="cmd"><svg><use href="#spark"/></svg>Pide algo: «abre 40 vacantes de asesor en Bogotá»<kbd>Ctrl K</kbd></div>
+          </div>
+          <div class="agents-strip">
+            <div class="agent"><div class="agent-top"><span class="orb working"></span><b>Agente reclutador</b><span class="pill p-ai">Trabajando</span></div><p>Leyendo hojas de vida para Auxiliar de bodega · Funza</p><div class="bar"><span style="width:73%"></span></div><div class="meta"><span>94 / 128 HV</span><span>~6 min</span></div></div>
+            <div class="agent"><div class="agent-top"><span class="orb thinking"></span><b>Preselección WhatsApp</b><span class="pill p-ai">Conversando</span></div><p>18 conversaciones abiertas, 11 completas hoy</p><div class="bar"><span style="width:61%"></span></div><div class="meta"><span>11 / 18</span><span>tasa resp. 82 %</span></div></div>
+            <div class="agent"><div class="agent-top"><span class="orb done"></span><b>Agente de vinculación</b><span class="pill p-ok">Al día</span></div><p>6 contratos listos para firma, empleados creados en nómina</p><div class="bar"><span style="width:100%;background:var(--ok)"></span></div><div class="meta"><span>6 / 6</span><span>SINCO ✓</span></div></div>
+          </div>
+          <div class="inbox">
+            <div class="inbox-list" role="listbox" aria-label="Bandeja de aprobaciones" id="inboxList"></div>
+            <div class="detail" id="detail" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phones">
+      <div>
+        <div class="phone"><div class="screen">
+          <div class="p-status"><span>9:41</span><span>5G</span></div>
+          <div class="p-body">
+            <div class="wl-logo"><i></i>Servicios Andinos · Empleos</div>
+            <div class="vac">
+              <span class="pill p-info" style="justify-self:start">40 vacantes</span>
+              <h5>Asesor(a) de servicio al cliente</h5>
+              <div class="facts"><span class="pill p-neutral">Bogotá · Chapinero</span><span class="pill p-neutral">$1.950.000</span><span class="pill p-neutral">Turnos rotativos</span></div>
+            </div>
+            <div class="drop"><svg><use href="#i-up"/></svg><b>Sube tu hoja de vida</b><span>Foto, PDF o Word. La leemos por ti.</span></div>
+            <div class="field"><label for="m-name">Nombre</label><input id="m-name" class="input ai-filled" value="Andrés Felipe Salcedo"><span class="ai-note"><svg><use href="#spark"/></svg>Leído de tu hoja de vida</span></div>
+            <div class="field"><label for="m-cel">Celular (WhatsApp)</label><input id="m-cel" class="input ai-filled mono" value="300 412 7781"></div>
+            <label class="consent"><input type="checkbox" id="m-ok" checked>Autorizo el tratamiento de mis datos personales según la Ley 1581 de 2012 y la política de Servicios Andinos.</label>
+            <button class="btn btn-primary" type="button" style="justify-content:center;background:#C2410C;color:#fff">Postularme</button>
+          </div>
+        </div></div>
+        <p class="phone-cap">Portal de empleo en marca blanca: el cliente pone su logo y su color; los patrones de Selvana se mantienen.</p>
+      </div>
+      <div>
+        <div class="phone"><div class="screen">
+          <div class="p-status" style="background:#075E54;color:#fff"><span>9:42</span><span>5G</span></div>
+          <div class="wa-head"><i><svg style="--leaf-a:#0B5D52;--leaf-b:#3FC2AA;--seed:#8A3FC4"><use href="#iso"/></svg></i><div><b>Servicios Andinos</b><small>Asistente de selección · cuenta verificada</small></div></div>
+          <div class="wa-body">
+            <div class="wa">Hola, Andrés 👋 Recibimos tu hoja de vida para <b>Asesor(a) de servicio al cliente</b>. Te hago 3 preguntas cortas.<small>14:30</small></div>
+            <div class="wa">¿Puedes trabajar en turnos rotativos, incluidos sábados?<small>14:31</small></div>
+            <div class="wa me">Sí, sin problema<small>14:32 ✓✓</small></div>
+            <div class="wa">Perfecto. ¿Cuál es tu aspiración salarial mensual?<small>14:33</small></div>
+            <div class="wa me">2.100.000<small>14:35 ✓✓</small></div>
+            <div class="wa">Gracias. Te envié una prueba corta de 15 minutos. Puedes hacerla desde aquí.<small>14:35</small></div>
+            <div class="wa-quick"><span>Hacer la prueba</span><span>Más tarde</span></div>
+          </div>
+        </div></div>
+        <p class="phone-cap">Preselección conversacional: cada respuesta queda como evidencia citable en la explicación de la terna.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">10 · Principios de UX</div>
+      <h2>Cuatro reglas para todas las pantallas</h2>
+    </div>
+    <div class="princ">
+      <div class="pr"><h4>Bandeja antes que menú</h4><p>Cada rol abre en lo que tiene que decidir hoy. Los módulos son el segundo nivel.</p></div>
+      <div class="pr"><h4>Nada sin explicación</h4><p>Todo puntaje o sugerencia muestra de 3 a 5 razones con su fuente y se puede corregir.</p></div>
+      <div class="pr"><h4>Prellenado, nunca en blanco</h4><p>Ningún formulario aparece vacío si la IA puede llenarlo. El usuario revisa, no digita.</p></div>
+      <div class="pr"><h4>Celular primero para el operativo</h4><p>Candidatos y empleados operativos usan WhatsApp y web móvil liviana, sin app que instalar.</p></div>
+    </div>
+    <div class="next">
+      <h3>Aprobado el 21 de octubre de 2026</h3>
+      <ol>
+        <li>Ruta de marca Dosel: verde selva y violeta orquídea.</li>
+        <li>Regla del violeta: el color orquídea es exclusivo de la IA.</li>
+        <li>Bandeja de aprobaciones como pantalla de inicio de la consola.</li>
+        <li>Siguiente paso: pasar los tokens y componentes a Claude Design y completar el theme de React (sprint 2).</li>
+      </ol>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function isDark(){var t=root.getAttribute('data-theme');if(t)return t==='dark';return matchMedia('(prefers-color-scheme: dark)').matches;}
+  function label(){btn.textContent=isDark()?'Cambiar a claro':'Cambiar a oscuro';}
+  btn.addEventListener('click',function(){root.setAttribute('data-theme',isDark()?'light':'dark');label();});
+  try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',label);}catch(e){}
+  label();
+
+  var toastEl=document.getElementById('toast'),tt;
+  function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){toastEl.classList.remove('show')},2800);}
+
+  // autonomía
+  var seg=document.getElementById('autonomy'),desc=document.getElementById('autonomyDesc');
+  seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+    seg.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});desc.textContent=b.dataset.d;});
+
+  // lienzo del héroe: luz filtrada por el dosel
+  var cv=document.getElementById('canopy'),cx=cv.getContext('2d');
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, leaves=[];
+  function size(){var r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);cv.width=r.width*d;cv.height=r.height*d;cx.setTransform(d,0,0,d,0,0);
+    leaves=[];for(var i=0;i<46;i++)leaves.push({x:Math.random()*r.width,y:Math.random()*r.height,s:14+Math.random()*46,a:Math.random()*6.28,v:.0015+Math.random()*.003,c:Math.random()<.12});}
+  function leaf(l,t){var w=cv.clientWidth;cx.save();cx.translate(l.x+Math.sin(t*l.v+l.a)*8,l.y);cx.rotate(l.a+Math.sin(t*l.v)*.3);
+    cx.beginPath();cx.moveTo(0,0);cx.bezierCurveTo(l.s*.5,-l.s*.4,l.s,-l.s*.1,l.s,0);cx.bezierCurveTo(l.s,l.s*.1,l.s*.5,l.s*.4,0,0);
+    cx.fillStyle=l.c?'rgba(197,144,240,.35)':'rgba(127,220,200,'+(.08+l.s/600)+')';cx.fill();cx.restore();}
+  function draw(t){var w=cv.clientWidth,h=cv.clientHeight;cx.clearRect(0,0,w,h);
+    var g=cx.createRadialGradient(w*.7,h*.2,0,w*.7,h*.2,w*.8);g.addColorStop(0,'rgba(63,194,170,.35)');g.addColorStop(1,'rgba(7,63,56,0)');cx.fillStyle=g;cx.fillRect(0,0,w,h);
+    leaves.forEach(function(l){leaf(l,t)});if(!reduce)requestAnimationFrame(draw);}
+  size();draw(0);addEventListener('resize',function(){size();if(reduce)draw(0)});
+
+  // bandeja
+  var C={
+    terna:{t:'Terna lista · Asesor(a) de servicio al cliente',d:'Bogotá · 40 vacantes · Cliente: Contact Center Norte',stripe:'var(--warn)',pills:[['p-warn','Urgente'],['p-ai','IA']],age:'hace 12 min',kind:'terna',
+      funnel:[['412','postulados'],['128','leídas por IA'],['34','cumplen todo'],['18','preselección'],['3','terna']],
+      cands:[
+        {i:'AS',n:'Andrés Felipe Salcedo',r:'3 años contact center · prueba 86',s:92,reasons:[['+','3 años como asesor en contact center de telecomunicaciones.','HV p.1'],['+','Confirmó turnos rotativos y sábados.','WhatsApp 14:32'],['+','Prueba de servicio: 86/100 (corte 70).','Prueba #A-221'],['−','Aspira $2.100.000, 5 % sobre el rango.','WhatsApp 14:35']]},
+        {i:'DR',n:'Daniela Rojas Pinzón',r:'Bilingüe B2 · 2 años BPO',s:88,reasons:[['+','Inglés B2 certificado, útil para la campaña bilingüe.','Certificado EF'],['+','2 años en BPO con atención multicanal.','HV p.2'],['+','Salario aspirado dentro del rango.','WhatsApp 10:05'],['−','Solo disponible desde el 4 de noviembre.','WhatsApp 10:07']]},
+        {i:'JM',n:'Jhon Mario Cárdenas',r:'Técnico SENA · 1 año retail',s:81,reasons:[['+','Técnico en atención al cliente, SENA.','Diploma'],['+','Prueba de servicio: 90/100, la más alta del grupo.','Prueba #A-198'],['+','Disponibilidad inmediata.','WhatsApp 09:12'],['−','Experiencia en retail, no en contact center.','HV p.1']]}
+      ]},
+    vacante:{t:'Vacante redactada · Auxiliar de bodega',d:'Funza · 25 vacantes · creada a partir de «necesito 25 auxiliares para la bodega de Funza»',stripe:'var(--orq)',pills:[['p-ai','IA'],['p-neutral','Borrador']],age:'hace 40 min',kind:'vacante'},
+    descarte:{t:'Descarte sugerido · 23 candidatos',d:'No cumplen el curso de manejo de montacargas exigido',stripe:'var(--err)',pills:[['p-err','Afecta personas'],['p-ai','IA']],age:'hace 1 h',kind:'descarte'},
+    doc:{t:'Soporte actualizado · Curso de alturas',d:'Carlos Ibáñez subió su certificado renovado. La IA lo leyó y validó.',stripe:'var(--ok)',pills:[['p-ok','Validado'],['p-ai','IA']],age:'hace 2 h',kind:'doc'}
+  };
+  var list=document.getElementById('inboxList'),det=document.getElementById('detail'),cur='terna',open=0;
+  list.innerHTML='<header><b>Bandeja de aprobaciones</b><span class="pill p-neutral">7 pendientes</span></header>';
+  Object.keys(C).forEach(function(k){var c=C[k],b=document.createElement('button');b.type='button';b.className='item';b.setAttribute('role','option');b.dataset.k=k;
+    b.innerHTML='<span class="stripe" style="background:'+c.stripe+'"></span><div><div class="t">'+c.t+'</div><div class="d">'+c.d+'</div><div class="m">'+c.pills.map(function(p){return '<span class="pill '+p[0]+'">'+p[1]+'</span>'}).join('')+'<span class="age">'+c.age+'</span></div></div>';
+    list.appendChild(b);});
+  list.addEventListener('click',function(e){var b=e.target.closest('.item');if(!b)return;cur=b.dataset.k;open=0;render();});
+
+  function explain(c){return '<div class="explain"><div class="explain-head"><svg><use href="#spark"/></svg>Por qué '+c.n.split(' ')[0]+' está en la terna<span class="conf">Afinidad '+c.s+' / 100</span></div><ul class="reasons">'+
+    c.reasons.map(function(r){return '<li><span class="sig '+(r[0]==='+'?'plus':'minus')+'">'+r[0]+'</span><span>'+r[1]+'</span><span class="cite">'+r[2]+'</span></li>'}).join('')+
+    '</ul><div class="protected"><svg><use href="#shield"/></svg><span>No se usaron para el puntaje: edad, género, estado civil, foto ni dirección exacta.</span></div></div>';}
+  function decide(primary,msg){return '<div class="decide"><button class="btn btn-primary" type="button" data-msg="'+msg+'"><svg><use href="#i-check"/></svg>'+primary+'</button><button class="btn btn-sec" type="button" data-msg="Abriste el modo de ajuste. Tus cambios se registran junto a la sugerencia.">Ajustar</button><span class="audit"><svg><use href="#i-log"/></svg>Se registra sugerencia y decisión</span></div>';}
+
+  function render(){
+    list.querySelectorAll('.item').forEach(function(b){b.setAttribute('aria-selected',b.dataset.k===cur?'true':'false')});
+    var c=C[cur],h='<div class="detail-head"><div><h4>'+c.t.split(' · ')[1]+'</h4><p>'+c.d+'</p></div>'+c.pills.map(function(p){return '<span class="pill '+p[0]+'">'+p[1]+'</span>'}).join(' ')+'</div>';
+    if(c.kind==='terna'){
+      h+='<div class="funnel">'+c.funnel.map(function(f){return '<div><b>'+f[0]+'</b><span>'+f[1]+'</span></div>'}).join('')+'</div><div class="cands">'+
+        c.cands.map(function(p,i){return '<button type="button" class="cand" data-i="'+i+'" aria-expanded="'+(i===open)+'"><span class="avatar">'+p.i+'</span><div><div class="n">'+p.n+'</div><div class="r">'+p.r+'</div></div><div class="score"><b>'+p.s+'</b><div class="bar"><span style="width:'+p.s+'%"></span></div></div></button>'+(i===open?explain(p):'')}).join('')+
+        '</div>'+decide('Aprobar terna','Terna aprobada. El agente avisará a los 3 candidatos por WhatsApp.');
+    } else if(c.kind==='vacante'){
+      h+='<div class="field"><label for="v-t">Título del aviso</label><input id="v-t" class="input ai-filled" value="Auxiliar de bodega con manejo de montacargas"></div>'+
+        '<div class="field"><label for="v-s">Rango salarial</label><input id="v-s" class="input ai-filled mono" value="$1.750.000 – $2.050.000"><span class="ai-note"><svg><use href="#spark"/></svg>Basado en 42 vacantes similares en Funza y Mosquera</span></div>'+
+        '<div class="field"><label for="v-q">Preguntas filtro</label><textarea id="v-q" class="input ai-filled" rows="3">¿Tienes curso vigente de montacargas? · ¿Puedes trabajar turno noche? · ¿Vives en Funza, Mosquera o Madrid?</textarea></div>'+
+        decide('Publicar vacante','Vacante publicada en el portal y en 3 bolsas de empleo.');
+    } else if(c.kind==='descarte'){
+      h+='<div class="explain"><div class="explain-head"><svg><use href="#spark"/></svg>Por qué se sugiere descartar<span class="conf">23 personas</span></div><ul class="reasons">'+
+        '<li><span class="sig minus">−</span><span>El aviso exige curso vigente de montacargas y ninguno lo reporta.</span><span class="cite">Requisito #2</span></li>'+
+        '<li><span class="sig minus">−</span><span>5 dijeron por WhatsApp que no tienen el curso.</span><span class="cite">WhatsApp</span></li>'+
+        '<li><span class="sig plus">+</span><span>7 tienen buen perfil para Auxiliar de empaque; puedo moverlos a esa vacante.</span><span class="cite">Vacante #V-118</span></li>'+
+        '</ul><div class="protected"><svg><use href="#shield"/></svg><span>Descartar afecta a personas: siempre requiere tu aprobación, en cualquier nivel de autonomía.</span></div></div>'+
+        '<div class="decide"><button class="btn btn-danger" type="button" data-msg="16 descartados con mensaje respetuoso. 7 movidos a Auxiliar de empaque.">Descartar 16 y mover 7</button><button class="btn btn-sec" type="button" data-msg="Abriste la lista para revisar uno por uno.">Revisar uno por uno</button><span class="audit"><svg><use href="#i-log"/></svg>Se registra sugerencia y decisión</span></div>';
+    } else {
+      h+='<div class="explain"><div class="explain-head"><svg><use href="#spark"/></svg>Lo que leyó la IA del soporte<span class="conf">Confianza alta</span></div><ul class="reasons">'+
+        '<li><span class="sig plus">+</span><span>Certificado de trabajo seguro en alturas, nivel avanzado.</span><span class="cite">PDF p.1</span></li>'+
+        '<li><span class="sig plus">+</span><span>Vigente hasta el 14 de octubre de 2027.</span><span class="cite">PDF p.1</span></li>'+
+        '<li><span class="sig plus">+</span><span>Entidad certificadora con registro activo.</span><span class="cite">Consulta registro</span></li>'+
+        '</ul></div>'+decide('Aprobar cambio','Expediente actualizado. Se quitó la alerta de vencimiento.');
+    }
+    det.innerHTML=h;
+  }
+  det.addEventListener('click',function(e){var cd=e.target.closest('.cand');if(cd){var i=+cd.dataset.i;open=open===i?-1:i;render();return;}
+    var b=e.target.closest('button[data-msg]');if(b)toast(b.dataset.msg);
+    var ci=e.target.closest('.cite');if(ci)toast('Abriría la evidencia: '+ci.textContent);});
+  document.getElementById('ia').addEventListener('click',function(e){var ci=e.target.closest('.cite');if(ci)toast('Abriría la evidencia: '+ci.textContent);});
+  render();
+})();
+</script>

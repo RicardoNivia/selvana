@@ -1,0 +1,39 @@
+/* Filtros ATS de la vacante */
+.ats { display: flex; flex-direction: column; gap: var(--espacio-4); }
+.ats-sub { display: block; font-size: 12px; color: var(--color-texto-tenue); }
+.ats-acciones { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ats-panel { padding: var(--espacio-6); display: flex; flex-direction: column; gap: var(--espacio-4); }
+.ats-panel > header { display: flex; justify-content: space-between; gap: var(--espacio-4); align-items: flex-start; }
+.ats-panel h2 { margin: 0; font-family: var(--fuente-display); font-size: 20px; }
+.ats-panel > header p { margin: 4px 0 0; font-size: 14px; color: var(--color-texto-suave); max-width: 72ch; }
+.ats-panel .decision { padding: var(--espacio-3) 0 0; }
+.ats-columnas { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--espacio-4); }
+.ats-columnas fieldset { border: 1px solid var(--color-borde); border-radius: var(--radio-m); padding: var(--espacio-3) var(--espacio-4); margin: 0; display: flex; flex-direction: column; gap: var(--espacio-2); min-width: 0; }
+.ats-columnas legend { font-size: 13px; font-weight: 600; padding: 0 4px; }
+.ats-legend-2 { margin-top: var(--espacio-3); font-size: 13px; font-weight: 600; }
+.ats-opcion { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer; }
+.ats-opcion input { margin-top: 3px; accent-color: var(--color-primario); }
+.ats-sugerencia { display: block; font-size: 12px; color: var(--color-texto-tenue); }
+.ats-quitar { border: 0; background: transparent; color: var(--color-texto-suave); cursor: pointer; margin-left: 4px; font-size: 14px; line-height: 1; }
+.ats-ciudad { display: flex; gap: 8px; }
+.ats-meses { display: flex; gap: 8px; align-items: center; font-size: 13px; }
+.ats-meses input { max-width: 110px; }
+.ats-resumen { display: flex; flex-wrap: wrap; gap: var(--espacio-3); justify-content: space-between; align-items: center; }
+.ats-filas { display: flex; flex-direction: column; gap: var(--espacio-2); }
+.ats-fila { border: 1px solid var(--color-borde); border-radius: var(--radio-m); padding: var(--espacio-3) var(--espacio-4); display: flex; flex-direction: column; gap: var(--espacio-2); }
+.ats-fila.no-cumple { border-color: color-mix(in srgb, var(--color-error) 35%, var(--color-borde)); }
+.ats-fila > header { display: flex; flex-wrap: wrap; gap: 8px var(--espacio-3); align-items: center; }
+.ats-fila > header a { font-weight: 600; }
+.ats-fila > header .pill { margin-left: auto; }
+.ats-chequeos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ats-chequeos li { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; }
+.ats-chequeos li > span:nth-child(2) { flex: 1; }
+.ats-chequeos .signo { flex: 0 0 12px; font-family: var(--fuente-datos); font-weight: 700; }
+.ats-chequeos .cumple .signo { color: var(--color-exito); }
+.ats-chequeos .nocumple .signo { color: var(--color-error); }
+.ats-chequeos .sinevidencia .signo { color: var(--color-alerta); }
+.tablero-filtro { display: flex; align-items: flex-start; gap: 4px; font-size: 12px; }
+.tablero-filtro svg { width: 13px; height: 13px; flex: none; margin-top: 1px; }
+.tablero-filtro span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.tablero-filtro.nocumple { color: var(--color-error); }
+.tablero-filtro.porrevisar { color: var(--color-alerta); }

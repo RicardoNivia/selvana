@@ -1,0 +1,53 @@
+/* Chat del candidato (público, celular primero) */
+.chat-candidato { max-width: 640px; margin: 0 auto; padding-block: var(--espacio-6) var(--espacio-8); display: flex; flex-direction: column; gap: var(--espacio-3); min-height: 70vh; }
+.chat-cabeza { display: flex; align-items: center; gap: var(--espacio-3); padding: var(--espacio-3) var(--espacio-4); border: 1px solid var(--color-borde); border-radius: var(--radio-l); background: var(--color-superficie); }
+.chat-cabeza div { display: flex; flex-direction: column; min-width: 0; font-size: 14px; }
+.chat-cabeza span { font-size: 13px; color: var(--color-texto-suave); }
+.chat-avatar { flex: none; width: 40px; height: 40px; border-radius: var(--radio-full); display: grid; place-items: center; background: var(--color-ia-suave); color: var(--color-ia); font: 800 16px var(--fuente-display); }
+.chat-mensajes { flex: 1; display: flex; flex-direction: column; gap: var(--espacio-2); padding: var(--espacio-2) 0; }
+.chat-burbuja { max-width: 85%; padding: 10px 14px; border-radius: var(--radio-l); font-size: 15px; line-height: 1.45; animation: chat-entra var(--duracion-media) var(--curva-salida); }
+.chat-burbuja p { margin: 0; white-space: pre-wrap; }
+.chat-burbuja.agente { align-self: flex-start; background: var(--color-ia-suave); border: 1px solid var(--color-ia-borde); border-bottom-left-radius: var(--radio-s); }
+.chat-burbuja.persona { align-self: flex-start; background: var(--color-primario-suave); border-bottom-left-radius: var(--radio-s); }
+.chat-burbuja.propia { align-self: flex-end; background: var(--color-primario); color: var(--color-sobre-primario); border-bottom-right-radius: var(--radio-s); }
+.chat-quien { display: block; font-size: 12px; font-weight: 700; color: var(--color-primario); margin-bottom: 2px; }
+.chat-hora { display: block; margin-top: 4px; font-size: 11px; opacity: 0.7; text-align: right; }
+.chat-escribiendo { display: flex; gap: 4px; padding: 14px 16px; }
+.chat-escribiendo span { width: 7px; height: 7px; border-radius: var(--radio-full); background: var(--color-ia); animation: chat-punto 1s infinite ease-in-out; }
+.chat-escribiendo span:nth-child(2) { animation-delay: 0.15s; }
+.chat-escribiendo span:nth-child(3) { animation-delay: 0.3s; }
+.chat-escribir { position: sticky; bottom: var(--espacio-3); display: flex; gap: var(--espacio-2); padding: var(--espacio-2); border: 1px solid var(--color-borde); border-radius: var(--radio-full); background: var(--color-superficie); box-shadow: var(--sombra-2); }
+.chat-escribir .entrada { flex: 1; border: 0; background: none; font-size: 16px; }
+.chat-escribir .boton { border-radius: var(--radio-full); min-width: 44px; padding: 0 14px; }
+.chat-aviso { margin: 0; padding: var(--espacio-3) var(--espacio-4); border-radius: var(--radio-m); background: var(--color-superficie-2); font-size: 14px; color: var(--color-texto-suave); }
+.chat-privacidad { display: flex; gap: 6px; align-items: flex-start; margin: 0; font-size: 12px; color: var(--color-texto-tenue); }
+.chat-privacidad svg { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+@keyframes chat-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes chat-punto { 0%, 80%, 100% { opacity: 0.3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .chat-burbuja, .chat-escribiendo span { animation: none; } }
+
+/* Preselección en la consola */
+.fila-explicacion-cuerpo { display: flex; flex-direction: column; gap: var(--espacio-4); }
+.fila-detalle { display: block; margin-top: 2px; font-size: 12px; }
+.presel { display: flex; flex-direction: column; gap: var(--espacio-3); padding: var(--espacio-3) var(--espacio-4); border: 1px solid var(--color-borde); border-radius: var(--radio-l); background: var(--color-superficie); max-width: 880px; }
+.presel-cabeza { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); font-size: 14px; }
+.presel-cabeza svg { width: 16px; height: 16px; color: var(--color-ia); }
+.presel-enlace { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); padding: var(--espacio-3); border-radius: var(--radio-m); background: var(--color-superficie-2); font-size: 13px; }
+.presel-enlace code { flex: 1 1 320px; overflow-wrap: anywhere; font-size: 12px; }
+.presel-enlace small { flex-basis: 100%; font-size: 12px; color: var(--color-texto-tenue); }
+.presel-resumen dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--espacio-3); margin: 0; padding: var(--espacio-3) var(--espacio-4); }
+.presel-resumen dt { font-size: 12px; color: var(--color-texto-tenue); }
+.presel-resumen dd { margin: 0; font-size: 14px; font-weight: 600; }
+.presel-respuestas { margin: 0; padding: 0 var(--espacio-4) var(--espacio-2) var(--espacio-8); display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.presel-dudas, .presel-texto { margin: 0; padding: 0 var(--espacio-4) var(--espacio-3); font-size: 13px; color: var(--color-texto-suave); }
+.presel-chat { display: flex; flex-direction: column; gap: var(--espacio-2); }
+.presel-mensaje { padding: var(--espacio-2) var(--espacio-3); border-radius: var(--radio-m); font-size: 13px; border-left: 3px solid var(--color-borde); background: var(--color-fondo); }
+.presel-mensaje span { font-size: 11px; color: var(--color-texto-tenue); }
+.presel-mensaje p { margin: 2px 0 0; }
+.presel-mensaje.agente { border-left-color: var(--color-ia); }
+.presel-mensaje.persona { border-left-color: var(--color-primario); }
+.presel-mensaje.candidato { border-left-color: var(--color-texto-tenue); }
+
+.ficha-preseleccion { display: flex; flex-direction: column; gap: var(--espacio-4); padding: var(--espacio-4) var(--espacio-6) var(--espacio-6); border-top: 1px solid var(--color-borde); }
+.ficha-preseleccion h3 { margin: 0 0 var(--espacio-2); font-size: 15px; }
+.ficha-preseleccion h3 .mono { font-size: 12px; font-weight: 400; color: var(--color-texto-tenue); }

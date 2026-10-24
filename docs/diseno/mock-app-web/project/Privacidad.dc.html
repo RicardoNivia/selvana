@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Privacidad y auditoría</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0B5D52}a:hover{color:#073F38}
+</style>
+</helmet>
+<div style="min-height: 1200px; display: flex; flex-wrap: wrap; background: #F3F6F3; color: #10211B; font-family: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+<nav aria-label="Principal" style="flex: 1 1 232px; max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-right: 1px solid #D5DFD9; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px">
+  <div style="display: flex; align-items: center; gap: 8px; padding: 0 10px 20px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 21px; letter-spacing: -0.03em">
+    <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 24C24 12 31 5 43 5C43 17 36 24 24 24Z" fill="#0B5D52"></path><path d="M24 24C24 36 17 43 5 43C5 31 12 24 24 24Z" fill="#0B5D52"></path><circle cx="11" cy="12" r="5.5" fill="#8A3FC4"></circle></svg>selvana
+  </div>
+  <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 11l2-7h10l2 7v5H3v-5Zm0 0h4l1 2h4l1-2h4"></path></svg>Bandeja
+    <span style="margin-left: auto; font: 600 11px 'IBM Plex Mono', monospace; background: #8A3FC4; color: #FFFFFF; border-radius: 999px; padding: 1px 8px">7</span>
+  </a>
+  <a href="Vacantes.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="6" width="14" height="10" rx="2"></rect><path d="M7 6V4h6v2"></path></svg>Vacantes
+  </a>
+  <a href="Candidato.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="7" r="3"></circle><path d="M2.5 16c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5M13 4.5a3 3 0 0 1 0 5.5M15 11.8c1.4.6 2.2 1.9 2.5 4.2"></path></svg>Candidatos
+  </a>
+  <div style="font: 500 10px 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #5F7169; padding: 18px 12px 6px">Próximas etapas</div>
+  <span style="padding: 10px 12px; color: #5F7169; font-size: 14px">Vinculación</span>
+  <span style="padding: 10px 12px; color: #5F7169; font-size: 14px">Empleados</span>
+  <span style="padding: 10px 12px; color: #5F7169; font-size: 14px">Desempeño y clima</span>
+  <div style="font: 500 10px 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #5F7169; padding: 18px 12px 6px">Empresa</div>
+  <a href="Conexion.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M7 3v4M13 3v4M5 7h10v3a5 5 0 0 1-10 0V7ZM10 15v2"></path></svg>Conectar nómina
+  </a>
+  <a href="Estructura.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="7.5" y="2.5" width="5" height="4" rx="1"></rect><rect x="2.5" y="13.5" width="5" height="4" rx="1"></rect><rect x="12.5" y="13.5" width="5" height="4" rx="1"></rect><path d="M10 6.5v3.5M5 13.5V10h10v3.5"></path></svg>Estructura y cargos
+  </a>
+  <a href="Usuarios.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="7" r="3"></circle><path d="M2.5 16c.6-3 2.8-4.5 5.5-4.5 1.2 0 2.3.3 3.2.9M14.5 11l3 1.2v2.3c0 1.6-1.3 2.9-3 3.5-1.7-.6-3-1.9-3-3.5v-2.3l3-1.2Z"></path></svg>Usuarios y roles
+  </a>
+  <a href="Privacidad.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #D7ECE6; color: #0B5D52; font-weight: 600; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="2"></rect><path d="M7 9V6.5a3 3 0 0 1 6 0V9M10 12.5v2"></path></svg>Privacidad y auditoría
+  </a>
+  <a href="Agentes.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0.5c.4 3.6 1.9 5.1 5.5 5.5-3.6.4-5.1 1.9-5.5 5.5-.4-3.6-1.9-5.1-5.5-5.5C6.1 5.6 7.6 4.1 8 .5Z" fill="currentColor"></path></svg>Agentes y autonomía
+  </a>
+  <a href="Usuarios.dc.html" style="margin-top: auto; padding: 12px; border: 1px solid #D5DFD9; border-radius: 10px; font-size: 12px; color: #465A52; display: flex; align-items: center; gap: 10px; text-decoration: none">
+    <span style="flex: 0 0 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: #2A62B8; color: #FFFFFF; font-weight: 700; font-size: 12px">CN</span>
+    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 11px; color: #5F7169">Trabajando en</span><b style="color: #10211B; font-size: 13px">Contact Center Norte</b><span>Servicios Andinos EST · Laura M.</span></span>
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-label="Cambiar de empresa usuaria" role="img"><path d="M6 8l4-4 4 4M6 12l4 4 4-4"></path></svg>
+  </a>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+  <div>
+    <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 32px; letter-spacing: -0.02em; line-height: 1.15">Privacidad y auditoría</h1>
+    <p style="margin: 4px 0 0; color: #465A52; font-size: 14px; max-width: 72ch">Todo lo que necesita para responder a un titular o a la Superintendencia de Industria y Comercio: quién autorizó, cuándo y qué hizo cada quien, incluida la IA.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px">
+    <div style="padding: 14px 16px; border-radius: 10px; background: #FFFFFF; border: 1px solid #D5DFD9"><span style="font-size: 12px; color: #5F7169">Autorizaciones vigentes</span><b style="display: block; font: 600 24px 'IBM Plex Mono', monospace">3.912</b><span style="font-size: 12px; color: #5F7169">41 revocadas este año</span></div>
+    <div style="padding: 14px 16px; border-radius: 10px; background: #FFFFFF; border: 1px solid #D5DFD9"><span style="font-size: 12px; color: #5F7169">Política vigente</span><b style="display: block; font: 600 24px 'IBM Plex Mono', monospace">v3</b><span style="font-size: 12px; color: #5F7169">Desde el 12 sep 2026</span></div>
+    <div style="padding: 14px 16px; border-radius: 10px; background: #FFFFFF; border: 1px solid #F0C98A"><span style="font-size: 12px; color: #5F7169">Solicitudes de titulares</span><b style="display: block; font: 600 24px 'IBM Plex Mono', monospace">3 abiertas</b><span style="font-size: 12px; color: #8A5200">1 vence en 2 días hábiles</span></div>
+    <div style="padding: 14px 16px; border-radius: 10px; background: #FFFFFF; border: 1px solid #D5DFD9"><span style="font-size: 12px; color: #5F7169">Accesos a datos sensibles</span><b style="display: block; font: 600 24px 'IBM Plex Mono', monospace">27</b><span style="font-size: 12px; color: #5F7169">Últimos 7 días</span></div>
+  </div>
+
+  <div role="tablist" aria-label="Privacidad" style="display: flex; gap: 4px; border-bottom: 1px solid #D5DFD9; overflow-x: auto">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+      <button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="min-height: 44px; padding: 0 16px; border: 0; border-bottom: 2px solid {{t.line}}; background: transparent; font: 600 14px 'Instrument Sans', sans-serif; color: {{t.color}}; cursor: pointer; white-space: nowrap">{{t.label}}</button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{verBitacora}}" hint-placeholder-val="{{ true }}">
+    <section aria-label="Bitácora" style="background: #FFFFFF; border: 1px solid #D5DFD9; border-radius: 16px; overflow: hidden">
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 16px; border-bottom: 1px solid #D5DFD9">
+        <div role="group" aria-label="Quién hizo la acción" style="display: inline-flex; padding: 3px; border: 1px solid #D5DFD9; border-radius: 10px; background: #E9EFEB">
+          <sc-for list="{{filtros}}" as="f" hint-placeholder-count="3">
+            <button type="button" aria-pressed="{{f.on}}" onClick="{{f.pick}}" style="min-height: 36px; padding: 0 14px; border: 0; border-radius: 7px; background: {{f.bg}}; color: {{f.color}}; font: 600 13px 'Instrument Sans', sans-serif; cursor: pointer; box-shadow: {{f.sombra}}">{{f.label}}</button>
+          </sc-for>
+        </div>
+        <span style="font-size: 13px; color: #5F7169">Hoy, 21 de octubre · Servicios Andinos EST</span>
+        <span style="margin-left: auto; font-size: 12px; color: #5F7169">Registro inmutable: cada línea lleva su huella</span>
+      </div>
+      <sc-for list="{{eventos}}" as="e" hint-placeholder-count="7">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: flex-start; padding: 14px 16px; border-top: 1px solid #E9EFEB">
+          <span style="flex: 0 0 52px; font: 500 13px 'IBM Plex Mono', monospace; color: #465A52; padding-top: 2px">{{e.hora}}</span>
+          <span style="flex: 0 0 auto; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: {{e.actorBg}}; color: {{e.actorFg}}; white-space: nowrap">{{e.actor}}</span>
+          <div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <b style="font-size: 14px">{{e.accion}}</b>
+            <span style="font-size: 13px; color: #465A52">{{e.detalle}}</span>
+            <span style="font-size: 12px; color: {{e.notaColor}}">{{e.nota}}</span>
+          </div>
+          <span style="font: 11px 'IBM Plex Mono', monospace; color: #5F7169; white-space: nowrap">{{e.huella}}</span>
+        </div>
+      </sc-for>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{verAutorizaciones}}" hint-placeholder-val="{{ false }}">
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div role="note" style="padding: 12px 16px; border-radius: 10px; background: #FFFFFF; border: 1px solid #D5DFD9; font-size: 13px; color: #465A52">El texto de autorización se muestra antes de postularse, no se puede omitir y queda guardado con la versión que la persona aceptó. Los documentos se guardan cifrados.</div>
+      <section aria-label="Autorizaciones" style="background: #FFFFFF; border: 1px solid #D5DFD9; border-radius: 16px; overflow-x: auto">
+        <table style="width: 100%; min-width: 800px; border-collapse: collapse; font-size: 14px">
+          <thead>
+            <tr style="text-align: left; font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #5F7169">
+              <th style="padding: 12px 16px; font-weight: 500">Titular</th>
+              <th style="padding: 12px 16px; font-weight: 500">Canal</th>
+              <th style="padding: 12px 16px; font-weight: 500">Versión</th>
+              <th style="padding: 12px 16px; font-weight: 500">Fecha y hora</th>
+              <th style="padding: 12px 16px; font-weight: 500">Estado</th>
+              <th style="padding: 12px 16px; font-weight: 500">Evidencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{autorizaciones}}" as="a" hint-placeholder-count="5">
+              <tr style="border-top: 1px solid #E9EFEB">
+                <td style="padding: 12px 16px"><b>{{a.titular}}</b><span style="display: block; font: 12px 'IBM Plex Mono', monospace; color: #5F7169">{{a.documento}}</span></td>
+                <td style="padding: 12px 16px; color: #465A52">{{a.canal}}</td>
+                <td style="padding: 12px 16px; font-family: 'IBM Plex Mono', monospace">{{a.version}}</td>
+                <td style="padding: 12px 16px; font: 13px 'IBM Plex Mono', monospace; color: #465A52">{{a.fecha}}</td>
+                <td style="padding: 12px 16px"><span style="font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: {{a.bg}}; color: {{a.fg}}">{{a.estado}}</span></td>
+                <td style="padding: 12px 16px; font: 12px 'IBM Plex Mono', monospace; color: #465A52">{{a.evidencia}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{verSolicitudes}}" hint-placeholder-val="{{ false }}">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <sc-for list="{{solicitudes}}" as="s" hint-placeholder-count="3">
+        <section style="background: #FFFFFF; border: 1px solid {{s.borde}}; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start">
+            <div style="flex: 1 1 320px; min-width: 0">
+              <b style="font-size: 15px">{{s.tipo}} · {{s.titular}}</b>
+              <span style="display: block; font-size: 13px; color: #465A52">{{s.pide}}</span>
+            </div>
+            <span style="font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: {{s.plazoBg}}; color: {{s.plazoFg}}">{{s.plazo}}</span>
+          </div>
+          <div style="padding: 12px 14px; border-radius: 10px; border: 1px solid #D9BDF0; background: #F1E6FA; font-size: 14px">
+            <span style="display: block; font-size: 12px; font-weight: 600; color: #7A33B3; margin-bottom: 4px">Respuesta preparada por la IA</span>{{s.respuesta}}
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+            <button type="button" style="min-height: 40px; padding: 0 16px; border-radius: 6px; border: 0; background: #0B5D52; color: #FFFFFF; font: 600 14px 'Instrument Sans', sans-serif; cursor: pointer">Revisar y enviar</button>
+            <span style="font-size: 12px; color: #5F7169">Recibida {{s.recibida}} por {{s.canal}}</span>
+          </div>
+        </section>
+      </sc-for>
+    </div>
+  </sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'bitacora', filtro: 'todo' };
+  }
+  renderVals() {
+    var s = this.state, self = this;
+    var tabs = [['bitacora', 'Bitácora'], ['autorizaciones', 'Autorizaciones Ley 1581'], ['solicitudes', 'Solicitudes de titulares · 3']].map(function (t) {
+      var on = s.tab === t[0];
+      return { label: t[1], on: on, line: on ? '#0B5D52' : 'transparent', color: on ? '#0B5D52' : '#465A52', pick: function () { self.setState({ tab: t[0] }); } };
+    });
+    var filtros = [['todo', 'Todo'], ['ia', 'IA'], ['personas', 'Personas']].map(function (f) {
+      var on = s.filtro === f[0];
+      return { label: f[1], on: on, bg: on ? '#FFFFFF' : 'transparent', color: on ? '#10211B' : '#465A52', sombra: on ? '0 1px 3px rgba(16,33,27,.12)' : 'none',
+        pick: function () { self.setState({ filtro: f[0] }); } };
+    });
+    var IA = ['#F1E6FA', '#7A33B3'], PER = ['#D7ECE6', '#0B5D52'], SIS = ['#E9EFEB', '#465A52'];
+    function ev(hora, tipo, actor, accion, detalle, nota, notaColor, huella) {
+      var c = tipo === 'ia' ? IA : tipo === 'persona' ? PER : SIS;
+      return { hora: hora, tipo: tipo, actor: actor, actorBg: c[0], actorFg: c[1], accion: accion, detalle: detalle, nota: nota, notaColor: notaColor || '#5F7169', huella: huella };
+    }
+    var todos = [
+      ev('09:14', 'persona', 'Laura Moreno', 'Aprobó la terna de Asesor(a) de servicio al cliente', '3 candidatos · sin cambios a la propuesta', '', '', 'a91f…3c2'),
+      ev('09:02', 'ia', 'Agente reclutador', 'Propuso la terna de Asesor(a) de servicio al cliente', 'Leyó 128 hojas de vida · 4 herramientas usadas · gemini-3.5-flash-lite · USD 0,0000', 'Aprobado por Laura Moreno a las 09:14', '#237534', '7c0e…e41'),
+      ev('08:47', 'persona', 'Camilo Duarte', 'Abrió la prueba psicotécnica de Andrés F. S.', 'Dato sensible · motivo: revisión de terna', 'Acceso permitido por su rol', '#8A5200', '52bd…0a9'),
+      ev('08:31', 'ia', 'Lector de documentos', 'Validó el certificado de alturas de Carlos Ibáñez', 'Vigente hasta 14 oct 2027 · claude-opus-5-5 · USD 0,0124', 'Espera aprobación', '#8A5200', 'f3a2…71d'),
+      ev('08:05', 'persona', 'Camilo Duarte', 'Cambió el rol sugerido de Jorge Peña', 'La IA sugirió Líder · se asignó Analista', 'Corrección registrada para mejorar la sugerencia', '', '19e4…b80'),
+      ev('06:00', 'sistema', 'Conector SINCO', 'Sincronizó la nómina', '1.284 empleados leídos · 4 cambios propuestos · 3 registros con error', '', '', '0d7c…2fe'),
+      ev('05:58', 'ia', 'Preselección WhatsApp', 'Envió 6 recordatorios a candidatos', 'Tarea de bajo riesgo en modo autónomo con límites', 'No requiere aprobación', '', 'c44a…9d3')
+    ];
+    var eventos = todos.filter(function (e) {
+      return s.filtro === 'todo' || (s.filtro === 'ia' && e.tipo === 'ia') || (s.filtro === 'personas' && e.tipo === 'persona');
+    });
+    var V = ['#E1F3E4', '#1B5E2A'], R = ['#FBE4E1', '#8E2A22'];
+    function au(titular, documento, canal, version, fecha, vigente, evidencia) {
+      var c = vigente ? V : R;
+      return { titular: titular, documento: documento, canal: canal, version: version, fecha: fecha, estado: vigente ? 'Vigente' : 'Revocada', bg: c[0], fg: c[1], evidencia: evidencia };
+    }
+    var W = ['#FCEFD9', '#8A5200'], N = ['#E9EFEB', '#465A52'];
+    return {
+      tabs: tabs, filtros: filtros, eventos: eventos,
+      verBitacora: s.tab === 'bitacora', verAutorizaciones: s.tab === 'autorizaciones', verSolicitudes: s.tab === 'solicitudes',
+      autorizaciones: [
+        au('Andrés F. Salcedo', 'CC ***.789', 'Portal de empleo', 'v3', '2026-10-15 08:12', true, 'sha256 9f2c…a81'),
+        au('Daniela Rojas P.', 'CC ***.456', 'WhatsApp', 'v3', '2026-10-14 10:02', true, 'sha256 41be…07c'),
+        au('Jhon M. Cárdenas', 'CC ***.102', 'Portal de empleo', 'v3', '2026-10-13 21:40', true, 'sha256 c8d1…e5f'),
+        au('Sara Gómez', 'CC ***.330', 'WhatsApp', 'v2', '2026-08-02 17:15', false, 'sha256 77a0…13b'),
+        au('Carlos Ibáñez', 'CC ***.918', 'Presencial (firma)', 'v2', '2026-03-09 09:00', true, 'PDF firmado · cifrado')
+      ],
+      solicitudes: [
+        { tipo: 'Reclamo de supresión', titular: 'Sara Gómez', pide: 'Pide eliminar su hoja de vida y sus datos de contacto.', plazo: 'Quedan 2 de 15 días hábiles', plazoBg: W[0], plazoFg: W[1], borde: '#F0C98A',
+          respuesta: 'Se eliminarán su hoja de vida, sus datos de contacto y sus conversaciones. Se conserva solo el registro de que revocó la autorización, como exige la ley.', recibida: 'el 30 sep', canal: 'correo' },
+        { tipo: 'Consulta', titular: 'Kevin Mosquera', pide: 'Quiere saber qué datos suyos tiene la empresa.', plazo: 'Quedan 6 de 10 días hábiles', plazoBg: N[0], plazoFg: N[1], borde: '#D5DFD9',
+          respuesta: 'Tenemos su nombre, cédula, celular, hoja de vida y las respuestas de preselección del 18 de octubre. Le adjuntamos el detalle.', recibida: 'el 15 oct', canal: 'WhatsApp' },
+        { tipo: 'Actualización', titular: 'Natalia Bermúdez', pide: 'Cambió de número de celular.', plazo: 'Quedan 9 de 15 días hábiles', plazoBg: N[0], plazoFg: N[1], borde: '#D5DFD9',
+          respuesta: 'Se actualizará su celular a 311 *** 4410 en su perfil de candidata.', recibida: 'el 20 oct', canal: 'portal' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\Selvana.Infrastructure.Common\Selvana.Infrastructure.Common.csproj" />
+    <ProjectReference Include="..\Selvana.AI.Contracts\Selvana.AI.Contracts.csproj" />
+    <ProjectReference Include="..\..\Modules\Core\Selvana.Core.Contracts\Selvana.Core.Contracts.csproj" />
+    <ProjectReference Include="..\..\Modules\Reclutamiento\Selvana.Reclutamiento.Contracts\Selvana.Reclutamiento.Contracts.csproj" />
+    <ProjectReference Include="..\..\Modules\Vinculacion\Selvana.Vinculacion.Contracts\Selvana.Vinculacion.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Anthropic" />
+    <PackageReference Include="Google.GenAI" />
+    <PackageReference Include="Microsoft.Extensions.AI" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Selvana.AI.Tests" />
+  </ItemGroup>
+</Project>

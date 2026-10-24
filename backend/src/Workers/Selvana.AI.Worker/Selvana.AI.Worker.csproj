@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\Selvana.Infrastructure.Common\Selvana.Infrastructure.Common.csproj" />
+    <ProjectReference Include="..\Selvana.AI\Selvana.AI.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Selvana.Web.Common\Selvana.Web.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+
+  </ItemGroup>
+  <PropertyGroup>
+    <UserSecretsId>selvana-ai-worker</UserSecretsId>
+  </PropertyGroup>
+</Project>

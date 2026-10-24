@@ -1,0 +1,172 @@
+{
+  "agente": "redactor-vacantes",
+  "meta": {
+    "ciudadYCupos": 0.95,
+    "sinDiscriminacion": 1.0,
+    "salarioLegal": 1.0,
+    "explicacion": 0.95
+  },
+  "nota": "Frases sintéticas. Ciudad y cupos esperados los define el experto funcional de RRHH.",
+  "casos": [
+    {
+      "id": "vac-001",
+      "frase": "Necesito 25 auxiliares de bodega para Funza, turno noche, con curso de montacargas",
+      "esperado": {
+        "ciudad": "Funza",
+        "cupos": 25
+      }
+    },
+    {
+      "id": "vac-002",
+      "frase": "Busco 3 asesores de servicio al cliente bilingües para Bogotá",
+      "esperado": {
+        "ciudad": "Bogotá",
+        "cupos": 3
+      }
+    },
+    {
+      "id": "vac-003",
+      "frase": "Requiero 1 auxiliar de enfermería para la Clínica en Medellín, turnos rotativos",
+      "esperado": {
+        "ciudad": "Medellín",
+        "cupos": 1
+      }
+    },
+    {
+      "id": "vac-004",
+      "frase": "Necesitamos 10 cajeros para temporada de diciembre en Cali",
+      "esperado": {
+        "ciudad": "Cali",
+        "cupos": 10
+      }
+    },
+    {
+      "id": "vac-005",
+      "frase": "2 conductores con licencia C2 para reparto en Barranquilla",
+      "esperado": {
+        "ciudad": "Barranquilla",
+        "cupos": 2
+      }
+    },
+    {
+      "id": "vac-006",
+      "frase": "Contratar 15 operarios de producción para la planta de Mosquera, turno rotativo",
+      "esperado": {
+        "ciudad": "Mosquera",
+        "cupos": 15
+      }
+    },
+    {
+      "id": "vac-007",
+      "frase": "Un analista de nómina con experiencia en liquidación para Bogotá",
+      "esperado": {
+        "ciudad": "Bogotá",
+        "cupos": 1
+      }
+    },
+    {
+      "id": "vac-008",
+      "frase": "Necesito 8 montacarguistas certificados en Funza, jornada diurna",
+      "esperado": {
+        "ciudad": "Funza",
+        "cupos": 8
+      }
+    },
+    {
+      "id": "vac-009",
+      "frase": "Buscamos 4 vendedores de mostrador para Bucaramanga",
+      "esperado": {
+        "ciudad": "Bucaramanga",
+        "cupos": 4
+      }
+    },
+    {
+      "id": "vac-010",
+      "frase": "Requiero 6 alistadores de pedidos para el centro de distribución de Pereira",
+      "esperado": {
+        "ciudad": "Pereira",
+        "cupos": 6
+      }
+    },
+    {
+      "id": "vac-011",
+      "frase": "Necesito una recepcionista para el hotel en Cartagena",
+      "esperado": {
+        "ciudad": "Cartagena",
+        "cupos": 1
+      }
+    },
+    {
+      "id": "vac-012",
+      "frase": "20 agentes de call center para campaña de cobranza en Bogotá, medio tiempo",
+      "esperado": {
+        "ciudad": "Bogotá",
+        "cupos": 20
+      }
+    },
+    {
+      "id": "vac-013",
+      "frase": "Busco jefe de bodega con 5 años de experiencia en Funza",
+      "esperado": {
+        "ciudad": "Funza",
+        "cupos": 1
+      }
+    },
+    {
+      "id": "vac-014",
+      "frase": "Necesitamos 12 auxiliares de cocina para un restaurante en Medellín",
+      "esperado": {
+        "ciudad": "Medellín",
+        "cupos": 12
+      }
+    },
+    {
+      "id": "vac-015",
+      "frase": "Contratar 2 electricistas con certificado de alturas para obra en Cali",
+      "esperado": {
+        "ciudad": "Cali",
+        "cupos": 2
+      }
+    },
+    {
+      "id": "vac-016",
+      "frase": "5 mensajeros en moto para Bogotá con licencia A2",
+      "esperado": {
+        "ciudad": "Bogotá",
+        "cupos": 5
+      }
+    },
+    {
+      "id": "vac-017",
+      "frase": "Necesito 30 operarios de empaque para temporada en Mosquera",
+      "esperado": {
+        "ciudad": "Mosquera",
+        "cupos": 30
+      }
+    },
+    {
+      "id": "vac-018",
+      "frase": "Un coordinador de talento humano para la sede de Barranquilla",
+      "esperado": {
+        "ciudad": "Barranquilla",
+        "cupos": 1
+      }
+    },
+    {
+      "id": "vac-019",
+      "frase": "Busco 7 auxiliares de aseo para oficinas en Bucaramanga, turno de mañana",
+      "esperado": {
+        "ciudad": "Bucaramanga",
+        "cupos": 7
+      }
+    },
+    {
+      "id": "vac-020",
+      "frase": "Requerimos 3 técnicos de mantenimiento de montacargas en Funza",
+      "esperado": {
+        "ciudad": "Funza",
+        "cupos": 3
+      }
+    }
+  ]
+}

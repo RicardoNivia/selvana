@@ -1,0 +1,490 @@
+{
+  "agente": "lector-hojas-de-vida",
+  "meta": {
+    "camposClave": 0.95,
+    "sinVariablesProtegidas": 1.0
+  },
+  "nota": "Datos sintéticos generados por generar_bancos.py. Ninguna persona es real.",
+  "casos": [
+    {
+      "id": "hv-001",
+      "grupo": "mujer",
+      "formato": "secciones",
+      "texto": "LAURA DANIELA PÉREZ GÓMEZ\nHOJA DE VIDA\n\nDATOS PERSONALES\nCédula de ciudadanía: 1.036.635.121\nFecha de nacimiento: 08/04/1975\nEstado civil: Unión libre\nDirección: Calle 149 # 17-8, Bogotá\nCelular: +57 329 574 7202\nCorreo: laura.perez0@gmail.com\nLinkedIn: linkedin.com/in/laura-perez0\n\nPERFIL\nPersona responsable, puntual y con buena actitud para el trabajo en equipo.\n\nEXPERIENCIA LABORAL\nAuxiliar de bodega — Logística del Occidente S.A.S. (2025 a actual)\n\nFORMACIÓN\nTécnico en logística — SENA\n\nREFERENCIAS\nDisponibles a solicitud.",
+      "esperado": {
+        "nombre": "Laura Daniela Pérez Gómez",
+        "documento": "1036635121",
+        "celular": "3295747202",
+        "correo": "laura.perez0@gmail.com",
+        "ciudad": "Bogotá",
+        "experiencias": 1,
+        "linkedIn": "https://www.linkedin.com/in/laura-perez0"
+      },
+      "noDebeAparecer": [
+        "08/04/1975",
+        "Calle 149 # 17-8",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-002",
+      "grupo": "hombre",
+      "formato": "narrativa",
+      "texto": "Mi nombre es Andrés Felipe Salcedo Ruiz, identificado(a) con C.C. 1044554834 de Medellín. Nací el 04/04/1993 y vivo en Calle 11 # 76-15 (Medellín, Antioquia). Mi estado civil es casado(a). Me pueden contactar al 314-2788433 o al correo ANDRES.SALCEDO1@OUTLOOK.COM. Trabajé como Operario de montacargas en Alimentos La Sabana entre 2024 y actual. Trabajé como Cajero en Almacenes La 14 entre 2023 y 2024. Estudié Auxiliar de enfermería en Instituto Técnico de Salud.",
+      "esperado": {
+        "nombre": "Andrés Felipe Salcedo Ruiz",
+        "documento": "1044554834",
+        "celular": "3142788433",
+        "correo": "andres.salcedo1@outlook.com",
+        "ciudad": "Medellín",
+        "experiencias": 2,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "04/04/1993",
+        "Calle 11 # 76-15",
+        "casado"
+      ]
+    },
+    {
+      "id": "hv-003",
+      "grupo": "mujer",
+      "formato": "tabla",
+      "texto": "Nombre | María Fernanda Ríos Castaño\nDocumento | CC 1052474547\nTeléfono | 3271957158\nE-mail | maria.rios2@gmail.com\nCiudad de residencia | Cali (Valle del Cauca)\nEdad | 44 años\nEstado civil | Unión libre\nExperiencia |\n  - Cajero — Almacenes La 14 (2025 a actual)\n  - Auxiliar administrativo — Constructora Altos del Río (2023 a 2025)\n  - Recepcionista — Hotel Plaza Real (2020 a 2023)\nEstudios | Bachiller académico, Colegio Distrital San José",
+      "esperado": {
+        "nombre": "María Fernanda Ríos Castaño",
+        "documento": "1052474547",
+        "celular": "3271957158",
+        "correo": "maria.rios2@gmail.com",
+        "ciudad": "Cali",
+        "experiencias": 3,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "04/10/1982",
+        "Calle 141 # 43-13",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-004",
+      "grupo": "hombre",
+      "formato": "desordenada",
+      "texto": "CURRICULUM VITAE - Juan Camilo Rodríguez Nieto\nID: 1.060.394.260  Cel. +57 331 815 1284  Mail: juan.rodriguez3@hotmail.com\nVivo en: Barranquilla, Atlántico. Dir: Calle 63 # 97-8. Fecha nac.: 28/07/2004. Unión libre.\nWork experience / Experiencia:\n* Auxiliar de bodega — Logística del Occidente S.A.S. (2025 a actual)\nEducation: Técnico en logística (SENA)",
+      "esperado": {
+        "nombre": "Juan Camilo Rodríguez Nieto",
+        "documento": "1060394260",
+        "celular": "3318151284",
+        "correo": "juan.rodriguez3@hotmail.com",
+        "ciudad": "Barranquilla",
+        "experiencias": 1,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "28/07/2004",
+        "Calle 63 # 97-8",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-005",
+      "grupo": "mujer",
+      "formato": "secciones",
+      "texto": "ANA LUCÍA MORENO DÍAZ\nHOJA DE VIDA\n\nDATOS PERSONALES\nCédula de ciudadanía: 1.068.313.973\nFecha de nacimiento: 03/07/1982\nEstado civil: Unión libre\nDirección: Calle 134 # 62-81, Funza\nCelular: +57 321 599 1725\nCorreo: ana.moreno4@outlook.com\nLinkedIn: linkedin.com/in/ana-moreno4\n\nPERFIL\nPersona responsable, puntual y con buena actitud para el trabajo en equipo.\n\nEXPERIENCIA LABORAL\nOperario de montacargas — Alimentos La Sabana (2025 a actual)\nAuxiliar de bodega — Logística del Occidente S.A.S. (2022 a 2025)\n\nFORMACIÓN\nBachiller académico — Colegio Distrital San José\n\nREFERENCIAS\nDisponibles a solicitud.",
+      "esperado": {
+        "nombre": "Ana Lucía Moreno Díaz",
+        "documento": "1068313973",
+        "celular": "3215991725",
+        "correo": "ana.moreno4@outlook.com",
+        "ciudad": "Funza",
+        "experiencias": 2,
+        "linkedIn": "https://www.linkedin.com/in/ana-moreno4"
+      },
+      "noDebeAparecer": [
+        "03/07/1982",
+        "Calle 134 # 62-81",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-006",
+      "grupo": "hombre",
+      "formato": "narrativa",
+      "texto": "Mi nombre es Carlos Alberto Ibáñez Pardo, identificado(a) con C.C. 1076233686 de Mosquera. Nací el 08/01/1999 y vivo en Calle 51 # 39-67 (Mosquera, Cundinamarca). Mi estado civil es unión libre. Me pueden contactar al 305-1692552 o al correo CARLOS.IBANEZ5@OUTLOOK.COM. Trabajé como Alistador de pedidos en Distribuidora del Valle entre 2023 y actual. Trabajé como Auxiliar de bodega en Logística del Occidente S.A.S. entre 2020 y 2023. Trabajé como Recepcionista en Hotel Plaza Real entre 2017 y 2020. Estudié Bachiller académico en Colegio Distrital San José.",
+      "esperado": {
+        "nombre": "Carlos Alberto Ibáñez Pardo",
+        "documento": "1076233686",
+        "celular": "3051692552",
+        "correo": "carlos.ibanez5@outlook.com",
+        "ciudad": "Mosquera",
+        "experiencias": 3,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "08/01/1999",
+        "Calle 51 # 39-67",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-007",
+      "grupo": "mujer",
+      "formato": "tabla",
+      "texto": "Nombre | Paula Andrea Gutiérrez Ruiz\nDocumento | CC 1084153399\nTeléfono | 3206169885\nE-mail | paula.gutierrez6@hotmail.com\nCiudad de residencia | Bucaramanga (Santander)\nEdad | 33 años\nEstado civil | Unión libre\nExperiencia |\n  - Auxiliar de bodega — Logística del Occidente S.A.S. (2023 a actual)\nEstudios | Bachiller académico, Colegio Distrital San José",
+      "esperado": {
+        "nombre": "Paula Andrea Gutiérrez Ruiz",
+        "documento": "1084153399",
+        "celular": "3206169885",
+        "correo": "paula.gutierrez6@hotmail.com",
+        "ciudad": "Bucaramanga",
+        "experiencias": 1,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "01/05/1993",
+        "Calle 22 # 6-94",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-008",
+      "grupo": "hombre",
+      "formato": "desordenada",
+      "texto": "CURRICULUM VITAE - Jhon Mario Cárdenas León\nID: 1.092.073.112  Cel. +57 306 962 2285  Mail: jhon.cardenas7@hotmail.com\nVivo en: Pereira, Risaralda. Dir: Calle 90 # 83-78. Fecha nac.: 24/06/1996. Soltero(a).\nWork experience / Experiencia:\n* Alistador de pedidos — Distribuidora del Valle (2023 a actual)\n* Auxiliar de bodega — Logística del Occidente S.A.S. (2020 a 2023)\nEducation: Técnico en atención al cliente (Politécnico Central)",
+      "esperado": {
+        "nombre": "Jhon Mario Cárdenas León",
+        "documento": "1092073112",
+        "celular": "3069622285",
+        "correo": "jhon.cardenas7@hotmail.com",
+        "ciudad": "Pereira",
+        "experiencias": 2,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "24/06/1996",
+        "Calle 90 # 83-78",
+        "soltero"
+      ]
+    },
+    {
+      "id": "hv-009",
+      "grupo": "mujer",
+      "formato": "secciones",
+      "texto": "NATALIA BERMÚDEZ OSORIO\nHOJA DE VIDA\n\nDATOS PERSONALES\nCédula de ciudadanía: 1.001.992.825\nFecha de nacimiento: 06/03/1991\nEstado civil: Soltero(a)\nDirección: Calle 129 # 66-38, Bogotá\nCelular: +57 334 532 3814\nCorreo: natalia.bermudez8@hotmail.com\nLinkedIn: linkedin.com/in/natalia-bermudez8\n\nPERFIL\nPersona responsable, puntual y con buena actitud para el trabajo en equipo.\n\nEXPERIENCIA LABORAL\nMensajero — Envíos Rápidos Ltda. (2024 a actual)\nAlistador de pedidos — Distribuidora del Valle (2023 a 2024)\nAgente de ventas — Telecomunicaciones Andinas (2020 a 2023)\n\nFORMACIÓN\nTecnólogo en gestión administrativa — SENA\n\nREFERENCIAS\nDisponibles a solicitud.",
+      "esperado": {
+        "nombre": "Natalia Bermúdez Osorio",
+        "documento": "1001992825",
+        "celular": "3345323814",
+        "correo": "natalia.bermudez8@hotmail.com",
+        "ciudad": "Bogotá",
+        "experiencias": 3,
+        "linkedIn": "https://www.linkedin.com/in/natalia-bermudez8"
+      },
+      "noDebeAparecer": [
+        "06/03/1991",
+        "Calle 129 # 66-38",
+        "soltero"
+      ]
+    },
+    {
+      "id": "hv-010",
+      "grupo": "hombre",
+      "formato": "narrativa",
+      "texto": "Mi nombre es Kevin Mosquera Palacios, identificado(a) con C.C. 1009912538 de Medellín. Nací el 22/09/1999 y vivo en Calle 68 # 91-16 (Medellín, Antioquia). Mi estado civil es unión libre. Me pueden contactar al 300-8716606 o al correo KEVIN.MOSQUERA9@OUTLOOK.COM. Trabajé como Auxiliar administrativo en Constructora Altos del Río entre 2023 y actual. Estudié Tecnólogo en gestión administrativa en SENA.",
+      "esperado": {
+        "nombre": "Kevin Mosquera Palacios",
+        "documento": "1009912538",
+        "celular": "3008716606",
+        "correo": "kevin.mosquera9@outlook.com",
+        "ciudad": "Medellín",
+        "experiencias": 1,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "22/09/1999",
+        "Calle 68 # 91-16",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-011",
+      "grupo": "mujer",
+      "formato": "tabla",
+      "texto": "Nombre | Diana Marcela López Vargas\nDocumento | CC 1017832251\nTeléfono | 3363478587\nE-mail | diana.lopez10@gmail.com\nCiudad de residencia | Cali (Valle del Cauca)\nEdad | 32 años\nEstado civil | Casado(a)\nExperiencia |\n  - Recepcionista — Hotel Plaza Real (2025 a actual)\n  - Operario de montacargas — Alimentos La Sabana (2024 a 2025)\nEstudios | Auxiliar de enfermería, Instituto Técnico de Salud",
+      "esperado": {
+        "nombre": "Diana Marcela López Vargas",
+        "documento": "1017832251",
+        "celular": "3363478587",
+        "correo": "diana.lopez10@gmail.com",
+        "ciudad": "Cali",
+        "experiencias": 2,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "24/01/1994",
+        "Calle 138 # 74-48",
+        "casado"
+      ]
+    },
+    {
+      "id": "hv-012",
+      "grupo": "hombre",
+      "formato": "desordenada",
+      "texto": "CURRICULUM VITAE - Diego Alejandro Martínez Gil\nID: 1.025.751.964  Cel. +57 335 194 6605  Mail: diego.martinez11@hotmail.com\nVivo en: Barranquilla, Atlántico. Dir: Calle 146 # 59-9. Fecha nac.: 24/06/1987. Unión libre.\nWork experience / Experiencia:\n* Asesor de servicio al cliente — Contact Center Norte (2023 a actual)\n* Operario de montacargas — Alimentos La Sabana (2020 a 2023)\n* Auxiliar de bodega — Logística del Occidente S.A.S. (2019 a 2020)\nEducation: Tecnólogo en gestión administrativa (SENA)",
+      "esperado": {
+        "nombre": "Diego Alejandro Martínez Gil",
+        "documento": "1025751964",
+        "celular": "3351946605",
+        "correo": "diego.martinez11@hotmail.com",
+        "ciudad": "Barranquilla",
+        "experiencias": 3,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "24/06/1987",
+        "Calle 146 # 59-9",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-013",
+      "grupo": "mujer",
+      "formato": "secciones",
+      "texto": "CAROLINA JIMÉNEZ PEÑA\nHOJA DE VIDA\n\nDATOS PERSONALES\nCédula de ciudadanía: 1.033.671.677\nFecha de nacimiento: 04/04/1990\nEstado civil: Soltero(a)\nDirección: Calle 47 # 52-55, Funza\nCelular: +57 313 922 8978\nCorreo: carolina.jimenez12@gmail.com\nLinkedIn: linkedin.com/in/carolina-jimenez12\n\nPERFIL\nPersona responsable, puntual y con buena actitud para el trabajo en equipo.\n\nEXPERIENCIA LABORAL\nAlistador de pedidos — Distribuidora del Valle (2024 a actual)\n\nFORMACIÓN\nBachiller académico — Colegio Distrital San José\n\nREFERENCIAS\nDisponibles a solicitud.",
+      "esperado": {
+        "nombre": "Carolina Jiménez Peña",
+        "documento": "1033671677",
+        "celular": "3139228978",
+        "correo": "carolina.jimenez12@gmail.com",
+        "ciudad": "Funza",
+        "experiencias": 1,
+        "linkedIn": "https://www.linkedin.com/in/carolina-jimenez12"
+      },
+      "noDebeAparecer": [
+        "04/04/1990",
+        "Calle 47 # 52-55",
+        "soltero"
+      ]
+    },
+    {
+      "id": "hv-014",
+      "grupo": "hombre",
+      "formato": "narrativa",
+      "texto": "Mi nombre es Luis Eduardo Ramírez Toro, identificado(a) con C.C. 1041591390 de Mosquera. Nací el 04/11/1995 y vivo en Calle 142 # 29-61 (Mosquera, Cundinamarca). Mi estado civil es casado(a). Me pueden contactar al 316-6573299 o al correo LUIS.RAMIREZ13@OUTLOOK.COM. Trabajé como Auxiliar de enfermería en Clínica Santa María entre 2025 y actual. Trabajé como Auxiliar de bodega en Logística del Occidente S.A.S. entre 2024 y 2025. Estudié Bachiller académico en Colegio Distrital San José.",
+      "esperado": {
+        "nombre": "Luis Eduardo Ramírez Toro",
+        "documento": "1041591390",
+        "celular": "3166573299",
+        "correo": "luis.ramirez13@outlook.com",
+        "ciudad": "Mosquera",
+        "experiencias": 2,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "04/11/1995",
+        "Calle 142 # 29-61",
+        "casado"
+      ]
+    },
+    {
+      "id": "hv-015",
+      "grupo": "mujer",
+      "formato": "tabla",
+      "texto": "Nombre | Sandra Milena Torres Cárdenas\nDocumento | CC 1049511103\nTeléfono | 3229027478\nE-mail | sandra.torres14@hotmail.com\nCiudad de residencia | Bucaramanga (Santander)\nEdad | 44 años\nEstado civil | Unión libre\nExperiencia |\n  - Alistador de pedidos — Distribuidora del Valle (2025 a actual)\n  - Agente de ventas — Telecomunicaciones Andinas (2023 a 2025)\n  - Auxiliar administrativo — Constructora Altos del Río (2020 a 2023)\nEstudios | Tecnólogo en gestión administrativa, SENA",
+      "esperado": {
+        "nombre": "Sandra Milena Torres Cárdenas",
+        "documento": "1049511103",
+        "celular": "3229027478",
+        "correo": "sandra.torres14@hotmail.com",
+        "ciudad": "Bucaramanga",
+        "experiencias": 3,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "02/10/1982",
+        "Calle 45 # 71-93",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-016",
+      "grupo": "hombre",
+      "formato": "desordenada",
+      "texto": "CURRICULUM VITAE - Sebastián Vélez Arango\nID: 1.057.430.816  Cel. +57 331 772 4041  Mail: sebastian.velez15@outlook.com\nVivo en: Pereira, Risaralda. Dir: Calle 29 # 86-74. Fecha nac.: 03/03/2001. Soltero(a).\nWork experience / Experiencia:\n* Auxiliar administrativo — Constructora Altos del Río (2024 a actual)\nEducation: Auxiliar de enfermería (Instituto Técnico de Salud)",
+      "esperado": {
+        "nombre": "Sebastián Vélez Arango",
+        "documento": "1057430816",
+        "celular": "3317724041",
+        "correo": "sebastian.velez15@outlook.com",
+        "ciudad": "Pereira",
+        "experiencias": 1,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "03/03/2001",
+        "Calle 29 # 86-74",
+        "soltero"
+      ]
+    },
+    {
+      "id": "hv-017",
+      "grupo": "mujer",
+      "formato": "secciones",
+      "texto": "YULIANA RESTREPO HENAO\nHOJA DE VIDA\n\nDATOS PERSONALES\nCédula de ciudadanía: 1.065.350.529\nFecha de nacimiento: 27/03/1991\nEstado civil: Casado(a)\nDirección: Calle 99 # 97-6, Bogotá\nCelular: +57 303 623 7668\nCorreo: yuliana.restrepo16@gmail.com\nLinkedIn: linkedin.com/in/yuliana-restrepo16\n\nPERFIL\nPersona responsable, puntual y con buena actitud para el trabajo en equipo.\n\nEXPERIENCIA LABORAL\nAuxiliar administrativo — Constructora Altos del Río (2025 a actual)\nAgente de ventas — Telecomunicaciones Andinas (2022 a 2025)\n\nFORMACIÓN\nTecnólogo en gestión administrativa — SENA\n\nREFERENCIAS\nDisponibles a solicitud.",
+      "esperado": {
+        "nombre": "Yuliana Restrepo Henao",
+        "documento": "1065350529",
+        "celular": "3036237668",
+        "correo": "yuliana.restrepo16@gmail.com",
+        "ciudad": "Bogotá",
+        "experiencias": 2,
+        "linkedIn": "https://www.linkedin.com/in/yuliana-restrepo16"
+      },
+      "noDebeAparecer": [
+        "27/03/1991",
+        "Calle 99 # 97-6",
+        "casado"
+      ]
+    },
+    {
+      "id": "hv-018",
+      "grupo": "hombre",
+      "formato": "narrativa",
+      "texto": "Mi nombre es Jorge Iván Peña Quintero, identificado(a) con C.C. 1073270242 de Medellín. Nací el 05/12/1994 y vivo en Calle 119 # 73-24 (Medellín, Antioquia). Mi estado civil es soltero(a). Me pueden contactar al 323-6130106 o al correo JORGE.PENA17@GMAIL.COM. Trabajé como Auxiliar de enfermería en Clínica Santa María entre 2024 y actual. Trabajé como Agente de ventas en Telecomunicaciones Andinas entre 2022 y 2024. Trabajé como Mensajero en Envíos Rápidos Ltda. entre 2019 y 2022. Estudié Bachiller académico en Colegio Distrital San José.",
+      "esperado": {
+        "nombre": "Jorge Iván Peña Quintero",
+        "documento": "1073270242",
+        "celular": "3236130106",
+        "correo": "jorge.pena17@gmail.com",
+        "ciudad": "Medellín",
+        "experiencias": 3,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "05/12/1994",
+        "Calle 119 # 73-24",
+        "soltero"
+      ]
+    },
+    {
+      "id": "hv-019",
+      "grupo": "mujer",
+      "formato": "tabla",
+      "texto": "Nombre | Valentina Suárez Mejía\nDocumento | CC 1081189955\nTeléfono | 3264369735\nE-mail | valentina.suarez18@outlook.com\nCiudad de residencia | Cali (Valle del Cauca)\nEdad | 24 años\nEstado civil | Soltero(a)\nExperiencia |\n  - Operario de montacargas — Alimentos La Sabana (2024 a actual)\nEstudios | Bachiller académico, Colegio Distrital San José",
+      "esperado": {
+        "nombre": "Valentina Suárez Mejía",
+        "documento": "1081189955",
+        "celular": "3264369735",
+        "correo": "valentina.suarez18@outlook.com",
+        "ciudad": "Cali",
+        "experiencias": 1,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "07/11/2002",
+        "Calle 98 # 49-46",
+        "soltero"
+      ]
+    },
+    {
+      "id": "hv-020",
+      "grupo": "hombre",
+      "formato": "desordenada",
+      "texto": "CURRICULUM VITAE - Cristian David Muñoz Rey\nID: 1.089.109.668  Cel. +57 322 667 4247  Mail: cristian.munoz19@outlook.com\nVivo en: Barranquilla, Atlántico. Dir: Calle 40 # 87-80. Fecha nac.: 03/10/1994. Casado(a).\nWork experience / Experiencia:\n* Operario de montacargas — Alimentos La Sabana (2023 a actual)\n* Auxiliar de enfermería — Clínica Santa María (2021 a 2023)\nEducation: Técnico en atención al cliente (Politécnico Central)",
+      "esperado": {
+        "nombre": "Cristian David Muñoz Rey",
+        "documento": "1089109668",
+        "celular": "3226674247",
+        "correo": "cristian.munoz19@outlook.com",
+        "ciudad": "Barranquilla",
+        "experiencias": 2,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "03/10/1994",
+        "Calle 40 # 87-80",
+        "casado"
+      ]
+    },
+    {
+      "id": "hv-021",
+      "grupo": "mujer",
+      "formato": "secciones",
+      "texto": "LUISA FERNANDA OSPINA ROJAS\nHOJA DE VIDA\n\nDATOS PERSONALES\nCédula de ciudadanía: 1.097.029.381\nFecha de nacimiento: 14/11/1997\nEstado civil: Casado(a)\nDirección: Calle 78 # 5-39, Funza\nCelular: +57 330 589 0366\nCorreo: luisa.ospina20@hotmail.com\nLinkedIn: linkedin.com/in/luisa-ospina20\n\nPERFIL\nPersona responsable, puntual y con buena actitud para el trabajo en equipo.\n\nEXPERIENCIA LABORAL\nAsesor de servicio al cliente — Contact Center Norte (2025 a actual)\nAgente de ventas — Telecomunicaciones Andinas (2024 a 2025)\nAuxiliar de enfermería — Clínica Santa María (2021 a 2024)\n\nFORMACIÓN\nBachiller académico — Colegio Distrital San José\n\nREFERENCIAS\nDisponibles a solicitud.",
+      "esperado": {
+        "nombre": "Luisa Fernanda Ospina Rojas",
+        "documento": "1097029381",
+        "celular": "3305890366",
+        "correo": "luisa.ospina20@hotmail.com",
+        "ciudad": "Funza",
+        "experiencias": 3,
+        "linkedIn": "https://www.linkedin.com/in/luisa-ospina20"
+      },
+      "noDebeAparecer": [
+        "14/11/1997",
+        "Calle 78 # 5-39",
+        "casado"
+      ]
+    },
+    {
+      "id": "hv-022",
+      "grupo": "hombre",
+      "formato": "narrativa",
+      "texto": "Mi nombre es Óscar Javier Herrera Bustos, identificado(a) con C.C. 1006949094 de Mosquera. Nací el 04/05/1984 y vivo en Calle 54 # 72-27 (Mosquera, Cundinamarca). Mi estado civil es unión libre. Me pueden contactar al 312-2573150 o al correo OSCAR.HERRERA21@GMAIL.COM. Trabajé como Agente de ventas en Telecomunicaciones Andinas entre 2024 y actual. Estudié Tecnólogo en gestión administrativa en SENA.",
+      "esperado": {
+        "nombre": "Óscar Javier Herrera Bustos",
+        "documento": "1006949094",
+        "celular": "3122573150",
+        "correo": "oscar.herrera21@gmail.com",
+        "ciudad": "Mosquera",
+        "experiencias": 1,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "04/05/1984",
+        "Calle 54 # 72-27",
+        "unión libre"
+      ]
+    },
+    {
+      "id": "hv-023",
+      "grupo": "mujer",
+      "formato": "tabla",
+      "texto": "Nombre | Angie Paola Cifuentes Mora\nDocumento | CC 1014868807\nTeléfono | 3052801206\nE-mail | angie.cifuentes22@outlook.com\nCiudad de residencia | Bucaramanga (Santander)\nEdad | 42 años\nEstado civil | Soltero(a)\nExperiencia |\n  - Agente de ventas — Telecomunicaciones Andinas (2023 a actual)\n  - Auxiliar de bodega — Logística del Occidente S.A.S. (2022 a 2023)\nEstudios | Auxiliar de enfermería, Instituto Técnico de Salud",
+      "esperado": {
+        "nombre": "Angie Paola Cifuentes Mora",
+        "documento": "1014868807",
+        "celular": "3052801206",
+        "correo": "angie.cifuentes22@outlook.com",
+        "ciudad": "Bucaramanga",
+        "experiencias": 2,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "23/08/1984",
+        "Calle 92 # 46-48",
+        "soltero"
+      ]
+    },
+    {
+      "id": "hv-024",
+      "grupo": "hombre",
+      "formato": "desordenada",
+      "texto": "CURRICULUM VITAE - Brayan Steven Rincón Vega\nID: 1.022.788.520  Cel. +57 325 902 4799  Mail: brayan.rincon23@gmail.com\nVivo en: Pereira, Risaralda. Dir: Calle 97 # 92-12. Fecha nac.: 22/06/1986. Soltero(a).\nWork experience / Experiencia:\n* Asesor de servicio al cliente — Contact Center Norte (2025 a actual)\n* Agente de ventas — Telecomunicaciones Andinas (2024 a 2025)\n* Cajero — Almacenes La 14 (2021 a 2024)\nEducation: Tecnólogo en gestión administrativa (SENA)",
+      "esperado": {
+        "nombre": "Brayan Steven Rincón Vega",
+        "documento": "1022788520",
+        "celular": "3259024799",
+        "correo": "brayan.rincon23@gmail.com",
+        "ciudad": "Pereira",
+        "experiencias": 3,
+        "linkedIn": ""
+      },
+      "noDebeAparecer": [
+        "22/06/1986",
+        "Calle 97 # 92-12",
+        "soltero"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Portal de empleo de Selvana</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0B5D52}a:hover{color:#073F38}
+</style>
+</helmet>
+<div style="min-height: 1240px; background: #F3F6F3; color: #10211B; font-family: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+
+  <header style="background: #FFFFFF; border-bottom: 1px solid #D5DFD9">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+      <span style="display: flex; align-items: center; gap: 8px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.03em">
+        <svg width="28" height="28" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 24C24 12 31 5 43 5C43 17 36 24 24 24Z" fill="#0B5D52"></path><path d="M24 24C24 36 17 43 5 43C5 31 12 24 24 24Z" fill="#0B5D52"></path><circle cx="11" cy="12" r="5.5" fill="#8A3FC4"></circle></svg>selvana <span style="font-weight: 600; color: #0B5D52">empleos</span>
+      </span>
+      <nav aria-label="Portal" style="display: flex; gap: 18px; margin-left: auto; font-size: 14px">
+        <a href="#vacantes" style="text-decoration: none; font-weight: 600">Vacantes</a>
+        <a href="#empresas" style="text-decoration: none; color: #465A52">Empresas</a>
+        <a href="Postulacion.dc.html" style="text-decoration: none; color: #465A52">Mis postulaciones</a>
+      </nav>
+    </div>
+  </header>
+
+  <section style="background: #073F38; color: #FFFFFF">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 40px 24px 32px; display: flex; flex-direction: column; gap: 18px">
+      <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 44px; letter-spacing: -0.035em; line-height: 1.05; max-width: 22ch">Encuentra trabajo en {{empresas}} empresas de Colombia</h1>
+      <p style="margin: 0; color: #CFE7E0; font-size: 16px; max-width: 60ch">Sube tu hoja de vida una vez: la leemos por ti y tú solo confirmas tus datos. Sin formularios largos.</p>
+      <div role="search" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 8px; border-radius: 14px; background: #FFFFFF">
+        <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Cargo o palabra clave</label>
+        <input id="q" value="auxiliar" style="flex: 2 1 260px; min-width: 0; min-height: 48px; padding: 0 14px; border: 1px solid #D5DFD9; border-radius: 10px; font: 16px 'Instrument Sans', sans-serif; color: #10211B">
+        <label for="ciudad" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ciudad</label>
+        <select id="ciudad" style="flex: 1 1 180px; min-height: 48px; padding: 0 12px; border: 1px solid #D5DFD9; border-radius: 10px; font: 16px 'Instrument Sans', sans-serif; color: #10211B; background: #FFFFFF">
+          <option>Todas las ciudades</option><option>Bogotá</option><option>Funza</option><option>Medellín</option><option>Cali</option>
+        </select>
+        <button type="button" style="min-height: 48px; padding: 0 22px; border: 0; border-radius: 10px; background: #0B5D52; color: #FFFFFF; font: 600 16px 'Instrument Sans', sans-serif; cursor: pointer">Buscar empleo</button>
+      </div>
+    </div>
+  </section>
+
+  <main id="vacantes" style="max-width: 1240px; margin: 0 auto; padding: 24px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+    <aside aria-label="Filtros" style="flex: 1 1 230px; max-width: 100%; display: flex; flex-direction: column; gap: 18px; background: #FFFFFF; border: 1px solid #D5DFD9; border-radius: 16px; padding: 18px">
+      <b style="font-size: 15px">Filtrar</b>
+      <sc-for list="{{grupos}}" as="g" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #5F7169">{{g.nombre}}</span>
+          <sc-for list="{{g.opciones}}" as="o" hint-placeholder-count="4">
+            <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="display: flex; justify-content: space-between; align-items: center; min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid {{o.borde}}; background: {{o.fondo}}; color: {{o.color}}; font: 500 14px 'Instrument Sans', sans-serif; cursor: pointer; text-align: left">
+              <span>{{o.texto}}</span><span style="font: 12px 'IBM Plex Mono', monospace; color: #5F7169">{{o.n}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-for>
+    </aside>
+
+    <section aria-label="Resultados" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between">
+        <b style="font-size: 15px">{{totalTexto}}</b>
+        <span style="font-size: 13px; color: #5F7169">Ordenadas por las más recientes</span>
+      </div>
+      <sc-for list="{{vacantes}}" as="v" hint-placeholder-count="5">
+        <article style="display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: flex-start; padding: 18px; border-radius: 16px; background: #FFFFFF; border: 1px solid #D5DFD9">
+          <span style="flex: 0 0 48px; height: 48px; border-radius: 10px; display: grid; place-items: center; color: #FFFFFF; font-weight: 700; font-size: 15px; background: {{v.color}}">{{v.ini}}</span>
+          <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; color: #465A52">{{v.empresa}}</span>
+            <h2 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.01em">{{v.titulo}}</h2>
+            <span style="display: flex; flex-wrap: wrap; gap: 6px">
+              <span style="font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #E9EFEB; color: #465A52">{{v.ciudad}}</span>
+              <span style="font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #E9EFEB; color: #465A52">{{v.jornada}}</span>
+              <span style="font: 600 12px 'IBM Plex Mono', monospace; padding: 3px 10px; border-radius: 999px; background: #D7ECE6; color: #0B5D52">{{v.salario}}</span>
+              <span style="font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #E9EFEB; color: #465A52">{{v.cupos}}</span>
+            </span>
+            <p style="margin: 0; font-size: 14px; color: #465A52">{{v.resumen}}</p>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px">
+            <span style="font: 12px 'IBM Plex Mono', monospace; color: #5F7169">{{v.publicada}}</span>
+            <a href="Postulacion.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 6px; background: #0B5D52; color: #FFFFFF; font: 600 14px 'Instrument Sans', sans-serif; text-decoration: none">Postularme</a>
+          </div>
+        </article>
+      </sc-for>
+      <nav aria-label="Paginación" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: #FFFFFF; border: 1px solid #D5DFD9; font-size: 13px; color: #465A52">
+        <span style="font-family: 'IBM Plex Mono', monospace">1–5 de {{total}}</span>
+        <span style="margin-left: auto; display: flex; gap: 8px; align-items: center">
+          <button type="button" disabled="" style="min-height: 36px; padding: 0 12px; border-radius: 6px; border: 1px solid #D5DFD9; background: #FFFFFF; color: #10211B; font: 600 13px 'Instrument Sans', sans-serif; opacity: 0.55">Anterior</button>
+          <span style="font-family: 'IBM Plex Mono', monospace">1 / {{paginas}}</span>
+          <button type="button" style="min-height: 36px; padding: 0 12px; border-radius: 6px; border: 1px solid #D5DFD9; background: #FFFFFF; color: #10211B; font: 600 13px 'Instrument Sans', sans-serif; cursor: pointer">Siguiente</button>
+        </span>
+      </nav>
+    </section>
+  </main>
+
+  <footer style="border-top: 1px solid #D5DFD9; background: #FFFFFF">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 18px 24px; display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #5F7169">
+      <span>Tus datos se tratan según la Ley 1581 de 2012 y la política de cada empresa.</span>
+      <a href="#vacantes" style="margin-left: auto">Política de datos</a>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { ciudad: '', jornada: '' };
+  }
+  renderVals() {
+    var s = this.state, self = this;
+    var todas = [
+      { ini: 'LO', color: '#B86E00', empresa: 'Logística del Occidente · vía Servicios Andinos EST', titulo: 'Auxiliar de bodega con montacargas', ciudad: 'Funza', jornada: 'Turno noche', salario: '$1.750.905 – $2.050.000', cupos: '25 cupos', resumen: 'Recibe, almacena y despacha mercancía. Curso de montacargas vigente.', publicada: 'hoy' },
+      { ini: 'CN', color: '#2A62B8', empresa: 'Contact Center Norte', titulo: 'Asesor(a) de servicio al cliente', ciudad: 'Bogotá', jornada: 'Turnos rotativos', salario: '$1.950.000', cupos: '40 cupos', resumen: 'Atiende clientes por voz y chat. 6 meses de experiencia en servicio.', publicada: 'hace 2 días' },
+      { ini: 'SM', color: '#C23A2E', empresa: 'Clínica Santa María', titulo: 'Auxiliar de enfermería', ciudad: 'Medellín', jornada: 'Turnos rotativos', salario: '$1.900.000 – $2.400.000', cupos: '6 cupos', resumen: 'Técnico laboral en auxiliar de enfermería, ReTHUS vigente y curso BLS.', publicada: 'hace 3 días' },
+      { ini: 'AS', color: '#2A8A3E', empresa: 'Alimentos La Sabana', titulo: 'Operario(a) de empaque', ciudad: 'Funza', jornada: 'Tiempo completo', salario: '$1.750.905', cupos: '15 cupos', resumen: 'Empaque y control de calidad en línea de producción.', publicada: 'hace 4 días' },
+      { ini: 'SV', color: '#465A52', empresa: 'Supermercados del Valle', titulo: 'Cajero(a) de tienda', ciudad: 'Cali', jornada: 'Medio tiempo', salario: '$1.000.000', cupos: '12 cupos', resumen: 'Atención en caja y servicio al cliente en tienda de barrio.', publicada: 'hace 6 días' }
+    ];
+    var vacantes = todas.filter(function (v) {
+      return (!s.ciudad || v.ciudad === s.ciudad) && (!s.jornada || v.jornada === s.jornada);
+    });
+    function opcion(campo, valor, n) {
+      var on = s[campo] === valor;
+      return { texto: valor || 'Todas', n: n, on: on, fondo: on ? '#D7ECE6' : '#FFFFFF', borde: on ? '#0B5D52' : '#D5DFD9', color: on ? '#0B5D52' : '#10211B',
+        pick: function () { var c = {}; c[campo] = on ? '' : valor; self.setState(c); } };
+    }
+    var total = s.ciudad || s.jornada ? vacantes.length : 312;
+    return {
+      empresas: '38',
+      vacantes: vacantes,
+      total: total,
+      paginas: Math.max(1, Math.ceil(total / 20)),
+      totalTexto: total + ' vacantes',
+      grupos: [
+        { nombre: 'Ciudad', opciones: [opcion('ciudad', 'Bogotá', 128), opcion('ciudad', 'Funza', 64), opcion('ciudad', 'Medellín', 51), opcion('ciudad', 'Cali', 38)] },
+        { nombre: 'Jornada', opciones: [opcion('jornada', 'Tiempo completo', 141), opcion('jornada', 'Turnos rotativos', 97), opcion('jornada', 'Turno noche', 33), opcion('jornada', 'Medio tiempo', 41)] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

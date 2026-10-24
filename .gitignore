@@ -1,0 +1,23 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.trx
+coverage*/
+# Node
+node_modules/
+web/dist/
+# Entorno
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+# IDE / SO
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+.DS_Store

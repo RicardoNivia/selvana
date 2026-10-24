@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Selvana.Vinculacion.Application\Selvana.Vinculacion.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Selvana.Infrastructure.Common\Selvana.Infrastructure.Common.csproj" />
+    <ProjectReference Include="..\..\..\Integrations\Selvana.Integrations\Selvana.Integrations.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

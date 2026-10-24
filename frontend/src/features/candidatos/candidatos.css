@@ -1,0 +1,76 @@
+/* Banco de talento */
+.banco-buscador { padding: var(--espacio-4); display: flex; flex-wrap: wrap; gap: var(--espacio-3); align-items: center; }
+.banco-entrada { flex: 1 1 320px; display: flex; align-items: center; gap: var(--espacio-2); min-height: 48px; padding: 0 var(--espacio-4); border: 1px solid var(--color-borde); border-radius: var(--radio-m); background: var(--color-superficie); transition: border-color var(--duracion-corta), box-shadow var(--duracion-corta); }
+.banco-entrada:focus-within { border-color: var(--color-primario); box-shadow: 0 0 0 3px var(--color-primario-suave); }
+.banco-entrada svg { width: 18px; height: 18px; color: var(--color-texto-tenue); flex: none; }
+.banco-entrada input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: 16px var(--fuente-base); color: var(--color-texto); }
+.banco-ejemplos { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: var(--espacio-2); }
+.chip { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: var(--radio-full); border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto-suave); font: 500 13px var(--fuente-base); cursor: pointer; transition: background var(--duracion-corta), color var(--duracion-corta); }
+.chip:hover { background: var(--color-primario-suave); color: var(--color-primario); }
+.banco-entendido { flex: 1 1 100%; margin: 0; display: flex; flex-wrap: wrap; gap: var(--espacio-2); align-items: center; font-size: 13px; color: var(--color-texto-suave); }
+.banco-sub { display: block; font-size: 12px; color: var(--color-texto-tenue); }
+.banco-habilidades { display: flex; flex-wrap: wrap; gap: 6px; }
+.banco-alerta { display: flex; align-items: center; gap: 4px; margin-top: 2px; font-size: 12px; color: var(--color-alerta); }
+.banco-alerta svg { width: 13px; height: 13px; }
+
+/* Ficha del candidato */
+.ficha-cabeza { display: flex; flex-direction: column; gap: var(--espacio-2); }
+.ficha-titulo { display: flex; align-items: center; gap: var(--espacio-4); }
+.ficha-avatar { flex: 0 0 64px; height: 64px; border-radius: var(--radio-full); display: grid; place-items: center; background: var(--color-primario-suave); color: var(--color-primario); font: 700 20px var(--fuente-base); }
+.ficha-datos { flex: 1 1 300px; min-width: 0; padding: var(--espacio-4); display: flex; flex-direction: column; gap: var(--espacio-3); }
+.ficha-dato { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: var(--radio-s); border: 1px solid var(--color-borde); }
+.ficha-dato span { font-size: 12px; color: var(--color-texto-tenue); }
+.ficha-dato b { font-size: 14px; overflow-wrap: anywhere; }
+.ficha-nota { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: var(--color-texto-tenue); }
+.ficha-nota svg { width: 14px; height: 14px; flex: none; margin-top: 1px; }
+.ficha-cuerpo { flex: 1.6 1 460px; min-width: 0; padding: 0; overflow: hidden; }
+
+/* Hoja de vida por bloques */
+.hv { padding: var(--espacio-4) var(--espacio-6) var(--espacio-6); display: flex; flex-direction: column; gap: var(--espacio-4); }
+.hv-resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--espacio-3); }
+.hv-cifra { display: flex; flex-direction: column; gap: 2px; padding: var(--espacio-3) var(--espacio-4); border-radius: var(--radio-m); background: var(--color-superficie-2); min-width: 0; }
+.hv-cifra span { font-size: 12px; color: var(--color-texto-suave); }
+.hv-cifra b { font: 800 20px/1.2 var(--fuente-display); letter-spacing: -0.01em; color: var(--color-texto); }
+.hv-cifra b.hv-cifra-texto { font: 600 15px/1.3 var(--fuente-base); overflow-wrap: anywhere; }
+.hv-cifra small { font-size: 12px; color: var(--color-texto-tenue); }
+.hv-bloque { display: flex; flex-direction: column; gap: var(--espacio-3); padding-top: var(--espacio-4); border-top: 1px solid var(--color-borde); }
+.hv-bloque-cabeza { display: flex; align-items: center; gap: var(--espacio-2); }
+.hv-bloque-cabeza h3 { margin: 0; font-size: 16px; }
+.hv-icono { flex: none; width: 32px; height: 32px; border-radius: var(--radio-s); display: grid; place-items: center; background: var(--color-primario-suave); color: var(--color-primario); }
+.hv-icono svg { width: 18px; height: 18px; }
+.hv-icono-pequeno { width: 26px; height: 26px; }
+.hv-icono-pequeno svg { width: 15px; height: 15px; }
+.hv-cuenta { margin-left: auto; font-size: 12px; color: var(--color-texto-tenue); }
+.hv-vacio { margin: 0; font-size: 13px; color: var(--color-texto-suave); }
+.hv-nota { font-size: 12px; color: var(--color-texto-tenue); }
+
+.hv-alertas { display: flex; flex-direction: column; gap: var(--espacio-2); padding: var(--espacio-3) var(--espacio-4); border-radius: var(--radio-m); background: var(--color-alerta-suave); border-left: 3px solid var(--color-alerta); }
+.hv-alertas header { display: flex; align-items: center; gap: var(--espacio-2); font-size: 14px; }
+.hv-alertas header svg { width: 16px; height: 16px; color: var(--color-alerta); }
+.hv-alertas ul { margin: 0; padding-left: var(--espacio-4); display: flex; flex-direction: column; gap: var(--espacio-2); font-size: 13px; }
+.hv-alertas small { font-size: 12px; color: var(--color-texto-suave); }
+
+.hv-empleos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.hv-empleo { position: relative; display: flex; gap: var(--espacio-3); padding-bottom: var(--espacio-3); }
+.hv-empleo:not(:last-child)::before { content: ''; position: absolute; left: 6px; top: 18px; bottom: 0; width: 2px; background: var(--color-borde); }
+.hv-empleo-punto { flex: none; width: 14px; height: 14px; margin-top: 14px; border-radius: var(--radio-full); border: 2px solid var(--color-primario); background: var(--color-superficie); }
+.hv-empleo.actual .hv-empleo-punto { background: var(--color-primario); }
+.hv-empleo-cuerpo { flex: 1; min-width: 0; padding: var(--espacio-3) var(--espacio-4); border: 1px solid var(--color-borde); border-radius: var(--radio-m); display: flex; flex-direction: column; gap: 2px; transition: border-color var(--duracion-corta); }
+.hv-empleo-cuerpo:hover { border-color: var(--color-primario); }
+.hv-empleo-titulo { display: flex; flex-wrap: wrap; gap: var(--espacio-2); align-items: center; font-size: 15px; }
+.hv-empresa { font-size: 14px; color: var(--color-texto-suave); }
+.hv-empleo-meta { display: flex; flex-wrap: wrap; gap: var(--espacio-2); align-items: center; margin-top: var(--espacio-1); font-size: 12px; color: var(--color-texto-suave); }
+.hv-duracion { padding: 2px 8px; border-radius: var(--radio-full); background: var(--color-superficie-2); font-weight: 600; color: var(--color-texto); }
+
+.hv-estudios { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--espacio-3); }
+.hv-estudio { display: flex; flex-direction: column; gap: 2px; padding: var(--espacio-3) var(--espacio-4); border: 1px solid var(--color-borde); border-radius: var(--radio-m); font-size: 13px; color: var(--color-texto-suave); }
+.hv-estudio b { font-size: 14px; color: var(--color-texto); }
+
+.hv-conjuntos { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--espacio-3); }
+.hv-conjunto { display: flex; flex-direction: column; gap: var(--espacio-2); padding: var(--espacio-3) var(--espacio-4); border: 1px solid var(--color-borde); border-radius: var(--radio-m); }
+.hv-conjunto header { display: flex; align-items: center; gap: var(--espacio-2); font-size: 14px; }
+.hv-conjunto small { font-size: 12px; color: var(--color-texto-tenue); }
+.hv-conjunto.blandas { background: var(--color-superficie-2); }
+.hv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hv-chip { display: inline-flex; flex-direction: column; padding: 4px 10px; border-radius: var(--radio-s); border: 1px solid var(--color-borde); background: var(--color-superficie); font-size: 13px; font-weight: 600; color: var(--color-texto); }
+.hv-menciona { font: 400 11px var(--fuente-datos); color: var(--color-texto-tenue); }

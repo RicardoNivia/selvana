@@ -1,0 +1,135 @@
+/*
+ * Design tokens de Selvana · marca Dosel (aprobada el 2026-10-21).
+ * Fuente: docs/diseno/marca.md. Al cerrar el design system en Claude Design, este archivo
+ * se regenera desde el JSON de tokens. Los componentes solo usan estas variables, nunca colores sueltos.
+ *
+ * Regla del violeta: --color-ia solo se usa en lo que produjo la IA y nadie ha confirmado.
+ */
+:root {
+  /* Neutros con sesgo verde */
+  --color-fondo: #f3f6f3;
+  --color-superficie: #ffffff;
+  --color-superficie-2: #e9efeb;
+  --color-borde: #d5dfd9;
+  --color-texto: #10211b;
+  --color-texto-suave: #465a52;
+  --color-texto-tenue: #73867e;
+
+  /* Selva: marca y acciones humanas */
+  --color-primario: #0b5d52;
+  --color-primario-fuerte: #073f38;
+  --color-primario-suave: #d7ece6;
+  --color-sobre-primario: #ffffff;
+
+  /* Orquídea: exclusivo de la IA */
+  --color-ia: #8a3fc4;
+  --color-ia-suave: #f1e6fa;
+  --color-ia-borde: #d9bdf0;
+  --color-sobre-ia: #ffffff;
+
+  /* Sobre fondo selva (paneles de marca, logo claro): iguales en claro y oscuro */
+  --color-sobre-selva: #ffffff;
+  --color-sobre-selva-2: #7fdcc8;
+  --color-ia-sobre-selva: #c590f0;
+
+  /* Semánticos */
+  --color-exito: #2a8a3e;
+  --color-exito-suave: #e1f3e4;
+  --color-alerta: #b86e00;
+  --color-alerta-suave: #fcefd9;
+  --color-error: #c23a2e;
+  --color-error-suave: #fbe4e1;
+  --color-info: #2a62b8;
+  --color-info-suave: #e2ecfa;
+
+  /* Tipografía */
+  --fuente-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --fuente-base: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --fuente-datos: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+
+  /* Espaciado (base 4 px) */
+  --espacio-1: 4px;
+  --espacio-2: 8px;
+  --espacio-3: 12px;
+  --espacio-4: 16px;
+  --espacio-6: 24px;
+  --espacio-8: 32px;
+  --espacio-12: 48px;
+
+  /* Radios */
+  --radio-s: 6px;
+  --radio-m: 10px;
+  --radio-l: 16px;
+  --radio-full: 999px;
+
+  /* Movimiento: orgánico, como hojas con viento suave; nunca rebotes de caricatura */
+  --duracion-corta: 160ms;
+  --duracion-media: 320ms;
+  --duracion-larga: 700ms;
+  --curva-salida: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --curva-organica: cubic-bezier(0.45, 0.05, 0.35, 1);
+
+  /* Elevación */
+  --sombra-1: 0 1px 3px rgba(16, 33, 27, 0.12);
+  --sombra-2: 0 1px 2px rgba(16, 33, 27, 0.06), 0 8px 24px rgba(16, 33, 27, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-fondo: #0c1513;
+    --color-superficie: #13201d;
+    --color-superficie-2: #1a2a26;
+    --color-borde: #273a35;
+    --color-texto: #e6efeb;
+    --color-texto-suave: #a6b9b1;
+    --color-texto-tenue: #7b8f87;
+    --color-primario: #3fc2aa;
+    --color-primario-fuerte: #7fdcc8;
+    --color-primario-suave: #123a34;
+    --color-sobre-primario: #04211c;
+    --color-ia: #c590f0;
+    --color-ia-suave: #2a1a3a;
+    --color-ia-borde: #5a3a7a;
+    --color-sobre-ia: #1b0a2a;
+    --color-exito: #5cc774;
+    --color-exito-suave: #163222;
+    --color-alerta: #f0a63a;
+    --color-alerta-suave: #352711;
+    --color-error: #f07a6e;
+    --color-error-suave: #3a1a17;
+    --color-info: #7aa8f0;
+    --color-info-suave: #172740;
+    --sombra-1: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --sombra-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-fondo: #0c1513;
+  --color-superficie: #13201d;
+  --color-superficie-2: #1a2a26;
+  --color-borde: #273a35;
+  --color-texto: #e6efeb;
+  --color-texto-suave: #a6b9b1;
+  --color-texto-tenue: #7b8f87;
+  --color-primario: #3fc2aa;
+  --color-primario-fuerte: #7fdcc8;
+  --color-primario-suave: #123a34;
+  --color-sobre-primario: #04211c;
+  --color-ia: #c590f0;
+  --color-ia-suave: #2a1a3a;
+  --color-ia-borde: #5a3a7a;
+  --color-sobre-ia: #1b0a2a;
+  --color-exito: #5cc774;
+  --color-exito-suave: #163222;
+  --color-alerta: #f0a63a;
+  --color-alerta-suave: #352711;
+  --color-error: #f07a6e;
+  --color-error-suave: #3a1a17;
+  --color-info: #7aa8f0;
+  --color-info-suave: #172740;
+  --sombra-1: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --sombra-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}

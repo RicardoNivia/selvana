@@ -1,0 +1,85 @@
+/* Usuarios y roles, empresas usuarias y activación de cuenta. Solo tokens de la marca Dosel. */
+
+.usuarios-columnas { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--espacio-4); align-items: start; }
+@media (max-width: 1100px) { .usuarios-columnas { grid-template-columns: minmax(0, 1fr); } }
+.ayuda-suave { font-size: 12px; color: var(--color-texto-tenue); }
+.sub-celda { display: block; font-size: 12px; color: var(--color-texto-tenue); }
+.celda-empresas { font-size: 13px; color: var(--color-texto-suave); max-width: 260px; }
+.vacio-tabla { margin: 0; padding: var(--espacio-6); text-align: center; color: var(--color-texto-suave); font-size: 14px; }
+.tabla tr.fila-edicion td { background: var(--color-superficie-2); }
+
+/* Matriz de permisos */
+.tabla-permisos th.centro, .tabla-permisos td.centro { text-align: center; }
+.tabla-permisos tr.fila-sensible td { background: color-mix(in srgb, var(--color-alerta-suave) 55%, var(--color-superficie)); }
+.nota-sensible { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 12px; color: var(--color-alerta); }
+.nota-sensible svg { width: 13px; height: 13px; }
+.alcance { font: 600 13px var(--fuente-base); }
+.alcance-Si { color: var(--color-exito); }
+.alcance-No { color: var(--color-texto-tenue); font-weight: 400; }
+.alcance-SuEquipo, .alcance-SuVacante, .alcance-LoSuyo, .alcance-Pedir { color: var(--color-texto-suave); }
+
+/* Invitar */
+.panel-invitar { position: sticky; top: var(--espacio-4); padding: 20px; display: flex; flex-direction: column; gap: var(--espacio-4); }
+.panel-invitar h2 { margin: 0; font-size: 20px; }
+.etiqueta-campo { font-size: 13px; font-weight: 600; }
+.campo-rol { display: flex; flex-direction: column; gap: 8px; }
+.roles-invitar { display: flex; flex-wrap: wrap; gap: 6px; }
+.roles-invitar button { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 12px; border-radius: var(--radio-full); border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto-suave); font: 600 13px var(--fuente-base); cursor: pointer; transition: background var(--duracion-corta), border-color var(--duracion-corta), color var(--duracion-corta); }
+.roles-invitar button svg { width: 12px; height: 12px; }
+.roles-invitar button:hover { border-color: var(--color-primario); }
+.roles-invitar button.on { background: var(--color-primario-suave); border-color: var(--color-primario); color: var(--color-primario); }
+.roles-invitar button.on.ia { background: var(--color-ia-suave); border-color: var(--color-ia-borde); color: var(--color-ia); }
+.nota-sugerencia { display: block; padding: 10px 12px; border-radius: var(--radio-m); background: var(--color-ia-suave); color: var(--color-texto-suave); font-size: 12px; line-height: 1.5; }
+.nota-sugerencia > svg { width: 12px; height: 12px; color: var(--color-ia); margin-right: 4px; vertical-align: -1px; }
+.nota-sugerencia b { color: var(--color-ia); }
+.nota-sugerencia .cita { display: inline-block; margin-top: 4px; }
+.campo-cargo { position: relative; }
+.cargo-elegido { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: var(--radio-s); border: 1px solid var(--color-borde); background: var(--color-superficie-2); font-size: 14px; }
+.cargo-elegido button { border: 0; background: none; color: var(--color-primario); font: 600 13px var(--fuente-base); cursor: pointer; }
+.opciones-cargo { position: absolute; z-index: 5; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; border-radius: var(--radio-m); border: 1px solid var(--color-borde); background: var(--color-superficie); box-shadow: var(--sombra-1); font-weight: 400; }
+.opciones-cargo li.ayuda { padding: 8px 10px; }
+.opciones-cargo button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; padding: 8px 10px; border: 0; border-radius: var(--radio-s); background: none; color: var(--color-texto); font: 14px var(--fuente-base); text-align: left; cursor: pointer; }
+.opciones-cargo button:hover { background: var(--color-superficie-2); }
+.opciones-cargo button span { font-size: 12px; color: var(--color-texto-tenue); }
+.selector-empresas { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px; }
+.selector-empresas legend { padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+.selector-empresas-lista { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-empresa { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: var(--radio-full); border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto); font: 500 13px var(--fuente-base); cursor: pointer; }
+.chip-empresa svg { width: 12px; height: 12px; }
+.chip-empresa[aria-pressed='true'] { background: var(--color-primario-suave); border-color: var(--color-primario); color: var(--color-primario); font-weight: 600; }
+.enlace-invitacion { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: var(--radio-m); background: var(--color-exito-suave); border: 1px solid color-mix(in srgb, var(--color-exito) 30%, transparent); animation: entra var(--duracion-media) var(--curva-salida) both; }
+.enlace-invitacion > b { display: inline-flex; align-items: center; gap: 6px; color: var(--color-exito); }
+.enlace-invitacion > b svg { width: 14px; height: 14px; }
+.enlace-invitacion.compacto { margin-top: 8px; padding: 10px; }
+.enlace-texto { padding: 8px 10px; border-radius: var(--radio-s); background: var(--color-superficie); font-size: 12px; overflow-wrap: anywhere; user-select: all; }
+.enlace-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Empresas usuarias */
+.rejilla-empresas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: var(--espacio-4); }
+.tarjeta-empresa { display: flex; flex-direction: column; gap: 10px; padding: 18px; animation: entra var(--duracion-media) var(--curva-salida) both; }
+.tarjeta-empresa.inactiva { opacity: 0.7; }
+.tarjeta-empresa-cabeza { display: flex; gap: 12px; align-items: center; }
+.tarjeta-empresa-cabeza b { display: block; font-size: 16px; }
+.logo-empresa { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radio-m); background: var(--color-primario); color: var(--color-sobre-primario); font: 700 14px var(--fuente-display); }
+.tarjeta-empresa-pie { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: auto; }
+.tarjeta-empresa-pie .boton { margin-left: auto; }
+.tarjeta-agregar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 160px; padding: 18px; border-style: dashed; background: transparent; color: var(--color-texto); font: inherit; text-align: center; cursor: pointer; transition: border-color var(--duracion-corta), background var(--duracion-corta); }
+.tarjeta-agregar:hover { border-color: var(--color-primario); background: var(--color-primario-suave); }
+.tarjeta-agregar > span:first-child { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--color-primario-suave); color: var(--color-primario); font-size: 22px; }
+.nota-ok { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 400; color: var(--color-exito); }
+.nota-ok svg { width: 12px; height: 12px; }
+
+/* Barra lateral: empresa usuaria en la que se trabaja */
+.selector-empresa-usuaria { display: block; width: 100%; margin: 2px 0; padding: 4px 6px; border: 1px solid var(--color-borde); border-radius: var(--radio-s); background: var(--color-superficie); color: var(--color-texto); font: 600 13px var(--fuente-base); cursor: pointer; }
+.empresa-actual-matriz { display: block; font-size: 11px; color: var(--color-texto-tenue); }
+
+/* Activar cuenta */
+.reglas-contrasena { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: -4px 0 0; padding: 0; list-style: none; font-size: 12px; color: var(--color-texto-tenue); }
+.reglas-contrasena li { display: inline-flex; align-items: center; gap: 4px; transition: color var(--duracion-corta); }
+.reglas-contrasena svg { width: 12px; height: 12px; opacity: 0.35; transition: opacity var(--duracion-corta); }
+.reglas-contrasena li.ok { color: var(--color-exito); }
+.reglas-contrasena li.ok svg { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .enlace-invitacion, .tarjeta-empresa { animation: none; }
+}

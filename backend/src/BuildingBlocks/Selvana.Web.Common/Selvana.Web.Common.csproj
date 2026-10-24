@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Selvana.SharedKernel\Selvana.SharedKernel.csproj" />
+    <ProjectReference Include="..\Selvana.Infrastructure.Common\Selvana.Infrastructure.Common.csproj" />
+  </ItemGroup>
+</Project>

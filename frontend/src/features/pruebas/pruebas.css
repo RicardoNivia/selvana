@@ -1,0 +1,75 @@
+/* Pruebas psicotécnicas: batería, envío, resultados y pantalla del candidato. Solo tokens de la marca Dosel. */
+
+/* Batería */
+.pruebas-cargo { margin-top: var(--espacio-2); }
+.bateria { display: flex; flex-direction: column; gap: 10px; }
+.bateria-ia .bateria-lista > li.elegida { border-color: var(--color-ia-borde); background: var(--color-ia-suave); }
+.bateria-sugerencia { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: var(--radio-m); background: var(--color-ia-suave); color: var(--color-texto-suave); font-size: 13px; font-weight: 400; }
+.bateria-sugerencia svg { width: 14px; height: 14px; flex: none; margin-top: 2px; color: var(--color-ia); }
+.bateria-lista { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.bateria-lista > li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--radio-m); border: 1px solid var(--color-borde); background: var(--color-superficie); font-weight: 400; transition: border-color var(--duracion-corta), background var(--duracion-corta); }
+.bateria-lista > li.elegida { border-color: var(--color-primario); }
+.bateria-prueba { display: flex !important; flex-direction: row !important; gap: 10px !important; align-items: flex-start; cursor: pointer; flex: 1 1 260px; }
+.bateria-prueba input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--color-primario); }
+.bateria-prueba b { font-size: 14px; }
+.bateria-etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.bateria-ajustes { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.bateria-ajustes label { display: inline-flex !important; flex-direction: row !important; align-items: center; gap: 6px !important; font-size: 12px; }
+.bateria-ajustes .entrada { width: 64px; min-height: 32px; padding: 4px 8px; }
+
+/* Vacante */
+.pruebas-vacante { display: flex; flex-direction: column; gap: var(--espacio-4); }
+.pruebas-bloque { display: flex; flex-direction: column; gap: 10px; padding: 18px; }
+.pruebas-bloque h2 { margin: 0; font-size: 18px; }
+.envio-lista { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 6px; }
+.envio-lista li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: var(--radio-s); border: 1px solid var(--color-borde); font-size: 14px; }
+.enlace-candidato { display: grid; grid-template-columns: minmax(120px, 180px) minmax(0, 1fr) auto; align-items: center; gap: 8px; font-size: 13px; }
+@media (max-width: 720px) { .enlace-candidato { grid-template-columns: minmax(0, 1fr) auto; } .enlace-candidato b { grid-column: 1 / -1; } }
+.resultado-pruebas { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.resultado-pruebas li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; }
+.resultado-nombre { min-width: 170px; color: var(--color-texto-suave); }
+.resultado-puntaje { display: inline-flex; align-items: center; gap: 8px; }
+.barra-puntaje { display: inline-block; width: 90px; height: 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; }
+.barra-puntaje > span { display: block; height: 100%; border-radius: inherit; background: var(--color-exito); transition: width var(--duracion-media) var(--curva-salida); }
+.barra-puntaje > span.bajo { background: var(--color-alerta); }
+.barra-puntaje.neutra > span { background: var(--color-primario); }
+.resultado-alertas { flex-basis: 100%; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-alerta); }
+.resultado-alertas svg { width: 12px; height: 12px; }
+.dimensiones { display: grid; gap: 4px; }
+.dimension { display: grid; grid-template-columns: 150px 90px 28px; align-items: center; gap: 8px; font-size: 12px; }
+
+/* Candidato */
+.pruebas-vence { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; color: var(--color-texto-suave); }
+.pruebas-vence svg { width: 14px; height: 14px; }
+.pruebas-lista { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.pruebas-lista li { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: var(--radio-l); background: var(--color-superficie); border: 1px solid var(--color-borde); animation: entra var(--duracion-media) var(--curva-salida) both; animation-delay: calc(var(--i) * 70ms); }
+.pruebas-lista li.hecha { border-color: color-mix(in srgb, var(--color-exito) 40%, var(--color-borde)); }
+.pruebas-lista-num { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--color-primario-suave); color: var(--color-primario); font: 600 13px var(--fuente-datos); }
+.pruebas-lista li.hecha .pruebas-lista-num { background: var(--color-exito-suave); color: var(--color-exito); }
+.pruebas-lista-num svg { width: 16px; height: 16px; }
+.pruebas-lista-texto { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 13px; color: var(--color-texto-suave); }
+.pruebas-lista-texto b { color: var(--color-texto); font-size: 15px; }
+.pruebas-consejos { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 13px; color: var(--color-texto-suave); }
+
+.presentando { gap: var(--espacio-3); }
+.presentando-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.presentando-reloj { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radio-full); background: var(--color-superficie); border: 1px solid var(--color-borde); font-size: 15px; }
+.presentando-reloj svg { width: 14px; height: 14px; }
+.presentando-reloj.poco { border-color: var(--color-alerta); color: var(--color-alerta); animation: latido-reloj 1s ease-in-out infinite; }
+@keyframes latido-reloj { 50% { background: var(--color-alerta-suave); } }
+.presentando-pregunta { display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: var(--radio-l); background: var(--color-superficie); border: 1px solid var(--color-borde); animation: postular-escena var(--duracion-media) var(--curva-salida) both; }
+.presentando-pregunta h2 { margin: 0; font-size: 20px; line-height: 1.35; }
+.presentando-opciones { display: grid; gap: 8px; }
+.presentando-opciones button { min-height: 52px; padding: 10px 14px; border-radius: var(--radio-m); border: 1.5px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto); font: 500 15px var(--fuente-base); text-align: left; cursor: pointer;
+  transition: border-color var(--duracion-corta), background var(--duracion-corta), transform var(--duracion-corta) var(--curva-salida); }
+.presentando-opciones button:hover { border-color: var(--color-primario); }
+.presentando-opciones button:active { transform: scale(0.98); }
+.presentando-opciones button[aria-checked='true'] { border-color: var(--color-primario); background: var(--color-primario); color: var(--color-sobre-primario); }
+.presentando-opciones.likert { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.presentando-opciones.likert button { min-height: 72px; padding: 8px; font-size: 12px; text-align: center; }
+@media (max-width: 520px) { .presentando-opciones.likert { grid-template-columns: minmax(0, 1fr); } .presentando-opciones.likert button { min-height: 48px; text-align: left; } }
+.presentando-pie { display: flex; justify-content: space-between; gap: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pruebas-lista li, .presentando-pregunta, .presentando-reloj.poco { animation: none; }
+}

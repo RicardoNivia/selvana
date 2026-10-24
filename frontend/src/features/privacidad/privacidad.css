@@ -1,0 +1,63 @@
+/* Privacidad y auditoría, apertura de hojas de vida y solicitudes del titular. Solo tokens de la marca Dosel. */
+
+.cifra-alerta { border-color: var(--color-alerta); background: color-mix(in srgb, var(--color-alerta-suave) 60%, var(--color-superficie)); }
+
+/* Bitácora */
+.bitacora-cadena { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 0 var(--espacio-4) var(--espacio-3); }
+.bitacora-cadena .ayuda-suave { display: inline-flex; align-items: center; gap: 6px; }
+.bitacora-cadena .ayuda-suave svg { width: 14px; height: 14px; color: var(--color-primario); }
+.bitacora-cadena .pill { white-space: normal; animation: entra var(--duracion-media) var(--curva-salida) both; }
+.bitacora-dia h3 { margin: 0; padding: 10px var(--espacio-4); border-top: 1px solid var(--color-borde); background: var(--color-superficie-2); font: 600 12px var(--fuente-base); letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-texto-suave); }
+.bitacora { margin: 0; padding: 0; list-style: none; }
+.bitacora-linea { display: grid; grid-template-columns: 48px 92px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px var(--espacio-4); border-top: 1px solid var(--color-borde); font-size: 14px; }
+.bitacora-linea.sensible { background: color-mix(in srgb, var(--color-alerta-suave) 45%, var(--color-superficie)); }
+@media (max-width: 720px) { .bitacora-linea { grid-template-columns: 44px minmax(0, 1fr); } .bitacora-linea .actor { grid-column: 2; justify-self: start; } .bitacora-texto { grid-column: 1 / -1; } .bitacora-huella { display: none; } }
+.bitacora-hora { font-size: 13px; color: var(--color-texto-tenue); padding-top: 2px; }
+.actor { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 3px 8px; border-radius: var(--radio-full); font: 600 12px var(--fuente-base); }
+.actor svg { width: 11px; height: 11px; }
+.actor-Ia { background: var(--color-ia-suave); color: var(--color-ia); }
+.actor-Persona { background: var(--color-primario-suave); color: var(--color-primario); }
+.actor-Sistema { background: var(--color-superficie-2); color: var(--color-texto-suave); }
+.actor-Titular { background: var(--color-info-suave); color: var(--color-info); }
+.bitacora-texto { min-width: 0; }
+.bitacora-texto b { font-weight: 600; }
+.bitacora-detalle { display: block; margin-top: 2px; font-size: 13px; color: var(--color-texto-suave); overflow-wrap: anywhere; }
+.bitacora-nota { display: flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 12px; color: var(--color-texto-tenue); }
+.bitacora-nota svg { width: 12px; height: 12px; flex: none; }
+.nota-sensible-texto { color: var(--color-alerta); }
+.bitacora-huella { font-size: 11px; color: var(--color-texto-tenue); padding-top: 3px; }
+
+/* Solicitudes */
+.solicitudes { display: flex; flex-direction: column; gap: var(--espacio-3); }
+.solicitudes > .barra-filtros.tarjeta { padding: var(--espacio-3) var(--espacio-4); }
+.solicitud { display: flex; flex-direction: column; gap: 10px; padding: 18px; animation: entra var(--duracion-media) var(--curva-salida) both; }
+.solicitud.urgente { border-color: var(--color-alerta); }
+.solicitud-cabeza { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.solicitud-cabeza b { font-size: 16px; }
+.solicitud-pide { margin: 0; font-size: 14px; color: var(--color-texto); }
+.etiqueta-borrador { color: var(--color-texto-suave); }
+.borrador-preparado { background: var(--color-superficie-2); }
+.aviso-supresion { padding: 10px 12px; border-radius: var(--radio-m); background: color-mix(in srgb, var(--color-alerta-suave) 60%, var(--color-superficie)); font-size: 13px !important; }
+.solicitud-respuesta p { margin: 6px 0 0; padding: 10px 12px; border-radius: var(--radio-m); background: var(--color-superficie-2); font-size: 14px; white-space: pre-line; }
+
+/* Abrir hoja de vida con motivo */
+.abrir-hv { display: flex; flex-direction: column; gap: 6px; min-width: 220px; animation: entra var(--duracion-corta) var(--curva-salida) both; }
+.abrir-hv .entrada { min-height: 32px; font-size: 13px; padding: 4px 8px; }
+.abrir-hv-acciones { display: flex; gap: 6px; }
+
+/* Portal: tus datos personales */
+.mis-datos-opciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 10px; }
+.mis-datos-opciones button { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: var(--radio-l); border: 1.5px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto); font: inherit; text-align: left; cursor: pointer;
+  animation: entra var(--duracion-media) var(--curva-salida) both; animation-delay: calc(var(--i) * 60ms);
+  transition: border-color var(--duracion-corta), background var(--duracion-corta), translate var(--duracion-corta) var(--curva-salida); }
+.mis-datos-opciones button:hover { border-color: var(--color-primario); translate: 0 -2px; }
+.mis-datos-opciones button[aria-checked='true'] { border-color: var(--color-primario); background: color-mix(in srgb, var(--color-primario-suave) 55%, var(--color-superficie)); }
+.mis-datos-opciones b { font-size: 15px; }
+.mis-datos-opciones span { font-size: 13px; color: var(--color-texto-suave); }
+.mis-datos-opciones .mono { font-size: 11px; color: var(--color-texto-tenue); }
+.mis-datos-listo { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--color-exito-suave); color: var(--color-exito); animation: portal-check-pop var(--duracion-larga) var(--curva-salida) both; }
+.mis-datos-listo svg { width: 32px; height: 32px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .solicitud, .abrir-hv, .bitacora-cadena .pill { animation: none; }
+}

@@ -1,0 +1,81 @@
+# Selvana completo en contenedores: copie .env.example como .env y ejecute `docker compose up --build`
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-selvana}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD en .env}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-selvana}"]
+      interval: 5s
+      retries: 10
+
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: src/Host/Selvana.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Selvana: Host=postgres;Port=5432;Database=${POSTGRES_DB:-selvana};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+      Database__MigrateOnStartup: "true"
+      Cors__AllowedOrigins__0: http://localhost:${WEB_PORT:-5173}
+      Auth__Authority: ${AUTH_AUTHORITY:-}
+      Mensajeria__ClaveInterna: ${MENSAJERIA_CLAVE:?Defina MENSAJERIA_CLAVE en .env}
+      # Igual que appsettings.json: a quién va cada evento del outbox (ADR 0008)
+      Mensajeria__Destinos__0__Url: http://ai-worker:8080/eventos
+      Mensajeria__Destinos__0__Prefijos__0: Selvana.Core.Contracts.Estructura.
+      Mensajeria__Destinos__0__Prefijos__1: Selvana.Reclutamiento.Contracts.
+      Mensajeria__Destinos__0__Prefijos__2: Selvana.Vinculacion.Contracts.Ia.
+      Mensajeria__Destinos__1__Url: http://localhost:8080/internal/eventos/core
+      Mensajeria__Destinos__1__Prefijos__0: Selvana.Core.Contracts.Auditoria.
+      Mensajeria__Destinos__1__Prefijos__1: Selvana.Core.Contracts.Bandeja.
+      Mensajeria__Destinos__2__Url: http://localhost:8080/internal/eventos/reclutamiento
+      Mensajeria__Destinos__2__Prefijos__0: Selvana.Core.Contracts.Privacidad.
+      Mensajeria__Destinos__2__Prefijos__1: Selvana.Vinculacion.Contracts.Eventos.
+    ports:
+      - "${API_PORT:-5000}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ai-worker:
+    build:
+      context: ./backend
+      dockerfile: src/Workers/Selvana.AI.Worker/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Database__MigrateOnStartup: "true"
+      Mensajeria__ClaveInterna: ${MENSAJERIA_CLAVE}
+      Mensajeria__Destinos__0__Url: http://api:8080/internal/eventos/core
+      Mensajeria__Destinos__0__Prefijos__0: Selvana.AI.Contracts.Estructura.
+      Mensajeria__Destinos__1__Url: http://api:8080/internal/eventos/reclutamiento
+      Mensajeria__Destinos__1__Prefijos__0: Selvana.AI.Contracts.Reclutamiento.
+      Mensajeria__Destinos__2__Url: http://api:8080/internal/eventos/vinculacion
+      Mensajeria__Destinos__2__Prefijos__0: Selvana.AI.Contracts.Vinculacion.
+      Reclutamiento__UrlArchivos: http://api:8080/internal/archivos/
+      Vinculacion__UrlArchivos: http://api:8080/internal/archivos/vinculacion/
+      ConnectionStrings__Selvana: Host=postgres;Port=5432;Database=${POSTGRES_DB:-selvana};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+      Ia__Proveedores__Gemini__ApiKey: ${GEMINI_API_KEY}
+      Ia__Proveedores__Anthropic__ApiKey: ${ANTHROPIC_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:${API_PORT:-5000}
+    ports:
+      - "${WEB_PORT:-5173}:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:

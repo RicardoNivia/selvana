@@ -1,0 +1,29 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente-base);
+  font-size: 15px;
+  line-height: 1.55;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--fuente-display);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ia);
+  outline-offset: 2px;
+}

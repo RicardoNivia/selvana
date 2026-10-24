@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Usuarios y roles</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0B5D52}a:hover{color:#073F38}
+</style>
+</helmet>
+<div style="min-height: 1180px; display: flex; flex-wrap: wrap; background: #F3F6F3; color: #10211B; font-family: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+<nav aria-label="Principal" style="flex: 1 1 232px; max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-right: 1px solid #D5DFD9; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px">
+  <div style="display: flex; align-items: center; gap: 8px; padding: 0 10px 20px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 21px; letter-spacing: -0.03em">
+    <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 24C24 12 31 5 43 5C43 17 36 24 24 24Z" fill="#0B5D52"></path><path d="M24 24C24 36 17 43 5 43C5 31 12 24 24 24Z" fill="#0B5D52"></path><circle cx="11" cy="12" r="5.5" fill="#8A3FC4"></circle></svg>selvana
+  </div>
+  <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 11l2-7h10l2 7v5H3v-5Zm0 0h4l1 2h4l1-2h4"></path></svg>Bandeja
+    <span style="margin-left: auto; font: 600 11px 'IBM Plex Mono', monospace; background: #8A3FC4; color: #FFFFFF; border-radius: 999px; padding: 1px 8px">7</span>
+  </a>
+  <a href="Vacantes.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="6" width="14" height="10" rx="2"></rect><path d="M7 6V4h6v2"></path></svg>Vacantes
+  </a>
+  <a href="Candidato.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="7" r="3"></circle><path d="M2.5 16c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5M13 4.5a3 3 0 0 1 0 5.5M15 11.8c1.4.6 2.2 1.9 2.5 4.2"></path></svg>Candidatos
+  </a>
+  <div style="font: 500 10px 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #5F7169; padding: 18px 12px 6px">Próximas etapas</div>
+  <span style="padding: 10px 12px; color: #5F7169; font-size: 14px">Vinculación</span>
+  <span style="padding: 10px 12px; color: #5F7169; font-size: 14px">Empleados</span>
+  <span style="padding: 10px 12px; color: #5F7169; font-size: 14px">Desempeño y clima</span>
+  <div style="font: 500 10px 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #5F7169; padding: 18px 12px 6px">Empresa</div>
+  <a href="Conexion.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M7 3v4M13 3v4M5 7h10v3a5 5 0 0 1-10 0V7ZM10 15v2"></path></svg>Conectar nómina
+  </a>
+  <a href="Estructura.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="7.5" y="2.5" width="5" height="4" rx="1"></rect><rect x="2.5" y="13.5" width="5" height="4" rx="1"></rect><rect x="12.5" y="13.5" width="5" height="4" rx="1"></rect><path d="M10 6.5v3.5M5 13.5V10h10v3.5"></path></svg>Estructura y cargos
+  </a>
+  <a href="Usuarios.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #D7ECE6; color: #0B5D52; font-weight: 600; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="7" r="3"></circle><path d="M2.5 16c.6-3 2.8-4.5 5.5-4.5 1.2 0 2.3.3 3.2.9M14.5 11l3 1.2v2.3c0 1.6-1.3 2.9-3 3.5-1.7-.6-3-1.9-3-3.5v-2.3l3-1.2Z"></path></svg>Usuarios y roles
+  </a>
+  <a href="Privacidad.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="2"></rect><path d="M7 9V6.5a3 3 0 0 1 6 0V9M10 12.5v2"></path></svg>Privacidad y auditoría
+  </a>
+  <a href="Agentes.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #465A52; text-decoration: none; font-size: 14px">
+    <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0.5c.4 3.6 1.9 5.1 5.5 5.5-3.6.4-5.1 1.9-5.5 5.5-.4-3.6-1.9-5.1-5.5-5.5C6.1 5.6 7.6 4.1 8 .5Z" fill="currentColor"></path></svg>Agentes y autonomía
+  </a>
+  <a href="Usuarios.dc.html" style="margin-top: auto; padding: 12px; border: 1px solid #D5DFD9; border-radius: 10px; font-size: 12px; color: #465A52; display: flex; align-items: center; gap: 10px; text-decoration: none">
+    <span style="flex: 0 0 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: #2A62B8; color: #FFFFFF; font-weight: 700; font-size: 12px">CN</span>
+    <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 11px; color: #5F7169">Trabajando en</span><b style="color: #10211B; font-size: 13px">Contact Center Norte</b><span>Servicios Andinos EST · Laura M.</span></span>
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-label="Cambiar de empresa usuaria" role="img"><path d="M6 8l4-4 4 4M6 12l4 4 4-4"></path></svg>
+  </a>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 20px">
+  <div>
+    <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 32px; letter-spacing: -0.02em; line-height: 1.15">Usuarios y roles</h1>
+    <p style="margin: 4px 0 0; color: #465A52; font-size: 14px">Cada persona ve solo las empresas usuarias que tiene asignadas. Los datos de una nunca aparecen en otra.</p>
+  </div>
+
+  <div role="tablist" aria-label="Usuarios" style="display: flex; gap: 4px; border-bottom: 1px solid #D5DFD9; overflow-x: auto">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+      <button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="min-height: 44px; padding: 0 16px; border: 0; border-bottom: 2px solid {{t.line}}; background: transparent; font: 600 14px 'Instrument Sans', sans-serif; color: {{t.color}}; cursor: pointer; white-space: nowrap">{{t.label}}</button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{verUsuarios}}" hint-placeholder-val="{{ true }}">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <section aria-label="Invitar" style="background: #FFFFFF; border: 1px solid #D5DFD9; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 1px 2px rgba(16,33,27,.06), 0 8px 24px rgba(16,33,27,.08)">
+        <b style="font-size: 15px">Invitar a una persona</b>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="correo" style="font-size: 13px; font-weight: 600">Correo</label>
+            <input id="correo" value="jorge.pena@serviciosandinos.co" style="padding: 10px 12px; border-radius: 6px; border: 1px solid #D5DFD9; background: #FFFFFF; font: 14px 'Instrument Sans', sans-serif; color: #10211B">
+            <span style="font-size: 12px; color: #465A52">Encontrado en SINCO: <b>Jorge Peña</b> · Jefe de bodega · CC ***.214</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; font-weight: 600">Rol</span>
+            <div role="group" aria-label="Rol" style="display: flex; flex-wrap: wrap; gap: 6px">
+              <sc-for list="{{rolesInvitar}}" as="r" hint-placeholder-count="5">
+                <button type="button" onClick="{{r.pick}}" aria-pressed="{{r.on}}" style="min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{r.border}}; background: {{r.bg}}; color: {{r.color}}; font: 600 13px 'Instrument Sans', sans-serif; cursor: pointer">{{r.label}}</button>
+              </sc-for>
+            </div>
+            <span style="display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: {{sugerenciaColor}}">
+              <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M8 0.5c.4 3.6 1.9 5.1 5.5 5.5-3.6.4-5.1 1.9-5.5 5.5-.4-3.6-1.9-5.1-5.5-5.5C6.1 5.6 7.6 4.1 8 .5Z" fill="currentColor"></path></svg>
+              <span>{{sugerencia}} <span style="font-family: 'IBM Plex Mono', monospace">[SINCO · cargo 0231]</span></span>
+            </span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px; font-weight: 600">Empresas usuarias que verá</span>
+            <span style="padding: 10px 12px; border-radius: 6px; border: 1px solid #D9BDF0; background: #F1E6FA; font-size: 14px">Logística del Occidente</span>
+            <span style="font-size: 12px; color: #7A33B3">Sugerido: su equipo trabaja en el centro de costo CC-0440 de ese cliente.</span>
+          </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+          <button type="button" style="min-height: 44px; padding: 0 18px; border-radius: 6px; border: 0; background: #0B5D52; color: #FFFFFF; font: 600 14px 'Instrument Sans', sans-serif; cursor: pointer">Enviar invitación</button>
+          <span style="font-size: 12px; color: #5F7169">Le llega un correo para entrar con su cuenta de Microsoft o Google</span>
+        </div>
+      </section>
+
+      <section aria-label="Personas con acceso" style="background: #FFFFFF; border: 1px solid #D5DFD9; border-radius: 16px; overflow-x: auto">
+        <table style="width: 100%; min-width: 720px; border-collapse: collapse; font-size: 14px">
+          <thead>
+            <tr style="text-align: left; font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #5F7169">
+              <th style="padding: 12px 16px; font-weight: 500">Persona</th>
+              <th style="padding: 12px 16px; font-weight: 500">Rol</th>
+              <th style="padding: 12px 16px; font-weight: 500">Empresas usuarias</th>
+              <th style="padding: 12px 16px; font-weight: 500">Último ingreso</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{usuarios}}" as="u" hint-placeholder-count="5">
+              <tr style="border-top: 1px solid #E9EFEB">
+                <td style="padding: 12px 16px"><b>{{u.nombre}}</b><span style="display: block; font-size: 12px; color: #5F7169">{{u.correo}}</span></td>
+                <td style="padding: 12px 16px"><span style="font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #D7ECE6; color: #0B5D52">{{u.rol}}</span></td>
+                <td style="padding: 12px 16px; color: #465A52">{{u.empresas}}</td>
+                <td style="padding: 12px 16px; font: 13px 'IBM Plex Mono', monospace; color: #465A52">{{u.ingreso}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{verRoles}}" hint-placeholder-val="{{ false }}">
+    <section aria-label="Permisos por rol" style="background: #FFFFFF; border: 1px solid #D5DFD9; border-radius: 16px; overflow-x: auto">
+      <table style="width: 100%; min-width: 900px; border-collapse: collapse; font-size: 14px">
+        <thead>
+          <tr style="text-align: left; font: 500 11px 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: #5F7169">
+            <th style="padding: 12px 16px; font-weight: 500">Qué puede hacer</th>
+            <sc-for list="{{rolesMatriz}}" as="r" hint-placeholder-count="6"><th style="padding: 12px 10px; font-weight: 500; text-align: center">{{r}}</th></sc-for>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{permisos}}" as="p" hint-placeholder-count="8">
+            <tr style="border-top: 1px solid #E9EFEB; background: {{p.fondo}}">
+              <td style="padding: 12px 16px"><b style="font-size: 14px">{{p.accion}}</b><span style="display: block; font-size: 12px; color: {{p.notaColor}}">{{p.nota}}</span></td>
+              <sc-for list="{{p.celdas}}" as="c" hint-placeholder-count="6">
+                <td style="padding: 12px 10px; text-align: center; font-size: 13px; font-weight: 600; color: {{c.color}}">{{c.texto}}</td>
+              </sc-for>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{verEmpresas}}" hint-placeholder-val="{{ false }}">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px">
+      <sc-for list="{{empresas}}" as="e" hint-placeholder-count="4">
+        <section style="background: #FFFFFF; border: 1px solid #D5DFD9; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <span style="flex: 0 0 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; color: #FFFFFF; font-weight: 700; font-size: 13px; background: {{e.color}}">{{e.ini}}</span>
+            <div style="min-width: 0"><b style="font-size: 15px">{{e.nombre}}</b><span style="display: block; font: 12px 'IBM Plex Mono', monospace; color: #5F7169">NIT {{e.nit}}</span></div>
+          </div>
+          <span style="font-size: 13px; color: #465A52">{{e.sector}} · {{e.ciudad}}</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <span style="font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #E9EFEB; color: #465A52">{{e.trabajadores}} en misión</span>
+            <span style="font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #E9EFEB; color: #465A52">{{e.usuarios}} usuarios</span>
+            <span style="font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: {{e.marcaBg}}; color: {{e.marcaFg}}">{{e.marca}}</span>
+          </div>
+        </section>
+      </sc-for>
+      <section style="background: #FFFFFF; border: 1px dashed #D9BDF0; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+        <label for="nit" style="font-size: 14px; font-weight: 600">Agregar empresa usuaria</label>
+        <input id="nit" placeholder="NIT, por ejemplo 900.123.456-7" style="padding: 10px 12px; border-radius: 6px; border: 1px solid #D5DFD9; font: 14px 'IBM Plex Mono', monospace; color: #10211B">
+        <span style="font-size: 12px; color: #7A33B3">Con el NIT, la IA completa razón social, actividad económica y ciudad. Usted confirma.</span>
+      </section>
+    </div>
+  </sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'usuarios', rol: 'Líder' };
+  }
+  renderVals() {
+    var s = this.state, self = this;
+    var tabs = [['usuarios', 'Usuarios · 14'], ['roles', 'Roles y permisos'], ['empresas', 'Empresas usuarias · 4']].map(function (t) {
+      var on = s.tab === t[0];
+      return { label: t[1], on: on, line: on ? '#0B5D52' : 'transparent', color: on ? '#0B5D52' : '#465A52', pick: function () { self.setState({ tab: t[0] }); } };
+    });
+    var sugerido = 'Líder';
+    var rolesInvitar = ['Administrador', 'Gerente RRHH', 'Analista', 'Líder', 'Empleado'].map(function (r) {
+      var on = s.rol === r, ia = r === sugerido && s.rol === sugerido;
+      return { label: r, on: on,
+        bg: on ? (ia ? '#F1E6FA' : '#D7ECE6') : '#FFFFFF', border: on ? (ia ? '#D9BDF0' : '#0B5D52') : '#D5DFD9', color: on ? (ia ? '#7A33B3' : '#0B5D52') : '#465A52',
+        pick: function () { self.setState({ rol: r }); } };
+    });
+    var cambiado = s.rol !== sugerido;
+    var Y = { texto: 'Sí', color: '#237534' }, NO = { texto: '—', color: '#5F7169' };
+    function eq(t) { return { texto: t, color: '#465A52' }; }
+    var permisos = [
+      ['Aprobar ternas y decisiones de la bandeja', '', [Y, Y, NO, eq('Su equipo'), NO, NO]],
+      ['Crear y publicar vacantes', '', [Y, Y, Y, eq('Pedir'), NO, NO]],
+      ['Ver hojas de vida', '', [Y, Y, Y, eq('Su vacante'), NO, eq('La suya')]],
+      ['Ver datos sensibles (salud, pruebas psicotécnicas)', 'Dato sensible · cada acceso queda en la bitácora', [NO, Y, NO, NO, NO, eq('Los suyos')]],
+      ['Configurar estructura y conexión de nómina', '', [Y, Y, NO, NO, NO, NO]],
+      ['Configurar agentes y autonomía', '', [Y, Y, NO, NO, NO, NO]],
+      ['Ver bitácora de auditoría', '', [Y, Y, NO, NO, NO, NO]],
+      ['Consultar sus vacaciones, certificados y documentos', '', [NO, NO, NO, Y, Y, NO]]
+    ].map(function (p) {
+      var sensible = !!p[1];
+      return { accion: p[0], nota: p[1], notaColor: sensible ? '#8A5200' : '#5F7169', fondo: sensible ? '#FFFBF3' : '#FFFFFF', celdas: p[2] };
+    });
+    function emp(ini, nombre, nit, sector, ciudad, trabajadores, usuarios, marca, color) {
+      return { ini: ini, nombre: nombre, nit: nit, sector: sector, ciudad: ciudad, trabajadores: trabajadores, usuarios: usuarios, color: color,
+        marca: marca ? 'Portal con su marca' : 'Portal de Servicios Andinos', marcaBg: marca ? '#D7ECE6' : '#E9EFEB', marcaFg: marca ? '#0B5D52' : '#465A52' };
+    }
+    return {
+      tabs: tabs, rolesInvitar: rolesInvitar,
+      sugerencia: cambiado ? 'Cambiaste el rol que sugirió la IA (Líder). Queda registrado.' : 'Sugerido: Líder, porque en SINCO es Jefe de bodega con 18 personas a cargo.',
+      sugerenciaColor: cambiado ? '#465A52' : '#7A33B3',
+      verUsuarios: s.tab === 'usuarios', verRoles: s.tab === 'roles', verEmpresas: s.tab === 'empresas',
+      usuarios: [
+        { nombre: 'Laura Moreno', correo: 'laura.moreno@serviciosandinos.co', rol: 'Gerente RRHH', empresas: 'Todas', ingreso: 'hoy 07:42' },
+        { nombre: 'Ana Ruiz', correo: 'ana.ruiz@serviciosandinos.co', rol: 'Administrador', empresas: 'Todas', ingreso: 'ayer 18:10' },
+        { nombre: 'Camilo Duarte', correo: 'camilo.duarte@serviciosandinos.co', rol: 'Analista', empresas: 'Contact Center Norte, Logística del Occidente', ingreso: 'hoy 08:05' },
+        { nombre: 'Paula Vélez', correo: 'paula.velez@clinicasantamaria.co', rol: 'Líder', empresas: 'Clínica Santa María', ingreso: '19 oct 16:30' },
+        { nombre: 'Marcela Gil', correo: 'marcela.gil@ccnorte.co', rol: 'Líder', empresas: 'Contact Center Norte', ingreso: 'hoy 06:58' }
+      ],
+      rolesMatriz: ['Administrador', 'Gerente RRHH', 'Analista', 'Líder', 'Empleado', 'Candidato'],
+      permisos: permisos,
+      empresas: [
+        emp('CN', 'Contact Center Norte', '900.412.887-1', 'BPO y contact center', 'Bogotá', 412, 3, true, '#2A62B8'),
+        emp('LO', 'Logística del Occidente', '830.115.902-4', 'Logística y bodegaje', 'Funza', 498, 2, false, '#B86E00'),
+        emp('AS', 'Alimentos La Sabana', '860.044.551-8', 'Industria de alimentos', 'Mosquera', 96, 1, false, '#2A8A3E'),
+        emp('SM', 'Clínica Santa María', '890.903.120-3', 'Salud', 'Medellín', 174, 2, true, '#C23A2E')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

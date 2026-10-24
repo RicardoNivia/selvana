@@ -1,0 +1,384 @@
+{
+  "$comentario": "Fuente del backlog de Azure Boards. Lo mantiene el agente azure-backlog y lo carga scripts/crear-backlog-azure.ps1. Épica = etapa, Feature = sprint o bloque, historia = entregable. No renombrar títulos ya creados: el script los usa para no duplicar.",
+  "etapas": [
+    {
+      "etapa": "Etapa D – Diseño, marca y design system",
+      "sprints": "1 a 3 (va primero)",
+      "objetivo": "Va primero: la marca y el design system son lo primero que se crea; ninguna pantalla se diseña ni se programa sin ellos. Definir la marca, crear el design system, diseñar el producto en Claude Design y entregar el theme listo para el frontend antes de la Etapa 1.",
+      "gate": "Manual de marca aprobado, sistema de diseño y pantallas de la Etapa 1 completos en Claude Design, y theme publicado en el frontend con los componentes base.",
+      "features": [
+        {
+          "titulo": "Marca de la aplicación",
+          "sprint": "1",
+          "historias": [
+            "Concepto de marca: personalidad, propuesta visual y tono de voz de Selvana",
+            "Logo, isotipo y variantes (horizontal, vertical, monocromo, favicon e ícono de app)",
+            "Paleta de colores de marca y colores semánticos (éxito, alerta, error, información)",
+            "Tipografía, iconografía y estilo de ilustración",
+            "Manual de marca en Claude Design"
+          ]
+        },
+        {
+          "titulo": "Sistema de diseño en Claude Design",
+          "sprint": "2",
+          "historias": [
+            "Design tokens en Claude Design: color, tipografía, espaciado, radios, sombras y breakpoints",
+            "Modo claro y modo oscuro",
+            "Librería de componentes base en Claude Design (botones, formularios, tablas, tarjetas, modales, navegación)",
+            "Patrones de IA: bandeja de aprobaciones, explicación de sugerencias, chat del asistente y estados del agente",
+            "Lineamientos de accesibilidad WCAG 2.1 AA y diseño responsive"
+          ]
+        },
+        {
+          "titulo": "Diseño de pantallas en Claude Design",
+          "sprint": "2-3",
+          "historias": [
+            "Mapa de navegación y arquitectura de información del producto",
+            "Pantallas de la consola RRHH y bandeja de aprobaciones",
+            "Pantallas del portal de empleo y postulación móvil",
+            "Pantallas del portal del líder y del portal del empleado",
+            "Flujos conversacionales de WhatsApp (preselección, documentos, asistente)",
+            "Prototipo navegable de punta a punta para pruebas de usabilidad"
+          ]
+        },
+        {
+          "titulo": "Theme de diseño en el frontend",
+          "sprint": "3",
+          "historias": [
+            "Exportación de tokens de Claude Design a código (JSON de tokens y variables CSS)",
+            "Theme de React con modo claro y oscuro sobre la librería de componentes",
+            "Marca blanca por empresa: logo y colores configurables para el portal de empleo",
+            "Catálogo de componentes en Storybook sincronizado con Claude Design",
+            "Guía de handoff diseño-desarrollo"
+          ]
+        }
+      ]
+    },
+    {
+      "etapa": "Etapa 0 – Cimientos",
+      "sprints": "1 a 3",
+      "objetivo": "Dejar listos el descubrimiento con clientes, el núcleo de datos y la plataforma de IA sobre la que se montan todos los agentes.",
+      "gate": "Prototipo validado en pruebas de usabilidad, benchmark cerrado, núcleo de datos integrado al ERP y primer agente de prueba respondiendo en el entorno de desarrollo.",
+      "features": [
+        {
+          "titulo": "Sprint 1 – Descubrimiento y diseño",
+          "sprint": "1",
+          "historias": [
+            "Benchmark de la competencia: revisar sitios, demos públicas, precios y reseñas de Buk, Factorial, Humand, Heinsohn, Workday y SAP",
+            "Lista de funciones obligatorias y diferenciadoras",
+            "Propuesta de valor, nombre de planes y precio de lanzamiento",
+            "Prototipo navegable (Claude Design) del flujo vacante → candidatos → aprobación, probado con 5 profesionales de RRHH externos",
+            "Documento de decisiones: proveedor de modelo de IA, proveedor de WhatsApp Business, proveedor psicométrico"
+          ]
+        },
+        {
+          "titulo": "Sprint 2 – Núcleo de datos y seguridad",
+          "sprint": "2",
+          "historias": [
+            "Modelo de datos base: Persona, Empresa, Sede, Área, Centro de costo, Cargo, Usuario, Rol",
+            "Capa de integración agnóstica y primer conector: SINCO",
+            "Roles y permisos: administrador, gerente RRHH, analista, líder, empleado, candidato",
+            "Multiempresa y multicliente (empresa usuaria) para empresas temporales",
+            "Registro de autorización de tratamiento de datos (Ley 1581) y bitácora de auditoría",
+            "Almacenamiento documental cifrado"
+          ]
+        },
+        {
+          "titulo": "Sprint 2 – Andamiaje backend y frontend",
+          "sprint": "2",
+          "historias": [
+            "Solución .NET 10 de monolito modular (Host, BuildingBlocks, Modules, Integrations, Workers, tests) con nullable, TreatWarningsAsErrors y gestión central de paquetes",
+            "SharedKernel con Result/Error, entidades base y dispatcher CQRS propio (ICommand/IQuery y handlers, sin MediatR)",
+            "Decoradores transversales (logging, validación con FluentValidation, transacción) e inyección de dependencias",
+            "Arquitectura limpia por módulo: Domain, Application, Infrastructure, Api y Contracts con dependencias hacia el dominio",
+            "EF Core + Npgsql: un DbContext y un esquema de PostgreSQL por módulo, snake_case y migraciones por módulo",
+            "Outbox de eventos de integración y mensajería HTTP (outbox e inbox) entre la API y el AI.Worker",
+            "Host Selvana.Api: Minimal APIs, ProblemDetails, OpenAPI, versionado, health checks, OpenID Connect y CORS SelvanaWeb desde configuración",
+            "Pruebas de arquitectura con NetArchTest y base de pruebas con xUnit, FluentAssertions y Testcontainers",
+            "Frontend web/ con Vite, React, TypeScript, TanStack Query, carpetas por funcionalidad y el theme del design system",
+            "docker-compose (PostgreSQL con pgvector) y pipeline de Azure Pipelines con build, pruebas, cobertura y reglas de arquitectura"
+          ]
+        },
+        {
+          "titulo": "Sprint 3 – Plataforma de IA mínima",
+          "sprint": "3",
+          "historias": [
+            "Servicio de IA desacoplado (gateway) con proveedor intercambiable y control de costos por cliente",
+            "Motor de agentes: herramientas, memoria del caso, registro de cada acción",
+            "Bandeja de aprobaciones genérica (la IA propone, tú apruebas) reutilizable en todo el módulo",
+            "Banco de pruebas de IA: 200 hojas de vida anonimizadas y 20 vacantes etiquetadas",
+            "Pipeline de evaluación automática (precisión de extracción, calidad del ranking, sesgo)"
+          ]
+        }
+      ]
+    },
+    {
+      "etapa": "Etapa 1 – Agente Reclutador IA",
+      "sprints": "4 a 10",
+      "objetivo": "Que una vacante pase de solicitud a terna aprobada con la IA haciendo el trabajo operativo. Es la primera versión que se vende.",
+      "gate": "Plan Selección IA publicado y a la venta; las primeras empresas en prueba gratuita cierran vacantes con el agente; los usuarios aceptan al menos 7 de cada 10 candidatos de la terna propuesta.",
+      "features": [
+        {
+          "titulo": "Sprint 4 – Vacante en un minuto",
+          "sprint": "4",
+          "historias": [
+            "Requisición creada por IA a partir de lenguaje natural del líder",
+            "Generación de perfil de cargo, aviso, preguntas filtro y competencias desde el catálogo de cargos o desde cero",
+            "Flujo de aprobación de la requisición (líder → RRHH → gerencia) en la bandeja de aprobaciones",
+            "Validación de la requisición contra presupuesto de planta del ERP"
+          ]
+        },
+        {
+          "titulo": "Sprint 5 – Portal de empleo y captación",
+          "sprint": "5",
+          "historias": [
+            "Portal de empleo por empresa (y por empresa usuaria en temporales) con marca propia",
+            "Postulación en 2 minutos desde el celular: subir HV o foto, o postular por WhatsApp",
+            "Publicación en bolsas externas por enlace o integración",
+            "Autorización de datos en la postulación"
+          ]
+        },
+        {
+          "titulo": "Sprint 6 – Lector inteligente de hojas de vida",
+          "sprint": "6",
+          "historias": [
+            "Extracción de datos de HV desde PDF, Word, imagen y texto",
+            "Normalización de cargos y habilidades contra un catálogo propio",
+            "Detección de vacíos e inconsistencias en la HV",
+            "Deduplicación de candidatos y banco de talento buscable en lenguaje natural",
+            "Meta de calidad: ≥ 95 % de campos clave extraídos correctamente en el banco de pruebas"
+          ]
+        },
+        {
+          "titulo": "Sprint 7 – Ranking explicable",
+          "sprint": "7",
+          "historias": [
+            "Puntaje de afinidad candidato-vacante con 3 a 5 razones y evidencia citada de la HV",
+            "Exclusión de variables protegidas del puntaje",
+            "Propuesta de terna y tablero Kanban por vacante",
+            "Retroalimentación del reclutador que mejora el ranking por empresa",
+            "Reporte de sesgo por vacante"
+          ]
+        },
+        {
+          "titulo": "Sprint 8 – Agente conversacional de preselección",
+          "sprint": "8",
+          "historias": [
+            "Conversación de preselección por WhatsApp y web (interés, salario, disponibilidad, ubicación, preguntas técnicas)",
+            "Respuestas a preguntas del candidato sobre la vacante",
+            "Resumen de cada conversación en la ficha del candidato",
+            "Escalamiento a humano cuando el candidato lo pide o la IA no está segura"
+          ]
+        },
+        {
+          "titulo": "Sprint 9 – Pruebas psicotécnicas automatizadas",
+          "sprint": "9",
+          "historias": [
+            "Envío automático de pruebas, recordatorios y calificación (banco propio + proveedor psicométrico)",
+            "Pruebas técnicas generadas por IA según el cargo",
+            "Controles antifraude en pruebas: tiempo límite, preguntas aleatorias, detección de copia",
+            "Informe comparativo de finalistas: HV, conversación y pruebas en una sola vista"
+          ]
+        },
+        {
+          "titulo": "Sprint 10 – Estabilización y lanzamiento comercial",
+          "sprint": "10",
+          "historias": [
+            "Tablero de selección: vacantes abiertas, tiempo por etapa, fuentes, costo IA por vacante",
+            "Pruebas de carga para selección masiva",
+            "Autoservicio de alta: registro, prueba gratuita de 30 días y onboarding guiado",
+            "Landing, video demo, casos de uso por sector y publicación del plan Selección IA",
+            "Analítica de uso del producto para medir adopción"
+          ]
+        }
+      ]
+    },
+    {
+      "etapa": "Etapa 2 – Vinculación y onboarding autónomo",
+      "sprints": "11 a 14",
+      "objetivo": "Que el candidato aprobado quede contratado, afiliado y creado en nómina sin que RRHH digite nada.",
+      "gate": "De candidato aprobado a empleado en nómina sin redigitar datos; plan Selección + Vinculación a la venta.",
+      "features": [
+        {
+          "titulo": "Sprint 11 – Oferta y contrato",
+          "sprint": "11",
+          "historias": [
+            "Carta oferta y contrato generados por IA desde plantillas y tipo de contrato",
+            "Firma electrónica del candidato y del representante",
+            "Revisión automática de cláusulas contra la plantilla aprobada por jurídico"
+          ]
+        },
+        {
+          "titulo": "Sprint 12 – Agente de documentos",
+          "sprint": "12",
+          "historias": [
+            "Solicitud y seguimiento de documentos de ingreso por WhatsApp",
+            "Lectura y validación de cédula, certificados, diplomas, cuenta bancaria y certificaciones",
+            "Verificación de antecedentes (Procuraduría, Contraloría, Policía) con soporte guardado",
+            "Orden y resultado de examen médico de ingreso"
+          ]
+        },
+        {
+          "titulo": "Sprint 13 – Alta en nómina y paquete temporales",
+          "sprint": "13",
+          "historias": [
+            "Creación automática del empleado en la nómina del ERP conectado y su centro de costo",
+            "API abierta, webhooks y exportación por archivo para cualquier ERP",
+            "Checklist de afiliaciones (EPS, AFP, ARL, caja) con alertas",
+            "Empresas temporales: asignación a empresa usuaria, control de misión y portal del cliente"
+          ]
+        },
+        {
+          "titulo": "Sprint 14 – Onboarding guiado",
+          "sprint": "14",
+          "historias": [
+            "Plan de inducción generado por cargo: tareas, responsables y fechas",
+            "Asistente de bienvenida que responde dudas los primeros días",
+            "Encuestas automáticas a los 30, 60 y 90 días con alerta temprana de retiro"
+          ]
+        }
+      ]
+    },
+    {
+      "etapa": "Etapa 3 – Expediente vivo y asistente del empleado",
+      "sprints": "15 a 18",
+      "objetivo": "Que la hoja de vida del empleado se mantenga actualizada sola y que el empleado resuelva sus trámites con un asistente, no con RRHH.",
+      "gate": "Al menos la mitad de las consultas de empleados de los clientes activos resueltas por el asistente sin intervención de RRHH.",
+      "features": [
+        {
+          "titulo": "Sprint 15 – Expediente digital",
+          "sprint": "15",
+          "historias": [
+            "Hoja de vida corporativa con historial de cargos, salarios, traslados, sedes o clientes",
+            "Carpeta documental con versiones y vencimientos",
+            "Migración asistida: la IA clasifica y extrae datos de carpetas escaneadas"
+          ]
+        },
+        {
+          "titulo": "Sprint 16 – Actualización inteligente",
+          "sprint": "16",
+          "historias": [
+            "El empleado sube un soporte y la IA identifica el tipo, extrae datos y propone el cambio",
+            "Aprobación de cambios del expediente con un clic desde la bandeja",
+            "Alertas automáticas de documentos y certificaciones por vencer",
+            "Campaña anual de actualización de datos conducida por el asistente"
+          ]
+        },
+        {
+          "titulo": "Sprint 17 – Asistente del empleado (web y WhatsApp)",
+          "sprint": "17",
+          "historias": [
+            "Respuestas sobre reglamento, políticas y beneficios desde los documentos de la empresa",
+            "Generación inmediata de certificados laborales y desprendibles",
+            "Solicitud conversacional de vacaciones, permisos e incapacidades con envío al aprobador",
+            "Escalamiento a RRHH con el caso resumido"
+          ]
+        },
+        {
+          "titulo": "Sprint 18 – Portal del líder",
+          "sprint": "18",
+          "historias": [
+            "Vista del equipo, aprobaciones pendientes y alertas para el líder",
+            "Preguntas en lenguaje natural del líder sobre su equipo"
+          ]
+        }
+      ]
+    },
+    {
+      "etapa": "Etapa 4 – Desempeño con copiloto IA",
+      "sprints": "19 a 23",
+      "objetivo": "Evaluaciones periódicas que se preparan solas a partir de la evidencia, con el líder enfocado en la conversación.",
+      "gate": "Un ciclo completo cerrado en clientes activos con borradores de la IA aceptados con cambios menores.",
+      "features": [
+        {
+          "titulo": "Sprint 19 – Ciclos y formularios",
+          "sprint": "19",
+          "historias": [
+            "Ciclos de evaluación configurables: anual, semestral, trimestral, periodo de prueba, fin de misión o proyecto",
+            "Evaluaciones 90°, 180° y 360° con formularios por cargo generados desde las competencias"
+          ]
+        },
+        {
+          "titulo": "Sprint 20 – Objetivos",
+          "sprint": "20",
+          "historias": [
+            "Objetivos (OKR/KPI) con pesos sugeridos por IA desde el cargo y el área",
+            "Registro de avance y evidencias durante el periodo"
+          ]
+        },
+        {
+          "titulo": "Sprint 21 – Copiloto del evaluador",
+          "sprint": "21",
+          "historias": [
+            "Resumen automático de evidencias, feedback y avance de objetivos por empleado",
+            "Borrador de evaluación y comentarios que el líder ajusta",
+            "Detección de sesgos de calificación"
+          ]
+        },
+        {
+          "titulo": "Sprint 22 – Calibración y desarrollo",
+          "sprint": "22",
+          "historias": [
+            "Comité de calibración y matriz 9-box",
+            "Plan de desarrollo individual (PDI) propuesto por la IA desde las brechas",
+            "Feedback continuo y reconocimientos"
+          ]
+        },
+        {
+          "titulo": "Sprint 23 – Estabilización de desempeño",
+          "sprint": "23",
+          "historias": [
+            "Tableros de desempeño por área, sede o cliente",
+            "Primer ciclo real de desempeño con clientes activos"
+          ]
+        }
+      ]
+    },
+    {
+      "etapa": "Etapa 5 – Desarrollo, clima y retención predictiva",
+      "sprints": "24 a 30",
+      "objetivo": "Pasar de gestionar a anticipar: formar según brechas, medir clima y alertar antes de que alguien renuncie.",
+      "gate": "Módulo completo en producción; alertas de riesgo validadas contra retiros reales de los clientes activos.",
+      "features": [
+        {
+          "titulo": "Sprints 24 y 25 – Formación",
+          "sprint": "24-25",
+          "historias": [
+            "Plan anual de capacitación generado desde las brechas de desempeño",
+            "LMS básico: cursos internos, registro de externos, cursos obligatorios con vencimiento",
+            "Generación de microcursos y cuestionarios con IA a partir de manuales de la empresa"
+          ]
+        },
+        {
+          "titulo": "Sprint 26 – Carrera y sucesión",
+          "sprint": "26",
+          "historias": [
+            "Mapa de habilidades por empleado inferido de HV, cursos y evaluaciones",
+            "Vacantes internas sugeridas a empleados con afinidad",
+            "Sucesores sugeridos para cargos críticos"
+          ]
+        },
+        {
+          "titulo": "Sprints 27 y 28 – Clima, bienestar y SST",
+          "sprint": "27-28",
+          "historias": [
+            "Encuestas de clima y eNPS anónimas con análisis de sentimiento y temas",
+            "Batería de riesgo psicosocial y seguimiento de planes de acción",
+            "Exámenes ocupacionales periódicos y de retiro con alertas"
+          ]
+        },
+        {
+          "titulo": "Sprints 29 y 30 – Analítica predictiva y retiro",
+          "sprint": "29-30",
+          "historias": [
+            "Modelo de riesgo de rotación y ausentismo con razones explicadas y acciones sugeridas",
+            "Planeador de planta según demanda o contratos",
+            "Proceso de retiro: paz y salvo, encuesta de salida con el asistente, liquidación vía nómina",
+            "Preguntas en lenguaje natural sobre todos los datos de talento",
+            "Conectores nativos con 2 ERP de nómina adicionales"
+          ]
+        }
+      ]
+    }
+  ]
+}

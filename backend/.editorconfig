@@ -1,0 +1,13 @@
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+charset = utf-8
+csharp_style_namespace_declarations = file_scoped:warning
+
+# Nombres como Error o Result son parte del diseño (ver docs/arquitectura/backend.md); no hay consumidores en VB
+dotnet_diagnostic.CA1716.severity = none
+
+[**/Migrations/*.cs]
+generated_code = true
