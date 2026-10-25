@@ -5,8 +5,9 @@ import { iniciales, nombreRol, usePuede, useSalir, useSesion } from '../features
 import { elegirEmpresaUsuaria, useEmpresaUsuariaActual } from '../features/sesion/empresaUsuaria'
 import {
   Chispa, IconoBandeja, IconoCandado, IconoConexion, IconoContraer, IconoEstructura, IconoExpandir, IconoPersonas, IconoSalir, IconoUsuarios,
-  IconoVacantes, IconoDocumento, IconoCupos, IconoInsignia, Isotipo,
+  IconoVacantes, IconoDocumento, IconoCupos, IconoInsignia, IconoLuna, IconoPantalla, IconoSol, Isotipo,
 } from '../shared/ui/Iconos'
+import { nombreTema, useTema } from '../shared/ui/tema'
 
 const claveColapsado = 'selvana.menu-colapsado'
 
@@ -50,6 +51,7 @@ export function Layout() {
   const pendientes = useResumenBandeja(Boolean(sesion)).data?.pendientes ?? 0
   const conSelector = Boolean(sesion?.empresaTemporal && sesion.empresasUsuarias.length > 0)
   const [colapsado, setColapsado] = useState(leerColapsado)
+  const { tema, alternar: alternarTema } = useTema()
   const alternar = () => {
     setColapsado((c) => {
       try {
@@ -116,6 +118,11 @@ export function Layout() {
               </span>
             </div>
           )}
+          <button type="button" className="nav-item nav-salir" onClick={alternarTema}
+            title={`${nombreTema[tema]} · cambiar`} aria-label={`${nombreTema[tema]}. Pulse para cambiar`}>
+            {tema === 'claro' ? <IconoSol /> : tema === 'oscuro' ? <IconoLuna /> : <IconoPantalla />}
+            <span className="nav-texto">{nombreTema[tema]}</span>
+          </button>
           <button type="button" className="nav-item nav-salir" disabled={salir.isPending} aria-busy={salir.isPending || undefined}
             onClick={() => salir.mutate(undefined, { onSettled: () => navegar('/', { replace: true }) })} title="Salir">
             {salir.isPending ? <span className="indicador" aria-hidden="true" /> : <IconoSalir />}

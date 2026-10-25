@@ -1,0 +1,101 @@
+# Compila y prueba en cada push y PR; en main además despliega en el ambiente de pruebas de Azure.
+# Requiere el secreto AZURE_CREDENTIALS (ver deploy/azure/README.md).
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  REGISTRO: selvanapruebasabfe08
+  GRUPO: rg-selvana-pruebas
+  VM: vm-selvana
+  DOMINIO: selvana-pruebas.northcentralus.cloudapp.azure.com
+
+jobs:
+  backend:
+    name: Backend (.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+      - name: Compilar
+        run: dotnet build Selvana.slnx -c Release
+        working-directory: backend
+      # Incluye pruebas de arquitectura (NetArchTest) e integración con Testcontainers (Docker del runner)
+      - name: Pruebas
+        run: dotnet test Selvana.slnx -c Release --no-build
+        working-directory: backend
+
+  frontend:
+    name: Frontend (React)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instalar, lint y compilar
+        run: npm ci && npm run lint && npm run build
+        working-directory: frontend
+
+  desplegar:
+    name: Desplegar en pruebas
+    needs: [backend, frontend]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: pruebas
+      url: https://${{ env.DOMINIO }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Construir y subir imágenes
+        run: |
+          V=${GITHUB_SHA::7}
+          R=$REGISTRO.azurecr.io
+          az acr login -n $REGISTRO
+          docker build -t $R/selvana-api:$V -f backend/src/Host/Selvana.Api/Dockerfile backend
+          docker build -t $R/selvana-ai-worker:$V -f backend/src/Workers/Selvana.AI.Worker/Dockerfile backend
+          # Web y API comparten dominio: la web llama a /api con rutas relativas
+          docker build -t $R/selvana-web:$V --build-arg VITE_API_URL= frontend
+          for i in selvana-api selvana-ai-worker selvana-web; do docker push -q $R/$i:$V; done
+
+      # Sin SSH abierto a internet: el script corre en la VM con run-command; el .env (secretos) ya vive allá
+      - name: Levantar la versión en la VM
+        run: |
+          V=${GITHUB_SHA::7}
+          COMPOSE=$(base64 -w0 deploy/azure/docker-compose.yml)
+          CADDY=$(base64 -w0 deploy/azure/Caddyfile)
+          cat > desplegar.sh <<EOF
+          set -e
+          cd /opt/selvana
+          echo $COMPOSE | base64 -d > docker-compose.yml
+          echo $CADDY | base64 -d > Caddyfile
+          if grep -q '^VERSION=' .env; then sed -i 's/^VERSION=.*/VERSION=$V/' .env; else echo 'VERSION=$V' >> .env; fi
+          REG=\$(grep '^REGISTRO=' .env | cut -d= -f2-)
+          USU=\$(grep '^REGISTRO_USUARIO=' .env | cut -d= -f2-)
+          grep '^REGISTRO_CLAVE=' .env | cut -d= -f2- | docker login \$REG -u \$USU --password-stdin >/dev/null
+          docker compose pull -q
+          docker compose up -d --remove-orphans
+          docker image prune -af --filter until=72h >/dev/null
+          docker compose ps --format 'table {{.Service}}\t{{.Status}}'
+          EOF
+          az vm run-command invoke -g $GRUPO -n $VM --command-id RunShellScript --scripts @desplegar.sh --query "value[0].message" -o tsv
+
+      - name: Comprobar que responde
+        run: curl -fsS --retry 15 --retry-delay 6 --retry-all-errors https://$DOMINIO/health

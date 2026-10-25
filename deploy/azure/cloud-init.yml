@@ -1,0 +1,16 @@
+#cloud-config
+# Primer arranque de la VM: Docker, compose y 2 GB de memoria de intercambio (la VM gratuita trae 1 GB de RAM)
+package_update: true
+packages:
+  - docker.io
+  - docker-compose-v2
+runcmd:
+  - fallocate -l 2G /swapfile
+  - chmod 600 /swapfile
+  - mkswap /swapfile
+  - swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  - systemctl enable --now docker
+  - usermod -aG docker selvana
+  - mkdir -p /opt/selvana
+  - chown selvana:selvana /opt/selvana
