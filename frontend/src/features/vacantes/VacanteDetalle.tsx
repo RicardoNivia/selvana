@@ -11,6 +11,7 @@ import { AbrirHojaDeVida } from './AbrirHojaDeVida'
 import { ExplicacionAfinidad, PuntajeAfinidad } from './AfinidadPostulante'
 import { AprobacionRequisicion } from './AprobacionRequisicion'
 import { CargoDeLaVacante } from './CargoDelCatalogo'
+import { DelBanco } from './DelBanco'
 import { ComparativoFinalistas } from './ComparativoFinalistas'
 import { FiltrosAts } from './FiltrosAts'
 import { ReporteSesgo } from './ReporteSesgo'
@@ -20,7 +21,7 @@ import { estadoVacante, type Vacante, useCalcularAfinidad, useCerrarVacante, use
 const pesos = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
 
-const pestanas = ['vacante', 'postulantes', 'filtros', 'tablero', 'finalistas', 'equidad', 'pruebas'] as const
+const pestanas = ['vacante', 'postulantes', 'banco', 'filtros', 'tablero', 'finalistas', 'equidad', 'pruebas'] as const
 type Pestana = (typeof pestanas)[number]
 
 export function VacanteDetalle() {
@@ -61,6 +62,7 @@ export function VacanteDetalle() {
       <div role="tablist" aria-label="Vacante" className="pestanas">
         <button type="button" role="tab" className="pestana" aria-selected={pestana === 'vacante'} onClick={() => setPestana('vacante')}>Vacante</button>
         <button type="button" role="tab" className="pestana" aria-selected={pestana === 'postulantes'} onClick={() => setPestana('postulantes')}>Postulantes · {v.postulantes}</button>
+        {(v.estado === 'Publicada' || v.estado === 'Cerrada') && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'banco'} onClick={() => setPestana('banco')}>Del banco</button>}
         {v.estado !== 'Redactando' && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'filtros'} onClick={() => setPestana('filtros')}>Filtros ATS</button>}
         {v.postulantes > 0 && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'tablero'} onClick={() => setPestana('tablero')}>Tablero</button>}
         {v.postulantes > 0 && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'finalistas'} onClick={() => setPestana('finalistas')}>Finalistas</button>}
@@ -69,7 +71,7 @@ export function VacanteDetalle() {
       </div>
 
       {pestana === 'vacante' ? (v.estado === 'Redactando' ? <Redactando frase={v.frase} /> : <Contenido key={`${v.id}-${v.estado}`} vacante={v} />)
-        : pestana === 'pruebas' ? <PruebasDeLaVacante vacante={v} /> : pestana === 'tablero' ? <TableroVacante vacante={v} /> : pestana === 'equidad' ? <ReporteSesgo vacanteId={v.id} /> : pestana === 'finalistas' ? <ComparativoFinalistas vacanteId={v.id} /> : pestana === 'filtros' ? <FiltrosAts vacanteId={v.id} /> : <Postulantes vacante={v} />}
+        : pestana === 'pruebas' ? <PruebasDeLaVacante vacante={v} /> : pestana === 'tablero' ? <TableroVacante vacante={v} /> : pestana === 'equidad' ? <ReporteSesgo vacanteId={v.id} /> : pestana === 'finalistas' ? <ComparativoFinalistas vacanteId={v.id} /> : pestana === 'filtros' ? <FiltrosAts vacanteId={v.id} /> : pestana === 'banco' ? <DelBanco vacante={v} /> : <Postulantes vacante={v} />}
     </>
   )
 }

@@ -10,6 +10,7 @@ using Selvana.Reclutamiento.Application.Preseleccion;
 using Selvana.Reclutamiento.Application.Privacidad;
 using Selvana.Reclutamiento.Application.Pruebas;
 using Selvana.Reclutamiento.Application.Ranking;
+using Selvana.Reclutamiento.Application.Recontacto;
 using Selvana.Reclutamiento.Application.Vacantes;
 using Selvana.SharedKernel.Messaging;
 using Selvana.SharedKernel.Results;
@@ -48,6 +49,10 @@ public sealed record AprobarDescartesRequest(IReadOnlyList<Guid>? PostulacionIds
 public sealed record DescartesResponse(int Postulaciones);
 
 public sealed record RespuestaPersonaRequest(string Texto, bool Cerrar);
+
+public sealed record NoEncajaRequest(string Motivo);
+
+public sealed record SugeridosBancoResponse(int Sugeridos);
 
 public sealed record GuardarBateriaCargoRequest(string Cargo, IReadOnlyList<PruebaEnBateriaDto>? Pruebas);
 
@@ -229,13 +234,16 @@ public static class ReclutamientoEndpoints
                     b.SalarioMinimo, b.SalarioMaximo, b.Requisitos, b.PreguntasFiltro), ct)).ToHttp())
             .WithName("EditarVacante");
 
-        // Requisición: líder → RRHH → gerencia; la última aprobación la publica en el portal
-        g.MapPost("/vacantes/{id:guid}/solicitar-aprobacion", async (Guid id, ICommandHandler<SolicitarAprobacionVacanteCommand> h, CancellationToken ct) =>
-                (await h.Handle(new SolicitarAprobacionVacanteCommand(id), ct)).ToHttp())
+        // Requisición: líder → RRHH → gerencia; la última aprobación la publica en el portal y busca en el banco de talento
+        // (la búsqueda es otro comando: si la vacante aún no queda publicada, no hace nada)
+        g.MapPost("/vacantes/{id:guid}/solicitar-aprobacion", async (Guid id, ICommandHandler<SolicitarAprobacionVacanteCommand> h,
+                ICommandHandler<BuscarEnBancoCommand, int> banco, CancellationToken ct) =>
+                (await AlPublicar(await h.Handle(new SolicitarAprobacionVacanteCommand(id), ct), banco, id, ct)).ToHttp())
             .WithName("SolicitarAprobacionVacante");
 
-        g.MapPost("/vacantes/{id:guid}/aprobar", async (Guid id, ICommandHandler<AprobarRequisicionCommand> h, CancellationToken ct) =>
-                (await h.Handle(new AprobarRequisicionCommand(id), ct)).ToHttp())
+        g.MapPost("/vacantes/{id:guid}/aprobar", async (Guid id, ICommandHandler<AprobarRequisicionCommand> h, ICommandHandler<BuscarEnBancoCommand, int> banco,
+                CancellationToken ct) =>
+                (await AlPublicar(await h.Handle(new AprobarRequisicionCommand(id), ct), banco, id, ct)).ToHttp())
             .WithName("AprobarRequisicion").RequireAuthorization(Politicas.DeAccion("AprobarBandeja"));
 
         g.MapPost("/vacantes/{id:guid}/devolver", async (Guid id, DevolverRequisicionRequest b, ICommandHandler<DevolverRequisicionCommand> h, CancellationToken ct) =>
@@ -312,6 +320,27 @@ public static class ReclutamientoEndpoints
                 (await h.Handle(new RescatarPostulacionCommand(id, postulacionId), ct)).ToHttp())
             .WithName("RescatarPostulacion").RequireAuthorization(Politicas.VerHojasDeVida);
 
+        // Recontacto del banco de talento: las reglas encuentran, la IA califica y una persona decide a quién invitar
+        g.MapGet("/vacantes/{id:guid}/banco", async (Guid id, int? pagina, int? tamano, IQueryHandler<ListarSugerenciasBancoQuery, Pagina<SugerenciaBancoDto>> h,
+                CancellationToken ct) =>
+                (await h.Handle(new ListarSugerenciasBancoQuery(id, pagina, tamano), ct)).ToHttp())
+            .WithName("SugerenciasBanco").Produces<Pagina<SugerenciaBancoDto>>().RequireAuthorization(Politicas.VerHojasDeVida);
+
+        g.MapPost("/vacantes/{id:guid}/banco/buscar", async (Guid id, ICommandHandler<BuscarEnBancoCommand, int> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new BuscarEnBancoCommand(id), ct);
+                return r.IsSuccess ? Results.Ok(new SugeridosBancoResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("BuscarEnBanco").Produces<SugeridosBancoResponse>().RequireAuthorization(Politicas.VerHojasDeVida);
+
+        g.MapPost("/banco/sugerencias/{id:guid}/invitar", async (Guid id, ICommandHandler<InvitarDesdeBancoCommand, InvitacionBancoDto> h, CancellationToken ct) =>
+                (await h.Handle(new InvitarDesdeBancoCommand(id), ct)).ToHttp())
+            .WithName("InvitarDesdeBanco").Produces<InvitacionBancoDto>().RequireAuthorization(Politicas.VerHojasDeVida);
+
+        g.MapPost("/banco/sugerencias/{id:guid}/no-encaja", async (Guid id, NoEncajaRequest b, ICommandHandler<DescartarSugerenciaBancoCommand> h, CancellationToken ct) =>
+                (await h.Handle(new DescartarSugerenciaBancoCommand(id, b.Motivo), ct)).ToHttp())
+            .WithName("DescartarSugerenciaBanco").RequireAuthorization(Politicas.VerHojasDeVida);
+
         // Preselección conversacional: invitar, ver la conversación con su resumen y responder como persona
         g.MapPost("/postulaciones/{id:guid}/preseleccion", async (Guid id, ICommandHandler<InvitarPreseleccionCommand, EnlacePreseleccionDto> h, CancellationToken ct) =>
                 (await h.Handle(new InvitarPreseleccionCommand(id), ct)).ToHttp())
@@ -344,6 +373,17 @@ public static class ReclutamientoEndpoints
                 IQueryHandler<ListarPostulantesQuery, Pagina<PostulanteDto>> h, CancellationToken ct) =>
                 (await h.Handle(new ListarPostulantesQuery(id, pagina, tamano, buscar, canal), ct)).ToHttp())
             .WithName("ListarPostulantes").Produces<Pagina<PostulanteDto>>();
+    }
+
+    /// <summary>Si el comando salió bien, busca en el banco (solo actúa si la vacante quedó publicada). La respuesta es la del comando.</summary>
+    private static async Task<Result> AlPublicar(Result r, ICommandHandler<BuscarEnBancoCommand, int> banco, Guid vacanteId, CancellationToken ct)
+    {
+        if (r.IsSuccess)
+        {
+            await banco.Handle(new BuscarEnBancoCommand(vacanteId, AlPublicar: true), ct);
+        }
+
+        return r;
     }
 
     private static void MapPortal(RouteGroupBuilder g)

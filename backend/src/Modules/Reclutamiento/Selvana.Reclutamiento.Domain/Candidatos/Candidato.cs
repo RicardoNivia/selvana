@@ -43,6 +43,9 @@ public enum CanalPostulacion
     Computrabajo,
     Referido,
     Otro,
+
+    /// <summary>Estaba en el banco de talento y una persona lo invitó a postularse (recontacto).</summary>
+    Banco,
 }
 
 public sealed class RespuestaFiltro
