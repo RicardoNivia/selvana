@@ -47,7 +47,8 @@ if (-not $SinConstruir) {
 Write-Host "Subiendo la configuración a la VM..."
 $envServidor = (Get-Content $archivoEnv | Where-Object { $_ -notmatch '^VERSION=' }) + "VERSION=$Version"
 $temporal = New-TemporaryFile
-Set-Content -Path $temporal -Value $envServidor -NoNewline:$false
+# Saltos de línea de Linux: un \r al final de cada valor rompe las variables en la VM
+[IO.File]::WriteAllText($temporal, ($envServidor -join "`n") + "`n")
 scp -i $llave -o StrictHostKeyChecking=accept-new "$PSScriptRoot/docker-compose.yml" "$PSScriptRoot/Caddyfile" "${servidor}:/opt/selvana/"
 scp -i $llave $temporal "${servidor}:/opt/selvana/.env"
 Remove-Item $temporal
@@ -55,7 +56,7 @@ Remove-Item $temporal
 Write-Host "Levantando la versión $Version..."
 $usuario = $valores['REGISTRO_USUARIO']
 $clave = $valores['REGISTRO_CLAVE']
-ssh -i $llave $servidor @"
+$remoto = @"
 set -e
 cd /opt/selvana
 chmod 600 .env
@@ -65,5 +66,8 @@ docker compose up -d --remove-orphans
 docker image prune -f >/dev/null
 docker compose ps --format 'table {{.Service}}\t{{.Status}}'
 "@
+# Git en Windows puede dejar este archivo con CRLF: bash no debe recibir los \r
+ssh -i $llave $servidor ($remoto -replace "`r", "")
+if ($LASTEXITCODE -ne 0) { throw "La VM no pudo levantar la versión $Version." }
 
 Write-Host "Listo: https://$($valores['DOMINIO'])"
