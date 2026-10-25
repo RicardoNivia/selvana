@@ -119,19 +119,9 @@ public static partial class EvaluadorFiltros
                 : new ChequeoFiltro(TipoRequisito, requisito, EstadoChequeo.NoCumple, $"Tiene {Meses(meses)} con fechas; pide {anios} {(anios == 1 ? "año" : "años")}.", "HV · experiencia");
         }
 
-        // Habilidades y cursos del catálogo con sinónimos («pase C2» = «Licencia de conducción C2»)
-        var canonico = Normalizacion.Habilidad(requisito);
-        if (Normalizacion.HabilidadesDe(datos).Contains(canonico, StringComparer.OrdinalIgnoreCase))
+        if (Demuestra(requisito, datos) is { } demostrado)
         {
-            return new ChequeoFiltro(TipoRequisito, requisito, EstadoChequeo.Cumple, $"La hoja de vida dice «{canonico}».", "HV · habilidades y cursos");
-        }
-
-        // Todas las palabras importantes del requisito aparecen en la hoja de vida
-        var palabras = Normalizacion.Simplificar(requisito).Split(' ').Where(p => p.Length > 2 && !Vacias.Contains(p)).ToList();
-        var texto = " " + Normalizacion.TextoBusqueda(datos) + " ";
-        if (palabras.Count > 0 && palabras.All(p => texto.Contains(" " + p, StringComparison.Ordinal)))
-        {
-            return new ChequeoFiltro(TipoRequisito, requisito, EstadoChequeo.Cumple, "Las palabras del requisito aparecen en la hoja de vida.", "HV");
+            return new ChequeoFiltro(TipoRequisito, requisito, EstadoChequeo.Cumple, demostrado.Detalle, demostrado.Evidencia);
         }
 
         // Lo que encontró el agente de ranking (copia el texto de los requisitos)
@@ -147,6 +137,26 @@ public static partial class EvaluadorFiltros
         }
 
         return new ChequeoFiltro(TipoRequisito, requisito, EstadoChequeo.SinEvidencia, "No encontramos evidencia en la hoja de vida.", "HV");
+    }
+
+    /// <summary>
+    /// Si la hoja de vida demuestra el requisito por sí sola (sin el ranking): una habilidad o curso del catálogo con sinónimos
+    /// («pase C2» = «Licencia de conducción C2») o todas sus palabras importantes. Devuelve el detalle y de dónde sale.
+    /// </summary>
+    public static (string Detalle, string Evidencia)? Demuestra(string requisito, DatosCandidato datos)
+    {
+        ArgumentNullException.ThrowIfNull(datos);
+        var canonico = Normalizacion.Habilidad(requisito);
+        if (Normalizacion.HabilidadesDe(datos).Contains(canonico, StringComparer.OrdinalIgnoreCase))
+        {
+            return ($"La hoja de vida dice «{canonico}».", "HV · habilidades y cursos");
+        }
+
+        var palabras = Normalizacion.Simplificar(requisito).Split(' ').Where(p => p.Length > 2 && !Vacias.Contains(p)).ToList();
+        var texto = " " + Normalizacion.TextoBusqueda(datos) + " ";
+        return palabras.Count > 0 && palabras.All(p => texto.Contains(" " + p, StringComparison.Ordinal))
+            ? ("Las palabras del requisito aparecen en la hoja de vida.", "HV")
+            : null;
     }
 
     /// <summary>Sugiere qué es excluyente: requisitos con licencia, curso, certificado, título o años; las preguntas de sí o no; la ciudad.</summary>

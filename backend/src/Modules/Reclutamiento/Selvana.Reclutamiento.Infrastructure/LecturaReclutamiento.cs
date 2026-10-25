@@ -232,6 +232,7 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
         CanalPostulacion.LinkedIn => "LinkedIn",
         CanalPostulacion.Computrabajo => "Computrabajo",
         CanalPostulacion.Referido => "Referido",
+        CanalPostulacion.Banco => "Banco de talento",
         _ => "Otro",
     };
 }

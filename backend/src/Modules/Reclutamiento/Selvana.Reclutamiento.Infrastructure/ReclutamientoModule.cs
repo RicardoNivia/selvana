@@ -11,11 +11,13 @@ using Selvana.Reclutamiento.Application.Filtros;
 using Selvana.Reclutamiento.Application.Preseleccion;
 using Selvana.Reclutamiento.Application.Pruebas;
 using Selvana.Reclutamiento.Application.Ranking;
+using Selvana.Reclutamiento.Application.Recontacto;
 using Selvana.Reclutamiento.Contracts;
 using Selvana.Reclutamiento.Domain.Candidatos;
 using Selvana.Reclutamiento.Infrastructure.Persistence;
 using Selvana.Reclutamiento.Infrastructure.Preseleccion;
 using Selvana.Reclutamiento.Infrastructure.Pruebas;
+using Selvana.Reclutamiento.Infrastructure.Recontacto;
 
 namespace Selvana.Reclutamiento.Infrastructure;
 
@@ -47,6 +49,9 @@ public static class ReclutamientoModule
         services.AddScoped<IConversaciones, ConversacionesRepositorio>();
         services.AddScoped<IPostulacionesContratables, PostulacionesContratables>();
         services.AddScoped<ILecturaFiltros, LecturaFiltros>();
+        services.AddScoped<ISugerenciasBanco, SugerenciasBancoRepositorio>();
+        services.AddScoped<IBancoTalento, BancoTalento>();
+        services.AddScoped<ILecturaRecontacto, LecturaRecontacto>();
 
         services.AddIntegrationEventConsumers<ReclutamientoDbContext>(AssemblyReference.Assembly);
         services.AddHostedService<OutboxProcessor<ReclutamientoDbContext>>();
