@@ -28,13 +28,13 @@ Las decisiones que afectan a una persona (descartar, contratar, sancionar, calif
 | `docs/arquitectura/backend.md` | Guía obligatoria: arquitectura limpia, SOLID, CQRS, CORS, pruebas |
 | `docs/backlog/` | Backlog ejecutable por sprint |
 | `docs/diseno/marca.md` | Marca aprobada (ruta Dosel): color, tipografía, logo, tono y patrones de IA |
-| `wiki/` | Wiki de Azure DevOps (code wiki publicada desde `/wiki`) |
+| `wiki/` | Wiki del proyecto en Markdown |
 | `backend/` | Todo lo de .NET: `Selvana.slnx`, `src/`, `tests/`, `Directory.*.props`, Dockerfiles de API y worker |
 | `frontend/` | Todo lo de React + TypeScript (Vite), con su Dockerfile |
 | `docker-compose.yml` | Aplicación completa en contenedores (PostgreSQL, API, worker, web) |
 | `.env.example` | Plantilla del `.env` (git ignora el `.env`): contraseñas de compose y `AZURE_DEVOPS_PAT` |
 
-Repositorio: Azure DevOps `https://dev.azure.com/ricardonivia0145/selvana/_git/selvana`, rama `main`. Carpeta local: `C:\Selvana`.
+Repositorio: GitHub `https://github.com/RicardoNivia/selvana`, rama `main` (ADR 0012). Carpeta local: `C:\Soluciones\selvana`. Nunca se hace commit directo en `main`: cada funcionalidad va en su propia rama (`feature/<nombre>`) con pull request en GitHub. Azure DevOps se usa solo para Azure Boards (backlog); su repositorio de código es una copia histórica.
 
 ## Stack (decidido)
 
@@ -118,7 +118,7 @@ Ver `docs/adr/0004-integracion-erp-agnostica.md`. Selvana **no depende de ningú
 - Pruebas: solo en el backend. xUnit + FluentAssertions 7 (la 8 tiene licencia comercial); Testcontainers para PostgreSQL en pruebas de integración (se omiten sin Docker). El frontend no lleva pruebas automatizadas.
 - Frontend: marca **Dosel** aprobada (`docs/diseno/marca.md`); usar solo las variables de `frontend/src/theme/tokens.css`. El violeta `--color-ia` es exclusivo de lo que produce la IA. **Antes de crear o cambiar cualquier pantalla, componente o pieza visual, usar la skill `selvana-marca`** (`.claude/skills/selvana-marca/SKILL.md`).
 - Frontend: carpetas por funcionalidad (`frontend/src/features/<modulo>`), componentes funcionales, TanStack Query para datos.
-- Pull requests y comentarios: descripción y comentarios de los PR, y comentarios en Azure Boards, en **Markdown** (no HTML). Al terminar cada bloque se suben los cambios.
+- Pull requests y comentarios: descripción y comentarios de los PR (en GitHub), y comentarios en Azure Boards, en **Markdown** (no HTML). Al terminar cada bloque se sube su rama y se abre el PR.
 - Secretos: nunca en el repo; usar `dotnet user-secrets` en desarrollo y el `.env` de la raíz para docker-compose.
 - Base de datos local: PostgreSQL 17 en `localhost:5432`, base `selvana`. Hoy corre la versión portátil de `C:\Users\ricardo.nivia\pgsql-portable` (el servicio `postgresql-x64-17` quedó sin `postgres.exe`). La cadena con contraseña está en los user-secrets de `Selvana.Api` (`ConnectionStrings:Selvana`). Para `dotnet ef` definir antes `ConnectionStrings__Selvana` en la sesión. pgvector aún no está instalado en ese servidor.
 

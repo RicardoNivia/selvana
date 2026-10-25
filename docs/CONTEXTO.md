@@ -22,7 +22,7 @@ Resumen de la conversación de definición (20 y 21 de octubre de 2026) entre Ri
 | 8 | No hay tres clientes piloto; publicarlo y venderlo según la práctica del mercado | Se eliminaron los pilotos. Validación por benchmark + usabilidad con RRHH externos + analítica de uso. Venta por planes con prueba gratuita de 30 días desde el sprint 10. |
 | 9 | Debe tener un punto final | **v1.0 en el sprint 30**, con criterios de terminado explícitos. Lo posterior va a un roadmap de evolución aparte. |
 | 10 | Integrable con cualquier ERP que maneje nómina | Contrato canónico + adaptadores; SINCO es solo el primer conector. Ver ADR 0004. |
-| 11 | Repositorio en Azure DevOps para wiki y documentación | Wiki en `/wiki` (code wiki) y documentos en `/docs`. |
+| 11 | Repositorio en Azure DevOps para wiki y documentación | Wiki en `/wiki` (code wiki) y documentos en `/docs`. *Cambiado el 25-10-2026 (ADR 0012): el repositorio es GitHub y cada funcionalidad entra por PR; Azure DevOps queda para Azure Boards.* |
 
 ## 3. Hallazgos clave del benchmark (21-10-2026)
 
