@@ -169,6 +169,11 @@ public sealed class ProcesoVinculacion : AggregateRoot<Guid>
     public DatosAlta Alta { get; private set; } = new();
     public string? EmpleadoCreadoPor { get; private set; }
     public DateTimeOffset? EmpleadoCreadoEn { get; private set; }
+
+    /// <summary>Plan de inducción: nace al crear el empleado con las tareas legales y la IA propone las del cargo.</summary>
+    public PlanInduccion? Induccion { get; private set; }
+    public string? OnboardingCerradoPor { get; private set; }
+    public DateTimeOffset? OnboardingCerradoEn { get; private set; }
     public EtapaVinculacion Etapa { get; private set; }
     public string? MotivoCancelacion { get; private set; }
     public string AprobadaPor { get; private init; } = "";
@@ -709,6 +714,246 @@ public sealed class ProcesoVinculacion : AggregateRoot<Guid>
         Etapa = EtapaVinculacion.Onboarding;
         EmpleadoCreadoPor = por;
         EmpleadoCreadoEn = ahora;
+        Induccion = new PlanInduccion { Estado = EstadoPlanInduccion.Redactando, Tareas = ReglasInduccion.Obligatorias(this) };
+        ActualizadoEn = ahora;
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Pedir (o volver a pedir) a la IA las tareas del cargo. Se conservan las legales y las que agregó una persona;
+    /// las que había propuesto la IA se reemplazan.
+    /// </summary>
+    public Result PedirPlanInduccion(DateTimeOffset ahora)
+    {
+        if (Etapa != EtapaVinculacion.Onboarding)
+        {
+            return Result.Failure(InduccionErrors.NoEnOnboarding);
+        }
+
+        switch (Induccion?.Estado)
+        {
+            case EstadoPlanInduccion.Redactando:
+                return Result.Failure(InduccionErrors.Redactando);
+            case EstadoPlanInduccion.Aprobado:
+                return Result.Failure(InduccionErrors.YaAprobado);
+        }
+
+        var conservadas = Induccion?.Tareas.Where(t => !t.DeIa).ToList() is { Count: > 0 } previas ? previas : ReglasInduccion.Obligatorias(this);
+        Induccion = new PlanInduccion { Estado = EstadoPlanInduccion.Redactando, Tareas = conservadas };
+        ActualizadoEn = ahora;
+        return Result.Success();
+    }
+
+    /// <summary>Llegan las tareas de la IA: se suman a las legales sin duplicarlas y el plan queda por aprobar.</summary>
+    public bool RegistrarPlanInduccion(IEnumerable<TareaPropuesta> tareas, IEnumerable<RazonOferta> razones, IEnumerable<string> alertas, string modelo, decimal costoUsd,
+        DateTimeOffset ahora)
+    {
+        if (Induccion is not { Estado: EstadoPlanInduccion.Redactando } plan)
+        {
+            return false;
+        }
+
+        foreach (var t in tareas.Where(t => !string.IsNullOrWhiteSpace(t.Titulo)))
+        {
+            if (plan.Tareas.Any(x => ReglasInduccion.SePareceA(x.Titulo, t.Titulo)))
+            {
+                continue;
+            }
+
+            var dia = Math.Clamp(t.Dia, ReglasInduccion.DiaMinimo, ReglasInduccion.DiaMaximo);
+            plan.Tareas.Add(new TareaInduccion
+            {
+                Id = Guid.CreateVersion7(), Titulo = t.Titulo.Trim(), Descripcion = (t.Descripcion ?? "").Trim(), Responsable = ResponsablesInduccion.Normalizar(t.Responsable),
+                Dia = dia, Fecha = ReglasInduccion.Fecha(Condiciones.FechaIngreso, dia), Fuente = string.IsNullOrWhiteSpace(t.Fuente) ? "Perfil del cargo" : t.Fuente.Trim(),
+                DeIa = true,
+            });
+        }
+
+        plan.Tareas = [.. plan.Tareas.OrderBy(x => x.Dia).ThenByDescending(x => x.Obligatoria)];
+        plan.Razones = [.. razones.Take(5)];
+        plan.AlertasIa = [.. alertas];
+        plan.Modelo = modelo;
+        plan.CostoUsd = costoUsd;
+        plan.RedactadoEn = ahora;
+        plan.ErrorIa = null;
+        plan.Estado = EstadoPlanInduccion.PorAprobar;
+        ActualizadoEn = ahora;
+        return true;
+    }
+
+    public bool FallaPlanInduccion(string error, DateTimeOffset ahora)
+    {
+        if (Induccion is not { Estado: EstadoPlanInduccion.Redactando } plan)
+        {
+            return false;
+        }
+
+        plan.Estado = EstadoPlanInduccion.FallaIa;
+        plan.ErrorIa = error.Length <= 300 ? error : error[..300];
+        ActualizadoEn = ahora;
+        return true;
+    }
+
+    /// <summary>
+    /// RRHH ajusta el plan: cambia, agrega o quita tareas (las legales no se quitan ni cambian de título). Lo que toca deja de ser
+    /// sugerencia de la IA. Se puede ajustar también después de aprobado, sin perder el avance.
+    /// </summary>
+    public Result EditarPlanInduccion(IReadOnlyList<TareaEditada> tareas, string por, DateTimeOffset ahora)
+    {
+        if (Etapa != EtapaVinculacion.Onboarding || Induccion is not { } plan)
+        {
+            return Result.Failure(InduccionErrors.NoEnOnboarding);
+        }
+
+        if (plan.Estado == EstadoPlanInduccion.Redactando)
+        {
+            return Result.Failure(InduccionErrors.Redactando);
+        }
+
+        if (tareas.Count == 0)
+        {
+            return Result.Failure(InduccionErrors.SinTareas);
+        }
+
+        if (tareas.Any(t => string.IsNullOrWhiteSpace(t.Titulo) || t.Dia is < ReglasInduccion.DiaMinimo or > ReglasInduccion.DiaMaximo))
+        {
+            return Result.Failure(InduccionErrors.TareaInvalida);
+        }
+
+        var ids = tareas.Where(t => t.Id is not null).Select(t => t.Id!.Value).ToHashSet();
+        if (plan.Tareas.Any(t => t.Obligatoria && !ids.Contains(t.Id)))
+        {
+            return Result.Failure(InduccionErrors.ObligatoriaNoSeQuita);
+        }
+
+        var nuevas = new List<TareaInduccion>();
+        foreach (var e in tareas)
+        {
+            var titulo = e.Titulo.Trim();
+            var descripcion = (e.Descripcion ?? "").Trim();
+            var responsable = ResponsablesInduccion.Normalizar(e.Responsable);
+            var asignado = string.IsNullOrWhiteSpace(e.Asignado) ? null : e.Asignado.Trim();
+            if (e.Id is { } id && plan.Tareas.FirstOrDefault(t => t.Id == id) is { } t)
+            {
+                var cambio = (!t.Obligatoria && t.Titulo != titulo) || t.Descripcion != descripcion || t.Responsable != responsable || t.Dia != e.Dia || t.Asignado != asignado;
+                if (!t.Obligatoria)
+                {
+                    t.Titulo = titulo;
+                }
+
+                t.Descripcion = descripcion;
+                t.Responsable = responsable;
+                t.Asignado = asignado;
+                t.Dia = e.Dia;
+                t.Fecha = ReglasInduccion.Fecha(Condiciones.FechaIngreso, e.Dia);
+                t.DeIa = t.DeIa && !cambio;
+                nuevas.Add(t);
+            }
+            else
+            {
+                nuevas.Add(new TareaInduccion
+                {
+                    Id = Guid.CreateVersion7(), Titulo = titulo, Descripcion = descripcion, Responsable = responsable, Asignado = asignado, Dia = e.Dia,
+                    Fecha = ReglasInduccion.Fecha(Condiciones.FechaIngreso, e.Dia), Fuente = $"Agregada por {por}",
+                });
+            }
+        }
+
+        plan.Tareas = [.. nuevas.OrderBy(x => x.Dia).ThenByDescending(x => x.Obligatoria)];
+        plan.EditadoPor = por;
+        plan.EditadoEn = ahora;
+        ActualizadoEn = ahora;
+        return Result.Success();
+    }
+
+    /// <summary>Decisión humana: aprobar el plan. Desde aquí se le hace seguimiento tarea por tarea.</summary>
+    public Result AprobarPlanInduccion(string por, DateTimeOffset ahora)
+    {
+        if (Etapa != EtapaVinculacion.Onboarding || Induccion is not { } plan)
+        {
+            return Result.Failure(InduccionErrors.NoEnOnboarding);
+        }
+
+        if (plan.Estado is EstadoPlanInduccion.Redactando or EstadoPlanInduccion.Aprobado)
+        {
+            return Result.Failure(plan.Estado == EstadoPlanInduccion.Redactando ? InduccionErrors.Redactando : InduccionErrors.YaAprobado);
+        }
+
+        if (plan.Tareas.Count == 0)
+        {
+            return Result.Failure(InduccionErrors.SinTareas);
+        }
+
+        plan.Estado = EstadoPlanInduccion.Aprobado;
+        plan.AprobadoPor = por;
+        plan.AprobadoEn = ahora;
+        ActualizadoEn = ahora;
+        return Result.Success();
+    }
+
+    /// <summary>Seguimiento: la tarea queda hecha, no aplica (con motivo) o vuelve a pendiente.</summary>
+    public Result<TareaInduccion> ActualizarTarea(Guid tareaId, EstadoTarea estado, string? nota, string por, DateTimeOffset ahora)
+    {
+        if (Etapa != EtapaVinculacion.Onboarding || Induccion is not { } plan)
+        {
+            return InduccionErrors.NoEnOnboarding;
+        }
+
+        if (plan.Estado != EstadoPlanInduccion.Aprobado)
+        {
+            return InduccionErrors.NoAprobado;
+        }
+
+        if (plan.Tareas.FirstOrDefault(t => t.Id == tareaId) is not { } t)
+        {
+            return InduccionErrors.TareaNoExiste;
+        }
+
+        if (estado == EstadoTarea.NoAplica && t.Obligatoria)
+        {
+            return InduccionErrors.ObligatoriaNoAplica;
+        }
+
+        if (estado == EstadoTarea.NoAplica && string.IsNullOrWhiteSpace(nota))
+        {
+            return InduccionErrors.SinNota;
+        }
+
+        t.Estado = estado;
+        t.Nota = string.IsNullOrWhiteSpace(nota) ? null : nota.Trim();
+        t.CerradaPor = estado == EstadoTarea.Pendiente ? null : por;
+        t.CerradaEn = estado == EstadoTarea.Pendiente ? null : ahora;
+        ActualizadoEn = ahora;
+        return t;
+    }
+
+    /// <summary>Tareas pendientes cuya fecha ya pasó.</summary>
+    public IReadOnlyList<TareaInduccion> TareasVencidas(DateOnly hoy) =>
+        Induccion is { Estado: EstadoPlanInduccion.Aprobado } plan ? [.. plan.Tareas.Where(t => t.Estado == EstadoTarea.Pendiente && t.Fecha < hoy)] : [];
+
+    public bool OnboardingCompleto => Induccion is { Estado: EstadoPlanInduccion.Aprobado } plan && plan.Tareas.All(t => t.Estado != EstadoTarea.Pendiente);
+
+    /// <summary>Decisión humana: con todas las tareas cerradas, el proceso termina y la persona queda vinculada.</summary>
+    public Result CerrarOnboarding(string por, DateTimeOffset ahora)
+    {
+        if (Etapa != EtapaVinculacion.Onboarding || Induccion is null)
+        {
+            return Result.Failure(InduccionErrors.NoEnOnboarding);
+        }
+
+        if (Induccion.Estado != EstadoPlanInduccion.Aprobado)
+        {
+            return Result.Failure(InduccionErrors.NoAprobado);
+        }
+
+        if (!OnboardingCompleto)
+        {
+            return Result.Failure(InduccionErrors.Pendientes);
+        }
+
+        Etapa = EtapaVinculacion.Vinculado;
+        OnboardingCerradoPor = por;
+        OnboardingCerradoEn = ahora;
         ActualizadoEn = ahora;
         return Result.Success();
     }

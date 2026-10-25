@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Selvana.SharedKernel.Messaging;
 using Selvana.Vinculacion.Application.Alta;
 using Selvana.Vinculacion.Application.Documentos;
+using Selvana.Vinculacion.Application.Onboarding;
 using Selvana.Vinculacion.Application.Procesos;
 using Selvana.Web.Common;
 
@@ -28,6 +29,10 @@ public sealed record AltaRequest(string Area, string CentroCosto, string Sede, s
 public sealed record CrearEmpleadoRequest(bool ConfirmaAlertas);
 
 public sealed record AprobadosResponse(int Documentos);
+
+public sealed record PlanInduccionRequest(IReadOnlyList<TareaRequest> Tareas);
+
+public sealed record TareaEstadoRequest(string Estado, string? Nota);
 
 public sealed record ExamenMedicoResponse(string Concepto, string? Restricciones, string RegistradoPor, DateTimeOffset? RegistradoEn);
 
@@ -55,6 +60,7 @@ public static class VinculacionEndpoints
         MapConsola(app.MapGroup("/vinculacion").WithTags("Vinculación").RequireAuthorization(Politicas.VerHojasDeVida));
         MapDocumentos(app.MapGroup("/vinculacion/procesos/{id:guid}/documentos").WithTags("Vinculación · documentos").RequireAuthorization(Politicas.VerHojasDeVida));
         MapAlta(app.MapGroup("/vinculacion/procesos/{id:guid}").WithTags("Vinculación · afiliaciones y alta").RequireAuthorization(Politicas.VerHojasDeVida));
+        MapInduccion(app.MapGroup("/vinculacion/procesos/{id:guid}").WithTags("Vinculación · onboarding").RequireAuthorization(Politicas.VerHojasDeVida));
         MapCandidato(app.MapGroup("/portal/vinculacion").WithTags("Vinculación (candidato)").AllowAnonymous().RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         return app;
     }
@@ -130,6 +136,29 @@ public static class VinculacionEndpoints
                 return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
             })
             .WithName("DescargarAlta");
+    }
+
+    private static void MapInduccion(RouteGroupBuilder g)
+    {
+        g.MapPost("/induccion/redactar", async (Guid id, ICommandHandler<RedactarPlanInduccionCommand> h, CancellationToken ct) =>
+                (await h.Handle(new RedactarPlanInduccionCommand(id), ct)).ToHttp())
+            .WithName("RedactarPlanInduccion");
+
+        g.MapPut("/induccion", async (Guid id, PlanInduccionRequest b, ICommandHandler<EditarPlanInduccionCommand> h, CancellationToken ct) =>
+                (await h.Handle(new EditarPlanInduccionCommand(id, b.Tareas ?? []), ct)).ToHttp())
+            .WithName("EditarPlanInduccion");
+
+        g.MapPost("/induccion/aprobar", async (Guid id, ICommandHandler<AprobarPlanInduccionCommand> h, CancellationToken ct) =>
+                (await h.Handle(new AprobarPlanInduccionCommand(id), ct)).ToHttp())
+            .WithName("AprobarPlanInduccion").RequireAuthorization(Politicas.DeAccion("AprobarBandeja"));
+
+        g.MapPut("/induccion/tareas/{tareaId:guid}", async (Guid id, Guid tareaId, TareaEstadoRequest b, ICommandHandler<ActualizarTareaInduccionCommand> h, CancellationToken ct) =>
+                (await h.Handle(new ActualizarTareaInduccionCommand(id, tareaId, b.Estado, b.Nota), ct)).ToHttp())
+            .WithName("ActualizarTareaInduccion");
+
+        g.MapPost("/cerrar-onboarding", async (Guid id, ICommandHandler<CerrarOnboardingCommand> h, CancellationToken ct) =>
+                (await h.Handle(new CerrarOnboardingCommand(id), ct)).ToHttp())
+            .WithName("CerrarOnboarding").RequireAuthorization(Politicas.DeAccion("AprobarBandeja"));
     }
 
     private static void MapDocumentos(RouteGroupBuilder g)

@@ -299,7 +299,7 @@ internal sealed class ObtenerOfertaPublicaHandler(IProcesos procesos, ITokensEnl
         return new OfertaPublicaDto(p.Empresa, p.EmpresaUsuaria, p.Persona.Nombre, p.Vacante.Cargo, p.Oferta.Estado.ToString(), p.Personalizar(p.Oferta.Carta),
             Mapeo.Clausulas(p), Mapeo.Dto(p.Condiciones, parametros.Actuales), r?.En, r?.Acepta, r?.Huella, p.Etapa.ToString(),
             [.. Mapeo.DocumentosDe(p).Where(d => !d.LoCargaEmpresa).Select(d => new DocumentoPublicoDto(d.Tipo.ToString(), RequisitosDocumentales.Nombre(d.Tipo), d.Obligatorio,
-                d.Estado.ToString(), d.NombreArchivo, d.MotivoRechazo))]);
+                d.Estado.ToString(), d.NombreArchivo, d.MotivoRechazo))], Mapeo.InduccionPublica(p));
     }
 }
 

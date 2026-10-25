@@ -19,3 +19,11 @@ public sealed record DocumentoIngresoLeido(
     Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid ProcesoId, string Tipo, Guid ArchivoId, string TipoDetectado, bool Legible, bool TipoCorrecto,
     IReadOnlyList<CampoDocumento> Campos, IReadOnlyList<string> Observaciones, IReadOnlyList<RazonRedaccion> Razones, string Modelo, decimal CostoUsd,
     string? Error) : IIntegrationEvent;
+
+/// <summary>Una tarea de inducción propuesta: «Día» cuenta desde el ingreso (negativo = antes de que llegue).</summary>
+public sealed record TareaInduccionPropuesta(string Titulo, string Descripcion, string Responsable, int Dia, string Fuente);
+
+/// <summary>Tareas de inducción del cargo que propone la IA. Si falló, trae <see cref="Error"/> y quedan solo las tareas legales.</summary>
+public sealed record PlanInduccionRedactado(
+    Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid ProcesoId, IReadOnlyList<TareaInduccionPropuesta> Tareas, IReadOnlyList<RazonRedaccion> Razones,
+    IReadOnlyList<string> Alertas, string Modelo, decimal CostoUsd, string? Error) : IIntegrationEvent;

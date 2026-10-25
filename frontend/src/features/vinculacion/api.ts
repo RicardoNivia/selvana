@@ -120,7 +120,60 @@ export interface Proceso {
   documentos: Documento[]
   afiliaciones: Afiliacion[]
   alta: DatosAlta
+  induccion: PlanInduccion | null
 }
+
+export type EstadoPlanInduccion = 'Redactando' | 'PorAprobar' | 'FallaIa' | 'Aprobado'
+export type EstadoTarea = 'Pendiente' | 'Hecha' | 'NoAplica'
+
+export const estadosPlan: Record<EstadoPlanInduccion, { texto: string; clase: string }> = {
+  Redactando: { texto: 'La IA propone tareas', clase: 'pill-ia' },
+  PorAprobar: { texto: 'Por aprobar', clase: 'pill-alerta' },
+  FallaIa: { texto: 'La IA no respondió', clase: 'pill-error' },
+  Aprobado: { texto: 'En seguimiento', clase: 'pill-ok' },
+}
+
+export interface TareaInduccion {
+  id: string
+  titulo: string
+  descripcion: string
+  responsable: string
+  asignado: string | null
+  dia: number
+  fecha: string
+  obligatoria: boolean
+  fuente: string
+  deIa: boolean
+  estado: EstadoTarea
+  nota: string | null
+  cerradaPor: string | null
+  cerradaEn: string | null
+  vencida: boolean
+}
+
+export interface PlanInduccion {
+  estado: EstadoPlanInduccion
+  tareas: TareaInduccion[]
+  razones: Razon[]
+  alertasIa: string[]
+  modelo: string | null
+  costoUsd: number
+  errorIa: string | null
+  redactadoEn: string | null
+  editadoPor: string | null
+  aprobadoPor: string | null
+  aprobadoEn: string | null
+  hechas: number
+  vencidas: number
+  completo: boolean
+  cerradoPor: string | null
+  cerradoEn: string | null
+  responsables: string[]
+}
+
+export interface TareaEditable { id: string | null; titulo: string; descripcion: string; responsable: string; asignado: string | null; dia: number }
+
+export interface TareaPublica { titulo: string; descripcion: string; responsable: string; fecha: string; estado: EstadoTarea }
 
 export type EstadoAfiliacion = 'Pendiente' | 'Solicitada' | 'Confirmada' | 'NoAplica'
 
@@ -225,6 +278,7 @@ export interface OfertaPublica {
   huella: string | null
   etapa: EtapaVinculacion
   documentos: DocumentoPublico[]
+  induccion: TareaPublica[]
 }
 
 export const aRequest = (c: Condiciones): CondicionesRequest => ({
@@ -277,7 +331,7 @@ export function useProceso(id: string) {
   return useQuery({
     queryKey: ['vinculacion', 'proceso', id],
     queryFn: ({ signal }) => apiGet<Proceso>(`/api/v1/vinculacion/procesos/${id}`, signal),
-    refetchInterval: (x) => (x.state.data?.oferta.estado === 'Redactando' || x.state.data?.documentos.some((d) => d.estado === 'Leyendo') ? 2500
+    refetchInterval: (x) => (x.state.data?.oferta.estado === 'Redactando' || x.state.data?.induccion?.estado === 'Redactando' || x.state.data?.documentos.some((d) => d.estado === 'Leyendo') ? 2500
       : x.state.data?.oferta.estado === 'Enviada' ? 15_000 : false),
   })
 }
@@ -376,3 +430,12 @@ export async function descargarAlta(id: string, codigo: string) {
   a.download = `alta-${codigo}.csv`
   a.click()
 }
+
+export const useRedactarPlan = (id: string) => useAccionProceso(() => apiSend('POST', `/api/v1/vinculacion/procesos/${id}/induccion/redactar`))
+export const useEditarPlan = (id: string) =>
+  useAccionProceso((tareas: TareaEditable[]) => apiSend('PUT', `/api/v1/vinculacion/procesos/${id}/induccion`, { tareas }))
+export const useAprobarPlan = (id: string) => useAccionProceso(() => apiSend('POST', `/api/v1/vinculacion/procesos/${id}/induccion/aprobar`))
+export const useActualizarTarea = (id: string) =>
+  useAccionProceso((v: { tareaId: string; estado: EstadoTarea; nota: string | null }) =>
+    apiSend('PUT', `/api/v1/vinculacion/procesos/${id}/induccion/tareas/${v.tareaId}`, { estado: v.estado, nota: v.nota }))
+export const useCerrarOnboarding = (id: string) => useAccionProceso(() => apiSend('POST', `/api/v1/vinculacion/procesos/${id}/cerrar-onboarding`))

@@ -22,3 +22,16 @@ public sealed record OfertaSolicitada(
 public sealed record DocumentoIngresoRecibido(
     Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid ProcesoId, string Tipo, string TipoEsperado, Guid ArchivoId, string NombreArchivo,
     string TipoContenido) : IIntegrationEvent;
+
+/// <summary>Una tarea que ya está en el plan (las legales): la IA no la repite.</summary>
+public sealed record TareaExistente(string Titulo, string Responsable, int Dia);
+
+/// <summary>
+/// Lo que el planificador sabe del ingreso: el cargo y sus condiciones, sin nombre, documento ni datos de la persona.
+/// </summary>
+public sealed record DatosInduccion(
+    string Empresa, string? EmpresaUsuaria, string Cargo, string Area, string Sede, string TipoContrato, string Jornada, DateOnly FechaIngreso,
+    int PeriodoPruebaDias, int ClaseRiesgoArl, string Descripcion, IReadOnlyList<string> Requisitos, IReadOnlyList<TareaExistente> Existentes);
+
+/// <summary>Se creó el empleado (o RRHH pidió otra versión): el planificador propone las tareas de inducción propias del cargo.</summary>
+public sealed record PlanInduccionSolicitado(Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid ProcesoId, DatosInduccion Datos) : IIntegrationEvent;

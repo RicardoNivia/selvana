@@ -55,12 +55,26 @@ public sealed record ProcesoDto(
     Guid Id, string Codigo, string Etapa, PersonaDto Persona, Guid VacanteId, string CodigoVacante, string Vacante, string Cargo, Guid PostulacionId,
     Guid CandidatoId, string Empresa, string? EmpresaUsuaria, decimal SalarioMinimoVacante, decimal SalarioMaximoVacante, CondicionesDto Condiciones,
     IReadOnlyList<AlertaDto> Alertas, OfertaDto Oferta, string AprobadaPor, string? MotivoCancelacion, DateTimeOffset CreadoEn, DateTimeOffset ActualizadoEn,
-    IReadOnlyList<DocumentoDto> Documentos, IReadOnlyList<AfiliacionDto> Afiliaciones, AltaDto Alta);
+    IReadOnlyList<DocumentoDto> Documentos, IReadOnlyList<AfiliacionDto> Afiliaciones, AltaDto Alta, PlanInduccionDto? Induccion);
+
+public sealed record TareaInduccionDto(
+    Guid Id, string Titulo, string Descripcion, string Responsable, string? Asignado, int Dia, DateOnly Fecha, bool Obligatoria, string Fuente, bool DeIa,
+    string Estado, string? Nota, string? CerradaPor, DateTimeOffset? CerradaEn, bool Vencida);
+
+/// <summary>Plan de inducción con su avance; las tareas vencidas son las pendientes cuya fecha ya pasó.</summary>
+public sealed record PlanInduccionDto(
+    string Estado, IReadOnlyList<TareaInduccionDto> Tareas, IReadOnlyList<RazonDto> Razones, IReadOnlyList<string> AlertasIa, string? Modelo, decimal CostoUsd,
+    string? ErrorIa, DateTimeOffset? RedactadoEn, string? EditadoPor, string? AprobadoPor, DateTimeOffset? AprobadoEn, int Hechas, int Vencidas, bool Completo,
+    string? CerradoPor, DateTimeOffset? CerradoEn, IReadOnlyList<string> Responsables);
+
+/// <summary>Lo que ve el trabajador de su inducción: qué, quién y cuándo, sin notas internas.</summary>
+public sealed record TareaPublicaDto(string Titulo, string Descripcion, string Responsable, DateOnly Fecha, string Estado);
 
 /// <summary>Lo que ve el candidato en su enlace: la oferta con su nombre, sin datos internos.</summary>
 public sealed record OfertaPublicaDto(
     string Empresa, string? EmpresaUsuaria, string Nombre, string Cargo, string Estado, string Carta, IReadOnlyList<ClausulaDto> Clausulas,
-    CondicionesDto Condiciones, DateTimeOffset? RespondidaEn, bool? Acepto, string? Huella, string Etapa, IReadOnlyList<DocumentoPublicoDto> Documentos);
+    CondicionesDto Condiciones, DateTimeOffset? RespondidaEn, bool? Acepto, string? Huella, string Etapa, IReadOnlyList<DocumentoPublicoDto> Documentos,
+    IReadOnlyList<TareaPublicaDto> Induccion);
 
 public sealed record EnlaceOfertaDto(Guid ProcesoId, string Token);
 
@@ -93,8 +107,30 @@ internal static class Mapeo
                 a.ClaseRiesgo, a.Por, a.En))],
             new AltaDto(p.Alta.Area, p.Alta.CentroCosto, p.Alta.Sede, p.Alta.Banco, p.Alta.TipoCuenta, p.Alta.NumeroCuenta, p.Alta.SugeridosPorIa, p.Alta.EditadoPor,
                 p.Afiliaciones.Count == 0 ? [] : [.. ReglasAlta.Revisar(p, hoy).Select(a => new AlertaDto(a.Nivel.ToString(), a.Texto, a.Fuente))], p.ListoParaCrearEmpleado(hoy),
-                ReglasAlta.RequiereConfirmarAlertas(p), ReglasAlta.ClaseSugerida(p.Vacante.Cargo).Razon, p.EmpleadoCreadoPor, p.EmpleadoCreadoEn));
+                ReglasAlta.RequiereConfirmarAlertas(p), ReglasAlta.ClaseSugerida(p.Vacante.Cargo).Razon, p.EmpleadoCreadoPor, p.EmpleadoCreadoEn),
+            Induccion(p, hoy));
     }
+
+    public static PlanInduccionDto? Induccion(ProcesoVinculacion p, DateOnly hoy)
+    {
+        if (p.Induccion is not { } plan)
+        {
+            return null;
+        }
+
+        var aprobado = plan.Estado == EstadoPlanInduccion.Aprobado;
+        var tareas = plan.Tareas.Select(t => new TareaInduccionDto(t.Id, t.Titulo, t.Descripcion, t.Responsable, t.Asignado, t.Dia, t.Fecha, t.Obligatoria, t.Fuente, t.DeIa,
+            t.Estado.ToString(), t.Nota, t.CerradaPor, t.CerradaEn, aprobado && t.Estado == EstadoTarea.Pendiente && t.Fecha < hoy)).ToList();
+        return new PlanInduccionDto(plan.Estado.ToString(), tareas, [.. plan.Razones.Select(Dto)], plan.AlertasIa, plan.Modelo, plan.CostoUsd, plan.ErrorIa, plan.RedactadoEn,
+            plan.EditadoPor, plan.AprobadoPor, plan.AprobadoEn, plan.Tareas.Count(t => t.Estado != EstadoTarea.Pendiente), tareas.Count(t => t.Vencida), p.OnboardingCompleto,
+            p.OnboardingCerradoPor, p.OnboardingCerradoEn, ResponsablesInduccion.Todos);
+    }
+
+    /// <summary>El trabajador ve su inducción solo cuando RRHH aprobó el plan.</summary>
+    public static IReadOnlyList<TareaPublicaDto> InduccionPublica(ProcesoVinculacion p) =>
+        p.Induccion is { Estado: EstadoPlanInduccion.Aprobado } plan && p.Etapa is EtapaVinculacion.Onboarding or EtapaVinculacion.Vinculado
+            ? [.. plan.Tareas.Select(t => new TareaPublicaDto(t.Titulo, t.Descripcion, t.Responsable, t.Fecha, t.Estado.ToString()))]
+            : [];
 
     /// <summary>Si aceptó antes de existir la lista, se muestra la que le corresponde (se guarda al primer cambio).</summary>
     public static IReadOnlyList<DocumentoIngreso> DocumentosDe(ProcesoVinculacion p) =>

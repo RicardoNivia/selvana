@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { IconoAlerta, IconoCheck, IconoEscudo, IconoSubir } from '../../shared/ui/Iconos'
-import { type DocumentoPublico, estadosDocumento, fechaCorta, pesos, useOfertaPublica, useResponderOferta, useSubirDocumentoCandidato } from './api'
+import { type DocumentoPublico, estadosDocumento, fechaCorta, pesos, type TareaPublica, useOfertaPublica, useResponderOferta, useSubirDocumentoCandidato } from './api'
 import './vinculacion.css'
 
 const fechaHora = new Intl.DateTimeFormat('es-CO', { dateStyle: 'long', timeStyle: 'short' })
@@ -50,6 +50,30 @@ function MisDocumentos({ token, documentos }: { token: string; documentos: Docum
   )
 }
 
+/** El trabajador ve su plan de inducción aprobado: qué pasa, con quién y cuándo. */
+function MiInduccion({ tareas }: { tareas: TareaPublica[] }) {
+  const hechas = tareas.filter((t) => t.estado !== 'Pendiente').length
+  return (
+    <section className="tarjeta vin-firma" aria-label="Tu inducción">
+      <h2>Tu inducción</h2>
+      <p>Esto es lo que viene en tus primeros días{hechas > 0 ? ` · ya van ${hechas} de ${tareas.length}` : ''}. Si tienes dudas, pregúntale a tu líder o a Recursos Humanos.</p>
+      <ul className="vin-mis-docs">
+        {tareas.map((t) => (
+          <li key={`${t.fecha}-${t.titulo}`}>
+            <div>
+              <b>{t.titulo}</b>
+              {t.descripcion && <span className="vin-sub">{t.descripcion}</span>}
+              <span className="vin-sub">{t.responsable}</span>
+            </div>
+            <span className="mono">{fechaCorta(t.fecha)}</span>
+            {t.estado === 'Hecha' && <span className="pill pill-ok">Hecha</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 /** El candidato lee su oferta y su contrato y los acepta con su nombre y su documento, sin cuenta. */
 export function OfertaCandidato() {
   const { token = '' } = useParams()
@@ -77,6 +101,7 @@ export function OfertaCandidato() {
         <p className="aviso aviso-ok"><IconoCheck />Aceptaste esta oferta el {fechaHora.format(new Date(o.respondidaEn!))}.{o.etapa === 'Documentos' ? ' Ahora sube tus documentos de ingreso.' : ''}</p>
       )}
       {o.etapa === 'Documentos' && o.documentos.length > 0 && <MisDocumentos token={token} documentos={o.documentos} />}
+      {o.induccion.length > 0 && <MiInduccion tareas={o.induccion} />}
       {o.estado === 'Rechazada' && <p className="aviso aviso-alerta"><IconoAlerta />Respondiste que no aceptas esta oferta. Gracias por avisarnos.</p>}
 
       <dl className="vin-resumen tarjeta">

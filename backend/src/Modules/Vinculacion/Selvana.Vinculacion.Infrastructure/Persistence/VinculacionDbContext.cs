@@ -67,6 +67,15 @@ internal sealed class ProcesoVinculacionConfiguration : IEntityTypeConfiguration
         });
         builder.OwnsOne(p => p.Alta, x => x.ToJson());
         builder.Property(p => p.EmpleadoCreadoPor).HasMaxLength(200);
+        builder.Ignore(p => p.OnboardingCompleto);
+        builder.OwnsOne(p => p.Induccion, x =>
+        {
+            x.ToJson();
+            x.Property(i => i.Estado).HasConversion<string>();
+            x.OwnsMany(i => i.Tareas, t => t.Property(y => y.Estado).HasConversion<string>());
+            x.OwnsMany(i => i.Razones);
+        });
+        builder.Property(p => p.OnboardingCerradoPor).HasMaxLength(200);
     }
 }
 

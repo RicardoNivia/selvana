@@ -294,7 +294,7 @@ Objetivo: que el candidato aprobado quede contratado, afiliado y creado en nómi
 
 **Sprint 14 – Onboarding guiado**
 
-- [ ] Plan de inducción generado por cargo: tareas, responsables y fechas
+- [x] Plan de inducción generado por cargo: tareas, responsables y fechas — *bloque V4: al crear el empleado nace el plan con las tareas legales por reglas (inducción en SST, reglamento interno, EPP desde riesgo III, inducción en el sitio de la empresa usuaria y evaluación del periodo de prueba) y el planificador de IA (`PlanificadorInduccionAgente`, sin datos de la persona) propone las del cargo para los primeros 90 días. RRHH ajusta y aprueba en la bandeja; seguimiento tarea por tarea con vencidas, «no aplica» con motivo (nunca en las legales) y «Cerrar el onboarding» deja a la persona vinculada. El trabajador ve su plan en el enlace de su oferta. Si la IA falla, quedan las legales y RRHH completa a mano*
 - [ ] Asistente de bienvenida que responde dudas los primeros días
 - [ ] Encuestas automáticas a los 30, 60 y 90 días con alerta temprana de retiro
 
