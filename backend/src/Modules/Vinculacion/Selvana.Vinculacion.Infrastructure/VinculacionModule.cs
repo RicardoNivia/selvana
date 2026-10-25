@@ -39,6 +39,17 @@ public static class VinculacionModule
         return services;
     }
 
+    /// <summary>Ambiente de pruebas en línea: procesos de vinculación de ejemplo para la terna que sembró Reclutamiento, sin IA.</summary>
+    public static async Task SembrarEjemploVinculacionAsync(this IServiceProvider services,
+        IReadOnlyList<(Guid EmpresaId, Reclutamiento.Contracts.PostulanteContratable Postulante, string Avance)> contratables, string porRrhh)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        await Ejemplo.SemillaEjemplo.SembrarAsync(sp.GetRequiredService<VinculacionDbContext>(), sp.GetRequiredService<IAlmacenDocumentos>(),
+            sp.GetRequiredService<ICifradoSensible>(), sp.GetRequiredService<ITokensEnlace>(), sp.GetRequiredService<IParametrosLegales>(), contratables, porRrhh,
+            sp.GetRequiredService<TimeProvider>());
+    }
+
     public static async Task MigrateVinculacionModuleAsync(this IServiceProvider services)
     {
         await using var scope = services.CreateAsyncScope();

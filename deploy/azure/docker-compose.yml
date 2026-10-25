@@ -32,6 +32,12 @@ services:
       Desarrollo__EmpresaId: 0192f0a1-5e1c-7b11-9a8d-5e1ec7a0a001
       Desarrollo__Usuario: Laura Moreno
       Desarrollo__Contrasena: ${CONTRASENA_PRUEBAS:?Defina CONTRASENA_PRUEBAS en .env}
+      # Tres empresas de ejemplo con el flujo completo, sin IA (deploy/azure/README.md)
+      Ejemplo__Sembrar: "true"
+      Ejemplo__CorreoDueno: ${EJEMPLO_CORREO:?Defina EJEMPLO_CORREO en .env}
+      Ejemplo__NombreDueno: ${EJEMPLO_NOMBRE:-Dueño del ambiente}
+      Ejemplo__ContrasenaDueno: ${EJEMPLO_CONTRASENA:?Defina EJEMPLO_CONTRASENA en .env}
+      Ejemplo__ContrasenaFicticios: ${CONTRASENA_PRUEBAS}
       # Igual que appsettings.json: a quién va cada evento del outbox (ADR 0008)
       Mensajeria__Destinos__0__Url: http://ai-worker:8080/eventos
       Mensajeria__Destinos__0__Prefijos__0: Selvana.Core.Contracts.Estructura.

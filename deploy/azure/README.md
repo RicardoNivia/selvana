@@ -35,7 +35,28 @@ az ad sp create-for-rbac --name sp-selvana-github --role Contributor `
 Copie el JSON completo en GitHub → Settings → Secrets and variables → Actions → New repository secret, con el nombre
 `AZURE_CREDENTIALS`.
 
-## Usuarios de prueba
+## Datos de ejemplo
 
-`laura.moreno@serviciosandinos.co` (Gerente RRHH), `admin@serviciosandinos.co` y `camilo.duarte@serviciosandinos.co`; la
-contraseña es `CONTRASENA_PRUEBAS` del `.env.pruebas`. Solo datos de prueba: nada real de candidatos.
+Con `Ejemplo:Sembrar=true` (lo pone el `docker-compose.yml` de esta carpeta) la API crea al arrancar tres empresas
+independientes con el flujo completo de selección y vinculación. Es idempotente: si la empresa ya tiene vacantes, no la toca.
+Se hace con los métodos de dominio y **sin IA**: lo que normalmente produce un agente (borrador de la vacante, lectura de la HV,
+ranking, preselección, carta oferta, lectura de documentos) se fija a mano con el modelo «ejemplo (sin IA)». No se encola nada
+hacia el AI.Worker, así que sembrar no gasta tokens; la IA solo gasta cuando alguien usa una función de IA en el sitio. Las hojas
+de vida y los documentos son PDF ficticios de una página, cifrados como los reales.
+
+Código: `SemillaEjemplo` en `Selvana.Core.Infrastructure/Empresas`, `Selvana.Reclutamiento.Infrastructure/Ejemplo` y
+`Selvana.Vinculacion.Infrastructure/Ejemplo`; se llaman desde `Program.cs`.
+
+| Empresa | Tipo | Quién entra | Qué trae |
+| --- | --- | --- | --- |
+| Talento Andino EST S.A.S. | EST con dos empresas usuarias (Retail Express Colombia, Agroindustrial del Tolima) | `EJEMPLO_CORREO` (Administrador, contraseña `EJEMPLO_CONTRASENA`) y `valentina.rios@talentoandino.co` (Gerente RRHH) | Asesor comercial (8 postulantes en todas las etapas: recibida, puntaje ajustado, descartada por filtros, preselección invitada y completa, pruebas, terna y oferta por aprobar), auxiliar de bodega (5 postulantes: pruebas enviadas, documentos por revisar y un empleado creado), analista de nómina esperando aprobación de gerencia y un coordinador en borrador |
+| Logística Caribe S.A.S. | Empresa directa | `mateo.herrera@logisticacaribe.co` (Administrador) | Conductor de camión C2 publicada con 4 postulantes (preselección completa y un descarte por filtros) |
+| Clínica del Valle IPS | Empresa directa | `juliana.pardo@clinicadelvalle.co` (Administrador) | Auxiliar de enfermería publicada con 3 postulantes (pruebas completas, preselección invitada) y una recepcionista en borrador |
+
+En la bandeja de Talento Andino quedan tres decisiones: la requisición de analista de nómina (gerencia), la oferta de
+Natalia Gómez y los documentos de ingreso de Yeison Bermúdez.
+
+Los usuarios ficticios usan la contraseña `CONTRASENA_PRUEBAS`. Además sigue la empresa de desarrollo «Servicios Andinos EST»
+(`laura.moreno@`, `admin@` y `camilo.duarte@serviciosandinos.co`, misma contraseña). Solo datos ficticios: nada real de candidatos.
+
+Para volver a sembrar desde cero hay que borrar los datos de esas empresas (o recrear la base) y reiniciar la API.

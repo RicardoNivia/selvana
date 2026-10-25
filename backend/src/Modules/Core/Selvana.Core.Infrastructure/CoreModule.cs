@@ -68,6 +68,15 @@ public static class CoreModule
         await scope.ServiceProvider.GetRequiredService<CoreDbContext>().Database.MigrateAsync();
     }
 
+    /// <summary>Ambiente de pruebas en línea: crea las tres empresas de ejemplo y sus usuarios si no existen (Ejemplo:Sembrar).</summary>
+    public static async Task<IReadOnlyList<EmpresaResumen>> SembrarEjemploCoreAsync(this IServiceProvider services, AccesoEjemplo acceso)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await SemillaEjemplo.SembrarAsync(sp.GetRequiredService<CoreDbContext>(), acceso, sp.GetRequiredService<IHasherContrasenas>(),
+            sp.GetRequiredService<TimeProvider>());
+    }
+
     /// <summary>Solo en desarrollo: crea la empresa de ejemplo y sus usuarios si no existen, con la contraseña de los user-secrets.</summary>
     public static async Task SembrarDesarrolloCoreAsync(this IServiceProvider services, Guid empresaId, string usuario, string? contrasena)
     {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Selvana.Api;
 using Selvana.Core.Api;
 using Selvana.Core.Infrastructure;
+using Selvana.Core.Infrastructure.Empresas;
 using Selvana.Core.Infrastructure.Persistence;
 using Selvana.Infrastructure.Common.Cqrs;
 using Selvana.Infrastructure.Common.Messaging;
@@ -78,6 +79,17 @@ if ((app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Pruebas")
 {
     await app.Services.SembrarDesarrolloCoreAsync(empresaDesarrollo, app.Configuration["Desarrollo:Usuario"] ?? "Laura Moreno",
         app.Configuration["Desarrollo:Contrasena"]);
+}
+
+// Datos de ejemplo del flujo completo (tres empresas), sin IA: los pide el ambiente de pruebas en línea con Ejemplo:Sembrar
+if (app.Configuration.GetValue<bool>("Ejemplo:Sembrar"))
+{
+    var ejemplo = app.Configuration.GetSection("Ejemplo");
+    var dueno = ejemplo["NombreDueno"] ?? "Dueño del ambiente";
+    var empresas = await app.Services.SembrarEjemploCoreAsync(new AccesoEjemplo(ejemplo["CorreoDueno"] ?? "", dueno,
+        ejemplo["ContrasenaDueno"] ?? "", ejemplo["ContrasenaFicticios"] ?? ""));
+    var contratables = await app.Services.SembrarEjemploReclutamientoAsync(empresas, dueno);
+    await app.Services.SembrarEjemploVinculacionAsync(contratables, "Valentina Ríos");
 }
 
 if (app.Configuration.GetValue<bool>("Proxy:ConfiarEncabezados"))
