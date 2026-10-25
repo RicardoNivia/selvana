@@ -9,7 +9,9 @@ Stack: .NET 10 (monolito modular, arquitectura limpia, SOLID, CQRS) + React/Type
 - `docs/adr/` — decisiones de arquitectura
 - `docs/arquitectura/backend.md` — guía de backend: arquitectura limpia, SOLID, CQRS, CORS
 - `docs/backlog/` — backlog por sprint
-- `wiki/` — wiki (publicar como code wiki en Azure DevOps, carpeta `/wiki`)
+- `wiki/` — wiki del proyecto en Markdown
+
+Repositorio: https://github.com/RicardoNivia/selvana (rama `main`). Cada funcionalidad entra por su propia rama y un pull request; nunca commit directo en `main` (ADR 0012). Azure DevOps se usa solo para Azure Boards.
 - `backend/` — todo lo de .NET (`Selvana.slnx`, `src/`, `tests/`)
 - `frontend/` — todo lo de React + TypeScript
 - `docker-compose.yml` — aplicación completa en contenedores

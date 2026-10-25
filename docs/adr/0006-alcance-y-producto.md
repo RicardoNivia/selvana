@@ -9,4 +9,4 @@
 - Sin módulo de entrevistas.
 - Sin clientes piloto: validación por benchmark, usabilidad con RRHH externos y analítica de uso; prueba gratuita pública desde el sprint 10.
 - Punto final: v1.0 en el sprint 30 con criterios de terminado definidos en el plan.
-- Documentación y wiki en el repositorio de Azure DevOps (`/docs`, `/wiki`).
+- Documentación y wiki en el repositorio de Azure DevOps (`/docs`, `/wiki`). *Reemplazado por el ADR 0012: el repositorio es GitHub.*
