@@ -83,11 +83,12 @@ public static class CoreModule
     }
 
     /// <summary>Solo en desarrollo: crea la empresa de ejemplo y sus usuarios si no existen, con la contraseña de los user-secrets.</summary>
-    public static async Task SembrarDesarrolloCoreAsync(this IServiceProvider services, Guid empresaId, string usuario, string? contrasena)
+    public static async Task SembrarDesarrolloCoreAsync(this IServiceProvider services, Guid empresaId, string usuario, string? contrasena,
+        UsuarioPropioDesarrollo? propio = null)
     {
         await using var scope = services.CreateAsyncScope();
         var sp = scope.ServiceProvider;
-        await SemillaDesarrollo.SembrarAsync(sp.GetRequiredService<CoreDbContext>(), empresaId, usuario, contrasena,
+        await SemillaDesarrollo.SembrarAsync(sp.GetRequiredService<CoreDbContext>(), empresaId, usuario, contrasena, propio,
             sp.GetRequiredService<IHasherContrasenas>(), sp.GetRequiredService<TimeProvider>());
     }
 }

@@ -97,8 +97,11 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 // El ambiente de pruebas en línea también lleva la empresa de ejemplo, con la contraseña desde sus secretos
 if ((app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Pruebas")) && Guid.TryParse(app.Configuration["Desarrollo:EmpresaId"], out var empresaDesarrollo))
 {
+    var propio = app.Configuration.GetSection("Desarrollo:UsuarioPropio");
     await app.Services.SembrarDesarrolloCoreAsync(empresaDesarrollo, app.Configuration["Desarrollo:Usuario"] ?? "Laura Moreno",
-        app.Configuration["Desarrollo:Contrasena"]);
+        app.Configuration["Desarrollo:Contrasena"],
+        string.IsNullOrWhiteSpace(propio["Correo"]) || string.IsNullOrWhiteSpace(propio["Contrasena"]) ? null
+            : new UsuarioPropioDesarrollo(propio["Correo"]!, propio["Nombre"] ?? propio["Correo"]!, propio["Contrasena"]!));
 }
 
 // Datos de ejemplo del flujo completo (tres empresas), sin IA: los pide el ambiente de pruebas en línea con Ejemplo:Sembrar

@@ -143,6 +143,7 @@ Ver `docs/adr/0004-integracion-erp-agnostica.md`. Selvana **no depende de ningú
 ## Comandos
 
 ```
+.\scripts\levantar-local.ps1        # todo en local: PostgreSQL portátil + API 5000 + worker 5090 + web 5173 (lee el .env; -SinWorker, -Detener)
 cd backend && dotnet build Selvana.slnx && dotnet test Selvana.slnx
 ASPNETCORE_ENVIRONMENT=Development dotnet run --project backend/src/Host/Selvana.Api --no-launch-profile --urls http://localhost:5000   # API + Swagger en /swagger (sin el ambiente no corren la semilla ni el CORS de desarrollo)
 dotnet run --project backend/src/Workers/Selvana.AI.Worker      # worker de IA en http://localhost:5090

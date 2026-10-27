@@ -76,13 +76,17 @@ internal sealed class DirectorioEmpresas(CoreDbContext db) : IDirectorioEmpresas
             .Select(e => (e.Id, e.EsTemporal)).ToList();
 }
 
+/// <summary>Usuario administrador propio del desarrollador (Desarrollo:UsuarioPropio en user-secrets); tiene su propia contraseña.</summary>
+public sealed record UsuarioPropioDesarrollo(string Correo, string Nombre, string Contrasena);
+
 /// <summary>
 /// Datos de desarrollo: la empresa de ejemplo (una EST) con sus empresas usuarias y tres usuarios para probar el ingreso y el alcance.
 /// La contraseña sale de la configuración (user-secrets: Desarrollo:Contrasena), nunca del código.
 /// </summary>
 internal static class SemillaDesarrollo
 {
-    public static async Task SembrarAsync(CoreDbContext db, Guid empresaId, string usuario, string? contrasena, IHasherContrasenas hasher, TimeProvider reloj)
+    public static async Task SembrarAsync(CoreDbContext db, Guid empresaId, string usuario, string? contrasena, UsuarioPropioDesarrollo? propio,
+        IHasherContrasenas hasher, TimeProvider reloj)
     {
         var ahora = reloj.GetUtcNow();
         var empresa = await db.Set<Empresa>().Include(e => e.EmpresasUsuarias).FirstOrDefaultAsync(e => e.Id == empresaId);
@@ -99,13 +103,18 @@ internal static class SemillaDesarrollo
         Guid[] Ids(params string[] nombres) => [.. empresa.EmpresasUsuarias.Where(e => nombres.Contains(e.Nombre)).Select(e => e.Id)];
 
         // El analista solo ve dos empresas usuarias: sirve para probar que los datos de un cliente no aparecen en otro
-        (string Correo, string Nombre, Rol Rol, Guid[]? Empresas)[] personas =
+        (string Correo, string Nombre, Rol Rol, Guid[]? Empresas, string? Contrasena)[] personas =
         [
-            ("laura.moreno@serviciosandinos.co", usuario, Rol.GerenteRrhh, null),
-            ("admin@serviciosandinos.co", "Andrés Rojas", Rol.Administrador, null),
-            ("camilo.duarte@serviciosandinos.co", "Camilo Duarte", Rol.Analista, Ids("Contact Center Norte", "Logística del Occidente")),
+            ("laura.moreno@serviciosandinos.co", usuario, Rol.GerenteRrhh, null, contrasena),
+            ("admin@serviciosandinos.co", "Andrés Rojas", Rol.Administrador, null, contrasena),
+            ("camilo.duarte@serviciosandinos.co", "Camilo Duarte", Rol.Analista, Ids("Contact Center Norte", "Logística del Occidente"), contrasena),
         ];
-        foreach (var (correo, nombre, rol, empresasUsuarias) in personas)
+        if (propio is not null)
+        {
+            personas = [.. personas, (propio.Correo, propio.Nombre, Rol.Administrador, null, propio.Contrasena)];
+        }
+
+        foreach (var (correo, nombre, rol, empresasUsuarias, clave) in personas)
         {
             var existente = await db.Set<Usuario>().FirstOrDefaultAsync(u => u.EmpresaId == empresaId && u.Correo == correo);
             if (existente is null)
@@ -115,9 +124,9 @@ internal static class SemillaDesarrollo
                 db.Add(existente);
             }
 
-            if (existente.ContrasenaHash is null && !string.IsNullOrWhiteSpace(contrasena))
+            if (existente.ContrasenaHash is null && !string.IsNullOrWhiteSpace(clave))
             {
-                existente.EstablecerContrasena(hasher.Calcular(contrasena));
+                existente.EstablecerContrasena(hasher.Calcular(clave));
             }
         }
 
