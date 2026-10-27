@@ -6,9 +6,7 @@ import { Chispa } from '../../shared/ui/Iconos'
 import { Buscador, Paginacion } from '../../shared/ui/Paginacion'
 import { usePaginacion } from '../../shared/ui/paginado'
 import { useEmpresaUsuariaActual } from '../sesion/empresaUsuaria'
-import { useSesion } from '../sesion/api'
-import { ElegirCargo } from './CargoDelCatalogo'
-import { type CargoCatalogo, estadoVacante, useEmpresaActual, useVacantes } from './api'
+import { estadoVacante, useVacantes } from './api'
 import type { InicioVacante } from './VacanteNueva'
 
 const filtros: [string, string][] = [['', 'Todas'], ['Borrador', 'Borradores'], ['EnAprobacion', 'En aprobación'], ['Publicada', 'Publicadas'], ['Cerrada', 'Cerradas']]
@@ -26,7 +24,7 @@ export function VacantesLista() {
     <>
       <header className="encabezado">
         <h1>Vacantes</h1>
-        <p>Describa lo que necesita en una frase. El agente redacta el aviso, los requisitos, las preguntas filtro y el rango salarial; usted revisa y publica.</p>
+        <p>Escriba lo que necesita y la IA llena la vacante, o agréguela a mano. Cada vacante es de un solo cargo, con las posiciones disponibles que necesite.</p>
       </header>
 
       <NuevaVacante />
@@ -61,59 +59,37 @@ export function VacantesLista() {
             </tbody>
           </table>
         </div>
-        {vacantes.data && vacantes.data.total === 0 && <div className="vacio" style={{ padding: 32 }}><p>Todavía no hay vacantes. Cree la primera con una frase.</p></div>}
+        {vacantes.data && vacantes.data.total === 0 && <div className="vacio" style={{ padding: 32 }}><p>Todavía no hay vacantes. Cree la primera con la IA o a mano.</p></div>}
         {vacantes.data && <Paginacion pagina={vacantes.data} cargando={vacantes.isPlaceholderData} onCambiar={setPagina} onCambiarTamano={setTamano} />}
       </section>
     </>
   )
 }
 
-/** Barra para empezar una vacante: con la frase, «Redactar con IA» abre el formulario y la IA lo llena; «Agregar manualmente» lo abre vacío. */
+/**
+ * Barra para empezar una vacante: «Redactar con IA» abre el formulario y la IA lo llena con la frase;
+ * «Agregar manualmente» lo abre vacío. El cargo del catálogo y la empresa usuaria se eligen en el formulario.
+ */
 function NuevaVacante() {
-  const empresa = useEmpresaActual()
   const navegar = useNavigate()
   const [frase, setFrase] = useState('')
-  const [cargo, setCargo] = useState<CargoCatalogo | null>(null)
-  const { data: sesion } = useSesion()
-  const actual = useEmpresaUsuariaActual()
-  // Arranca en la empresa usuaria elegida en la barra lateral; solo ofrece las que la persona ve
-  const [usuaria, setUsuaria] = useState(actual.id)
-  const visibles = new Set(sesion?.empresasUsuarias.map((e) => e.id))
-  const usuarias = empresa.data?.empresasUsuarias.filter((e) => e.activa && visibles.has(e.id)) ?? []
 
   return (
     <form
       className="tarjeta formulario"
-      style={{ padding: 20, borderColor: 'var(--color-ia-borde)' }}
+      style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8, borderColor: 'var(--color-ia-borde)' }}
       onSubmit={(e) => {
         e.preventDefault()
-        navegar('/consola/vacantes/nueva', { state: { frase, cargo, empresaUsuariaId: usuaria, generar: true } satisfies InicioVacante })
+        navegar('/consola/vacantes/nueva', { state: { frase, generar: true } satisfies InicioVacante })
       }}
     >
-      <label style={{ color: 'var(--color-ia)' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><Chispa width={16} height={16} />Nueva vacante</span>
-        <textarea className="area-texto" rows={2} required value={frase} onChange={(e) => setFrase(e.target.value)}
-          placeholder="Ej.: Necesito 25 auxiliares de bodega para Funza, turno noche, con curso de montacargas" style={{ fontSize: 16 }} />
-      </label>
-      <ElegirCargo elegido={cargo} onElegir={setCargo} />
-      <span className="ayuda">{cargo ? 'La IA parte del perfil del cargo y la frase lo ajusta (ciudad, cupos, jornada).' : 'Sin cargo del catálogo, la IA redacta la vacante desde cero.'}</span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
-        {empresa.data?.esTemporal && (
-          <label style={{ flex: '1 1 260px' }}>
-            Empresa usuaria
-            <select className="selector" value={usuaria} onChange={(e) => setUsuaria(e.target.value)}>
-              <option value="">{empresa.data.nombre} (vacante propia)</option>
-              {usuarias.map((u) => <option key={u.id} value={u.id}>{u.nombre} · {u.ciudad}</option>)}
-            </select>
-          </label>
-        )}
-        <Boton type="submit" variante="ia" icono={<Chispa />} disabled={!frase.trim()}>
-          Redactar con IA
-        </Boton>
-        <Boton onClick={() => navegar('/consola/vacantes/nueva', { state: { cargo, empresaUsuariaId: usuaria } satisfies InicioVacante })}>
-          Agregar manualmente
-        </Boton>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+        <input className="entrada" style={{ flex: '1 1 360px' }} value={frase} onChange={(e) => setFrase(e.target.value)} aria-label="Qué necesita"
+          placeholder="Ej.: Necesito 25 auxiliares de bodega para Funza, turno noche, con curso de montacargas" />
+        <Boton type="submit" variante="ia" icono={<Chispa />} disabled={!frase.trim()}>Redactar con IA</Boton>
+        <Boton variante="primario" onClick={() => navegar('/consola/vacantes/nueva')}>Agregar manualmente</Boton>
       </div>
+      <span className="ayuda">Diga el cargo, cuántas posiciones, la ciudad y la jornada. La IA llena el formulario de la vacante y usted lo revisa; si la frase pide varios cargos, le pregunta antes.</span>
     </form>
   )
 }
