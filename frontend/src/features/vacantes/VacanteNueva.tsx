@@ -5,11 +5,13 @@ import { Boton } from '../../shared/ui/Boton'
 import { Chispa, IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Iconos'
 import { useSesion } from '../sesion/api'
 import { useEmpresaUsuariaActual } from '../sesion/empresaUsuaria'
-import { type ContenidoVacante, type Vacante, useCrearVacante, useEditarVacante, useEmpresaActual, useRedactarVacante, useSolicitarVacante, useVacante } from './api'
+import { ElegirCargo } from './CargoDelCatalogo'
+import { type CargoCatalogo, type ContenidoVacante, type Vacante, useCrearVacante, useEditarVacante, useEmpresaActual, useRedactarVacante, useSolicitarVacante, useVacante } from './api'
 
-/** Lo que llega desde la barra de la lista: la frase y, si la hay, la empresa usuaria; con generar, se pide a la IA al abrir. */
+/** Lo que llega desde la barra de la lista: la frase, el cargo y la empresa usuaria; con generar, se pide a la IA al abrir. */
 export interface InicioVacante {
   frase?: string
+  cargo?: CargoCatalogo | null
   empresaUsuariaId?: string
   generar?: boolean
 }
@@ -39,8 +41,9 @@ export function VacanteNueva() {
   const vacante = useVacante(vacanteId ?? '', Boolean(vacanteId)).data
 
   const [frase, setFrase] = useState(inicio.frase ?? '')
+  const [cargo, setCargo] = useState<CargoCatalogo | null>(inicio.cargo ?? null)
   const [usuaria, setUsuaria] = useState(inicio.empresaUsuariaId ?? actual.id)
-  const [f, setF] = useState<Campos>(vacios)
+  const [f, setF] = useState<Campos>({ ...vacios, cargo: inicio.cargo?.nombre ?? '' })
   const [deIa, setDeIa] = useState<Partial<Record<Campo, boolean>>>({})
   const [pidiendo, setPidiendo] = useState(false)
   const [llenadoCon, setLlenadoCon] = useState<string>()
@@ -56,7 +59,7 @@ export function VacanteNueva() {
     setPidiendo(true)
     const listo = { onError: () => setPidiendo(false) }
     if (vacanteId) redactar.mutate({ id: vacanteId, frase }, listo)
-    else solicitar.mutate({ frase, empresaUsuariaId: usuaria || null, cargoId: null }, { ...listo, onSuccess: (r) => setVacanteId(r.id) })
+    else solicitar.mutate({ frase, empresaUsuariaId: usuaria || null, cargoId: cargo?.id ?? null }, { ...listo, onSuccess: (r) => setVacanteId(r.id) })
   }
 
   // Desde la barra de la lista con «Redactar con IA»: se pide apenas abre la pantalla
@@ -89,7 +92,7 @@ export function VacanteNueva() {
   }
 
   const contenido = (): ContenidoVacante => ({
-    titulo: f.titulo, cargo: f.cargo, ciudad: f.ciudad, codigoMunicipio: f.codigoMunicipio, cupos: Number(f.cupos) || 0, jornada: f.jornada,
+    titulo: f.titulo, cargo: cargo?.nombre ?? f.cargo, ciudad: f.ciudad, codigoMunicipio: f.codigoMunicipio, cupos: Number(f.cupos) || 0, jornada: f.jornada,
     descripcion: f.descripcion, salarioMinimo: Number(f.salarioMinimo) || 0, salarioMaximo: Number(f.salarioMaximo) || 0,
     requisitos: lineas(f.requisitos), preguntasFiltro: lineas(f.preguntas),
   })
@@ -106,7 +109,7 @@ export function VacanteNueva() {
         await editar.mutateAsync(c)
         navegar(`/consola/vacantes/${vacanteId}`)
       } else {
-        const r = await crear.mutateAsync({ ...c, empresaUsuariaId: usuaria || null, cargoId: null })
+        const r = await crear.mutateAsync({ ...c, empresaUsuariaId: usuaria || null, cargoId: cargo?.id ?? null })
         navegar(`/consola/vacantes/${r.id}`)
       }
     } catch {
@@ -130,15 +133,21 @@ export function VacanteNueva() {
       </header>
 
       <form className="tarjeta formulario" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }} onSubmit={(e) => { e.preventDefault(); void guardar() }}>
-        {empresa.data?.esTemporal && (
-          <label style={{ maxWidth: 480 }}>
-            Empresa usuaria
-            <select className="selector" value={usuaria} onChange={(e) => setUsuaria(e.target.value)} disabled={Boolean(vacanteId)}>
-              <option value="">{empresa.data.nombre} (vacante propia)</option>
-              {usuarias.map((u) => <option key={u.id} value={u.id}>{u.nombre} · {u.ciudad}</option>)}
-            </select>
-          </label>
-        )}
+        <div className="dos-campos">
+          {empresa.data?.esTemporal && (
+            <label>
+              Empresa usuaria
+              <select className="selector" value={usuaria} onChange={(e) => setUsuaria(e.target.value)} disabled={Boolean(vacanteId)}>
+                <option value="">{empresa.data.nombre} (vacante propia)</option>
+                {usuarias.map((u) => <option key={u.id} value={u.id}>{u.nombre} · {u.ciudad}</option>)}
+              </select>
+            </label>
+          )}
+          <div className="campo" style={{ gap: 6 }}>
+            <span>Cargo del catálogo</span>
+            {vacanteId && !cargo ? <span className="sub-celda">Sin cargo del catálogo</span> : <ElegirCargo elegido={cargo} onElegir={(c) => { if (!vacanteId) { setCargo(c); poner('cargo', c?.nombre ?? '') } }} />}
+          </div>
+        </div>
 
         <div className="bloque-ia">
           <div className="bloque-ia-cabeza"><Chispa />Llenar la vacante con IA</div>
@@ -160,7 +169,7 @@ export function VacanteNueva() {
               <Boton variante="ia" icono={<Chispa />} cargando={redactando} textoCargando="La IA está redactando…" disabled={guardando} onClick={generar}>
                 {aclaraciones.length > 0 ? 'Responder y generar' : llenadoCon ? 'Pedir otro borrador' : 'Generar con IA'}
               </Boton>
-              <span className="ayuda">Diga el cargo, cuántas posiciones, la ciudad y la jornada. Si pide varios cargos, la IA le pregunta antes.</span>
+              <span className="ayuda">{cargo ? 'La IA parte del perfil del cargo y la frase lo ajusta (ciudad, posiciones, jornada).' : 'Sin cargo del catálogo, la IA redacta desde cero.'}</span>
             </div>
           </div>
         </div>
@@ -169,7 +178,7 @@ export function VacanteNueva() {
 
         <label>Título del aviso<input className={clase('titulo')} value={f.titulo} onChange={(e) => poner('titulo', e.target.value)} maxLength={200} /></label>
         <div className="dos-campos">
-          <label>Cargo<input className={clase('cargo')} value={f.cargo} onChange={(e) => poner('cargo', e.target.value)} maxLength={200} /></label>
+          <label>Cargo<input className={clase('cargo')} value={cargo?.nombre ?? f.cargo} onChange={(e) => poner('cargo', e.target.value)} disabled={Boolean(cargo)} maxLength={200} /></label>
           <label>
             Ciudad o municipio
             <AutocompletarMunicipio valor={{ codigo: f.codigoMunicipio, ciudad: f.ciudad }} ia={deIa.ciudad}
