@@ -199,6 +199,10 @@ export const useAprobarPerfil = () =>
 export const useSolicitarPerfil = () =>
   useMutacionEstructura((cargoId: string) => apiSend('POST', `/api/v1/core/estructura/cargos/${cargoId}/solicitar-perfil`))
 
+export const useCrearMaestro = (tipo: TipoMaestro) =>
+  useMutacionEstructura((v: { nombre: string; codigo?: string; sede?: string }) =>
+    apiSend<{ id: string }>('POST', `/api/v1/core/estructura/${tipo}`, tipo === 'centros-costo' ? { codigo: v.codigo ?? '', nombre: v.nombre, sede: v.sede ?? '' } : { nombre: v.nombre }))
+
 export const useEditarMaestro = (tipo: TipoMaestro) =>
   useMutacionEstructura((v: { id: string; nombre: string; activo: boolean; sede?: string }) =>
     apiSend('PUT', `/api/v1/core/estructura/${tipo}/${v.id}`, tipo === 'centros-costo' ? { nombre: v.nombre, sede: v.sede ?? '', activo: v.activo } : { nombre: v.nombre, activo: v.activo }))

@@ -65,9 +65,11 @@ export function CargoNuevo() {
   const [riesgo, setRiesgo] = useState('Por definir')
   const [ruta, setRuta] = useState<'ia' | 'manual'>()
   const [falta, setFalta] = useState<string>()
+  const areas = resumen.data?.nombresAreas ?? []
+  const sinAreas = resumen.isSuccess && areas.length === 0
 
   const enviar = (conIa: boolean) => {
-    if (!nombre.trim() || !area.trim()) return setFalta('Escriba el nombre y el área del cargo.')
+    if (!nombre.trim() || !area) return setFalta('Escriba el nombre del cargo y elija su área.')
     setFalta(undefined)
     setRuta(conIa ? 'ia' : 'manual')
     const datos = conIa
@@ -93,10 +95,18 @@ export function CargoNuevo() {
           </label>
           <label>
             Área
-            <input className="entrada" list="areas-cargo" value={area} onChange={(e) => setArea(e.target.value)} placeholder="Elija o escriba el área" maxLength={200} />
-            <datalist id="areas-cargo">{resumen.data?.nombresAreas.map((a) => <option key={a} value={a} />)}</datalist>
+            <select className="selector" value={area} onChange={(e) => setArea(e.target.value)} disabled={sinAreas}>
+              <option value="">{resumen.isPending ? 'Cargando áreas…' : sinAreas ? 'No hay áreas creadas' : 'Elija el área'}</option>
+              {areas.map((a) => <option key={a}>{a}</option>)}
+            </select>
           </label>
         </div>
+        {sinAreas && (
+          <div className="aviso aviso-alerta" style={{ alignItems: 'center' }}>
+            <span style={{ flex: 1 }}>Cada cargo se asocia a un área. Cree primero el área y vuelva aquí.</span>
+            <Link to={`${rutaLista}?pestana=areas`} className="boton boton-secundario boton-pequeno">Crear un área</Link>
+          </div>
+        )}
 
         <div className="bloque-ia">
           <div className="bloque-ia-cabeza"><Chispa />Generar el perfil con IA</div>
@@ -286,8 +296,9 @@ function EditarCargo({ cargo, areas, onCerrar }: { cargo: Cargo; areas: string[]
         <label>Nombre<input className="entrada" value={nombre} onChange={(e) => setNombre(e.target.value)} required /></label>
         <label>
           Área
-          <input className="entrada" list="areas-editar" value={area} onChange={(e) => setArea(e.target.value)} required />
-          <datalist id="areas-editar">{areas.map((a) => <option key={a} value={a} />)}</datalist>
+          <select className="selector" value={area} onChange={(e) => setArea(e.target.value)}>
+            {(areas.includes(cargo.area) ? areas : [cargo.area, ...areas]).map((a) => <option key={a}>{a}</option>)}
+          </select>
         </label>
       </div>
       <label className="interruptor"><input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} />Cargo activo</label>

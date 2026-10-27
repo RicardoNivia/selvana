@@ -31,6 +31,10 @@ public sealed record EditarMaestroRequest(string Nombre, bool Activo);
 
 public sealed record EditarCentroCostoRequest(string Nombre, string Sede, bool Activo);
 
+public sealed record CrearMaestroRequest(string Nombre);
+
+public sealed record CrearCentroCostoRequest(string Codigo, string Nombre, string Sede);
+
 public sealed record IngresarRequest(string Correo, string Contrasena)
 {
     public override string ToString() => $"IngresarRequest {{ Correo = {Correo} }}";
@@ -205,5 +209,25 @@ public static class CoreEndpoints
         estructura.MapPut("/centros-costo/{id:guid}", async (Guid id, EditarCentroCostoRequest body, ICommandHandler<EditarCentroCostoCommand> handler, CancellationToken ct) =>
                 (await handler.Handle(new EditarCentroCostoCommand(id, body.Nombre, body.Sede, body.Activo), ct)).ToHttp())
             .WithName("EditarCentroCosto");
+
+        estructura.MapPost("/sedes", async (CrearMaestroRequest body, ICommandHandler<CrearSedeCommand, Guid> handler, CancellationToken ct) =>
+                Creado(await handler.Handle(new CrearSedeCommand(body.Nombre), ct), "sedes"))
+            .WithName("CrearSede")
+            .Produces<ImportacionCreadaResponse>(StatusCodes.Status201Created);
+
+        estructura.MapPost("/areas", async (CrearMaestroRequest body, ICommandHandler<CrearAreaCommand, Guid> handler, CancellationToken ct) =>
+                Creado(await handler.Handle(new CrearAreaCommand(body.Nombre), ct), "areas"))
+            .WithName("CrearArea")
+            .Produces<ImportacionCreadaResponse>(StatusCodes.Status201Created);
+
+        estructura.MapPost("/centros-costo", async (CrearCentroCostoRequest body, ICommandHandler<CrearCentroCostoCommand, Guid> handler, CancellationToken ct) =>
+                Creado(await handler.Handle(new CrearCentroCostoCommand(body.Codigo, body.Nombre, body.Sede), ct), "centros-costo"))
+            .WithName("CrearCentroCosto")
+            .Produces<ImportacionCreadaResponse>(StatusCodes.Status201Created);
     }
+
+    private static IResult Creado(Result<Guid> resultado, string coleccion) =>
+        resultado.IsSuccess
+            ? Results.Created($"/api/v1/core/estructura/{coleccion}/{resultado.Value}", new ImportacionCreadaResponse(resultado.Value))
+            : resultado.ToHttp();
 }

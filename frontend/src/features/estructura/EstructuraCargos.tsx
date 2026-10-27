@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { Buscador, Paginacion } from '../../shared/ui/Paginacion'
@@ -7,7 +7,7 @@ import { usePaginacion } from '../../shared/ui/paginado'
 import { estadoDe } from './CargoPaginas'
 import {
   type CentroCosto, type Maestro, type ResumenEstructura, type TipoMaestro,
-  useCargos, useEditarMaestro, useMaestros, useResumenEstructura,
+  useCargos, useCrearMaestro, useEditarMaestro, useMaestros, useResumenEstructura,
 } from './api'
 
 type Pestana = 'cargos' | TipoMaestro
@@ -16,27 +16,20 @@ const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle:
 const numero = new Intl.NumberFormat('es-CO')
 const rutaNuevoCargo = '/consola/empresa/estructura/cargos/nuevo'
 
+const pestanasValidas: Pestana[] = ['cargos', 'sedes', 'areas', 'centros-costo']
+
 export function EstructuraCargos() {
   const resumen = useResumenEstructura()
-  const [pestana, setPestana] = useState<Pestana>('cargos')
+  // La pestaña va en la dirección (?pestana=areas) para poder llegar directo desde «Nuevo cargo»
+  const [params, setParams] = useSearchParams()
+  const pedida = params.get('pestana') as Pestana | null
+  const pestana: Pestana = pedida && pestanasValidas.includes(pedida) ? pedida : 'cargos'
+  const setPestana = (p: Pestana) => setParams(p === 'cargos' ? {} : { pestana: p }, { replace: true })
 
   if (resumen.isPending) return <EsqueletoPantalla />
   if (resumen.isError) return <p role="alert" className="aviso aviso-error">No hay conexión con la API. Revise que esté corriendo en el puerto 5000.</p>
 
   const r = resumen.data
-  if (r.cargos === 0 && r.sedes === 0) {
-    return (
-      <div className="tarjeta vacio">
-        <h2>La estructura llega de la nómina</h2>
-        <p>Suba la nómina; la IA ordena sedes, áreas, centros de costo y cargos, y usted aprueba. También puede agregar un cargo a mano.</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
-          <Link to="/consola/empresa/conectar-nomina" className="boton boton-primario">Conectar nómina</Link>
-          <Link to={rutaNuevoCargo} className="boton boton-secundario">Agregar cargo</Link>
-        </div>
-      </div>
-    )
-  }
-
   const pestanas: [Pestana, string][] = [
     ['cargos', `Cargos · ${r.cargos}`],
     ['sedes', `Sedes · ${r.sedes}`],
@@ -58,6 +51,13 @@ export function EstructuraCargos() {
         </div>
         {r.perfilesPorRevisar > 0 && <span className="pill pill-ia">{r.perfilesPorRevisar} perfiles de cargo por revisar</span>}
       </header>
+
+      {!r.fuente && (
+        <div className="aviso aviso-info" style={{ marginBottom: 16 }}>
+          <span style={{ flex: 1 }}>Si conecta la nómina, la IA trae sedes, áreas, centros de costo y cargos. También puede crearlos a mano: empiece por las áreas, porque cada cargo se asocia a una.</span>
+          <Link to="/consola/empresa/conectar-nomina" className="boton boton-secundario boton-pequeno">Conectar nómina</Link>
+        </div>
+      )}
 
       {r.perfilesRedactando > 0 && (
         <div className="estado-agente" role="status">
@@ -179,14 +179,20 @@ function TablaMaestros({ tipo, resumen }: { tipo: TipoMaestro; resumen: ResumenE
   const { pagina, setPagina, tamano, setTamano } = usePaginacion()
   const [buscar, setBuscar] = useState('')
   const [editando, setEditando] = useState<string>()
+  const [agregando, setAgregando] = useState(false)
   const datos = useMaestros<FilaMaestro>(tipo, { pagina, tamano, buscar })
   const alBuscar = useCallback((t: string) => { setBuscar(t); setPagina(1) }, [setPagina])
   const esCentro = tipo === 'centros-costo'
   const etiqueta = tipo === 'sedes' ? 'Buscar sede' : tipo === 'areas' ? 'Buscar área' : 'Buscar código, nombre o sede'
+  const textoAgregar = tipo === 'sedes' ? 'Agregar sede' : tipo === 'areas' ? 'Agregar área' : 'Agregar centro de costo'
+  const vacio = !datos.isPending && datos.data?.items.length === 0
 
   return (
     <section className="tarjeta" aria-label={tipo}>
-      <div className="barra-filtros"><Buscador etiqueta={etiqueta} onBuscar={alBuscar} /></div>
+      <div className="barra-filtros">
+        <Buscador etiqueta={etiqueta} onBuscar={alBuscar} />
+        <Boton variante="primario" style={{ marginLeft: 'auto' }} disabled={agregando} onClick={() => setAgregando(true)}>{textoAgregar}</Boton>
+      </div>
       <div className="tabla-envoltura">
         <table className="tabla">
           <thead>
@@ -200,6 +206,12 @@ function TablaMaestros({ tipo, resumen }: { tipo: TipoMaestro; resumen: ResumenE
             </tr>
           </thead>
           <tbody>
+            {agregando && <FilaNueva tipo={tipo} sedes={resumen.nombresSedes} onCerrar={() => setAgregando(false)} />}
+            {vacio && !agregando && (
+              <tr><td colSpan={esCentro ? 6 : 4} style={{ padding: 32, textAlign: 'center', color: 'var(--color-texto-suave)' }}>
+                {buscar ? 'No hay resultados con esa búsqueda.' : `Aún no hay registros. Use «${textoAgregar}».`}
+              </td></tr>
+            )}
             {datos.isPending
               ? Array.from({ length: 6 }, (_, i) => (
                   <tr key={i}>
@@ -225,7 +237,7 @@ function TablaMaestros({ tipo, resumen }: { tipo: TipoMaestro; resumen: ResumenE
                       <td className="num">{numero.format(f.empleados)}</td>
                       <td>
                         <span style={{ display: 'inline-flex', gap: 6 }}>
-                          {!f.activo ? <span className="pill pill-neutra">Inactivo</span> : f.empleados === 0 ? <span className="pill pill-alerta">Sin empleados</span> : <span className="pill pill-ok">Activo</span>}
+                          {!f.activo ? <span className="pill pill-neutra">Inactivo</span> : f.empleados === 0 && resumen.fuente ? <span className="pill pill-alerta">Sin empleados</span> : <span className="pill pill-ok">Activo</span>}
                           {f.editadoManualmente && <span className="pill pill-neutra">Editado</span>}
                         </span>
                       </td>
@@ -238,6 +250,43 @@ function TablaMaestros({ tipo, resumen }: { tipo: TipoMaestro; resumen: ResumenE
       </div>
       {datos.data && <Paginacion pagina={datos.data} cargando={datos.isPlaceholderData} onCambiar={setPagina} onCambiarTamano={setTamano} />}
     </section>
+  )
+}
+
+function FilaNueva({ tipo, sedes, onCerrar }: { tipo: TipoMaestro; sedes: string[]; onCerrar: () => void }) {
+  const crear = useCrearMaestro(tipo)
+  const esCentro = tipo === 'centros-costo'
+  const [codigo, setCodigo] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [sede, setSede] = useState('')
+  const guardar = () => crear.mutate({ codigo, nombre, sede }, { onSuccess: onCerrar })
+
+  return (
+    <tr>
+      {esCentro && <td><input className="entrada mono" aria-label="Código" value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="CC-001" maxLength={50} autoFocus /></td>}
+      <td>
+        <input className="entrada" aria-label="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={200} autoFocus={!esCentro}
+          placeholder={tipo === 'areas' ? 'Ej.: Logística' : tipo === 'sedes' ? 'Ej.: Bogotá' : 'Ej.: Bodega Funza'}
+          onKeyDown={(e) => { if (e.key === 'Enter') guardar(); if (e.key === 'Escape') onCerrar() }} />
+      </td>
+      {esCentro && (
+        <td>
+          <select className="selector" aria-label="Sede" value={sede} onChange={(e) => setSede(e.target.value)}>
+            <option value="">Sin sede</option>
+            {sedes.map((s) => <option key={s}>{s}</option>)}
+          </select>
+        </td>
+      )}
+      <td className="num">—</td>
+      <td><span className="pill pill-neutra">Nuevo</span></td>
+      <td className="acciones-fila">
+        <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+          {crear.error && <span role="alert" className="error-formulario">{crear.error.message}</span>}
+          <Boton pequeno variante="primario" cargando={crear.isPending} textoCargando="Guardando…" onClick={guardar}>Guardar</Boton>
+          <Boton pequeno onClick={onCerrar} disabled={crear.isPending}>Cancelar</Boton>
+        </span>
+      </td>
+    </tr>
   )
 }
 

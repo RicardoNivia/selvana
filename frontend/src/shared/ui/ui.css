@@ -63,6 +63,7 @@
 .aviso-alerta svg { color: var(--color-alerta); }
 .aviso-ok { background: var(--color-exito-suave); color: var(--color-texto); font-weight: 600; font-size: 14px; align-items: center; }
 .aviso-ok svg { color: var(--color-exito); }
+.aviso-info { background: var(--color-info-suave); color: var(--color-texto); align-items: center; }
 .aviso-error { background: var(--color-error-suave); color: var(--color-texto); }
 
 .bloque-ia { border: 1px solid var(--color-ia-borde); border-radius: var(--radio-l); overflow: hidden; background: var(--color-superficie); }
