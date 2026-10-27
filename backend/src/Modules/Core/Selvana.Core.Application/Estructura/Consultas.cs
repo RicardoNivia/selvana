@@ -34,6 +34,17 @@ internal sealed class ListarCargosHandler(IContextoUsuario usuario, ILecturaEstr
             query.EstadoPerfil, cancellationToken);
 }
 
+public sealed record ObtenerCargoQuery(Guid CargoId) : IQuery<CargoDto>;
+
+internal sealed class ObtenerCargoHandler(IContextoUsuario usuario, ILecturaEstructura lectura)
+    : IQueryHandler<ObtenerCargoQuery, CargoDto>
+{
+    public async Task<Result<CargoDto>> Handle(ObtenerCargoQuery query, CancellationToken cancellationToken) =>
+        await lectura.CargoAsync(usuario.EmpresaId, query.CargoId, cancellationToken) is { } cargo
+            ? cargo
+            : Result.Failure<CargoDto>(Domain.Estructura.EstructuraErrors.CargoNoExiste);
+}
+
 public sealed record ListarSedesQuery(int? Pagina, int? Tamano, string? Buscar) : IQuery<Pagina<MaestroDto>>;
 
 internal sealed class ListarSedesHandler(IContextoUsuario usuario, ILecturaEstructura lectura)

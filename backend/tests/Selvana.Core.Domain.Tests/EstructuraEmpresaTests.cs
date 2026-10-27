@@ -220,7 +220,7 @@ public sealed class EstructuraEmpresaTests
         var estructura = Aplicada();
         var existente = estructura.Cargos[0];
 
-        estructura.CrearCargo($"  {existente.Nombre.ToUpperInvariant()} ", "Bodega", Ahora).Error.Should().Be(EstructuraErrors.CargoDuplicado);
+        estructura.CrearCargo($"  {existente.Nombre.ToUpperInvariant()} ", "Bodega", null, "Laura", Ahora).Error.Should().Be(EstructuraErrors.CargoDuplicado);
         estructura.EditarCargo(estructura.Cargos[1].Id, existente.Nombre, "Bodega", true, null, "Laura", Ahora).Error.Should().Be(EstructuraErrors.CargoDuplicado);
     }
 
@@ -229,12 +229,26 @@ public sealed class EstructuraEmpresaTests
     {
         var estructura = Aplicada();
 
-        var nuevo = estructura.CrearCargo("Analista de datos", "Administración", Ahora).Value;
+        var nuevo = estructura.CrearCargo("Analista de datos", "Administración", null, "Laura", Ahora).Value;
         Resincronizar(estructura);
 
         nuevo.EstadoPerfil.Should().Be(EstadoPerfil.SinPerfil);
         nuevo.PerfilSolicitadoEn.Should().Be(Ahora);
         estructura.Cargos.Should().Contain(c => c.Id == nuevo.Id && c.Nombre == "Analista de datos");
+    }
+
+    [Fact]
+    public void UnCargoCreadoConPerfilEscritoAManoQuedaAprobadoPorQuienLoEscribioSinPedirloALaIa()
+    {
+        var estructura = Aplicada();
+        var perfil = new PerfilCargo { Mision = "Analizar datos", Funciones = ["Construir tableros"], Requisitos = ["Profesional en estadística"], RiesgoArl = "Clase I" };
+
+        var nuevo = estructura.CrearCargo("Analista de datos", "Administración", perfil, "Laura", Ahora).Value;
+
+        nuevo.EstadoPerfil.Should().Be(EstadoPerfil.Aprobado);
+        nuevo.AprobadoPor.Should().Be("Laura");
+        nuevo.PerfilSolicitadoEn.Should().BeNull();
+        nuevo.Perfil!.Mision.Should().Be("Analizar datos");
     }
 
     [Fact]

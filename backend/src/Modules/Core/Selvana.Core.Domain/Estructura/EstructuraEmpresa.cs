@@ -236,8 +236,11 @@ public sealed class EstructuraEmpresa : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    /// <summary>Crea a mano un cargo que todavía no está en la nómina (por ejemplo, para abrir una vacante nueva).</summary>
-    public Result<Cargo> CrearCargo(string nombre, string area, DateTimeOffset ahora)
+    /// <summary>
+    /// Crea a mano un cargo que todavía no está en la nómina (por ejemplo, para abrir una vacante nueva).
+    /// Sin perfil, queda pendiente de que la IA lo redacte; con perfil escrito por una persona, queda aprobado por ella.
+    /// </summary>
+    public Result<Cargo> CrearCargo(string nombre, string area, PerfilCargo? perfil, string usuario, DateTimeOffset ahora)
     {
         if (ExisteCargo(nombre, excepto: null))
         {
@@ -245,7 +248,15 @@ public sealed class EstructuraEmpresa : AggregateRoot<Guid>
         }
 
         var cargo = Cargo.CrearManual(nombre, area);
-        cargo.MarcarPerfilSolicitado(ahora);
+        if (perfil is null)
+        {
+            cargo.MarcarPerfilSolicitado(ahora);
+        }
+        else
+        {
+            cargo.Editar(nombre, area, activo: true, perfil, usuario, ahora);
+        }
+
         _cargos.Add(cargo);
         return cargo;
     }

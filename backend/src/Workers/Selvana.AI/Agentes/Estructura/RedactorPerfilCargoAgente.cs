@@ -36,7 +36,7 @@ internal sealed partial class RedactorPerfilCargoAgente(IChatClient ia, IFiltroV
         - Nunca pidas edad, género, estado civil, hijos, apariencia, foto, religión, barrio, estrato ni dirección.
         - "riesgoArl": la clase de riesgo de la ARL más probable para el cargo, solo "Clase I", "Clase II", "Clase III", "Clase IV" o "Clase V".
         - "razones": exactamente 3 razones de por qué redactaste el perfil así. "signo" es "+" si es un dato que sostiene el perfil
-          y "−" si es algo que RRHH debe revisar. "fuente" es "Nómina" si sale de los datos que te dieron, "Normativa" si sale de una ley
+          y "−" si es algo que RRHH debe revisar. "fuente" es "Nómina" si sale de los datos de la nómina, "RRHH" si sale de lo que contó RRHH del cargo, "Normativa" si sale de una ley
           colombiana (nómbrala en el texto) o "Supuesto" si lo supusiste.
         """;
 
@@ -49,6 +49,11 @@ internal sealed partial class RedactorPerfilCargoAgente(IChatClient ia, IFiltroV
             Empleados con este cargo: {cargo.Empleados}
             Nombres con los que aparece en la nómina: {string.Join(", ", cargo.NombresEnNomina)}
             """;
+        if (!string.IsNullOrWhiteSpace(cargo.Descripcion))
+        {
+            datos += $"\nLo que RRHH cuenta del cargo (úsalo como fuente principal y cítalo como \"RRHH\"): {cargo.Descripcion}";
+        }
+
         var mensajes = new List<ChatMessage> { new(ChatRole.System, Instrucciones), new(ChatRole.User, datos) };
         var opciones = new ContextoIa(empresaId, Nombre, ContieneDatosPersonales: false).AplicarA(new ChatOptions { MaxOutputTokens = 16_000 });
 

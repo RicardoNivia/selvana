@@ -104,13 +104,6 @@
 .pestana[aria-selected='true'] { color: var(--color-primario); border-bottom-color: var(--color-primario); }
 
 .dos-columnas { display: flex; flex-wrap: wrap; gap: var(--espacio-4); align-items: flex-start; }
-.lista-cargos { flex: 1 1 340px; min-width: 0; overflow: hidden; }
-.item-cargo { display: flex; gap: var(--espacio-3); align-items: center; width: 100%; padding: var(--espacio-3) var(--espacio-4); border: 0; border-bottom: 1px solid var(--color-borde); background: transparent; text-align: left; font: inherit; color: inherit; cursor: pointer; }
-.item-cargo:hover { background: var(--color-superficie-2); }
-.item-cargo[aria-pressed='true'] { background: var(--color-primario-suave); }
-.item-cargo .nombre { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.item-cargo .nombre b { font-size: 14px; }
-.item-cargo .nombre span { font-size: 12px; color: var(--color-texto-tenue); }
 .detalle-cargo { flex: 1.5 1 460px; min-width: 0; padding: var(--espacio-6); display: flex; flex-direction: column; gap: var(--espacio-4); }
 .detalle-cargo h2 { margin: 0; font-size: 22px; }
 .campo { display: flex; flex-direction: column; gap: 6px; }

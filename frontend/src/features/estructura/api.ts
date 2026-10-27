@@ -163,6 +163,15 @@ export function useCargos(filtro: { pagina: number; tamano?: number; buscar: str
   })
 }
 
+export function useCargo(id: string) {
+  return useQuery({
+    queryKey: ['estructura', 'cargo', id],
+    queryFn: ({ signal }) => apiGet<Cargo>(`/api/v1/core/estructura/cargos/${id}`, signal),
+    // Mientras la IA redacta el perfil, se consulta seguido para mostrarlo apenas llegue
+    refetchInterval: (q) => (q.state.data?.redactandoPerfil ? 3000 : false),
+  })
+}
+
 export function useMaestros<T extends Maestro | CentroCosto>(tipo: TipoMaestro, filtro: { pagina: number; tamano?: number; buscar: string }) {
   return useQuery({
     queryKey: ['estructura', tipo, filtro],
@@ -177,7 +186,8 @@ function useMutacionEstructura<V, R = unknown>(fn: (v: V) => Promise<R>) {
 }
 
 export const useCrearCargo = () =>
-  useMutacionEstructura((v: { nombre: string; area: string }) => apiSend<{ id: string }>('POST', '/api/v1/core/estructura/cargos', v))
+  useMutacionEstructura((v: { nombre: string; area: string; descripcion?: string; perfil?: Perfil }) =>
+    apiSend<{ id: string }>('POST', '/api/v1/core/estructura/cargos', v))
 
 export const useEditarCargo = () =>
   useMutacionEstructura((v: { id: string; nombre: string; area: string; activo: boolean; perfil: Perfil | null }) =>

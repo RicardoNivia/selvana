@@ -23,7 +23,7 @@ public sealed record CambiarPropuestaRequest(bool Incluida);
 
 public sealed record ImportacionCreadaResponse(Guid Id);
 
-public sealed record CrearCargoRequest(string Nombre, string Area);
+public sealed record CrearCargoRequest(string Nombre, string Area, string? Descripcion = null, PerfilEditado? Perfil = null);
 
 public sealed record EditarCargoRequest(string Nombre, string Area, bool Activo, PerfilEditado? Perfil);
 
@@ -152,7 +152,7 @@ public static class CoreEndpoints
 
         estructura.MapPost("/cargos", async (CrearCargoRequest body, ICommandHandler<CrearCargoCommand, Guid> handler, CancellationToken ct) =>
             {
-                var resultado = await handler.Handle(new CrearCargoCommand(body.Nombre, body.Area), ct);
+                var resultado = await handler.Handle(new CrearCargoCommand(body.Nombre, body.Area, body.Descripcion, body.Perfil), ct);
                 return resultado.IsSuccess
                     ? Results.Created($"/api/v1/core/estructura/cargos/{resultado.Value}", new ImportacionCreadaResponse(resultado.Value))
                     : resultado.ToHttp();
@@ -160,7 +160,12 @@ public static class CoreEndpoints
             .WithName("CrearCargo")
             .Produces<ImportacionCreadaResponse>(StatusCodes.Status201Created);
 
-        estructura.MapPut("/cargos/{cargoId:guid}", async (Guid cargoId, EditarCargoRequest body, ICommandHandler<EditarCargoCommand> handler, CancellationToken ct) =>
+        estructura.MapGet("/cargos/{cargoId:guid}", async (Guid cargoId, IQueryHandler<ObtenerCargoQuery, CargoDto> handler, CancellationToken ct) =>
+                (await handler.Handle(new ObtenerCargoQuery(cargoId), ct)).ToHttp())
+            .WithName("ObtenerCargo")
+            .Produces<CargoDto>();
+
+        estructura.MapPut("/cargos/{cargoId:guid}",async (Guid cargoId, EditarCargoRequest body, ICommandHandler<EditarCargoCommand> handler, CancellationToken ct) =>
                 (await handler.Handle(new EditarCargoCommand(cargoId, body.Nombre, body.Area, body.Activo, body.Perfil), ct)).ToHttp())
             .WithName("EditarCargo");
 

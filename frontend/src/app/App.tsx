@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { Bandeja } from '../features/bandeja/Bandeja'
 import { BancoTalento } from '../features/candidatos/BancoTalento'
 import { FichaCandidato } from '../features/candidatos/FichaCandidato'
+import { CargoDetalle, CargoNuevo } from '../features/estructura/CargoPaginas'
 import { ConectarNomina } from '../features/estructura/ConectarNomina'
 import { EstructuraCargos } from '../features/estructura/EstructuraCargos'
 import { ActivarCuenta } from '../features/inicio/ActivarCuenta'
@@ -63,6 +64,8 @@ const router = createBrowserRouter([
       { path: 'vinculacion/:id', element: <ProcesoVinculacion /> },
       { path: 'empresa/conectar-nomina', element: <ConectarNomina /> },
       { path: 'empresa/estructura', element: <EstructuraCargos /> },
+      { path: 'empresa/estructura/cargos/nuevo', element: <CargoNuevo /> },
+      { path: 'empresa/estructura/cargos/:id', element: <CargoDetalle /> },
       { path: 'empresa/usuarios', element: <UsuariosRoles /> },
       { path: 'empresa/privacidad', element: <PrivacidadAuditoria /> },
     ],

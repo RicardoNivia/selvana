@@ -69,6 +69,12 @@ internal sealed class LecturaEstructura(CoreDbContext db, TimeProvider reloj) : 
         return new Pagina<CargoDto>([.. pagina.Select(c => Mapear(c, desde))], filtro.Pagina.Numero, filtro.Pagina.Tamano, total);
     }
 
+    public async Task<CargoDto?> CargoAsync(Guid empresaId, Guid cargoId, CancellationToken cancellationToken)
+    {
+        var cargo = await De<Cargo>(empresaId).FirstOrDefaultAsync(c => c.Id == cargoId, cancellationToken);
+        return cargo is null ? null : Mapear(cargo, reloj.GetUtcNow() - VentanaRedaccion);
+    }
+
     public Task<Pagina<MaestroDto>> SedesAsync(Guid empresaId, FiltroListado filtro, CancellationToken cancellationToken) =>
         Maestros<Sede>(empresaId, filtro, cancellationToken);
 
