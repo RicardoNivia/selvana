@@ -159,7 +159,7 @@ function Cargos() {
                             {c.editadoManualmente && <span className="pill pill-neutra">Editado</span>}
                           </span>
                         </td>
-                        <td className="acciones-fila"><Link to={rutaCargo(c.id)} className="boton boton-secundario boton-pequeno">Ver</Link></td>
+                        <td className="acciones-fila"><Link to={rutaCargo(c.id)} className="boton boton-secundario boton-pequeno">Editar</Link></td>
                       </tr>
                     )
                   })}

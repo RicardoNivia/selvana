@@ -163,10 +163,11 @@ export function useCargos(filtro: { pagina: number; tamano?: number; buscar: str
   })
 }
 
-export function useCargo(id: string) {
+export function useCargo(id: string, activo = true) {
   return useQuery({
     queryKey: ['estructura', 'cargo', id],
     queryFn: ({ signal }) => apiGet<Cargo>(`/api/v1/core/estructura/cargos/${id}`, signal),
+    enabled: activo && Boolean(id),
     // Mientras la IA redacta el perfil, se consulta seguido para mostrarlo apenas llegue
     refetchInterval: (q) => (q.state.data?.redactandoPerfil ? 3000 : false),
   })
