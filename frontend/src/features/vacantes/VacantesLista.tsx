@@ -8,7 +8,8 @@ import { usePaginacion } from '../../shared/ui/paginado'
 import { useEmpresaUsuariaActual } from '../sesion/empresaUsuaria'
 import { useSesion } from '../sesion/api'
 import { ElegirCargo } from './CargoDelCatalogo'
-import { type CargoCatalogo, estadoVacante, useEmpresaActual, useSolicitarVacante, useVacantes } from './api'
+import { type CargoCatalogo, estadoVacante, useEmpresaActual, useVacantes } from './api'
+import type { InicioVacante } from './VacanteNueva'
 
 const filtros: [string, string][] = [['', 'Todas'], ['Borrador', 'Borradores'], ['EnAprobacion', 'En aprobación'], ['Publicada', 'Publicadas'], ['Cerrada', 'Cerradas']]
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' })
@@ -67,9 +68,9 @@ export function VacantesLista() {
   )
 }
 
+/** Barra para empezar una vacante: con la frase, «Redactar con IA» abre el formulario y la IA lo llena; «Agregar manualmente» lo abre vacío. */
 function NuevaVacante() {
   const empresa = useEmpresaActual()
-  const solicitar = useSolicitarVacante()
   const navegar = useNavigate()
   const [frase, setFrase] = useState('')
   const [cargo, setCargo] = useState<CargoCatalogo | null>(null)
@@ -86,7 +87,7 @@ function NuevaVacante() {
       style={{ padding: 20, borderColor: 'var(--color-ia-borde)' }}
       onSubmit={(e) => {
         e.preventDefault()
-        solicitar.mutate({ frase, empresaUsuariaId: usuaria || null, cargoId: cargo?.id ?? null }, { onSuccess: (r) => navegar(`/consola/vacantes/${r.id}`) })
+        navegar('/consola/vacantes/nueva', { state: { frase, cargo, empresaUsuariaId: usuaria, generar: true } satisfies InicioVacante })
       }}
     >
       <label style={{ color: 'var(--color-ia)' }}>
@@ -106,11 +107,13 @@ function NuevaVacante() {
             </select>
           </label>
         )}
-        <Boton type="submit" variante="ia" icono={<Chispa />} cargando={solicitar.isPending} textoCargando="Enviando al agente…" disabled={!frase.trim()}>
+        <Boton type="submit" variante="ia" icono={<Chispa />} disabled={!frase.trim()}>
           Redactar con IA
         </Boton>
+        <Boton onClick={() => navegar('/consola/vacantes/nueva', { state: { cargo, empresaUsuariaId: usuaria } satisfies InicioVacante })}>
+          Agregar manualmente
+        </Boton>
       </div>
-      {solicitar.error && <span role="alert" className="error-formulario">{solicitar.error.message}</span>}
     </form>
   )
 }

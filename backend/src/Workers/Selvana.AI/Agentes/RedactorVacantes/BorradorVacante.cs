@@ -18,7 +18,8 @@ public sealed record BorradorVacante(
     IReadOnlyList<string> PreguntasFiltro,
     RangoSalarialSugerido RangoSalarial,
     IReadOnlyList<RazonSugerencia> Razones,
-    IReadOnlyList<string> Supuestos);
+    IReadOnlyList<string> Supuestos,
+    IReadOnlyList<string>? Aclaraciones = null);
 
 public sealed record RangoSalarialSugerido(decimal MinimoCop, decimal MaximoCop, string Justificacion);
 

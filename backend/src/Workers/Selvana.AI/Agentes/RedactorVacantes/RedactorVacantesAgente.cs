@@ -40,6 +40,11 @@ internal sealed class RedactorVacantesAgente(
         - Entre 3 y 5 razones que expliquen las decisiones principales. Cada razón cita su evidencia: el fragmento literal de la frase entre comillas, o "Supuesto" si no sale de la frase.
         - Entre 3 y 5 preguntas filtro cortas, para hacer por WhatsApp, que se respondan con sí o no o con un dato corto.
         - Requisitos y competencias concretos y verificables.
+        - Una vacante es de UN solo cargo; "cupos" son las posiciones disponibles de ese cargo (si la frase dice "25 auxiliares", cupos = 25).
+        - Antes de redactar, revisa si puedes. Si la frase pide dos o más cargos distintos (por ejemplo "un contador y dos mensajeros"),
+          o le falta algo imprescindible que no se puede suponer con sensatez (qué cargo es), NO redactes: devuelve en "aclaraciones"
+          entre 1 y 3 preguntas cortas para la persona (por ejemplo "¿Cuál cargo quiere crear primero? Cada vacante es de un solo cargo.")
+          y deja los demás campos vacíos. Si puedes redactar, "aclaraciones" va vacío y lo que supongas va en "supuestos".
         """;
 
     public async Task<Result<ResultadoBorradorVacante>> RedactarAsync(SolicitudBorradorVacante solicitud, CancellationToken cancellationToken)
@@ -71,7 +76,24 @@ internal sealed class RedactorVacantesAgente(
             return RedactorVacantesErrors.SinModelos;
         }
 
-        if (!respuesta.TryGetResult(out var borrador) || string.IsNullOrWhiteSpace(borrador?.Titulo))
+        if (!respuesta.TryGetResult(out var borrador) || borrador is null)
+        {
+            return RedactorVacantesErrors.RespuestaInvalida;
+        }
+
+        var propiedades = respuesta.AdditionalProperties;
+        var proveedor = propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadProveedor, out var p) == true ? p?.ToString() ?? "" : "";
+        var costoUsd = propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadCostoUsd, out var c) == true && c is decimal costo ? costo : 0m;
+
+        // La IA pregunta antes de redactar (por ejemplo, la frase pide dos cargos): vuelve solo con las aclaraciones
+        var aclaraciones = (borrador.Aclaraciones ?? []).Where(a => !string.IsNullOrWhiteSpace(a)).Take(3).ToList();
+        if (aclaraciones.Count > 0)
+        {
+            var vacio = new BorradorVacante("", "", "", 0, "", "", [], [], [], new RangoSalarialSugerido(0, 0, ""), [], [], aclaraciones);
+            return new ResultadoBorradorVacante(vacio, [], proveedor, respuesta.ModelId ?? "", costoUsd);
+        }
+
+        if (string.IsNullOrWhiteSpace(borrador.Titulo))
         {
             return RedactorVacantesErrors.RespuestaInvalida;
         }
@@ -83,13 +105,7 @@ internal sealed class RedactorVacantesAgente(
             PreguntasFiltro = [.. borrador.PreguntasFiltro.Where(p => !filtro.EsDiscriminatorio(p))],
         }, minimo);
 
-        var propiedades = respuesta.AdditionalProperties;
-        return new ResultadoBorradorVacante(
-            limpio,
-            retirados,
-            propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadProveedor, out var p) == true ? p?.ToString() ?? "" : "",
-            respuesta.ModelId ?? "",
-            propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadCostoUsd, out var c) == true && c is decimal costo ? costo : 0m);
+        return new ResultadoBorradorVacante(limpio, retirados, proveedor, respuesta.ModelId ?? "", costoUsd);
     }
 
     /// <summary>

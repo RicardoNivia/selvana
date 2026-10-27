@@ -562,6 +562,11 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.PrimitiveCollection<List<string>>("Aclaraciones")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("aclaraciones");
+
                     b.Property<string>("AprobacionPedidaPor")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -592,6 +597,11 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)")
                         .HasColumnName("codigo");
+
+                    b.Property<string>("CodigoMunicipio")
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)")
+                        .HasColumnName("codigo_municipio");
 
                     b.PrimitiveCollection<List<string>>("Competencias")
                         .IsRequired()

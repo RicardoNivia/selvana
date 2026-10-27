@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AutocompletarMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Iconos'
@@ -39,7 +40,6 @@ function Configuracion({ vacanteId, f }: { vacanteId: string; f: Filtros }) {
     ciudades: f.ciudades,
     experienciaMinimaMeses: f.experienciaMinimaMeses,
   }))
-  const [ciudad, setCiudad] = useState('')
   const alternar = (lista: 'requisitos' | 'preguntas', texto: string) =>
     setV((x) => ({ ...x, [lista]: x[lista].includes(texto) ? x[lista].filter((t) => t !== texto) : [...x[lista], texto] }))
 
@@ -85,10 +85,11 @@ function Configuracion({ vacanteId, f }: { vacanteId: string; f: Filtros }) {
             {v.ciudades.length === 0 && <span className="ayuda">Cualquier ciudad</span>}
           </div>
           {puede && (
-            <form className="ats-ciudad" onSubmit={(e) => { e.preventDefault(); if (ciudad.trim()) { setV((x) => ({ ...x, ciudades: [...new Set([...x.ciudades, ciudad.trim()])] })); setCiudad('') } }}>
-              <input className="entrada" value={ciudad} onChange={(e) => setCiudad(e.target.value)} placeholder={`Ej.: ${f.ciudadVacante || 'Mosquera'}`} aria-label="Agregar ciudad" />
-              <Boton type="submit" pequeno disabled={!ciudad.trim()}>Agregar</Boton>
-            </form>
+            <div className="ats-ciudad">
+              {/* Se elige de la DIVIPOLA del DANE y queda agregada al elegirla */}
+              <AutocompletarMunicipio key={v.ciudades.length} texto="Agregar ciudad" valor={{ codigo: null, ciudad: '' }}
+                onElegir={(m) => { if (m) setV((x) => ({ ...x, ciudades: [...new Set([...x.ciudades, m.municipio])] })) }} />
+            </div>
           )}
           <legend className="ats-legend-2">Experiencia mínima con fechas</legend>
           <label className="ats-meses">

@@ -176,4 +176,41 @@ public sealed class VacanteTests
         vacante.SolicitarAprobacion("Andrés", Gerencia, Ahora).Error.Should().Be(VacanteErrors.Cerrada);
         vacante.Editar(Contenido()).Error.Should().Be(VacanteErrors.Cerrada);
     }
+
+    [Fact]
+    public void UnaVacanteCreadaAManoNaceComoBorradorConfirmadoConSuMunicipio()
+    {
+        var vacante = Vacante.CrearManual(Guid.NewGuid(), "Servicios Andinos EST", null, null, Contenido() with { CodigoMunicipio = "25286" }, "laura", Ahora).Value;
+
+        vacante.Estado.Should().Be(EstadoVacante.Borrador);
+        vacante.EditadaPorPersona.Should().BeTrue();
+        vacante.ModeloIa.Should().BeNull();
+        vacante.CodigoMunicipio.Should().Be("25286");
+        vacante.Codigo.Should().StartWith("VAC-261022-");
+        Vacante.CrearManual(Guid.NewGuid(), "Empresa", null, null, Contenido(2_000_000, 1_800_000), "laura", Ahora).Error.Should().Be(VacanteErrors.SalarioInvalido);
+    }
+
+    [Fact]
+    public void SiLaIaPreguntaAntesDeRedactarLaVacanteQuedaSinContenidoHastaQueLaPersonaResponda()
+    {
+        var vacante = Solicitada();
+
+        vacante.RegistrarAclaraciones(["¿Cuál cargo quiere crear primero? Cada vacante es de un solo cargo."]);
+
+        vacante.Estado.Should().Be(EstadoVacante.Borrador);
+        vacante.Aclaraciones.Should().ContainSingle();
+        vacante.Titulo.Should().BeEmpty();
+
+        vacante.PedirRedaccion("Necesito 3 contadores en Bogotá").IsSuccess.Should().BeTrue();
+        vacante.Estado.Should().Be(EstadoVacante.Redactando);
+        vacante.Frase.Should().Be("Necesito 3 contadores en Bogotá");
+        vacante.Aclaraciones.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void SoloSePideOtroBorradorALaIaMientrasLaVacanteEsBorrador()
+    {
+        Solicitada().PedirRedaccion("Otra frase").Error.Should().Be(VacanteErrors.NoSePuedeRedactar);
+        ConBorrador().PedirRedaccion(" ").Error.Should().Be(VacanteErrors.FraseVacia);
+    }
 }

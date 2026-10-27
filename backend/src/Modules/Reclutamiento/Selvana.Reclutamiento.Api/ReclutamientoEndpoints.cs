@@ -22,7 +22,14 @@ public sealed record SolicitarVacanteRequest(string Frase, Guid? EmpresaUsuariaI
 
 public sealed record EditarVacanteRequest(
     string Titulo, string Cargo, string Ciudad, int Cupos, string Jornada, string Descripcion,
-    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro);
+    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
+    string? CodigoMunicipio = null);
+
+public sealed record CrearVacanteRequest(
+    Guid? EmpresaUsuariaId, Guid? CargoId, string Titulo, string Cargo, string Ciudad, string? CodigoMunicipio, int Cupos, string Jornada,
+    string Descripcion, decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro);
+
+public sealed record RedactarVacanteRequest(string Frase);
 
 public sealed record CreadoResponse(Guid Id);
 
@@ -220,6 +227,20 @@ public static class ReclutamientoEndpoints
             })
             .WithName("SolicitarVacante").Produces<CreadoResponse>(StatusCodes.Status201Created);
 
+        // La persona llena el formulario sin la IA: nace como borrador confirmado por ella
+        g.MapPost("/vacantes/manual", async (CrearVacanteRequest b, ICommandHandler<CrearVacanteCommand, Guid> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new CrearVacanteCommand(b.EmpresaUsuariaId, b.CargoId, b.Titulo, b.Cargo, b.Ciudad, b.CodigoMunicipio, b.Cupos, b.Jornada,
+                    b.Descripcion, b.SalarioMinimo, b.SalarioMaximo, b.Requisitos, b.PreguntasFiltro), ct);
+                return r.IsSuccess ? Results.Created($"/api/v1/reclutamiento/vacantes/{r.Value}", new CreadoResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("CrearVacante").Produces<CreadoResponse>(StatusCodes.Status201Created);
+
+        // Otro borrador de la IA con una frase nueva (por ejemplo, la respuesta a lo que preguntó)
+        g.MapPost("/vacantes/{id:guid}/redactar", async (Guid id, RedactarVacanteRequest b, ICommandHandler<RedactarVacanteCommand> h, CancellationToken ct) =>
+                (await h.Handle(new RedactarVacanteCommand(id, b.Frase), ct)).ToHttp())
+            .WithName("RedactarVacante");
+
         // Catálogo de cargos para elegir de cuál parte la vacante (sin pedir permiso de configurar la estructura)
         g.MapGet("/cargos", async (string? buscar, IQueryHandler<BuscarCargosCatalogoQuery, IReadOnlyList<CargoCatalogoDto>> h, CancellationToken ct) =>
                 (await h.Handle(new BuscarCargosCatalogoQuery(buscar), ct)).ToHttp())
@@ -231,7 +252,7 @@ public static class ReclutamientoEndpoints
 
         g.MapPut("/vacantes/{id:guid}", async (Guid id, EditarVacanteRequest b, ICommandHandler<EditarVacanteCommand> h, CancellationToken ct) =>
                 (await h.Handle(new EditarVacanteCommand(id, b.Titulo, b.Cargo, b.Ciudad, b.Cupos, b.Jornada, b.Descripcion,
-                    b.SalarioMinimo, b.SalarioMaximo, b.Requisitos, b.PreguntasFiltro), ct)).ToHttp())
+                    b.SalarioMinimo, b.SalarioMaximo, b.Requisitos, b.PreguntasFiltro, b.CodigoMunicipio), ct)).ToHttp())
             .WithName("EditarVacante");
 
         // Requisición: líder → RRHH → gerencia; la última aprobación la publica en el portal y busca en el banco de talento

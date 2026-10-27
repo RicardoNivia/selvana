@@ -10,7 +10,9 @@ using Selvana.Core.Contracts.Empresas;
 using Selvana.Core.Contracts.Estructura;
 using Selvana.Core.Infrastructure.Bandeja;
 using Selvana.Core.Infrastructure.Empresas;
+using Selvana.Core.Application.Geografia;
 using Selvana.Core.Infrastructure.Estructura;
+using Selvana.Core.Infrastructure.Geografia;
 using Selvana.Core.Infrastructure.Persistence;
 using Selvana.Core.Infrastructure.Privacidad;
 using Selvana.Core.Infrastructure.Sesion;
@@ -54,6 +56,7 @@ public static class CoreModule
         services.AddScoped<IBandeja, BandejaAprobaciones>();
         services.AddScoped<ILecturaSesion, LecturaSesion>();
         services.AddSingleton<IHasherContrasenas, HasherPbkdf2>();
+        services.AddScoped<ICatalogoMunicipios, CatalogoMunicipios>();
 
         services.AddIntegrationEventConsumers<CoreDbContext>(Application.AssemblyReference.Assembly);
         services.AddHostedService<OutboxProcessor<CoreDbContext>>();
@@ -65,7 +68,9 @@ public static class CoreModule
     public static async Task MigrateCoreModuleAsync(this IServiceProvider services)
     {
         await using var scope = services.CreateAsyncScope();
-        await scope.ServiceProvider.GetRequiredService<CoreDbContext>().Database.MigrateAsync();
+        var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
+        await db.Database.MigrateAsync();
+        await SemillaMunicipios.SembrarAsync(db);
     }
 
     /// <summary>Solo en desarrollo: crea la empresa de ejemplo y sus usuarios si no existen, con la contraseña de los user-secrets.</summary>

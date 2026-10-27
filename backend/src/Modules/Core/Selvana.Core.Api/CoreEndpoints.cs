@@ -11,6 +11,7 @@ using Selvana.Core.Application.Estructura.CambiarPropuesta;
 using Selvana.Core.Application.Estructura.Cargos;
 using Selvana.Core.Application.Estructura.EditarMaestros;
 using Selvana.Core.Application.Estructura.ImportarNomina;
+using Selvana.Core.Application.Geografia;
 using Selvana.Core.Application.Sesion;
 using Selvana.Core.Contracts.Empresas;
 using Selvana.SharedKernel.Messaging;
@@ -56,6 +57,14 @@ public static class CoreEndpoints
                 (await handler.Handle(new ObtenerEmpresaActualQuery(), ct)).ToHttp())
             .WithName("ObtenerEmpresaActual")
             .Produces<EmpresaResumen>();
+
+        // DIVIPOLA del DANE para autocompletar ciudad: es información pública, la usa también el portal de empleo
+        core.MapGet("/municipios", async (string? buscar, int? tamano, IQueryHandler<BuscarMunicipiosQuery, IReadOnlyList<MunicipioDto>> handler, CancellationToken ct) =>
+                (await handler.Handle(new BuscarMunicipiosQuery(buscar, tamano), ct)).ToHttp())
+            .WithName("BuscarMunicipios")
+            .WithTags("Geografía")
+            .Produces<IReadOnlyList<MunicipioDto>>()
+            .AllowAnonymous();
 
         MapSesion(app.MapGroup("/sesion").WithTags("Sesión"));
         MapNomina(core.MapGroup("/nomina").WithTags("Conectar nómina"));

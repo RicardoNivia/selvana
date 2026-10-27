@@ -29,6 +29,12 @@ internal sealed class BorradorVacanteRedactadoConsumer(
             bitacora.Registrar(vacante.EmpresaId, TipoActor.Ia, "Agente redactor de vacantes", $"No pudo redactar la vacante {vacante.Codigo}", e.Error,
                 "Queda un borrador vacío para que una persona lo llene", "Vacante", vacante.Id);
         }
+        else if (e.Aclaraciones is { Count: > 0 } aclaraciones)
+        {
+            vacante.RegistrarAclaraciones(aclaraciones);
+            bitacora.Registrar(vacante.EmpresaId, TipoActor.Ia, "Agente redactor de vacantes", $"Pidió aclarar la vacante {vacante.Codigo} antes de redactarla",
+                string.Join(" · ", aclaraciones), "Espera que una persona responda", "Vacante", vacante.Id);
+        }
         else
         {
             bitacora.Registrar(vacante.EmpresaId, TipoActor.Ia, "Agente redactor de vacantes", $"Redactó la vacante {vacante.Codigo}",

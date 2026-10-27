@@ -65,10 +65,14 @@ public sealed class RazonVacante
     public string Fuente { get; init; } = "";
 }
 
-/// <summary>Contenido de una vacante, tal como lo redacta la IA o lo edita una persona.</summary>
+/// <summary>
+/// Contenido de una vacante, tal como lo redacta la IA o lo edita una persona. Una vacante es de un solo cargo;
+/// <see cref="Cupos"/> son las posiciones disponibles de ese cargo. <see cref="CodigoMunicipio"/> es el código DANE de la ciudad.
+/// </summary>
 public sealed record ContenidoVacante(
     string Titulo, string Cargo, string Ciudad, int Cupos, string Jornada, string Descripcion,
-    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro);
+    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
+    string? CodigoMunicipio = null);
 
 public static class VacanteErrors
 {
@@ -85,6 +89,7 @@ public static class VacanteErrors
     public static readonly Error YaAproboOtraEtapa = Error.Validation("Vacante.YaAproboOtraEtapa", "Ya aprobó otra etapa de esta requisición: la siguiente la aprueba otra persona.");
     public static readonly Error SinMotivo = Error.Validation("Vacante.SinMotivo", "Diga por qué devuelve la requisición, para que puedan ajustarla.");
     public static readonly Error NoPublicada = Error.Conflict("Vacante.NoPublicada", "Esta vacante ya no recibe postulaciones.");
+    public static readonly Error NoSePuedeRedactar = Error.Conflict("Vacante.NoSePuedeRedactar", "Solo se le pide a la IA un borrador nuevo mientras la vacante es un borrador.");
 }
 
 public sealed class Vacante : AggregateRoot<Guid>
@@ -100,13 +105,16 @@ public sealed class Vacante : AggregateRoot<Guid>
 
     /// <summary>Código público para el portal y para compartir: VAC-261022-3F2A.</summary>
     public string Codigo { get; private init; } = "";
-    public string Frase { get; private init; } = "";
+    public string Frase { get; private set; } = "";
 
     /// <summary>Cargo del catálogo del que parte la vacante; null si se redactó desde cero.</summary>
     public Guid? CargoId { get; private init; }
     public string Titulo { get; private set; } = "";
     public string Cargo { get; private set; } = "";
     public string Ciudad { get; private set; } = "";
+
+    /// <summary>Código DANE (DIVIPOLA) del municipio; null si la ciudad aún no se eligió del catálogo.</summary>
+    public string? CodigoMunicipio { get; private set; }
     public int Cupos { get; private set; }
     public string Jornada { get; private set; } = "";
     public string Descripcion { get; private set; } = "";
@@ -138,6 +146,12 @@ public sealed class Vacante : AggregateRoot<Guid>
     public DateTimeOffset? CerradaEn { get; private set; }
     public string? ModeloIa { get; private set; }
     public string? MensajeIa { get; private set; }
+
+    /// <summary>
+    /// Lo que la IA necesita saber antes de redactar (por ejemplo, si la frase pide dos cargos distintos).
+    /// Mientras haya aclaraciones, la vacante no tiene contenido: la persona responde y vuelve a pedir el borrador.
+    /// </summary>
+    public List<string> Aclaraciones { get; private set; } = [];
 
     /// <summary>Una persona cambió lo que redactó la IA (queda confirmado por ella).</summary>
     public bool EditadaPorPersona { get; private set; }
@@ -193,6 +207,69 @@ public sealed class Vacante : AggregateRoot<Guid>
             CreadaPor = usuario,
             CreadaEn = ahora,
         };
+    }
+
+    /// <summary>Una persona escribe la vacante a mano, sin pedírsela a la IA: nace como borrador confirmado por ella.</summary>
+    public static Result<Vacante> CrearManual(
+        Guid empresaId, string empresaNombre, Guid? empresaUsuariaId, string? empresaUsuariaNombre, ContenidoVacante contenido, string usuario,
+        DateTimeOffset ahora, Guid? cargoId = null)
+    {
+        ArgumentNullException.ThrowIfNull(contenido);
+        if (contenido.SalarioMaximo < contenido.SalarioMinimo)
+        {
+            return VacanteErrors.SalarioInvalido;
+        }
+
+        var id = Guid.CreateVersion7();
+        var vacante = new Vacante(id)
+        {
+            EmpresaId = empresaId,
+            EmpresaNombre = empresaNombre,
+            EmpresaUsuariaId = empresaUsuariaId,
+            EmpresaUsuariaNombre = empresaUsuariaNombre,
+            Codigo = $"VAC-{ahora:yyMMdd}-{id.ToString("N")[^4..].ToUpperInvariant()}",
+            CargoId = cargoId,
+            Estado = EstadoVacante.Borrador,
+            CreadaPor = usuario,
+            CreadaEn = ahora,
+            EditadaPorPersona = true,
+        };
+        vacante.Aplicar(contenido);
+        return vacante;
+    }
+
+    /// <summary>La IA no redactó porque la frase pide más de un cargo o le falta algo que no puede suponer: pregunta antes.</summary>
+    public void RegistrarAclaraciones(IEnumerable<string> preguntas)
+    {
+        if (Estado == EstadoVacante.Redactando)
+        {
+            Aclaraciones = [.. preguntas.Select(p => p.Trim()).Where(p => p.Length > 0)];
+            MensajeIa = null;
+            Estado = EstadoVacante.Borrador;
+        }
+    }
+
+    /// <summary>
+    /// Pide a la IA un borrador nuevo con otra frase (por ejemplo, después de responder sus aclaraciones).
+    /// Solo mientras es borrador: lo que ya se aprobó o publicó no lo reescribe la IA.
+    /// </summary>
+    public Result PedirRedaccion(string frase)
+    {
+        if (Estado != EstadoVacante.Borrador)
+        {
+            return Result.Failure(VacanteErrors.NoSePuedeRedactar);
+        }
+
+        if (string.IsNullOrWhiteSpace(frase))
+        {
+            return Result.Failure(VacanteErrors.FraseVacia);
+        }
+
+        Frase = frase.Trim();
+        Aclaraciones = [];
+        MensajeIa = null;
+        Estado = EstadoVacante.Redactando;
+        return Result.Success();
     }
 
     public void RegistrarBorradorIa(ContenidoVacante contenido, string justificacionSalario, IEnumerable<string> competencias,
@@ -390,6 +467,7 @@ public sealed class Vacante : AggregateRoot<Guid>
         Titulo = c.Titulo.Trim();
         Cargo = c.Cargo.Trim();
         Ciudad = c.Ciudad.Trim();
+        CodigoMunicipio = string.IsNullOrWhiteSpace(c.CodigoMunicipio) ? null : c.CodigoMunicipio.Trim();
         Cupos = c.Cupos;
         Jornada = c.Jornada.Trim();
         Descripcion = c.Descripcion.Trim();

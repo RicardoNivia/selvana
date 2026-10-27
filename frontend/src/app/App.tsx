@@ -20,6 +20,7 @@ import { PresentarPruebas } from '../features/pruebas/PresentarPruebas'
 import { PrivacidadAuditoria } from '../features/privacidad/PrivacidadAuditoria'
 import { UsuariosRoles } from '../features/usuarios/UsuariosRoles'
 import { VacanteDetalle } from '../features/vacantes/VacanteDetalle'
+import { VacanteNueva } from '../features/vacantes/VacanteNueva'
 import { VacantesLista } from '../features/vacantes/VacantesLista'
 import { OfertaCandidato } from '../features/vinculacion/OfertaCandidato'
 import { ProcesoVinculacion } from '../features/vinculacion/ProcesoVinculacion'
@@ -57,6 +58,7 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/consola/bandeja" replace /> },
       { path: 'bandeja', element: <Bandeja /> },
       { path: 'vacantes', element: <VacantesLista /> },
+      { path: 'vacantes/nueva', element: <VacanteNueva /> },
       { path: 'vacantes/:id', element: <VacanteDetalle /> },
       { path: 'candidatos', element: <BancoTalento /> },
       { path: 'candidatos/:id', element: <FichaCandidato /> },

@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { AutocompletarMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto, EsqueletoPanel } from '../../shared/ui/Esqueleto'
 import { Chispa, IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Iconos'
@@ -96,6 +97,8 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
   const cerrar = useCerrarVacante(v.id)
   const deIa = !v.editadaPorPersona && v.modeloIa !== null
   const bloqueada = v.estado === 'Cerrada' || v.estado === 'EnAprobacion'
+  const [municipio, setMunicipio] = useState(v.codigoMunicipio)
+  const [ciudadTocada, setCiudadTocada] = useState(false)
   const [f, setF] = useState({
     titulo: v.titulo, cargo: v.cargo, ciudad: v.ciudad, cupos: String(v.cupos || ''), jornada: v.jornada, descripcion: v.descripcion,
     salarioMinimo: String(v.salarioMinimo || ''), salarioMaximo: String(v.salarioMaximo || ''), requisitos: v.requisitos.join('\n'), preguntas: v.preguntasFiltro.join('\n'),
@@ -110,6 +113,7 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
   const contenido = () => ({
     titulo: f.titulo, cargo: f.cargo, ciudad: f.ciudad, cupos: Number(f.cupos) || 0, jornada: f.jornada, descripcion: f.descripcion,
     salarioMinimo: Number(f.salarioMinimo) || 0, salarioMaximo: Number(f.salarioMaximo) || 0, requisitos: lineas(f.requisitos), preguntasFiltro: lineas(f.preguntas),
+    codigoMunicipio: municipio,
   })
   const guardarYEnviar = () => (tocado ? editar.mutate(contenido(), { onSuccess: () => solicitar.mutate() }) : solicitar.mutate())
   const error = editar.error ?? solicitar.error ?? cerrar.error
@@ -123,11 +127,22 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
         )}
         {v.estado === 'EnAprobacion' && <p className="aviso aviso-neutro"><IconoEscudo />La requisición está en aprobación: para cambiarla, quien aprueba debe devolverla.</p>}
         {v.mensajeIa && <p className="aviso aviso-alerta"><IconoAlerta />{v.mensajeIa} Complete la vacante a mano.</p>}
+        {(v.aclaraciones?.length ?? 0) > 0 && (
+          <div className="aviso aviso-alerta" style={{ flexDirection: 'column', gap: 6 }}>
+            <b>La IA no redactó esta vacante porque necesita que aclare:</b>
+            <ul style={{ margin: 0, paddingLeft: 20 }}>{v.aclaraciones?.map((a) => <li key={a}>{a}</li>)}</ul>
+            <span>Llénela a mano aquí o cree otra con una frase de un solo cargo.</span>
+          </div>
+        )}
         <label>Título del aviso<input {...campo('titulo')} required /></label>
         <div className="dos-campos">
           <label>Cargo<input {...campo('cargo')} /></label>
-          <label>Ciudad<input {...campo('ciudad')} required /></label>
-          <label>Cupos<input {...campo('cupos')} type="number" min={1} /></label>
+          <label>
+            Ciudad o municipio
+            <AutocompletarMunicipio valor={{ codigo: municipio, ciudad: f.ciudad }} ia={deIa && !tocado && !ciudadTocada} disabled={bloqueada} requerido
+              onElegir={(m, texto) => { setF((x) => ({ ...x, ciudad: m?.municipio ?? texto })); setMunicipio(m?.codigo ?? null); setCiudadTocada(true); setTocado(true) }} />
+          </label>
+          <label>Posiciones disponibles<input {...campo('cupos')} type="number" min={1} /></label>
           <label>Jornada<input {...campo('jornada')} /></label>
           <label>Salario mínimo (COP)<input {...campo('salarioMinimo')} type="number" min={0} /></label>
           <label>Salario máximo (COP)<input {...campo('salarioMaximo')} type="number" min={0} /></label>

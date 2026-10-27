@@ -17,7 +17,8 @@ public sealed record VacanteDto(
     IReadOnlyList<string> Requisitos, IReadOnlyList<string> Competencias, IReadOnlyList<string> PreguntasFiltro, IReadOnlyList<string> Supuestos,
     IReadOnlyList<RazonDto> Razones, string? ModeloIa, string? MensajeIa, bool EditadaPorPersona,
     DateTimeOffset CreadaEn, string CreadaPor, DateTimeOffset? PublicadaEn, int Postulantes, IReadOnlyList<ConteoDto> Canales,
-    IReadOnlyList<Pruebas.PruebaEnBateriaDto> Pruebas, AprobacionRequisicionDto Aprobacion, Guid? CargoId = null, CargoCatalogoDto? CargoCatalogo = null);
+    IReadOnlyList<Pruebas.PruebaEnBateriaDto> Pruebas, AprobacionRequisicionDto Aprobacion, Guid? CargoId = null, CargoCatalogoDto? CargoCatalogo = null,
+    string? CodigoMunicipio = null, IReadOnlyList<string>? Aclaraciones = null);
 
 /// <summary>
 /// Cargo del catálogo de la empresa. En una vacante, <paramref name="Vinculado"/> dice si la vacante parte de él;
