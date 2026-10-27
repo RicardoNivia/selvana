@@ -233,13 +233,10 @@
 .explicacion-afinidad .ficha-nota { padding: var(--espacio-3) var(--espacio-4); border-top: 1px solid var(--color-borde); }
 .afinidad-ajuste { flex-direction: row; flex-wrap: wrap; align-items: flex-end; }
 
-/* Menú lateral colapsable: solo íconos, con el nombre al pasar el cursor */
+/* Menú lateral siempre contraído: solo íconos, con el nombre al pasar el cursor */
 .lateral { transition: flex-basis var(--duracion-media) var(--curva-salida), padding var(--duracion-media) var(--curva-salida); }
 .lateral-cabeza { display: flex; align-items: center; justify-content: space-between; gap: var(--espacio-2); padding-bottom: var(--espacio-6); }
 .lateral-cabeza .marca { padding-bottom: 0; min-width: 0; }
-.lateral-alternar { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid transparent; border-radius: var(--radio-s); background: none; color: var(--color-texto-tenue); cursor: pointer; transition: background var(--duracion-corta), color var(--duracion-corta); }
-.lateral-alternar:hover { background: var(--color-superficie-2); color: var(--color-texto); }
-.lateral-alternar svg { width: 18px; height: 18px; }
 .empresa-actual-detalle { min-width: 0; flex: 1; }
 /* Encabezado arriba, enlaces en medio (se desplazan si no caben) y pie fijo abajo con la persona y «Salir» */
 .lateral-menu { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: var(--espacio-1); overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
@@ -273,10 +270,10 @@
   .consola.menu-colapsado .lateral:hover, .consola.menu-colapsado .lateral:has(:focus-visible) {
     width: 232px; box-shadow: var(--sombra-2); transition-delay: 60ms;
   }
-  .menu-colapsado .lateral :is(.nav-texto, .nav-item .etiqueta, .empresa-actual-detalle, .nav-grupo, .lateral-alternar, .nav-texto + .nav-contador) {
+  .menu-colapsado .lateral :is(.nav-texto, .nav-item .etiqueta, .empresa-actual-detalle, .nav-grupo, .nav-texto + .nav-contador) {
     transition: opacity 140ms var(--curva-salida);
   }
-  .menu-colapsado .lateral:not(:hover):not(:has(:focus-visible)) :is(.nav-texto, .nav-item .etiqueta, .empresa-actual-detalle, .nav-grupo, .lateral-alternar) {
+  .menu-colapsado .lateral:not(:hover):not(:has(:focus-visible)) :is(.nav-texto, .nav-item .etiqueta, .empresa-actual-detalle, .nav-grupo) {
     opacity: 0; pointer-events: none;
   }
   .menu-colapsado .lateral :is(.nav-item, .marca) { white-space: nowrap; }
