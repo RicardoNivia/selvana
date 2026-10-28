@@ -195,10 +195,10 @@ public sealed class VacanteTests
     {
         var vacante = Solicitada();
 
-        vacante.RegistrarAclaraciones(["¿Cuál cargo quiere crear primero? Cada vacante es de un solo cargo."]);
+        vacante.RegistrarAclaraciones([new AclaracionVacante { Pregunta = "¿Qué cargo necesita?", Opciones = ["Operario de montacargas", " ", "Auxiliar de bodega"] }]);
 
         vacante.Estado.Should().Be(EstadoVacante.Borrador);
-        vacante.Aclaraciones.Should().ContainSingle();
+        vacante.Aclaraciones.Should().ContainSingle().Which.Opciones.Should().Equal("Operario de montacargas", "Auxiliar de bodega");
         vacante.Titulo.Should().BeEmpty();
 
         vacante.PedirRedaccion("Necesito 3 contadores en Bogotá").IsSuccess.Should().BeTrue();

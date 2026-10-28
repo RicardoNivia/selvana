@@ -562,11 +562,6 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.PrimitiveCollection<List<string>>("Aclaraciones")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("aclaraciones");
-
                     b.Property<string>("AprobacionPedidaPor")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -1552,6 +1547,32 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Selvana.Reclutamiento.Domain.Vacantes.Vacante", b =>
                 {
+                    b.OwnsMany("Selvana.Reclutamiento.Domain.Vacantes.AclaracionVacante", "Aclaraciones", b1 =>
+                        {
+                            b1.Property<Guid>("VacanteId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.PrimitiveCollection<string>("Opciones")
+                                .IsRequired();
+
+                            b1.Property<string>("Pregunta")
+                                .IsRequired();
+
+                            b1.HasKey("VacanteId", "__synthesizedOrdinal");
+
+                            b1.ToTable("vacantes", "reclutamiento");
+
+                            b1
+                                .ToJson("aclaraciones")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("VacanteId")
+                                .HasConstraintName("fk_vacantes_vacantes_vacante_id");
+                        });
+
                     b.OwnsMany("Selvana.Reclutamiento.Domain.Vacantes.AprobacionVacante", "Aprobaciones", b1 =>
                         {
                             b1.Property<Guid>("VacanteId");
@@ -1678,6 +1699,8 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                                 .HasForeignKey("VacanteId")
                                 .HasConstraintName("fk_vacantes_vacantes_vacante_id");
                         });
+
+                    b.Navigation("Aclaraciones");
 
                     b.Navigation("Aprobaciones");
 

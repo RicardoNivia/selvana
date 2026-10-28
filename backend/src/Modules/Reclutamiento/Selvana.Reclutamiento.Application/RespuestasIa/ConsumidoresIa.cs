@@ -31,9 +31,9 @@ internal sealed class BorradorVacanteRedactadoConsumer(
         }
         else if (e.Aclaraciones is { Count: > 0 } aclaraciones)
         {
-            vacante.RegistrarAclaraciones(aclaraciones);
+            vacante.RegistrarAclaraciones(aclaraciones.Select(a => new AclaracionVacante { Pregunta = a.Pregunta, Opciones = [.. a.Opciones] }));
             bitacora.Registrar(vacante.EmpresaId, TipoActor.Ia, "Agente redactor de vacantes", $"Pidió aclarar la vacante {vacante.Codigo} antes de redactarla",
-                string.Join(" · ", aclaraciones), "Espera que una persona responda", "Vacante", vacante.Id);
+                string.Join(" · ", aclaraciones.Select(a => a.Pregunta)), "Espera que una persona responda", "Vacante", vacante.Id);
         }
         else
         {

@@ -69,7 +69,7 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
                 v.AprobacionPedidaPor, v.MotivoDevolucion,
                 [.. v.Aprobaciones.Select(a => new AprobacionDto(FlujoRequisicion.Nombre(a.Etapa), a.Decision, a.Por, a.Rol, a.Motivo, a.Automatica, a.En))],
                 PuedeDecidir: false),
-            v.CargoId, CodigoMunicipio: v.CodigoMunicipio, Aclaraciones: v.Aclaraciones);
+            v.CargoId, CodigoMunicipio: v.CodigoMunicipio, Aclaraciones: [.. v.Aclaraciones.Select(a => new AclaracionDto(a.Pregunta, a.Opciones))]);
     }
 
     public async Task<Pagina<PostulanteDto>> PostulantesAsync(Guid empresaId, Guid vacanteId, PaginaSolicitada pagina, string? buscar, string? canal, CancellationToken ct)

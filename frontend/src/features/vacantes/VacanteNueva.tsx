@@ -6,7 +6,7 @@ import { Chispa, IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Ic
 import { useSesion } from '../sesion/api'
 import { useEmpresaUsuariaActual } from '../sesion/empresaUsuaria'
 import { ElegirCargo } from './CargoDelCatalogo'
-import { type CargoCatalogo, type ContenidoVacante, type Vacante, useCrearVacante, useEditarVacante, useEmpresaActual, useRedactarVacante, useSolicitarVacante, useVacante } from './api'
+import { type Aclaracion, type CargoCatalogo, type ContenidoVacante, type Vacante, useCrearVacante, useEditarVacante, useEmpresaActual, useRedactarVacante, useSolicitarVacante, useVacante } from './api'
 
 /** Lo que llega desde la barra de la lista: la frase, el cargo y la empresa usuaria; con generar, se pide a la IA al abrir. */
 export interface InicioVacante {
@@ -38,28 +38,32 @@ export function VacanteNueva() {
   const crear = useCrearVacante()
   const [vacanteId, setVacanteId] = useState<string>()
   const editar = useEditarVacante(vacanteId ?? '')
-  const vacante = useVacante(vacanteId ?? '', Boolean(vacanteId)).data
+  const consulta = useVacante(vacanteId ?? '', Boolean(vacanteId))
+  const vacante = consulta.data
 
   const [frase, setFrase] = useState(inicio.frase ?? '')
   const [cargo, setCargo] = useState<CargoCatalogo | null>(inicio.cargo ?? null)
   const [usuaria, setUsuaria] = useState(inicio.empresaUsuariaId ?? actual.id)
   const [f, setF] = useState<Campos>({ ...vacios, cargo: inicio.cargo?.nombre ?? '' })
   const [deIa, setDeIa] = useState<Partial<Record<Campo, boolean>>>({})
-  const [pidiendo, setPidiendo] = useState(false)
-  const [llenadoCon, setLlenadoCon] = useState<string>()
+  // Momento en que la IA aceptó el pedido: solo cuenta una respuesta leída después de ese momento (no la vacante vieja)
+  const [pedidoEn, setPedidoEn] = useState<number>()
+  const [llenado, setLlenado] = useState(false)
+  const [preguntas, setPreguntas] = useState<Aclaracion[] | null>(null)
+  const [modalAbierto, setModalAbierto] = useState(false)
   const [falta, setFalta] = useState<string>()
   const visibles = new Set(sesion?.empresasUsuarias.map((e) => e.id))
   const usuarias = empresa.data?.empresasUsuarias.filter((e) => e.activa && visibles.has(e.id)) ?? []
 
   const poner = (k: Campo, v: string) => { setF((x) => ({ ...x, [k]: v })); setDeIa((d) => ({ ...d, [k]: false })) }
 
-  const generar = () => {
-    if (!frase.trim()) return setFalta('Describa en una frase lo que necesita para que la IA llene el formulario.')
+  const generar = (texto = frase) => {
+    if (!texto.trim()) return setFalta('Describa en una frase lo que necesita para que la IA llene el formulario.')
     setFalta(undefined)
-    setPidiendo(true)
-    const listo = { onError: () => setPidiendo(false) }
-    if (vacanteId) redactar.mutate({ id: vacanteId, frase }, listo)
-    else solicitar.mutate({ frase, empresaUsuariaId: usuaria || null, cargoId: cargo?.id ?? null }, { ...listo, onSuccess: (r) => setVacanteId(r.id) })
+    setPreguntas(null)
+    const aceptado = () => setPedidoEn(Date.now())
+    if (vacanteId) redactar.mutate({ id: vacanteId, frase: texto }, { onSuccess: aceptado })
+    else solicitar.mutate({ frase: texto, empresaUsuariaId: usuaria || null, cargoId: cargo?.id ?? null }, { onSuccess: (r) => { setVacanteId(r.id); aceptado() } })
   }
 
   // Desde la barra de la lista con «Redactar con IA»: se pide apenas abre la pantalla
@@ -69,16 +73,20 @@ export function VacanteNueva() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Cuando llega la respuesta de la IA: o pregunta, o llena el formulario en violeta
+  // La respuesta de la IA: leída después del pedido y ya fuera de «redactando». O pregunta (modal), o llena el formulario
+  const respuesta = vacante && pedidoEn !== undefined && consulta.dataUpdatedAt > pedidoEn && vacante.estado !== 'Redactando' ? vacante : undefined
   useEffect(() => {
-    if (!vacante || vacante.estado === 'Redactando' || !pidiendo) return
-    setPidiendo(false)
-    if ((vacante.aclaraciones?.length ?? 0) > 0 || vacante.mensajeIa) return
-    const clave = `${vacante.frase}|${vacante.titulo}`
-    if (llenadoCon === clave) return
-    setLlenadoCon(clave)
-    llenar(vacante)
-  }, [vacante, pidiendo, llenadoCon])
+    if (!respuesta) return
+    setPedidoEn(undefined)
+    if ((respuesta.aclaraciones?.length ?? 0) > 0) {
+      setPreguntas(respuesta.aclaraciones)
+      setModalAbierto(true)
+      return
+    }
+    if (respuesta.mensajeIa || !respuesta.titulo) return
+    llenar(respuesta)
+    setLlenado(true)
+  }, [respuesta])
 
   const llenar = (v: Vacante) => {
     setF({
@@ -89,6 +97,14 @@ export function VacanteNueva() {
     setDeIa(Object.fromEntries(todos.map((k) => [k, true])))
     // La IA escribe la ciudad como texto: si corresponde a un solo municipio del DANE, queda elegido con su código
     if (!v.codigoMunicipio && v.ciudad) void resolverMunicipio(v.ciudad).then((m) => m && setF((x) => ({ ...x, ciudad: m.municipio, codigoMunicipio: m.codigo })))
+  }
+
+  // Con las respuestas del modal, la frase queda ajustada (la persona la ve) y se vuelve a pedir el borrador
+  const responder = (respuestas: string[]) => {
+    const ajustada = `${frase.trim()}\n${(preguntas ?? []).map((p, i) => `${p.pregunta} ${respuestas[i]}`).join('\n')}`
+    setFrase(ajustada)
+    setModalAbierto(false)
+    generar(ajustada)
   }
 
   const contenido = (): ContenidoVacante => ({
@@ -117,8 +133,7 @@ export function VacanteNueva() {
     }
   }
 
-  const redactando = pidiendo || vacante?.estado === 'Redactando'
-  const aclaraciones = !redactando ? vacante?.aclaraciones ?? [] : []
+  const redactando = solicitar.isPending || redactar.isPending || pedidoEn !== undefined
   const guardando = crear.isPending || editar.isPending
   const hayIa = Object.values(deIa).some(Boolean)
   const error = falta ?? (solicitar.error ?? redactar.error ?? crear.error ?? editar.error)?.message
@@ -157,18 +172,15 @@ export function VacanteNueva() {
               <textarea className="area-texto" rows={2} value={frase} onChange={(e) => setFrase(e.target.value)} maxLength={1000}
                 placeholder="Ej.: Necesito 25 auxiliares de bodega para Funza, turno noche, con curso de montacargas" />
             </label>
-            {aclaraciones.length > 0 && (
-              <div className="aviso aviso-alerta" role="status" style={{ flexDirection: 'column', gap: 6 }}>
-                <b style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}><IconoAlerta />Antes de redactar, la IA necesita que aclare:</b>
-                <ul style={{ margin: 0, paddingLeft: 20 }}>{aclaraciones.map((a) => <li key={a}>{a}</li>)}</ul>
-                <span>Ajuste la frase con la respuesta y vuelva a generar. Cada vacante es de un solo cargo; para otro cargo, cree otra vacante.</span>
-              </div>
-            )}
             {vacante?.mensajeIa && !redactando && <p className="aviso aviso-alerta"><IconoAlerta />{vacante.mensajeIa} Puede volver a intentarlo o llenar la vacante a mano.</p>}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-              <Boton variante="ia" icono={<Chispa />} cargando={redactando} textoCargando="La IA está redactando…" disabled={guardando} onClick={generar}>
-                {aclaraciones.length > 0 ? 'Responder y generar' : llenadoCon ? 'Pedir otro borrador' : 'Generar con IA'}
-              </Boton>
+              {preguntas && !redactando ? (
+                <Boton variante="ia" icono={<Chispa />} disabled={guardando} onClick={() => setModalAbierto(true)}>Responder a la IA</Boton>
+              ) : (
+                <Boton variante="ia" icono={<Chispa />} cargando={redactando} textoCargando="La IA está redactando…" disabled={guardando} onClick={() => generar()}>
+                  {llenado ? 'Pedir otro borrador' : 'Generar con IA'}
+                </Boton>
+              )}
               <span className="ayuda">{cargo ? 'La IA parte del perfil del cargo y la frase lo ajusta (ciudad, posiciones, jornada).' : 'Sin cargo del catálogo, la IA redacta desde cero.'}</span>
             </div>
           </div>
@@ -223,6 +235,70 @@ export function VacanteNueva() {
           <span className="registro">Se registran la sugerencia y tu decisión. Después se envía a aprobación.</span>
         </div>
       </form>
+
+      {modalAbierto && preguntas && (
+        <ModalAclaraciones frase={frase} preguntas={preguntas} onCancelar={() => setModalAbierto(false)} onResponder={responder} />
+      )}
     </>
+  )
+}
+
+/**
+ * Lo que la IA necesita saber antes de redactar: cada pregunta con sus opciones (un clic) y, si ninguna sirve, otra respuesta escrita.
+ * Al confirmar, las respuestas se agregan a la frase y la IA vuelve a redactar.
+ */
+function ModalAclaraciones({ frase, preguntas, onCancelar, onResponder }: {
+  frase: string
+  preguntas: Aclaracion[]
+  onCancelar: () => void
+  onResponder: (respuestas: string[]) => void
+}) {
+  const [elegidas, setElegidas] = useState<string[]>(() => preguntas.map(() => ''))
+  const [otras, setOtras] = useState<string[]>(() => preguntas.map(() => ''))
+  const respuesta = (i: number) => (otras[i].trim() || elegidas[i]).trim()
+  const completas = preguntas.every((_, i) => respuesta(i).length > 0)
+  const cambiar = (lista: string[], i: number, v: string) => lista.map((x, k) => (k === i ? v : x))
+
+  useEffect(() => {
+    const cerrar = (e: KeyboardEvent) => e.key === 'Escape' && onCancelar()
+    window.addEventListener('keydown', cerrar)
+    return () => window.removeEventListener('keydown', cerrar)
+  }, [onCancelar])
+
+  return (
+    <div className="capa-modal" role="presentation" onClick={(e) => e.target === e.currentTarget && onCancelar()}>
+      <form className="dialogo tarjeta" role="dialog" aria-modal="true" aria-labelledby="aclarar-titulo"
+        onSubmit={(e) => { e.preventDefault(); if (completas) onResponder(preguntas.map((_, i) => respuesta(i))) }}>
+        <header className="dialogo-cabeza">
+          <div>
+            <h2 id="aclarar-titulo" style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}><Chispa />Antes de redactar</h2>
+            <p>La IA necesita aclarar algo de «{frase.trim()}». Cada vacante es de un solo cargo.</p>
+          </div>
+          <button type="button" className="enlace-boton" onClick={onCancelar}>Cerrar</button>
+        </header>
+        {preguntas.map((p, i) => (
+          <fieldset key={p.pregunta} className="aclaracion">
+            <legend>{p.pregunta}</legend>
+            {p.opciones.length > 0 && (
+              <div className="aclaracion-opciones" role="group" aria-label={p.pregunta}>
+                {p.opciones.map((o) => (
+                  <button key={o} type="button" aria-pressed={!otras[i].trim() && elegidas[i] === o}
+                    onClick={() => { setElegidas((x) => cambiar(x, i, o)); setOtras((x) => cambiar(x, i, '')) }}>
+                    {o}
+                  </button>
+                ))}
+              </div>
+            )}
+            <input className="entrada" value={otras[i]} onChange={(e) => setOtras((x) => cambiar(x, i, e.target.value))}
+              placeholder={p.opciones.length > 0 ? 'Otra respuesta (opcional)' : 'Escriba la respuesta'} aria-label={`Otra respuesta: ${p.pregunta}`} />
+          </fieldset>
+        ))}
+        <div className="decision" style={{ padding: '8px 0 0' }}>
+          <Boton type="submit" variante="ia" icono={<Chispa />} disabled={!completas}>Generar con estas respuestas</Boton>
+          <Boton onClick={onCancelar}>Cancelar</Boton>
+          <span className="registro">Sus respuestas se agregan a la frase</span>
+        </div>
+      </form>
+    </div>
   )
 }

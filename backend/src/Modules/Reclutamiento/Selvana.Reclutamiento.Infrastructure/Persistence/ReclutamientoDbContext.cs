@@ -75,6 +75,7 @@ internal sealed class VacanteConfiguration : IEntityTypeConfiguration<Vacante>
             f.Ignore(x => x.Vacios);
         });
         builder.OwnsMany(v => v.Pruebas, p => p.ToJson());
+        builder.OwnsMany(v => v.Aclaraciones, a => a.ToJson());
         builder.OwnsMany(v => v.Aprobaciones, a =>
         {
             a.ToJson();

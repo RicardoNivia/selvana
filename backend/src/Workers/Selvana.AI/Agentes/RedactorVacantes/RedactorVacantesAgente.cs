@@ -42,9 +42,11 @@ internal sealed class RedactorVacantesAgente(
         - Requisitos y competencias concretos y verificables.
         - Una vacante es de UN solo cargo; "cupos" son las posiciones disponibles de ese cargo (si la frase dice "25 auxiliares", cupos = 25).
         - Antes de redactar, revisa si puedes. Si la frase pide dos o más cargos distintos (por ejemplo "un contador y dos mensajeros"),
-          o le falta algo imprescindible que no se puede suponer con sensatez (qué cargo es), NO redactes: devuelve en "aclaraciones"
-          entre 1 y 3 preguntas cortas para la persona (por ejemplo "¿Cuál cargo quiere crear primero? Cada vacante es de un solo cargo.")
-          y deja los demás campos vacíos. Si puedes redactar, "aclaraciones" va vacío y lo que supongas va en "supuestos".
+          o le falta algo imprescindible que no se puede suponer con sensatez (qué cargo es, en qué ciudad), NO redactes: devuelve en
+          "aclaraciones" entre 1 y 3 preguntas cortas para la persona y deja los demás campos vacíos. Cada aclaración trae "pregunta"
+          y "opciones": entre 2 y 4 respuestas cortas que la persona pueda elegir con un clic (por ejemplo, para "quiero dos montacargas":
+          pregunta "¿Qué cargo necesita?", opciones ["Operario de montacargas", "Auxiliar de bodega con montacargas"]; para la ciudad,
+          ciudades colombianas probables). Si puedes redactar, "aclaraciones" va vacío y lo que supongas va en "supuestos".
         """;
 
     public async Task<Result<ResultadoBorradorVacante>> RedactarAsync(SolicitudBorradorVacante solicitud, CancellationToken cancellationToken)
@@ -86,7 +88,9 @@ internal sealed class RedactorVacantesAgente(
         var costoUsd = propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadCostoUsd, out var c) == true && c is decimal costo ? costo : 0m;
 
         // La IA pregunta antes de redactar (por ejemplo, la frase pide dos cargos): vuelve solo con las aclaraciones
-        var aclaraciones = (borrador.Aclaraciones ?? []).Where(a => !string.IsNullOrWhiteSpace(a)).Take(3).ToList();
+        var aclaraciones = (borrador.Aclaraciones ?? []).Where(a => !string.IsNullOrWhiteSpace(a?.Pregunta)).Take(3)
+            .Select(a => a with { Opciones = [.. (a.Opciones ?? []).Where(o => !string.IsNullOrWhiteSpace(o)).Select(o => o.Trim()).Distinct().Take(4)] })
+            .ToList();
         if (aclaraciones.Count > 0)
         {
             var vacio = new BorradorVacante("", "", "", 0, "", "", [], [], [], new RangoSalarialSugerido(0, 0, ""), [], [], aclaraciones);

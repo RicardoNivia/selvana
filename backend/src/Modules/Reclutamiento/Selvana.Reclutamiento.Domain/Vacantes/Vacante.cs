@@ -16,6 +16,13 @@ public enum EstadoVacante
     Cerrada,
 }
 
+/// <summary>Pregunta de la IA antes de redactar la vacante, con respuestas cortas para elegir.</summary>
+public sealed class AclaracionVacante
+{
+    public string Pregunta { get; init; } = "";
+    public List<string> Opciones { get; init; } = [];
+}
+
 /// <summary>Etapas de aprobación de la requisición: líder → RRHH → gerencia.</summary>
 public enum EtapaAprobacion
 {
@@ -151,7 +158,7 @@ public sealed class Vacante : AggregateRoot<Guid>
     /// Lo que la IA necesita saber antes de redactar (por ejemplo, si la frase pide dos cargos distintos).
     /// Mientras haya aclaraciones, la vacante no tiene contenido: la persona responde y vuelve a pedir el borrador.
     /// </summary>
-    public List<string> Aclaraciones { get; private set; } = [];
+    public List<AclaracionVacante> Aclaraciones { get; private set; } = [];
 
     /// <summary>Una persona cambió lo que redactó la IA (queda confirmado por ella).</summary>
     public bool EditadaPorPersona { get; private set; }
@@ -239,11 +246,12 @@ public sealed class Vacante : AggregateRoot<Guid>
     }
 
     /// <summary>La IA no redactó porque la frase pide más de un cargo o le falta algo que no puede suponer: pregunta antes.</summary>
-    public void RegistrarAclaraciones(IEnumerable<string> preguntas)
+    public void RegistrarAclaraciones(IEnumerable<AclaracionVacante> preguntas)
     {
         if (Estado == EstadoVacante.Redactando)
         {
-            Aclaraciones = [.. preguntas.Select(p => p.Trim()).Where(p => p.Length > 0)];
+            Aclaraciones = [.. preguntas.Where(p => !string.IsNullOrWhiteSpace(p.Pregunta))
+                .Select(p => new AclaracionVacante { Pregunta = p.Pregunta.Trim(), Opciones = [.. p.Opciones.Select(o => o.Trim()).Where(o => o.Length > 0)] })];
             MensajeIa = null;
             Estado = EstadoVacante.Borrador;
         }

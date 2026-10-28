@@ -59,6 +59,12 @@ export interface CargoCatalogo {
   vinculado: boolean
 }
 
+/** Pregunta de la IA antes de redactar, con respuestas cortas para elegir. */
+export interface Aclaracion {
+  pregunta: string
+  opciones: string[]
+}
+
 export interface Vacante {
   aprobacion: AprobacionRequisicion
   cargoId: string | null
@@ -95,7 +101,7 @@ export interface Vacante {
   /** Código DANE del municipio; null si la ciudad aún no se eligió del catálogo. */
   codigoMunicipio: string | null
   /** Preguntas de la IA antes de redactar (por ejemplo, si la frase pide dos cargos). */
-  aclaraciones: string[] | null
+  aclaraciones: Aclaracion[] | null
 }
 
 /** Afinidad con la vacante: sugerencia del agente de ranking y, si existe, el ajuste de una persona. */

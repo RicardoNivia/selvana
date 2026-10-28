@@ -18,7 +18,10 @@ public sealed record VacanteDto(
     IReadOnlyList<RazonDto> Razones, string? ModeloIa, string? MensajeIa, bool EditadaPorPersona,
     DateTimeOffset CreadaEn, string CreadaPor, DateTimeOffset? PublicadaEn, int Postulantes, IReadOnlyList<ConteoDto> Canales,
     IReadOnlyList<Pruebas.PruebaEnBateriaDto> Pruebas, AprobacionRequisicionDto Aprobacion, Guid? CargoId = null, CargoCatalogoDto? CargoCatalogo = null,
-    string? CodigoMunicipio = null, IReadOnlyList<string>? Aclaraciones = null);
+    string? CodigoMunicipio = null, IReadOnlyList<AclaracionDto>? Aclaraciones = null);
+
+/// <summary>Pregunta de la IA antes de redactar, con opciones para elegir.</summary>
+public sealed record AclaracionDto(string Pregunta, IReadOnlyList<string> Opciones);
 
 /// <summary>
 /// Cargo del catálogo de la empresa. En una vacante, <paramref name="Vinculado"/> dice si la vacante parte de él;

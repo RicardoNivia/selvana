@@ -130,7 +130,7 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
         {(v.aclaraciones?.length ?? 0) > 0 && (
           <div className="aviso aviso-alerta" style={{ flexDirection: 'column', gap: 6 }}>
             <b>La IA no redactó esta vacante porque necesita que aclare:</b>
-            <ul style={{ margin: 0, paddingLeft: 20 }}>{v.aclaraciones?.map((a) => <li key={a}>{a}</li>)}</ul>
+            <ul style={{ margin: 0, paddingLeft: 20 }}>{v.aclaraciones?.map((a) => <li key={a.pregunta}>{a.pregunta}</li>)}</ul>
             <span>Llénela a mano aquí o cree otra con una frase de un solo cargo.</span>
           </div>
         )}

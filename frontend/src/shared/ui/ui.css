@@ -365,3 +365,15 @@
   .comp-grilla { overflow: visible; }
   .comp-columna { break-inside: avoid; }
 }
+
+/* Modal: capa que oscurece la página y diálogo centrado (sombra 2 solo en modales y panel de decisión) */
+.capa-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: var(--espacio-4); background: color-mix(in srgb, var(--color-texto) 35%, transparent); }
+.dialogo { width: min(640px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; display: flex; flex-direction: column; gap: var(--espacio-4); padding: var(--espacio-6); box-shadow: var(--sombra-2); }
+.dialogo-cabeza { display: flex; justify-content: space-between; gap: var(--espacio-4); align-items: flex-start; }
+.dialogo-cabeza h2 { margin: 0; font-family: var(--fuente-display); font-size: 22px; }
+.dialogo-cabeza p { margin: 4px 0 0; color: var(--color-texto-suave); font-size: 14px; }
+.aclaracion { display: flex; flex-direction: column; gap: var(--espacio-2); border: 0; padding: 0; margin: 0; }
+.aclaracion legend { font-weight: 600; font-size: 14px; margin-bottom: var(--espacio-2); }
+.aclaracion-opciones { display: flex; flex-wrap: wrap; gap: var(--espacio-2); }
+.aclaracion-opciones button { min-height: 36px; padding: 0 14px; border: 1px solid var(--color-ia-borde); border-radius: var(--radio-full); background: var(--color-superficie); color: var(--color-texto); font: 500 13px var(--fuente-base); cursor: pointer; }
+.aclaracion-opciones button[aria-pressed='true'] { background: var(--color-primario); border-color: var(--color-primario); color: var(--color-sobre-primario); }
