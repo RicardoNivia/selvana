@@ -33,8 +33,8 @@ El orden real se ajustó para tener un flujo completo de punta a punta antes de 
 | Etapa 2 · V1 Contratación y oferta, con maestro de tipos de contrato y plantillas | Hecho |
 | Etapa 2 · V2 Documentos de ingreso · V3 Alta y afiliaciones | Hechos |
 | Portal de la persona · P1 a P3b (cuenta, procesos, pendientes, ofertas para ti) y rediseño | Hecho |
-| **Etapa 2 · V4 Onboarding** | **En curso** |
-| Etapa 3 · Empleados E1 a E4 | Sigue |
+| Etapa 2 · V4 Onboarding · plan de inducción con seguimiento | Hecho; asistente de bienvenida con las integraciones y encuestas de 30, 60 y 90 días con Clima |
+| **Etapa 3 · Empleados E1 a E4** | **Sigue** |
 | Portal · P4 Mis documentos · P5 Portal del empleado | Después de E1 |
 | Etapa 4 · Desempeño · Etapa 5 · Clima | Después |
 | Etapa 1 · Sprint 10 · Estabilización y lanzamiento | Antes de vender el primer plan |
@@ -326,7 +326,7 @@ Adelantado (ADR 0013). Detalle en `docs/backlog/Modulos-Vinculacion-Empleados-De
 
 **Sprint 14 – Onboarding guiado**
 
-- [ ] Plan de inducción generado por cargo: tareas, responsables y fechas
+- [x] Plan de inducción generado por cargo: tareas, responsables y fechas — *bloque V4 (28/10/2026): al crear el empleado, el planificador de inducción (IA, sin datos de la persona) propone de 8 a 16 tareas por momento (antes del ingreso, primer día, primera semana, primer mes y periodo de prueba) con responsable (RRHH, líder, empleado, SST, TI o empresa usuaria), día relativo al ingreso, razones y alertas (avisa si falta SG-SST). Queda en violeta en la pestaña «Onboarding» y en la bandeja; RRHH lo ajusta y lo aprueba. Si la IA falla hay un plan base por reglas. El equipo marca las tareas (cada una queda en la bitácora) y, con todo hecho, «Cerrar el onboarding» deja el proceso «Vinculado». Falta el banco de pruebas del agente*
 - [ ] Asistente de bienvenida que responde dudas los primeros días
 - [ ] Encuestas automáticas a los 30, 60 y 90 días con alerta temprana de retiro
 

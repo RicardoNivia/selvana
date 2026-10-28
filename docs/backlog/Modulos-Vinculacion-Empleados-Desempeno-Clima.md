@@ -26,9 +26,9 @@ Planeación ejecutable de las Etapas 2 a 5 del [plan de trabajo](../Selvana-Plan
 | A1 a A4 · Filtros ATS | Hecho |
 | V1 · Contratación y oferta | Hecho, con maestro de tipos de contrato y plantillas (28/10) |
 | V2 · Documentos de ingreso · V3 · Alta y afiliaciones | Hechos |
-| **V4 · Onboarding** | **En curso** |
+| V4 · Onboarding | Hecho (plan de inducción con IA o plan base, aprobación y seguimiento); asistente y encuestas, después |
 | P1 a P3b · Portal de la persona | Hecho y rediseñado; P4 y P5 después de E1 |
-| E1 a E4 · Empleados | Sigue |
+| **E1 a E4 · Empleados** | **Sigue** |
 | Desempeño · Clima | Después |
 
 ## 0. Reclutamiento · Filtros ATS (pedido el 23 de octubre de 2026)

@@ -735,6 +735,122 @@ namespace Selvana.Vinculacion.Infrastructure.Persistence.Migrations
                                 .HasConstraintName("fk_procesos_procesos_id");
                         });
 
+                    b.OwnsOne("Selvana.Vinculacion.Domain.Procesos.PlanInduccion", "Induccion", b1 =>
+                        {
+                            b1.Property<Guid>("ProcesoVinculacionId");
+
+                            b1.PrimitiveCollection<string>("AlertasIa")
+                                .IsRequired();
+
+                            b1.Property<DateTimeOffset?>("AprobadoEn");
+
+                            b1.Property<string>("AprobadoPor");
+
+                            b1.Property<DateTimeOffset?>("CerradoEn");
+
+                            b1.Property<string>("CerradoPor");
+
+                            b1.Property<decimal>("CostoUsd");
+
+                            b1.Property<string>("ErrorIa");
+
+                            b1.Property<string>("Estado")
+                                .IsRequired();
+
+                            b1.Property<string>("Modelo");
+
+                            b1.Property<string>("Origen");
+
+                            b1.Property<DateTimeOffset?>("PedidoEn");
+
+                            b1.Property<DateTimeOffset?>("PropuestoEn");
+
+                            b1.HasKey("ProcesoVinculacionId");
+
+                            b1.ToTable("procesos", "vinculacion");
+
+                            b1
+                                .ToJson("induccion")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProcesoVinculacionId")
+                                .HasConstraintName("fk_procesos_procesos_id");
+
+                            b1.OwnsMany("Selvana.Vinculacion.Domain.Procesos.RazonOferta", "Razones", b2 =>
+                                {
+                                    b2.Property<Guid>("PlanInduccionProcesoVinculacionId");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAdd();
+
+                                    b2.Property<string>("Fuente")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Signo")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Texto")
+                                        .IsRequired();
+
+                                    b2.HasKey("PlanInduccionProcesoVinculacionId", "__synthesizedOrdinal")
+                                        .HasName("pk_procesos");
+
+                                    b2.ToTable("procesos", "vinculacion");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlanInduccionProcesoVinculacionId")
+                                        .HasConstraintName("fk_procesos_procesos_plan_induccion_proceso_vinculacion_id");
+                                });
+
+                            b1.OwnsMany("Selvana.Vinculacion.Domain.Procesos.TareaInduccion", "Tareas", b2 =>
+                                {
+                                    b2.Property<Guid>("PlanInduccionProcesoVinculacionId");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAdd();
+
+                                    b2.Property<bool>("DeIa");
+
+                                    b2.Property<string>("Detalle")
+                                        .IsRequired();
+
+                                    b2.Property<int>("Dia");
+
+                                    b2.Property<DateOnly>("Fecha");
+
+                                    b2.Property<bool>("Hecha");
+
+                                    b2.Property<DateTimeOffset?>("HechaEn");
+
+                                    b2.Property<string>("HechaPor");
+
+                                    b2.Property<Guid>("Id");
+
+                                    b2.Property<string>("Momento")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Responsable")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Titulo")
+                                        .IsRequired();
+
+                                    b2.HasKey("PlanInduccionProcesoVinculacionId", "__synthesizedOrdinal")
+                                        .HasName("pk_procesos");
+
+                                    b2.ToTable("procesos", "vinculacion");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlanInduccionProcesoVinculacionId")
+                                        .HasConstraintName("fk_procesos_procesos_plan_induccion_proceso_vinculacion_id");
+                                });
+
+                            b1.Navigation("Razones");
+
+                            b1.Navigation("Tareas");
+                        });
+
                     b.OwnsOne("Selvana.Vinculacion.Domain.Procesos.VacanteOrigen", "Vacante", b1 =>
                         {
                             b1.Property<Guid>("ProcesoVinculacionId");
@@ -786,6 +902,9 @@ namespace Selvana.Vinculacion.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Documentos");
+
+                    b.Navigation("Induccion")
+                        .IsRequired();
 
                     b.Navigation("Oferta")
                         .IsRequired();

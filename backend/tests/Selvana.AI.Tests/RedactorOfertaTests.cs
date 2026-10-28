@@ -68,3 +68,36 @@ public sealed class RedactorOfertaTests
         RedactorOfertaAgente.Validar(crudo, Condiciones, new FiltroVariablesProtegidas()).Alertas.Should().BeEmpty();
     }
 }
+
+public sealed class PlanificadorInduccionTests
+{
+    private static readonly Selvana.Vinculacion.Contracts.Ia.OnboardingSolicitado Solicitud = new(Guid.NewGuid(), DateTimeOffset.UnixEpoch, Guid.NewGuid(), Guid.NewGuid(),
+        "Servicios Andinos", null, "Montacarguista", "Opera montacargas en el CEDI", ["Licencia de montacargas"], "Término indefinido", null,
+        new DateOnly(2026, 11, 2), 60, "Tiempo completo", "Funza");
+
+    [Fact]
+    public void LaPreguntaNoLlevaDatosDeLaPersona()
+    {
+        PlanificadorInduccionAgente.Pregunta(Solicitud).Should().Contain("Montacarguista").And.Contain("02/11/2026").And.Contain("Vinculación directa");
+    }
+
+    [Fact]
+    public void NormalizaResponsablesYDiasYAvisaSiFaltaSgSst()
+    {
+        var crudo = new BorradorPlanInduccion(
+            [
+                new TareaInduccionPropuesta("Presentar al equipo", "", "jefe", "PrimerDia", 0),
+                new TareaInduccionPropuesta("Visitar la empresa usuaria", "", "Empresa usuaria", "PrimerDia", 0),
+                new TareaInduccionPropuesta("Revisión", "", "Líder", "PrimerMes", 500),
+                new TareaInduccionPropuesta("Sin momento", "", "RRHH", "Mañana", 1),
+                new TareaInduccionPropuesta("Confirmar la edad y el estado civil", "", "RRHH", "PrimerDia", 0),
+            ], [], []);
+
+        var v = PlanificadorInduccionAgente.Validar(crudo, Solicitud, new FiltroVariablesProtegidas());
+
+        v.Tareas.Should().HaveCount(3);
+        v.Tareas.Should().OnlyContain(t => t.Responsable == "RRHH" || t.Responsable == "Líder");
+        v.Tareas.Single(t => t.Titulo == "Revisión").Dia.Should().Be(60);
+        v.Alertas.Should().Contain(a => a.Contains("SG-SST", StringComparison.Ordinal));
+    }
+}

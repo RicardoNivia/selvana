@@ -153,7 +153,7 @@ public static class ProcesoErrors
 /// Proceso de vinculación de una persona: nace cuando alguien aprueba contratar al candidato de la terna y termina con el empleado creado.
 /// La IA redacta la oferta; RRHH la aprueba; el candidato la acepta por su enlace con evidencia.
 /// </summary>
-public sealed class ProcesoVinculacion : AggregateRoot<Guid>
+public sealed partial class ProcesoVinculacion : AggregateRoot<Guid>
 {
     public const string MarcaTrabajador = "[TRABAJADOR]";
     public const string MarcaDocumento = "[DOCUMENTO]";
@@ -742,6 +742,7 @@ public sealed class ProcesoVinculacion : AggregateRoot<Guid>
         Etapa = EtapaVinculacion.Onboarding;
         EmpleadoCreadoPor = por;
         EmpleadoCreadoEn = ahora;
+        Induccion = new PlanInduccion { Estado = EstadoPlanInduccion.Generando, PedidoEn = ahora };
         ActualizadoEn = ahora;
         return Result.Success();
     }

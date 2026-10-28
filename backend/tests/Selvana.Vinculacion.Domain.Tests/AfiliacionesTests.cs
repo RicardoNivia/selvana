@@ -89,4 +89,96 @@ public class AfiliacionesTests
         p.CrearEmpleado(false, "Laura", Ahora).Error.Should().Be(AltaErrors.SinConfirmarAlertas);
         p.CrearEmpleado(true, "Laura", Ahora).IsSuccess.Should().BeTrue();
     }
+
+    private static ProcesoVinculacion EnOnboarding()
+    {
+        var p = EnAfiliaciones();
+        ConfirmarTodo(p);
+        p.CrearEmpleado(false, "Laura", Ahora).IsSuccess.Should().BeTrue();
+        return p;
+    }
+
+    private static readonly TareaPropuesta[] TareasIa =
+    [
+        new("Enviar la bienvenida", "Fecha y lugar", "RRHH", MomentoInduccion.AntesDelIngreso, -3),
+        new("Inducción SG-SST", "Riesgos del montacargas", "SST", MomentoInduccion.PrimerDia, 0),
+        new("Revisión del primer mes", "Avance", "Líder", MomentoInduccion.PrimerMes, 30),
+    ];
+
+    [Fact]
+    public void AlCrearElEmpleadoSePideElPlanDeInduccionALaIa()
+    {
+        EnOnboarding().Induccion.Estado.Should().Be(EstadoPlanInduccion.Generando);
+    }
+
+    [Fact]
+    public void ElPlanDeLaIaQuedaPorAprobarEnVioletaConSusFechas()
+    {
+        var p = EnOnboarding();
+
+        p.RegistrarPlanInduccion(TareasIa, [new RazonOferta { Signo = "+", Texto = "SG-SST el primer día", Fuente = "SG-SST" }], [], "haiku", 0.01m, Ahora).Should().BeTrue();
+
+        p.Induccion.Estado.Should().Be(EstadoPlanInduccion.PorAprobar);
+        p.Induccion.Tareas.Should().OnlyContain(t => t.DeIa);
+        p.Induccion.Tareas[0].Fecha.Should().Be(Ingreso.AddDays(-3));
+        p.MarcarTareaInduccion(p.Induccion.Tareas[0].Id, true, "Laura", Ahora).Error.Should().Be(OnboardingErrors.NoEnCurso);
+    }
+
+    [Fact]
+    public void AprobadoSeHaceSeguimientoYSoloCierraConTodoHecho()
+    {
+        var p = EnOnboarding();
+        p.RegistrarPlanInduccion(TareasIa, [], [], "haiku", 0, Ahora);
+
+        p.AprobarPlanInduccion("Laura", Ahora).IsSuccess.Should().BeTrue();
+        p.Induccion.Tareas.Should().OnlyContain(t => !t.DeIa);
+        p.MarcarTareaInduccion(p.Induccion.Tareas[0].Id, true, "Camilo", Ahora).IsSuccess.Should().BeTrue();
+        p.Induccion.Avance.Should().Be(33);
+        p.CerrarOnboarding("Laura", Ahora).Error.Should().Be(OnboardingErrors.Pendientes);
+
+        foreach (var t in p.Induccion.Tareas)
+        {
+            p.MarcarTareaInduccion(t.Id, true, "Camilo", Ahora);
+        }
+
+        p.CerrarOnboarding("Laura", Ahora).IsSuccess.Should().BeTrue();
+        p.Etapa.Should().Be(EtapaVinculacion.Vinculado);
+        p.Induccion.Estado.Should().Be(EstadoPlanInduccion.Terminado);
+    }
+
+    [Fact]
+    public void EditarConfirmaLasTareasYConservaLoHecho()
+    {
+        var p = EnOnboarding();
+        p.RegistrarPlanInduccion(TareasIa, [], [], "haiku", 0, Ahora);
+        p.AprobarPlanInduccion("Laura", Ahora);
+        var primera = p.Induccion.Tareas[0];
+        p.MarcarTareaInduccion(primera.Id, true, "Camilo", Ahora);
+
+        p.EditarPlanInduccion([new(primera.Titulo, primera.Detalle, "RRHH", primera.Momento, -5, primera.Id), new("Nueva", "", "Líder", MomentoInduccion.PrimeraSemana, 3)], Ahora)
+            .IsSuccess.Should().BeTrue();
+
+        p.Induccion.Tareas.Should().HaveCount(2);
+        p.Induccion.Tareas.Single(t => t.Id == primera.Id).Should().Match<TareaInduccion>(t => t.Hecha && t.Fecha == Ingreso.AddDays(-5));
+    }
+
+    [Fact]
+    public void SiLaIaFallaSePuedeUsarElPlanBase()
+    {
+        var p = EnOnboarding();
+        p.FallaPlanInduccion("Ningún modelo respondió", Ahora).Should().BeTrue();
+
+        p.UsarPlanBase(Ahora).IsSuccess.Should().BeTrue();
+
+        p.Induccion.Origen.Should().Be("Plan base");
+        p.Induccion.Tareas.Should().Contain(t => t.Responsable == "SST").And.Contain(t => t.Momento == MomentoInduccion.PeriodoPrueba && t.Dia == 55);
+        p.Induccion.Tareas.Should().OnlyContain(t => !t.DeIa);
+    }
+
+    [Fact]
+    public void ElPlanBaseIncluyeLaEmpresaUsuariaSiLaHay()
+    {
+        PlanBaseInduccion.Para("Montacarguista", "Logística Funza", 0).Should().Contain(t => t.Responsable == "Empresa usuaria")
+            .And.NotContain(t => t.Momento == MomentoInduccion.PeriodoPrueba);
+    }
 }

@@ -195,3 +195,44 @@
 .vin-tipo-como-titulo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); font-size: 13px; font-weight: 600; }
 .vin-tipo-como-titulo a { margin-left: auto; font-size: 12px; }
 .vin-tipo-como p { margin: 0; font-size: 13px; font-weight: 400; color: var(--color-texto); white-space: pre-wrap; }
+
+/* Onboarding: plan de inducción por momentos, con seguimiento */
+.vin-plan-sub { margin: 4px 0 0; font-size: 13px; color: var(--color-texto-suave); }
+.vin-plan-avance { display: flex; align-items: center; gap: var(--espacio-3); font-size: 12px; color: var(--color-texto-suave); }
+.vin-plan-barra { flex: 1; height: 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; }
+.vin-plan-barra span { display: block; height: 100%; border-radius: inherit; background: var(--color-exito); transition: width var(--duracion-media) var(--curva-salida); }
+.vin-plan-vacio, .vin-plan-generando { display: flex; flex-direction: column; gap: var(--espacio-3); }
+.vin-plan-vacio p:not(.aviso) { margin: 0; color: var(--color-texto-suave); }
+.vin-plan-alerta { width: 14px; height: 14px; flex: none; margin-top: 2px; color: var(--color-alerta); }
+.vin-plan-grupos { display: flex; flex-direction: column; gap: var(--espacio-4); }
+.vin-plan-grupo h3 { display: flex; align-items: center; gap: var(--espacio-2); margin: 0 0 var(--espacio-2); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-texto-suave); }
+.vin-plan-grupo h3 .mono { letter-spacing: 0; color: var(--color-texto-tenue); }
+.vin-plan-grupo ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.vin-tarea { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto 120px; align-items: center; gap: var(--espacio-3); padding: 10px var(--espacio-3);
+  border: 1px solid var(--color-borde); border-radius: var(--radio-m); background: var(--color-superficie); transition: background var(--duracion-corta), border-color var(--duracion-corta); }
+.vin-tarea.de-ia { background: var(--color-ia-suave); border-color: var(--color-ia-borde); }
+.vin-tarea.hecha { background: color-mix(in srgb, var(--color-exito-suave) 55%, var(--color-superficie)); }
+.vin-tarea.hecha .vin-tarea-texto b { text-decoration: line-through; text-decoration-color: var(--color-texto-tenue); color: var(--color-texto-suave); }
+.vin-tarea-marca { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 2px solid var(--color-borde); border-radius: var(--radio-s); background: var(--color-superficie);
+  color: var(--color-sobre-primario); cursor: pointer; transition: background var(--duracion-corta), border-color var(--duracion-corta); }
+.vin-tarea-marca:hover { border-color: var(--color-primario); }
+.vin-tarea-marca[aria-checked="true"] { background: var(--color-exito); border-color: var(--color-exito); }
+.vin-tarea-marca svg { width: 16px; height: 16px; }
+.vin-tarea-marca .indicador { width: 12px; height: 12px; }
+.vin-tarea-punto { display: grid; place-items: center; width: 10px; height: 10px; margin-left: 8px; border-radius: var(--radio-full); background: var(--color-borde); }
+.vin-tarea.de-ia .vin-tarea-punto { width: 18px; height: 18px; margin-left: 4px; background: none; color: var(--color-ia); }
+.vin-tarea-punto svg { width: 14px; height: 14px; }
+.vin-tarea-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 14px; }
+.vin-tarea-texto > span { font-size: 13px; color: var(--color-texto-suave); }
+.vin-tarea-texto .vin-tarea-hecha { font-size: 12px; color: var(--color-exito); }
+.vin-tarea-quien { padding: 2px 10px; border-radius: var(--radio-full); background: var(--color-superficie-2); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.vin-tarea-cuando { display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; }
+.vin-tarea-cuando small { font-size: 11px; color: var(--color-texto-tenue); }
+@media (max-width: 720px) { .vin-tarea { grid-template-columns: 28px minmax(0, 1fr); } .vin-tarea-quien, .vin-tarea-cuando { grid-column: 2; justify-self: start; align-items: flex-start; } }
+.vin-plan-editor { display: flex; flex-direction: column; gap: var(--espacio-2); }
+.vin-plan-editor > .enlace-boton { align-self: flex-start; }
+.vin-plan-fila { display: grid; grid-template-columns: minmax(0, 2fr) 150px 160px 90px auto; gap: var(--espacio-2); align-items: center; padding: var(--espacio-2); border: 1px solid var(--color-borde); border-radius: var(--radio-m); }
+.vin-plan-detalle { grid-column: 1 / -1; }
+.vin-plan-dia { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-texto-suave); }
+.vin-plan-dia .entrada { width: 64px; }
+@media (max-width: 860px) { .vin-plan-fila { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .vin-plan-fila > .entrada:first-child { grid-column: 1 / -1; } }

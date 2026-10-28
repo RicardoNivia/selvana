@@ -25,3 +25,12 @@ public sealed record OfertaSolicitada(
 public sealed record DocumentoIngresoRecibido(
     Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid ProcesoId, string Tipo, string TipoEsperado, Guid ArchivoId, string NombreArchivo,
     string TipoContenido) : IIntegrationEvent;
+
+/// <summary>
+/// El empleado quedó creado: el planificador de la IA prepara el plan de inducción. Solo viajan el cargo, la vacante y las condiciones,
+/// nunca datos de la persona.
+/// </summary>
+public sealed record OnboardingSolicitado(
+    Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid ProcesoId, string Empresa, string? EmpresaUsuaria, string Cargo, string DescripcionVacante,
+    IReadOnlyList<string> Requisitos, string TipoContrato, string? ComoSeTrabaja, DateOnly FechaIngreso, int PeriodoPruebaDias, string Jornada, string Ciudad)
+    : IIntegrationEvent;

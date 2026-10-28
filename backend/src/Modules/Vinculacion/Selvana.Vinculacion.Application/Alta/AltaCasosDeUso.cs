@@ -162,6 +162,7 @@ internal sealed class CrearEmpleadoHandler(IUsuarioActual usuario, IProcesos pro
             p.Condiciones.SalarioCop, p.Condiciones.FechaIngreso, p.Condiciones.FechaFin, Entidad(TipoAfiliacion.Eps), Entidad(TipoAfiliacion.Pension), Entidad(TipoAfiliacion.Arl),
             p.Afiliaciones.FirstOrDefault(a => a.Tipo == TipoAfiliacion.Arl)?.ClaseRiesgo, Entidad(TipoAfiliacion.CajaCompensacion), usuario.Nombre));
         eventos.Publicar(new PropuestaResuelta(Guid.CreateVersion7(), ahora, p.EmpresaId, Altas.TipoBandeja, p.Id, "Empleado creado", usuario.Nombre));
+        eventos.Publicar(Onboarding.Onboardings.Solicitud(p, ahora));
         bitacora.Registrar(p.EmpresaId, TipoActor.Persona, usuario.Nombre, $"Creó el empleado {p.Persona.Nombre}",
             $"{p.Codigo} · {p.Vacante.Cargo} · ingreso {p.Condiciones.FechaIngreso:dd/MM/yyyy}",
             c.ConfirmaAlertas ? "Confirmó que revisó las alertas de antecedentes o examen médico" : "Decisión humana; se genera el archivo de alta", "ProcesoVinculacion", p.Id);

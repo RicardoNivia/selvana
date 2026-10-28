@@ -11,6 +11,7 @@ import {
 import { AlertasContrato, CondicionesFormulario } from './CondicionesFormulario'
 import { AfiliacionesYAlta } from './AfiliacionesYAlta'
 import { DocumentosIngreso } from './DocumentosIngreso'
+import { PlanInduccionPanel } from './PlanInduccion'
 import './vinculacion.css'
 
 const pasos = ['Oferta', 'Documentos', 'Afiliaciones', 'Onboarding'] as const
@@ -40,7 +41,7 @@ function Pestanas({ p, paso, onElegir }: { p: Proceso; paso: Paso; onElegir: (x:
             <span className="vin-paso-num mono">{p.etapa !== 'Cancelado' && i < actual ? <IconoCheck /> : i + 1}</span>
             {nombrePaso[x]}
             {x === 'Documentos' && pendientesDocs > 0 && <span className="nav-contador">{pendientesDocs}</span>}
-            {x === 'Onboarding' && <span className="vin-paso-pronto">Bloque V4</span>}
+            {x === 'Onboarding' && p.induccion?.estado === 'PorAprobar' && <span className="nav-contador">!</span>}
           </button>
         )
       })}
@@ -83,12 +84,7 @@ export function ProcesoVinculacion() {
         )}
         {paso === 'Documentos' && <DocumentosIngreso p={p} />}
         {paso === 'Afiliaciones' && <AfiliacionesYAlta p={p} />}
-        {paso === 'Onboarding' && (
-          <section className="tarjeta vin-panel">
-            <h2>Onboarding</h2>
-            <p className="aviso aviso-ok"><IconoCheck />Empleado creado por {p.alta.empleadoCreadoPor}{p.alta.empleadoCreadoEn ? ` el ${fechaHora.format(new Date(p.alta.empleadoCreadoEn))}` : ''}. El plan de inducción por cargo llega en el bloque V4.</p>
-          </section>
-        )}
+        {paso === 'Onboarding' && <PlanInduccionPanel p={p} />}
       </div>
     </>
   )

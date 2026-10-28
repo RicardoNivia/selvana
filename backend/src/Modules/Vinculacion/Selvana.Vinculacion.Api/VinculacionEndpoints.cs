@@ -5,6 +5,7 @@ using Selvana.SharedKernel.Messaging;
 using Selvana.Vinculacion.Application.Abstracciones;
 using Selvana.Vinculacion.Application.Alta;
 using Selvana.Vinculacion.Application.Documentos;
+using Selvana.Vinculacion.Application.Onboarding;
 using Selvana.Vinculacion.Application.Procesos;
 using Selvana.Vinculacion.Application.TiposContrato;
 using Selvana.Web.Common;
@@ -24,6 +25,10 @@ public sealed record ProcesoCreadoResponse(Guid Id);
 public sealed record TiposCargadosResponse(int Creados);
 
 public sealed record TipoCreadoResponse(Guid Id);
+
+public sealed record PlanInduccionRequest(IReadOnlyList<TareaInduccionRequest> Tareas);
+
+public sealed record MarcarTareaRequest(bool Hecha);
 
 public sealed record RechazarDocumentoRequest(string Motivo);
 
@@ -61,6 +66,7 @@ public static class VinculacionEndpoints
         MapConsola(app.MapGroup("/vinculacion").WithTags("Vinculación").RequireAuthorization(Politicas.VerHojasDeVida));
         MapDocumentos(app.MapGroup("/vinculacion/procesos/{id:guid}/documentos").WithTags("Vinculación · documentos").RequireAuthorization(Politicas.VerHojasDeVida));
         MapTiposContrato(app.MapGroup("/vinculacion/tipos-contrato").WithTags("Vinculación · tipos de contrato").RequireAuthorization(Politicas.VerHojasDeVida));
+        MapOnboarding(app.MapGroup("/vinculacion/procesos/{id:guid}/onboarding").WithTags("Vinculación · onboarding").RequireAuthorization(Politicas.VerHojasDeVida));
         MapAlta(app.MapGroup("/vinculacion/procesos/{id:guid}").WithTags("Vinculación · afiliaciones y alta").RequireAuthorization(Politicas.VerHojasDeVida));
         MapCandidato(app.MapGroup("/portal/vinculacion").WithTags("Vinculación (candidato)").AllowAnonymous().RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         return app;
@@ -137,6 +143,36 @@ public static class VinculacionEndpoints
                 return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
             })
             .WithName("DescargarAlta");
+    }
+
+    /// <summary>Plan de inducción: la IA lo propone, RRHH lo ajusta y aprueba; el seguimiento lo hace el equipo.</summary>
+    private static void MapOnboarding(RouteGroupBuilder g)
+    {
+        var aprobar = Politicas.DeAccion("AprobarBandeja");
+
+        g.MapPost("/pedir-plan", async (Guid id, ICommandHandler<PedirPlanInduccionCommand> h, CancellationToken ct) =>
+                (await h.Handle(new PedirPlanInduccionCommand(id), ct)).ToHttp())
+            .WithName("PedirPlanInduccion");
+
+        g.MapPost("/plan-base", async (Guid id, ICommandHandler<UsarPlanBaseCommand> h, CancellationToken ct) =>
+                (await h.Handle(new UsarPlanBaseCommand(id), ct)).ToHttp())
+            .WithName("UsarPlanBaseInduccion");
+
+        g.MapPut("/plan", async (Guid id, PlanInduccionRequest b, ICommandHandler<EditarPlanInduccionCommand> h, CancellationToken ct) =>
+                (await h.Handle(new EditarPlanInduccionCommand(id, b.Tareas), ct)).ToHttp())
+            .WithName("EditarPlanInduccion");
+
+        g.MapPost("/aprobar", async (Guid id, ICommandHandler<AprobarPlanInduccionCommand> h, CancellationToken ct) =>
+                (await h.Handle(new AprobarPlanInduccionCommand(id), ct)).ToHttp())
+            .WithName("AprobarPlanInduccion").RequireAuthorization(aprobar);
+
+        g.MapPut("/tareas/{tareaId:guid}", async (Guid id, Guid tareaId, MarcarTareaRequest b, ICommandHandler<MarcarTareaInduccionCommand> h, CancellationToken ct) =>
+                (await h.Handle(new MarcarTareaInduccionCommand(id, tareaId, b.Hecha), ct)).ToHttp())
+            .WithName("MarcarTareaInduccion");
+
+        g.MapPost("/cerrar", async (Guid id, ICommandHandler<CerrarOnboardingCommand> h, CancellationToken ct) =>
+                (await h.Handle(new CerrarOnboardingCommand(id), ct)).ToHttp())
+            .WithName("CerrarOnboarding").RequireAuthorization(aprobar);
     }
 
     /// <summary>Maestro de tipos de contrato: lo ve quien contrata; lo edita quien configura la estructura.</summary>

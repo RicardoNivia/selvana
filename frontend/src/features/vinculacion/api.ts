@@ -125,7 +125,55 @@ export interface Proceso {
   documentos: Documento[]
   afiliaciones: Afiliacion[]
   alta: DatosAlta
+  induccion: PlanInduccion
 }
+
+/* ---------- Onboarding: plan de inducción ---------- */
+
+export type MomentoInduccion = 'AntesDelIngreso' | 'PrimerDia' | 'PrimeraSemana' | 'PrimerMes' | 'PeriodoPrueba'
+export type EstadoPlanInduccion = 'SinPlan' | 'Generando' | 'FallaIa' | 'PorAprobar' | 'EnCurso' | 'Terminado'
+
+export const momentosInduccion: [MomentoInduccion, string][] = [
+  ['AntesDelIngreso', 'Antes del ingreso'],
+  ['PrimerDia', 'Primer día'],
+  ['PrimeraSemana', 'Primera semana'],
+  ['PrimerMes', 'Primer mes'],
+  ['PeriodoPrueba', 'Periodo de prueba'],
+]
+
+export const responsablesInduccion = ['RRHH', 'Líder', 'Empleado', 'SST', 'TI', 'Empresa usuaria']
+
+export interface TareaInduccion {
+  id: string
+  titulo: string
+  detalle: string
+  responsable: string
+  momento: MomentoInduccion
+  dia: number
+  fecha: string
+  hecha: boolean
+  hechaPor: string | null
+  hechaEn: string | null
+  deIa: boolean
+}
+
+export interface PlanInduccion {
+  estado: EstadoPlanInduccion
+  origen: string | null
+  tareas: TareaInduccion[]
+  razones: Razon[]
+  alertasIa: string[]
+  modelo: string | null
+  costoUsd: number
+  errorIa: string | null
+  aprobadoPor: string | null
+  aprobadoEn: string | null
+  cerradoPor: string | null
+  cerradoEn: string | null
+  avance: number
+}
+
+export interface TareaInduccionRequest { id: string | null; titulo: string; detalle: string; responsable: string; momento: MomentoInduccion; dia: number }
 
 export type EstadoAfiliacion = 'Pendiente' | 'Solicitada' | 'Confirmada' | 'NoAplica'
 
@@ -332,7 +380,8 @@ export function useProceso(id: string) {
   return useQuery({
     queryKey: ['vinculacion', 'proceso', id],
     queryFn: ({ signal }) => apiGet<Proceso>(`/api/v1/vinculacion/procesos/${id}`, signal),
-    refetchInterval: (x) => (x.state.data?.oferta.estado === 'Redactando' || x.state.data?.documentos.some((d) => d.estado === 'Leyendo') ? 2500
+    refetchInterval: (x) => (x.state.data?.oferta.estado === 'Redactando' || x.state.data?.documentos.some((d) => d.estado === 'Leyendo')
+      || x.state.data?.induccion?.estado === 'Generando' ? 2500
       : x.state.data?.oferta.estado === 'Enviada' ? 15_000 : false),
   })
 }
@@ -431,3 +480,12 @@ export async function descargarAlta(id: string, codigo: string) {
   a.download = `alta-${codigo}.csv`
   a.click()
 }
+
+const rutaOnboarding = (id: string) => `/api/v1/vinculacion/procesos/${id}/onboarding`
+export const usePedirPlanInduccion = (id: string) => useAccionProceso(() => apiSend('POST', `${rutaOnboarding(id)}/pedir-plan`))
+export const useUsarPlanBase = (id: string) => useAccionProceso(() => apiSend('POST', `${rutaOnboarding(id)}/plan-base`))
+export const useEditarPlanInduccion = (id: string) => useAccionProceso((tareas: TareaInduccionRequest[]) => apiSend('PUT', `${rutaOnboarding(id)}/plan`, { tareas }))
+export const useAprobarPlanInduccion = (id: string) => useAccionProceso(() => apiSend('POST', `${rutaOnboarding(id)}/aprobar`))
+export const useMarcarTareaInduccion = (id: string) =>
+  useAccionProceso((v: { tareaId: string; hecha: boolean }) => apiSend('PUT', `${rutaOnboarding(id)}/tareas/${v.tareaId}`, { hecha: v.hecha }))
+export const useCerrarOnboarding = (id: string) => useAccionProceso(() => apiSend('POST', `${rutaOnboarding(id)}/cerrar`))
