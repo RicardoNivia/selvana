@@ -1,23 +1,27 @@
 import { useState } from 'react'
 import { Boton } from '../../shared/ui/Boton'
 import { IconoCheck, IconoReloj } from '../../shared/ui/Iconos'
-import { type Vacante, useAprobarRequisicion, useDevolverRequisicion } from './api'
+import { type Vacante, useDevolverRequisicion } from './api'
 
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
 const nombreRol: Record<string, string> = { Administrador: 'Administrador', GerenteRrhh: 'Gerente RRHH', Analista: 'Analista', Lider: 'Líder' }
 
+/** Texto del botón de aprobar: el administrador aprueba todas las etapas de una vez; en la última etapa, aprobar publica. */
+export function textoAprobar(v: Vacante, rol: string) {
+  const a = v.aprobacion
+  return rol === 'Administrador' || a.etapaPendiente === a.etapas[a.etapas.length - 1] ? 'Aprobar y publicar' : `Aprobar por ${a.etapaPendiente}`
+}
+
 /** Requisición líder → RRHH → gerencia: en qué etapa va, quién decidió y, si le toca al usuario, aprobar o devolver. */
 export function AprobacionRequisicion({ vacante: v }: { vacante: Vacante }) {
   const a = v.aprobacion
-  const aprobar = useAprobarRequisicion(v.id)
   const devolver = useDevolverRequisicion(v.id)
   const [devolviendo, setDevolviendo] = useState(false)
   const [motivo, setMotivo] = useState('')
   const enAprobacion = v.estado === 'EnAprobacion'
   if (!enAprobacion && a.decisiones.length === 0 && !a.motivoDevolucion) return null
 
-  const ultima = a.etapas[a.etapas.length - 1]
-  const error = aprobar.error ?? devolver.error
+  const error = devolver.error
   return (
     <section className={`tarjeta requisicion ${a.puedeDecidir ? 'panel-decision' : ''}`} aria-label="Aprobación de la requisición">
       <h3>Aprobación de la requisición</h3>
@@ -44,11 +48,9 @@ export function AprobacionRequisicion({ vacante: v }: { vacante: Vacante }) {
         })}
       </ol>
 
+      {/* Aprobar está en la barra de la vacante; aquí queda devolver con el motivo */}
       {a.puedeDecidir && !devolviendo && (
         <div className="decision" style={{ padding: 0, borderTop: 0 }}>
-          <Boton variante="primario" icono={<IconoCheck />} cargando={aprobar.isPending} textoCargando="Aprobando…" onClick={() => aprobar.mutate()}>
-            {a.etapaPendiente === ultima ? 'Aprobar y publicar' : `Aprobar por ${a.etapaPendiente}`}
-          </Boton>
           <Boton onClick={() => setDevolviendo(true)}>Devolver</Boton>
         </div>
       )}

@@ -354,6 +354,10 @@ export const useRedactarVacante = () =>
 export const useEditarVacante = (id: string) =>
   useMutacionVacantes((v: ContenidoVacante) => apiSend('PUT', `/api/v1/reclutamiento/vacantes/${id}`, v))
 
+/** Igual que useSolicitarAprobacion, para cuando la vacante se acaba de crear y su id llega al guardar. */
+export const useEnviarAAprobacion = () =>
+  useMutacionVacantes((id: string) => apiSend('POST', `/api/v1/reclutamiento/vacantes/${id}/solicitar-aprobacion`))
+
 /** Envía la requisición a aprobación (RRHH → gerencia); la última aprobación la publica. */
 export const useSolicitarAprobacion = (id: string) => useMutacionVacantes(() => apiSend('POST', `/api/v1/reclutamiento/vacantes/${id}/solicitar-aprobacion`))
 

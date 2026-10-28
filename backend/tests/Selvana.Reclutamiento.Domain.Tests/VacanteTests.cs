@@ -120,9 +120,9 @@ public sealed class VacanteTests
         vacante.EtapaPendiente.Should().Be(EtapaAprobacion.Rrhh);
         vacante.RecibePostulaciones.Should().BeFalse();
 
-        vacante.Aprobar("Andrés", Gerencia, Ahora).IsSuccess.Should().BeTrue("el administrador también aprueba por RRHH");
+        vacante.Aprobar("Laura", Rrhh, Ahora).IsSuccess.Should().BeTrue();
         vacante.EtapaPendiente.Should().Be(EtapaAprobacion.Gerencia);
-        vacante.Aprobar("Andrés", Gerencia, Ahora).Error.Should().Be(VacanteErrors.YaAproboOtraEtapa);
+        vacante.Aprobar("Laura", Rrhh, Ahora).Error.Should().Be(VacanteErrors.NoApruebaEstaEtapa);
 
         vacante.Aprobar("Gerente general", Gerencia, Ahora.AddHours(1)).IsSuccess.Should().BeTrue();
         vacante.Estado.Should().Be(EstadoVacante.Publicada);
@@ -131,15 +131,29 @@ public sealed class VacanteTests
     }
 
     [Fact]
-    public void LaEtapaQuePuedeAprobarQuienPideSeApruebaSola()
+    public void EnviarAAprobacionNoApruebaNadaAunqueQuienEnviaPuedaAprobar()
     {
         var vacante = ConBorrador();
 
-        vacante.SolicitarAprobacion("Laura", Rrhh, Ahora);
+        vacante.SolicitarAprobacion("Laura", Rrhh, Ahora).IsSuccess.Should().BeTrue();
 
-        vacante.EtapaPendiente.Should().Be(EtapaAprobacion.Gerencia);
-        vacante.Aprobaciones.Should().ContainSingle().Which.Automatica.Should().BeTrue();
-        vacante.Aprobar("Laura", Rrhh, Ahora).Error.Should().Be(VacanteErrors.NoApruebaEstaEtapa);
+        vacante.Estado.Should().Be(EstadoVacante.EnAprobacion);
+        vacante.EtapaPendiente.Should().Be(EtapaAprobacion.Rrhh);
+        vacante.Aprobaciones.Should().BeEmpty();
+        vacante.RecibePostulaciones.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ElAdministradorApruebaTodasLasEtapasDeUnaVezYLaVacanteSePublica()
+    {
+        var vacante = ConBorrador();
+        vacante.SolicitarAprobacion("Andrés", Gerencia, Ahora);
+
+        vacante.Aprobar("Andrés", Gerencia, Ahora.AddMinutes(5)).IsSuccess.Should().BeTrue();
+
+        vacante.Estado.Should().Be(EstadoVacante.Publicada);
+        vacante.PublicadaEn.Should().Be(Ahora.AddMinutes(5));
+        vacante.Aprobaciones.Select(a => (a.Etapa, a.Por)).Should().Equal((EtapaAprobacion.Rrhh, "Andrés"), (EtapaAprobacion.Gerencia, "Andrés"));
     }
 
     [Fact]
@@ -168,6 +182,8 @@ public sealed class VacanteTests
         var vacante = ConBorrador();
 
         vacante.SolicitarAprobacion("Andrés", Gerencia, Ahora).IsSuccess.Should().BeTrue();
+        vacante.RecibePostulaciones.Should().BeFalse("enviar a aprobación no publica");
+        vacante.Aprobar("Andrés", Gerencia, Ahora).IsSuccess.Should().BeTrue();
         vacante.RecibePostulaciones.Should().BeTrue();
         vacante.PublicadaEn.Should().Be(Ahora);
 

@@ -17,7 +17,9 @@ import { ComparativoFinalistas } from './ComparativoFinalistas'
 import { FiltrosAts } from './FiltrosAts'
 import { ReporteSesgo } from './ReporteSesgo'
 import { TableroVacante } from './TableroVacante'
-import { estadoVacante, type Vacante, useCalcularAfinidad, useCerrarVacante, useEditarVacante, usePostulantes, useSolicitarAprobacion, useVacante } from './api'
+import { estadoVacante, type Vacante, useCalcularAfinidad, useCerrarVacante, useEditarVacante, usePostulantes, useAprobarRequisicion, useSolicitarAprobacion, useVacante } from './api'
+import { textoAprobar } from './AprobacionRequisicion'
+import { useSesion } from '../sesion/api'
 
 const pesos = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
@@ -94,6 +96,8 @@ const lineas = (t: string) => t.split('\n').map((l) => l.trim()).filter(Boolean)
 function Contenido({ vacante: v }: { vacante: Vacante }) {
   const editar = useEditarVacante(v.id)
   const solicitar = useSolicitarAprobacion(v.id)
+  const aprobar = useAprobarRequisicion(v.id)
+  const rol = useSesion().data?.rol ?? ''
   const cerrar = useCerrarVacante(v.id)
   const deIa = !v.editadaPorPersona && v.modeloIa !== null
   const bloqueada = v.estado === 'Cerrada' || v.estado === 'EnAprobacion'
@@ -116,7 +120,7 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
     codigoMunicipio: municipio,
   })
   const guardarYEnviar = () => (tocado ? editar.mutate(contenido(), { onSuccess: () => solicitar.mutate() }) : solicitar.mutate())
-  const error = editar.error ?? solicitar.error ?? cerrar.error
+  const error = editar.error ?? solicitar.error ?? aprobar.error ?? cerrar.error
 
   return (
     <div className="dos-columnas">
@@ -155,12 +159,19 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
         </div>
         {error && <span role="alert" className="error-formulario">{error.message}</span>}
         <div className="decision" style={{ padding: '8px 0 0', borderTop: 0 }}>
+          {/* Un paso a la vez: borrador → enviar a aprobación → aprobar (la última aprobación la publica) → cerrar */}
           {v.estado === 'Borrador' && (
-            <Boton variante="primario" icono={<IconoCheck />} cargando={solicitar.isPending || (editar.isPending && !tocado)} textoCargando="Enviando…" onClick={guardarYEnviar}>
-              Enviar a aprobación
+            <Boton variante="primario" icono={<IconoCheck />} cargando={solicitar.isPending} textoCargando="Enviando…" disabled={editar.isPending} onClick={guardarYEnviar}>
+              {tocado ? 'Guardar y enviar a aprobación' : 'Enviar a aprobación'}
             </Boton>
           )}
-          {!bloqueada && <Boton type="submit" disabled={!tocado} cargando={editar.isPending} textoCargando="Guardando…">Guardar cambios</Boton>}
+          {v.estado === 'Borrador' && <Boton type="submit" disabled={!tocado} cargando={editar.isPending && !solicitar.isPending} textoCargando="Guardando…">Guardar borrador</Boton>}
+          {v.estado === 'EnAprobacion' && v.aprobacion.puedeDecidir && (
+            <Boton variante="primario" icono={<IconoCheck />} cargando={aprobar.isPending} textoCargando="Aprobando…" onClick={() => aprobar.mutate()}>
+              {textoAprobar(v, rol)}
+            </Boton>
+          )}
+          {v.estado === 'EnAprobacion' && !v.aprobacion.puedeDecidir && <span className="ayuda">En aprobación: espera a {v.aprobacion.etapaPendiente}.</span>}
           {v.estado === 'Publicada' && <Boton cargando={cerrar.isPending} textoCargando="Cerrando…" onClick={() => cerrar.mutate()}>Cerrar vacante</Boton>}
           <span className="registro">Se registran la sugerencia y tu decisión</span>
         </div>

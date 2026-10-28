@@ -6,7 +6,7 @@ import { Chispa, IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Ic
 import { useSesion } from '../sesion/api'
 import { useEmpresaUsuariaActual } from '../sesion/empresaUsuaria'
 import { ElegirCargo } from './CargoDelCatalogo'
-import { type Aclaracion, type CargoCatalogo, type ContenidoVacante, type Vacante, useCrearVacante, useEditarVacante, useEmpresaActual, useRedactarVacante, useSolicitarVacante, useVacante } from './api'
+import { type Aclaracion, type CargoCatalogo, type ContenidoVacante, type Vacante, useCrearVacante, useEditarVacante, useEnviarAAprobacion, useEmpresaActual, useRedactarVacante, useSolicitarVacante, useVacante } from './api'
 
 /** Lo que llega desde la barra de la lista: la frase, el cargo y la empresa usuaria; con generar, se pide a la IA al abrir. */
 export interface InicioVacante {
@@ -36,6 +36,7 @@ export function VacanteNueva() {
   const solicitar = useSolicitarVacante()
   const redactar = useRedactarVacante()
   const crear = useCrearVacante()
+  const enviarAAprobacion = useEnviarAAprobacion()
   const [vacanteId, setVacanteId] = useState<string>()
   const editar = useEditarVacante(vacanteId ?? '')
   const consulta = useVacante(vacanteId ?? '', Boolean(vacanteId))
@@ -52,6 +53,7 @@ export function VacanteNueva() {
   const [preguntas, setPreguntas] = useState<Aclaracion[] | null>(null)
   const [modalAbierto, setModalAbierto] = useState(false)
   const [falta, setFalta] = useState<string>()
+  const [enviando, setEnviando] = useState(false)
   const visibles = new Set(sesion?.empresasUsuarias.map((e) => e.id))
   const usuarias = empresa.data?.empresasUsuarias.filter((e) => e.activa && visibles.has(e.id)) ?? []
 
@@ -113,30 +115,30 @@ export function VacanteNueva() {
     requisitos: lineas(f.requisitos), preguntasFiltro: lineas(f.preguntas),
   })
 
-  const guardar = async () => {
+  // Guardar deja el borrador; con «enviar», además lo manda a aprobación. Después se sigue en el detalle de la vacante
+  const guardar = async (enviar: boolean) => {
     const c = contenido()
     if (!c.titulo.trim() || !c.cargo.trim() || !c.descripcion.trim()) return setFalta('Escriba el título, el cargo y la descripción.')
     if (!c.codigoMunicipio) return setFalta('Elija la ciudad o el municipio de la lista.')
     if (c.cupos < 1) return setFalta('Diga cuántas posiciones hay disponibles para este cargo.')
     if (c.salarioMinimo <= 0) return setFalta('Escriba el salario mínimo del rango.')
     setFalta(undefined)
+    setEnviando(enviar)
     try {
-      if (vacanteId) {
-        await editar.mutateAsync(c)
-        navegar(`/consola/vacantes/${vacanteId}`)
-      } else {
-        const r = await crear.mutateAsync({ ...c, empresaUsuariaId: usuaria || null, cargoId: cargo?.id ?? null })
-        navegar(`/consola/vacantes/${r.id}`)
-      }
+      let id = vacanteId
+      if (id) await editar.mutateAsync(c)
+      else id = (await crear.mutateAsync({ ...c, empresaUsuariaId: usuaria || null, cargoId: cargo?.id ?? null })).id
+      if (enviar) await enviarAAprobacion.mutateAsync(id)
+      navegar(`/consola/vacantes/${id}`)
     } catch {
       // El error se muestra en el formulario
     }
   }
 
   const redactando = solicitar.isPending || redactar.isPending || pedidoEn !== undefined
-  const guardando = crear.isPending || editar.isPending
+  const guardando = crear.isPending || editar.isPending || enviarAAprobacion.isPending
   const hayIa = Object.values(deIa).some(Boolean)
-  const error = falta ?? (solicitar.error ?? redactar.error ?? crear.error ?? editar.error)?.message
+  const error = falta ?? (solicitar.error ?? redactar.error ?? crear.error ?? editar.error ?? enviarAAprobacion.error)?.message
   const clase = (k: Campo, base = 'entrada') => `${base}${deIa[k] ? ' entrada-ia' : ''}`
 
   return (
@@ -147,7 +149,7 @@ export function VacanteNueva() {
         <p>Una vacante es de un solo cargo, con las posiciones disponibles que necesite. Lo que proponga la IA se ve en violeta hasta que usted lo guarde.</p>
       </header>
 
-      <form className="tarjeta formulario" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }} onSubmit={(e) => { e.preventDefault(); void guardar() }}>
+      <form className="tarjeta formulario" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }} onSubmit={(e) => { e.preventDefault(); void guardar(false) }}>
         <div className="dos-campos">
           {empresa.data?.esTemporal && (
             <label>
@@ -228,11 +230,13 @@ export function VacanteNueva() {
 
         {error && <span role="alert" className="error-formulario">{error}</span>}
         <div className="decision" style={{ padding: '16px 0 0' }}>
-          <Boton type="submit" variante="primario" icono={<IconoCheck />} cargando={guardando} textoCargando="Guardando…" disabled={redactando}>
-            {hayIa ? 'Confirmar y guardar borrador' : 'Guardar borrador'}
+          <Boton variante="primario" icono={<IconoCheck />} cargando={guardando && enviando} textoCargando="Enviando…" disabled={redactando || guardando}
+            onClick={() => void guardar(true)}>
+            Guardar y enviar a aprobación
           </Boton>
+          <Boton type="submit" cargando={guardando && !enviando} textoCargando="Guardando…" disabled={redactando || guardando}>Guardar borrador</Boton>
           <Boton onClick={() => navegar('/consola/vacantes')} disabled={guardando}>Volver a vacantes</Boton>
-          <span className="registro">Se registran la sugerencia y tu decisión. Después se envía a aprobación.</span>
+          <span className="registro">Se registran la sugerencia y tu decisión. Al aprobarse, la vacante se publica en el portal.</span>
         </div>
       </form>
 

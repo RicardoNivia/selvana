@@ -50,6 +50,9 @@ public static class FlujoRequisicion
     public const string Aprobada = "Aprobada";
     public const string Devuelta = "Devuelta";
 
+    /// <summary>Rol que, por ahora, aprueba todas las etapas de una vez.</summary>
+    public const string Administrador = "Administrador";
+
     public static readonly IReadOnlyList<EtapaAprobacion> Etapas = [EtapaAprobacion.Rrhh, EtapaAprobacion.Gerencia];
 
     private static readonly Dictionary<EtapaAprobacion, string[]> Aprobadores = new()
@@ -367,13 +370,9 @@ public sealed class Vacante : AggregateRoot<Guid>
         AprobacionPedidaPor = por;
         MotivoDevolucion = null;
         Estado = EstadoVacante.EnAprobacion;
-        EtapaPendiente = FlujoRequisicion.Etapas[0];
-        while (EtapaPendiente is { } etapa && FlujoRequisicion.PuedeAprobar(rol, etapa))
-        {
-            Aprobaciones.Add(new AprobacionVacante { Etapa = etapa, Decision = FlujoRequisicion.Aprobada, Por = por, Rol = rol, Automatica = true, En = ahora });
-            Siguiente(ahora);
-        }
 
+        // Enviar no aprueba nada: aprobar es un paso aparte, aunque quien envía tenga autoridad para aprobar
+        EtapaPendiente = FlujoRequisicion.Etapas[0];
         return Result.Success();
     }
 
@@ -383,6 +382,18 @@ public sealed class Vacante : AggregateRoot<Guid>
         if (etapa.IsFailure)
         {
             return Result.Failure(etapa.Error);
+        }
+
+        // Por ahora el administrador aprueba de una vez todas las etapas que falten, y con eso la vacante se publica
+        if (rol == FlujoRequisicion.Administrador)
+        {
+            while (EtapaPendiente is { } pendiente)
+            {
+                Aprobaciones.Add(new AprobacionVacante { Etapa = pendiente, Decision = FlujoRequisicion.Aprobada, Por = por, Rol = rol, En = ahora });
+                Siguiente(ahora);
+            }
+
+            return Result.Success();
         }
 
         // Cuatro ojos: quien ya aprobó a mano una etapa no aprueba la siguiente
