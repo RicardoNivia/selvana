@@ -95,14 +95,40 @@
 .vin-firma p { margin: 0; font-size: 14px; }
 .vin-firma .ayuda svg { width: 13px; height: 13px; vertical-align: -2px; }
 
-.vin-docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--espacio-3); align-items: start; }
+.vin-docs-avance { display: flex; align-items: center; gap: var(--espacio-2); font-size: 13px; color: var(--color-texto-suave); }
+.vin-docs-barra { flex: 1; max-width: 240px; height: 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; }
+.vin-docs-barra > span { display: block; height: 100%; background: var(--color-primario); border-radius: inherit; transition: width var(--duracion-media) var(--curva-salida); }
+.vin-docs-grupo { display: flex; align-items: center; gap: 8px; margin: var(--espacio-2) 0 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--color-texto-suave); }
+.vin-docs-grupo .mono { font-size: 11px; padding: 0 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); }
+.vin-docs { list-style: none; margin: 0; padding: 0; border: 1px solid var(--color-borde); border-radius: var(--radio-m); overflow: hidden; }
 .vin-doc p svg, .vin-sub svg { width: 14px; height: 14px; vertical-align: -2px; }
-.vin-doc { border: 1px solid var(--color-borde); border-radius: var(--radio-m); padding: var(--espacio-3) var(--espacio-4); display: flex; flex-direction: column; gap: var(--espacio-2); }
-.vin-doc.vin-doc-ia { border-color: var(--color-ia-borde); }
-.vin-doc > header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.vin-doc > header svg { width: 16px; height: 16px; color: var(--color-texto-suave); }
-.vin-doc > header .pill { margin-left: auto; }
+.vin-doc { display: flex; flex-direction: column; gap: var(--espacio-2); padding: var(--espacio-3) var(--espacio-4); border-top: 1px solid var(--color-borde); transition: background var(--duracion-corta); }
+.vin-doc:first-child { border-top: 0; }
+.vin-doc:hover { background: var(--color-superficie-2); }
+.vin-doc.vin-doc-ia { box-shadow: inset 3px 0 0 var(--color-ia); }
 .vin-doc p { margin: 0; }
+.vin-doc-fila { display: grid; grid-template-columns: 32px minmax(0, 1fr) 132px minmax(200px, auto); align-items: center; gap: var(--espacio-3); }
+.vin-doc-icono { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radio-s); background: var(--color-superficie-2); color: var(--color-texto-suave); }
+.vin-doc-icono svg { width: 16px; height: 16px; }
+.vin-doc-listo .vin-doc-icono { background: var(--color-primario-suave); color: var(--color-primario); }
+.vin-doc-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vin-doc-nombre { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.vin-doc-opcional { font-size: 11px; color: var(--color-texto-tenue); border: 1px solid var(--color-borde); border-radius: var(--radio-full); padding: 0 6px; }
+.vin-doc-meta { font-size: 12px; color: var(--color-texto-tenue); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vin-doc-meta .enlace-boton { font-size: 12px; }
+.vin-doc-fila > .pill { justify-self: start; }
+.vin-doc-acciones { display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; }
+.vin-doc-detalle { margin-left: calc(32px + var(--espacio-3)); }
+.vin-archivo { display: inline-flex; align-items: center; gap: 8px; flex: 1 1 220px; min-width: 0; height: 32px; padding: 0 var(--espacio-3); border: 1px dashed var(--color-borde); border-radius: var(--radio-s); font-size: 13px; color: var(--color-texto-suave); cursor: pointer; transition: border-color var(--duracion-corta), color var(--duracion-corta); }
+.vin-archivo:hover, .vin-archivo:focus-within { border-color: var(--color-primario); color: var(--color-primario); }
+.vin-archivo.elegido { border-style: solid; color: var(--color-texto); }
+.vin-archivo svg { width: 14px; height: 14px; flex: none; }
+.vin-archivo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 720px) {
+  .vin-doc-fila { grid-template-columns: 32px minmax(0, 1fr) auto; }
+  .vin-doc-acciones { grid-column: 2 / -1; justify-content: flex-start; }
+  .vin-doc-detalle { margin-left: 0; }
+}
 .vin-lectura { background: var(--color-ia-suave); border-radius: var(--radio-s); padding: var(--espacio-2) var(--espacio-3); display: flex; flex-direction: column; gap: 6px; }
 .vin-lectura .vin-etiqueta { color: var(--color-ia); display: inline-flex; align-items: center; gap: 4px; }
 .vin-chequeos { list-style: none; margin: 0; padding: 0; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
@@ -112,6 +138,7 @@
 .vin-rechazo, .vin-empresa { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .vin-rechazo .entrada, .vin-empresa .entrada { flex: 1 1 200px; }
 .vin-empresa .selector { width: auto; }
+.vin-empresa .selector, .vin-rechazo .entrada { height: 32px; }
 .vin-subir { cursor: pointer; }
 .vin-error { display: block; font-size: 12px; color: var(--color-error); }
 .vin-alerta-texto { display: block; font-size: 13px; color: var(--color-alerta); }

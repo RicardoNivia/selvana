@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { AutocompletarMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
-import { Chispa, IconoAlerta, IconoCheck, IconoDocumento, IconoEscudo, IconoFlecha, IconoSubir } from '../../shared/ui/Iconos'
+import { Chispa, IconoAlerta, IconoCheck, IconoFlecha, IconoSubir } from '../../shared/ui/Iconos'
 import { rangoSalario } from '../portal/api'
 import {
   type Pendiente, type Registro, type TipoDocumento, tiposDocumento, useAbrirPendiente, useActualizarMiHojaDeVida, useHojaDeVidaPerfil, useIngresarPortal,
@@ -89,29 +89,6 @@ export function RegistroPortal() {
         <p className="postular-ayuda">¿Ya tienes cuenta? <Link to="/mi-portal/ingresar">Entra aquí</Link></p>
       </form>
     </main>
-  )
-}
-
-function SubirHojaDeVida({ titulo, ayuda, onSubida }: { titulo: string; ayuda: string; onSubida: (id: string) => void }) {
-  const subir = useSubirHojaDeVidaPerfil()
-  const archivo = useRef<HTMLInputElement>(null)
-  const enviar = (f?: File) => f && subir.mutate(f, { onSuccess: (r) => onSubida(r.id) })
-
-  return (
-    <section className="postular-cuerpo">
-      {titulo && <h1>{titulo}</h1>}
-      <p className="postular-ayuda">{ayuda}</p>
-      <input ref={archivo} type="file" accept={tiposArchivo} hidden onChange={(e) => enviar(e.target.files?.[0])} />
-      <button type="button" className={`postular-subir ${subir.isPending ? 'subiendo' : ''}`} disabled={subir.isPending} aria-busy={subir.isPending || undefined}
-        onClick={() => archivo.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); enviar(e.dataTransfer.files[0]) }}>
-        <span className="postular-subir-icono">{subir.isPending ? <span className="indicador" aria-hidden="true" /> : <IconoSubir />}</span>
-        <b>{subir.isPending ? 'Subiendo…' : 'Toca para subir tu hoja de vida'}</b>
-        <span>o arrástrala aquí · PDF, Word o una foto clara</span>
-        <span className="pill pill-ia postular-subir-ia"><Chispa />La IA la lee por ti</span>
-      </button>
-      {subir.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{subir.error.message}</p>}
-      <p className="postular-confianza"><IconoEscudo />Tu hoja de vida se guarda cifrada. No usamos tu edad, género, estado civil ni foto para evaluarte.</p>
-    </section>
   )
 }
 
@@ -213,10 +190,16 @@ function Pendientes({ pendientes, cargando }: { pendientes: Pendiente[]; cargand
 const claseEstado = (estado: string) =>
   estado === 'Contratada' || estado === 'Finalista' ? 'pill-ok' : estado === 'No seleccionada' || estado.includes('cerrad') ? 'pill-neutra' : 'pill-info'
 
+/** Avance del proceso en palabras de la persona; las postulaciones cerradas o no seleccionadas no muestran avance. */
+const etapasAvance = ['Recibida', 'En revisión', 'Preselección', 'Finalista', 'Contratación'] as const
+const indiceAvance: Record<string, number> = {
+  Recibida: 0, 'En revisión': 1, 'En preselección': 2, Pruebas: 2, Finalista: 3, 'En contratación': 4, Contratada: 5,
+}
+
 function Postulaciones() {
   const portal = useMiPortal()
   const [abierta, setAbierta] = useState<string>()
-  if (portal.isPending) return <div className="mp-lista">{[1, 2, 3].map((i) => <Esqueleto key={i} alto={72} />)}</div>
+  if (portal.isPending) return <div className="mp-lista">{[1, 2].map((i) => <Esqueleto key={i} alto={150} />)}</div>
   const lista = portal.data?.postulaciones ?? []
   if (lista.length === 0) {
     return (
@@ -228,23 +211,37 @@ function Postulaciones() {
   }
   return (
     <div className="mp-lista">
-      {lista.map((p) => (
-        <article key={p.postulacionId} className="tarjeta mp-tarjeta mp-postulacion">
-          <div className="mp-postulacion-fila">
-            <div>
-              <h3><Link to={`/empleos/${p.vacanteCodigo}`}>{p.vacante}</Link></h3>
-              <p>{p.empresa} · {p.ciudad} · <span className="mono">{p.numero}</span> · {fecha.format(new Date(p.recibidaEn))}</p>
-              <p className="mp-explicacion">{p.explicacion}</p>
-              <button type="button" className="enlace-boton" aria-expanded={abierta === p.postulacionId}
-                onClick={() => setAbierta((x) => (x === p.postulacionId ? undefined : p.postulacionId))}>
-                {abierta === p.postulacionId ? 'Ocultar el chat' : 'Ver el chat con la empresa'}
-              </button>
-            </div>
-            <span className={`pill ${claseEstado(p.estado)}`}>{p.estado}</span>
-          </div>
-          {abierta === p.postulacionId && <HistorialChat postulacionId={p.postulacionId} />}
-        </article>
-      ))}
+      {lista.map((p) => {
+        const avance = indiceAvance[p.estado]
+        const chatAbierto = abierta === p.postulacionId
+        return (
+          <article key={p.postulacionId} className="tarjeta mp-item">
+            <header className="mp-item-cabeza">
+              <div className="mp-item-titulo">
+                <h3><Link to={`/empleos/${p.vacanteCodigo}`}>{p.vacante}</Link></h3>
+                <p className="mp-item-meta">{p.empresa} · {p.ciudad} · <span className="mono">{p.numero}</span> · {fecha.format(new Date(p.recibidaEn))}</p>
+              </div>
+              <span className={`pill ${claseEstado(p.estado)}`}>{p.estado}</span>
+            </header>
+
+            {avance !== undefined && (
+              <ol className="mp-avance" aria-label={`Avance: ${p.estado}`}>
+                {etapasAvance.map((e, i) => (
+                  <li key={e} className={i < avance ? 'hecho' : i === avance ? 'actual' : ''}><span>{e}</span></li>
+                ))}
+              </ol>
+            )}
+
+            <footer className="mp-item-pie">
+              <p>{p.explicacion}</p>
+              <Boton pequeno aria-expanded={chatAbierto} onClick={() => setAbierta(chatAbierto ? undefined : p.postulacionId)}>
+                {chatAbierto ? 'Ocultar el chat' : 'Ver el chat'}
+              </Boton>
+            </footer>
+            {chatAbierto && <HistorialChat postulacionId={p.postulacionId} />}
+          </article>
+        )
+      })}
     </div>
   )
 }
@@ -362,21 +359,14 @@ function MiHojaDeVida() {
             : 'Sube tu hoja de vida o el PDF de tu LinkedIn y la IA llena tu perfil. También puedes escribirla abajo desde cero.'}
         </p>
         {!nuevaHv && (
-          <>
-            <div className="postular-modos" role="tablist" aria-label="Qué quieres subir">
-              <button type="button" role="tab" aria-selected={modo === 'hv'} onClick={() => setModo('hv')}><IconoDocumento />Hoja de vida</button>
-              <button type="button" role="tab" aria-selected={modo === 'linkedin'} onClick={() => setModo('linkedin')}><span className="postular-in" aria-hidden="true">in</span>LinkedIn</button>
-              <span className="postular-modos-indicador" style={{ translate: modo === 'hv' ? '0 0' : '100% 0' }} aria-hidden="true" />
+          <div className="mp-subir">
+            <div className="segmentado" role="group" aria-label="Qué quieres subir">
+              <button type="button" aria-pressed={modo === 'hv'} onClick={() => setModo('hv')}>Hoja de vida</button>
+              <button type="button" aria-pressed={modo === 'linkedin'} onClick={() => setModo('linkedin')}>PDF de LinkedIn</button>
             </div>
-            {modo === 'linkedin' && (
-              <ol className="postular-linkedin-pasos">
-                <li><b>Abre tu perfil</b> en linkedin.com desde el computador.</li>
-                <li>Toca <b>Más</b> y luego <b>Guardar en PDF</b>.</li>
-                <li><b>Sube ese PDF aquí</b> y la IA lee tu experiencia.</li>
-              </ol>
-            )}
-            <SubirHojaDeVida titulo="" ayuda={modo === 'linkedin' ? 'LinkedIn no deja leer tu perfil con solo el enlace; por eso usamos el PDF que LinkedIn genera para ti.' : ''} onSubida={setNuevaHv} />
-          </>
+            <SubirCompacto onSubida={setNuevaHv} texto={modo === 'linkedin' ? 'Sube el PDF de tu perfil de LinkedIn' : 'Sube tu hoja de vida (PDF, Word o foto)'} />
+            {modo === 'linkedin' && <span className="ayuda">En linkedin.com abre tu perfil, toca <b>Más</b> y luego <b>Guardar en PDF</b>. LinkedIn no deja leer el perfil solo con el enlace.</span>}
+          </div>
         )}
         {leyendo && <LeyendoHojaDeVida />}
         {leida?.estado === 'Fallida' && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{leida.mensaje} Escríbela abajo.</p>}
@@ -437,6 +427,22 @@ function MiHojaDeVida() {
           {guardado && <span className="pill pill-ok"><IconoCheck />Guardada</span>}
         </div>
       </form>
+    </div>
+  )
+}
+
+/** Subida en una franja: para el portal, donde la hoja de vida es una sección más y no la pantalla entera. */
+function SubirCompacto({ texto, onSubida }: { texto: string; onSubida: (id: string) => void }) {
+  const subir = useSubirHojaDeVidaPerfil()
+  const archivo = useRef<HTMLInputElement>(null)
+  const enviar = (f?: File) => f && subir.mutate(f, { onSuccess: (r) => onSubida(r.id) })
+  return (
+    <div className="mp-subir-franja" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); enviar(e.dataTransfer.files[0]) }}>
+      <input ref={archivo} type="file" accept={tiposArchivo} hidden onChange={(e) => enviar(e.target.files?.[0])} />
+      <span className="mp-subir-icono"><IconoSubir /></span>
+      <span className="mp-subir-texto"><b>{texto}</b><span><Chispa /> La IA la lee y llena el formulario. Se guarda cifrada.</span></span>
+      <Boton pequeno cargando={subir.isPending} textoCargando="Subiendo…" onClick={() => archivo.current?.click()}>Elegir archivo</Boton>
+      {subir.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{subir.error.message}</p>}
     </div>
   )
 }
