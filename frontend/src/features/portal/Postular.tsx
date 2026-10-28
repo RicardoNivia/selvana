@@ -1,27 +1,32 @@
-import { type CSSProperties, type DragEvent, useEffect, useRef, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { type CSSProperties, useEffect, useState } from 'react'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { AutocompletarMunicipio, resolverMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
-import { Chispa, IconoAlerta, IconoCheck, IconoDocumento, IconoEscudo, IconoFlecha, IconoSubir } from '../../shared/ui/Iconos'
-import { type BorradorPostulacion, esLinkedIn, rangoSalario, useBorrador, useEnviarPostulacion, useSubirHojaDeVida, useVacantePublica } from './api'
+import { Chispa, IconoAlerta, IconoCheck, IconoDocumento, IconoFlecha } from '../../shared/ui/Iconos'
+import { useMiCuenta, useMiPortal, usePostularmeConMiPerfil } from '../portal-persona/api'
+import { type BorradorPostulacion, esLinkedIn, rangoSalario, useBorrador, useEnviarPostulacion, useVacantePublica } from './api'
 
-const tipos = '.pdf,.docx,image/jpeg,image/png,image/webp'
 const v = (i: number) => ({ '--i': i }) as CSSProperties
 const miles = new Intl.NumberFormat('es-CO')
-const pasos = ['Hoja de vida', 'Tus datos', 'Enviada']
+const pasos = ['Confirmar', 'Tus datos', 'Enviada']
 
-/** Flujo de postulación: subir la hoja de vida → la IA la lee → el candidato confirma → envía. */
+/** Flujo de postulación con la cuenta del portal: confirma que quiere postularse con su perfil → responde y acepta → envía. */
 export function Postular() {
   const { codigo = '' } = useParams()
   const [busqueda] = useSearchParams()
-  // Desde el portal de la persona llega con el borrador ya listo (su hoja de vida del perfil): empieza en «Tus datos»
+  const cuenta = useMiCuenta()
+  const portal = useMiPortal()
+  // Desde «Ofertas para ti» llega con el borrador ya listo (su hoja de vida del perfil): empieza en «Tus datos»
   const [borradorId, setBorradorId] = useState<string | undefined>(busqueda.get('borrador') ?? undefined)
   const [enviada, setEnviada] = useState<string>()
-  const [linkedIn, setLinkedIn] = useState('')
   const vacante = useVacantePublica(codigo)
   const borrador = useBorrador(borradorId)
 
+  // Solo se postula con cuenta del portal (ADR 0013): sin sesión, a ingresar o crear la cuenta y volver aquí
+  if (cuenta.isError) return <Navigate to={`/mi-portal/ingresar?volver=${encodeURIComponent(`/empleos/${codigo}/postular`)}`} replace />
+
+  const yaPostulado = !enviada && portal.data?.postulaciones.some((p) => p.vacanteCodigo === codigo)
   const paso = enviada ? 4 : !borradorId ? 1 : borrador.data?.estado === 'Leyendo' || borrador.isPending ? 2 : 3
   const indice = paso <= 2 ? 0 : paso === 3 ? 1 : 2
   const canal = busqueda.get('utm_source') ?? 'Portal'
@@ -52,91 +57,61 @@ export function Postular() {
       </ol>
 
       <div key={paso} className="postular-escena">
-        {paso === 1 && <Subir codigo={codigo} linkedIn={linkedIn} onLinkedIn={setLinkedIn} onSubido={setBorradorId} />}
-        {paso === 2 && <Leyendo nombre={borrador.data?.nombreArchivo} />}
-        {paso === 3 && borrador.data && <Confirmar borrador={borrador.data} canal={canal} linkedInDado={linkedIn} onEnviada={setEnviada} />}
-        {paso === 4 && <Enviada numero={enviada!} empresa={vacante.data?.empresa} />}
+        {cuenta.isPending || portal.isPending ? (
+          <section className="postular-cuerpo"><Esqueleto alto={120} /></section>
+        ) : yaPostulado ? (
+          <section className="postular-cuerpo postular-final" role="status">
+            <h1>Ya te postulaste a esta vacante</h1>
+            <p className="postular-ayuda">Mira cómo va, el chat con la empresa y tus pendientes en tu portal.</p>
+            <Link to="/mi-portal" className="boton boton-primario">Ir a mi portal</Link>
+          </section>
+        ) : paso === 1 ? (
+          <ConfirmarPostularme codigo={codigo} onListo={setBorradorId} />
+        ) : paso === 2 ? (
+          <Leyendo nombre={borrador.data?.nombreArchivo} />
+        ) : paso === 3 && borrador.data ? (
+          <Confirmar borrador={borrador.data} canal={canal} linkedInDado="" onEnviada={setEnviada} />
+        ) : paso === 4 ? (
+          <Enviada numero={enviada!} empresa={vacante.data?.empresa} />
+        ) : null}
       </div>
     </main>
   )
 }
 
-function Subir({ codigo, linkedIn, onLinkedIn, onSubido }: { codigo: string; linkedIn: string; onLinkedIn: (v: string) => void; onSubido: (id: string) => void }) {
-  const subir = useSubirHojaDeVida(codigo)
-  const archivo = useRef<HTMLInputElement>(null)
-  const [origen, setOrigen] = useState<'archivo' | 'ejemplo'>()
-  const [encima, setEncima] = useState(false)
-  const [modo, setModo] = useState<'hv' | 'linkedin'>('hv')
-  const linkedInMal = linkedIn.trim().length > 0 && !esLinkedIn(linkedIn)
+/** Antes de postular: «¿Quieres postularte con tu perfil?», con los datos y la hoja de vida que tiene guardados en el portal. */
+function ConfirmarPostularme({ codigo, onListo }: { codigo: string; onListo: (borradorId: string) => void }) {
+  const cuenta = useMiCuenta()
+  const postular = usePostularmeConMiPerfil()
+  const c = cuenta.data!
 
-  const enviar = (f: File | undefined, desde: 'archivo' | 'ejemplo') => {
-    if (!f) return
-    setOrigen(desde)
-    subir.mutate(f, { onSuccess: (r) => onSubido(r.id) })
-  }
-  const ejemplo = async () => {
-    setOrigen('ejemplo')
-    const r = await fetch('/ejemplos/hoja-de-vida-ejemplo.pdf')
-    enviar(new File([await r.blob()], 'hoja-de-vida-ejemplo.pdf', { type: 'application/pdf' }), 'ejemplo')
-  }
-  const soltar = (e: DragEvent) => {
-    e.preventDefault()
-    setEncima(false)
-    if (!subir.isPending) enviar(e.dataTransfer.files[0], 'archivo')
+  if (!c.nombreArchivoHojaDeVida) {
+    return (
+      <section className="postular-cuerpo">
+        <h1>Primero sube tu hoja de vida</h1>
+        <p className="postular-ayuda">Te postulas con la hoja de vida de tu portal. Súbela allí (o el PDF de tu LinkedIn) y la IA llena tu perfil.</p>
+        <Link to="/mi-portal" className="boton boton-primario">Ir a mi hoja de vida</Link>
+      </section>
+    )
   }
 
-  const subiendoArchivo = subir.isPending && origen === 'archivo'
   return (
     <section className="postular-cuerpo">
-      <h1>Postúlate en 2 minutos</h1>
-      <p className="postular-ayuda">Sube tu hoja de vida o tu perfil de LinkedIn y nosotros llenamos la postulación. Tú solo revisas y envías.</p>
-
-      <div className="postular-modos" role="tablist" aria-label="Cómo quieres postularte">
-        <button type="button" role="tab" aria-selected={modo === 'hv'} onClick={() => setModo('hv')}><IconoDocumento />Hoja de vida</button>
-        <button type="button" role="tab" aria-selected={modo === 'linkedin'} onClick={() => setModo('linkedin')}><span className="postular-in" aria-hidden="true">in</span>LinkedIn</button>
-        <span className="postular-modos-indicador" style={{ translate: modo === 'hv' ? '0 0' : '100% 0' }} aria-hidden="true" />
+      <h1>¿Quieres postularte?</h1>
+      <p className="postular-ayuda">Te postulas con los datos y la hoja de vida de tu portal. Después respondes las preguntas de la empresa y aceptas su autorización de datos.</p>
+      <div className="postular-grupo">
+        <span><b>{c.datos.nombre}</b></span>
+        <span className="postular-nota-suave">{c.correo} · {c.tipoDocumento} <span className="mono">{c.datos.documento}</span></span>
+        <span className="postular-nota-suave">{c.datos.celular || 'Sin celular'} · {c.datos.ciudad || 'Sin ciudad'}</span>
+        <span className="postular-nota-suave"><IconoDocumento /> {c.nombreArchivoHojaDeVida}</span>
       </div>
-
-      {modo === 'linkedin' && (
-        <div className="postular-linkedin">
-          <label className="postular-campo">
-            Enlace de tu perfil
-            <input className="entrada" inputMode="url" autoComplete="url" placeholder="linkedin.com/in/tu-nombre" value={linkedIn}
-              onChange={(e) => onLinkedIn(e.target.value)} aria-invalid={linkedInMal || undefined} />
-            {linkedInMal
-              ? <span className="postular-nota-error">Pega el enlace de tu perfil, por ejemplo linkedin.com/in/tu-nombre.</span>
-              : <span className="postular-nota-suave">La empresa lo verá junto a tu postulación.</span>}
-          </label>
-          <ol className="postular-linkedin-pasos">
-            <li style={v(0)}><b>Abre tu perfil</b> en linkedin.com desde el computador.</li>
-            <li style={v(1)}>Toca <b>Más</b> y luego <b>Guardar en PDF</b>.</li>
-            <li style={v(2)}><b>Sube ese PDF aquí</b> y nosotros leemos tu experiencia.</li>
-          </ol>
-          <span className="postular-nota-suave">LinkedIn no deja que otras páginas lean tu perfil con solo el enlace; por eso te pedimos el PDF que LinkedIn genera para ti.</span>
-        </div>
-      )}
-
-      <input ref={archivo} type="file" accept={tipos} hidden onChange={(e) => enviar(e.target.files?.[0], 'archivo')} />
-      <button
-        type="button"
-        className={`postular-subir ${encima ? 'encima' : ''} ${subiendoArchivo ? 'subiendo' : ''}`}
-        disabled={subir.isPending || linkedInMal}
-        aria-busy={subiendoArchivo || undefined}
-        onClick={() => archivo.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); setEncima(true) }}
-        onDragLeave={() => setEncima(false)}
-        onDrop={soltar}
-      >
-        <span className="postular-subir-icono">{subiendoArchivo ? <span className="indicador" aria-hidden="true" /> : <IconoSubir />}</span>
-        <b>{subiendoArchivo ? 'Subiendo…' : encima ? 'Suéltala aquí' : modo === 'linkedin' ? 'Toca para subir el PDF de LinkedIn' : 'Toca para subir tu hoja de vida'}</b>
-        <span>o arrástrala aquí · PDF, Word o una foto clara · máx. 10 MB</span>
-        <span className="pill pill-ia postular-subir-ia"><Chispa />La IA la lee por ti</span>
-      </button>
-      <Boton cargando={subir.isPending && origen === 'ejemplo'} textoCargando="Subiendo…" disabled={subir.isPending} onClick={() => void ejemplo()}>
-        Probar con una hoja de vida de ejemplo
-      </Boton>
-      {subir.error && <p role="alert" className="aviso aviso-alerta postular-error"><IconoAlerta />{subir.error.message}</p>}
-      <p className="postular-confianza"><IconoEscudo />Tu hoja de vida se guarda cifrada y solo la ve la empresa. No usamos tu edad, género, estado civil ni foto para evaluarte.</p>
+      {postular.error && <p role="alert" className="aviso aviso-alerta postular-error"><IconoAlerta />{postular.error.message}</p>}
+      <div className="postular-enviar-barra">
+        <Boton variante="primario" cargando={postular.isPending} textoCargando="Preparando…" onClick={() => postular.mutate(codigo, { onSuccess: (r) => onListo(r.id) })} className="postular-enviar">
+          Sí, quiero postularme <IconoFlecha />
+        </Boton>
+        <Link to="/mi-portal" className="postular-ayuda">Corregir mis datos en el portal</Link>
+      </div>
     </section>
   )
 }
@@ -252,6 +227,8 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
                 inputMode={c === 'documento' || c === 'celular' ? 'numeric' : c === 'correo' ? 'email' : undefined}
                 autoComplete={c === 'nombre' ? 'name' : c === 'correo' ? 'email' : c === 'celular' ? 'tel' : undefined}
                 required={c !== 'correo'}
+                // El correo y la identificación son los de la cuenta del portal: con ellos se une la postulación
+                readOnly={c === 'correo' || c === 'documento'}
               />
               {ia && <span className="postular-nota-ia"><Chispa />Leído de tu hoja de vida</span>}
               {editados[c] && leidos?.[c] && <span className="postular-nota-ok"><IconoCheck />Corregido por ti</span>}

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Selvana.Reclutamiento.Application;
 using Selvana.Reclutamiento.Application.Portal;
 using Selvana.SharedKernel.Messaging;
 using Selvana.Web.Common;
@@ -17,6 +18,10 @@ public sealed record IngresarCuentaRequest(string Correo, string Contrasena)
 public sealed record DatosCuentaRequest(string Nombre, string Celular, string Ciudad, string? LinkedIn);
 
 public sealed record PendienteAbiertoResponse(string Ruta);
+
+public sealed record PerfilRequest(
+    string Nombre, string Celular, string Ciudad, string? LinkedIn, IReadOnlyList<ExperienciaDto> Experiencia, IReadOnlyList<FormacionDto> Formacion,
+    IReadOnlyList<string> Cursos, IReadOnlyList<string> Habilidades);
 
 public sealed record ActualizarHojaDeVidaRequest(Guid BorradorId, string Nombre, string Celular, string Ciudad, string? LinkedIn);
 
@@ -86,6 +91,17 @@ public static class PortalPersonaEndpoints
         cuenta.MapPut("/datos", async (DatosCuentaRequest b, ICommandHandler<ActualizarMisDatosCommand> h, CancellationToken ct) =>
                 (await h.Handle(new ActualizarMisDatosCommand(new DatosEditables(b.Nombre, b.Celular, b.Ciudad, b.LinkedIn)), ct)).ToHttp())
             .WithName("ActualizarMisDatosPortal");
+
+        // Su hoja de vida escrita o corregida a mano
+        cuenta.MapPut("/perfil", async (PerfilRequest b, ICommandHandler<ActualizarMiPerfilCommand> h, CancellationToken ct) =>
+                (await h.Handle(new ActualizarMiPerfilCommand(new PerfilEditable(new DatosEditables(b.Nombre, b.Celular, b.Ciudad, b.LinkedIn),
+                    b.Experiencia ?? [], b.Formacion ?? [], b.Cursos ?? [], b.Habilidades ?? [])), ct)).ToHttp())
+            .WithName("ActualizarMiPerfilPortal");
+
+        // Historial del chat de preselección de una de sus postulaciones
+        cuenta.MapGet("/postulaciones/{postulacionId:guid}/chat", async (Guid postulacionId, IQueryHandler<ObtenerChatDePostulacionQuery, ChatDePostulacionDto> h,
+                CancellationToken ct) => (await h.Handle(new ObtenerChatDePostulacionQuery(postulacionId), ct)).ToHttp())
+            .WithName("ChatDePostulacionPortal").Produces<ChatDePostulacionDto>();
 
         cuenta.MapPut("/hoja-de-vida", async (ActualizarHojaDeVidaRequest b, ICommandHandler<ActualizarMiHojaDeVidaCommand> h, CancellationToken ct) =>
                 (await h.Handle(new ActualizarMiHojaDeVidaCommand(b.BorradorId, new DatosEditables(b.Nombre, b.Celular, b.Ciudad, b.LinkedIn)), ct)).ToHttp())

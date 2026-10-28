@@ -91,6 +91,8 @@ public static class ReclutamientoEndpoints
         MapPreseleccionCandidato(app.MapGroup("/portal/preseleccion").WithTags("Preselección conversacional (candidato)").AllowAnonymous()
             .RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         MapPortal(app.MapGroup("/portal").WithTags("Portal de empleo público").AllowAnonymous().RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
+        MapPostularse(app.MapGroup("/portal").WithTags("Postularse (con cuenta del portal)").RequireAuthorization(SesionesPortal.Politica)
+            .RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         app.MapPortalPersona();
         return app;
     }
@@ -420,7 +422,12 @@ public static class ReclutamientoEndpoints
                 (await h.Handle(new ObtenerVacantePublicaQuery(codigo), ct)).ToHttp())
             .WithName("PortalVacante").Produces<VacantePublicaDetalleDto>();
 
-        g.MapPost("/vacantes/{codigo}/postulaciones", async (string codigo, IFormFile hojaDeVida,
+    }
+
+    /// <summary>Postularse exige la cuenta del portal (ADR 0013): la postulación sale con el correo y la identificación de la persona.</summary>
+    private static void MapPostularse(RouteGroupBuilder conCuenta)
+    {
+        conCuenta.MapPost("/vacantes/{codigo}/postulaciones", async (string codigo, IFormFile hojaDeVida,
                 ICommandHandler<IniciarPostulacionCommand, Guid> h, CancellationToken ct) =>
             {
                 await using var flujo = hojaDeVida.OpenReadStream();
@@ -431,11 +438,11 @@ public static class ReclutamientoEndpoints
             })
             .WithName("IniciarPostulacion").DisableAntiforgery().Produces<CreadoResponse>(StatusCodes.Status201Created);
 
-        g.MapGet("/postulaciones/{borradorId:guid}", async (Guid borradorId, IQueryHandler<ObtenerBorradorPostulacionQuery, BorradorPostulacionDto> h, CancellationToken ct) =>
+        conCuenta.MapGet("/postulaciones/{borradorId:guid}", async (Guid borradorId, IQueryHandler<ObtenerBorradorPostulacionQuery, BorradorPostulacionDto> h, CancellationToken ct) =>
                 (await h.Handle(new ObtenerBorradorPostulacionQuery(borradorId), ct)).ToHttp())
             .WithName("PortalBorradorPostulacion").Produces<BorradorPostulacionDto>();
 
-        g.MapPost("/postulaciones/{borradorId:guid}/enviar", async (Guid borradorId, EnviarPostulacionRequest b, HttpContext http,
+        conCuenta.MapPost("/postulaciones/{borradorId:guid}/enviar", async (Guid borradorId, EnviarPostulacionRequest b, HttpContext http,
                 ICommandHandler<EnviarPostulacionCommand, string> h, CancellationToken ct) =>
             {
                 var r = await h.Handle(new EnviarPostulacionCommand(borradorId, b.Nombre, b.Documento, b.Celular, b.Correo, b.Ciudad,

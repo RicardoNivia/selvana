@@ -100,8 +100,8 @@ internal sealed class ObtenerOfertasParaTiHandler(IPersonaActual persona, ICuent
 /// del perfil. La persona sigue en la pantalla de postulación: responde las preguntas y acepta la autorización de esa empresa.
 /// </summary>
 internal sealed class PostularmeConMiPerfilHandler(
-    IPersonaActual persona, ICuentasCandidato cuentas, IVacantes vacantes, IBorradoresPostulacion borradores, IAlmacenHojasDeVida almacen,
-    IUnidadReclutamiento unidad, TimeProvider reloj) : ICommandHandler<PostularmeConMiPerfilCommand, Guid>
+    IPersonaActual persona, ICuentasCandidato cuentas, ILecturaPortalPersona postulaciones, IVacantes vacantes, IBorradoresPostulacion borradores,
+    IAlmacenHojasDeVida almacen, IUnidadReclutamiento unidad, TimeProvider reloj) : ICommandHandler<PostularmeConMiPerfilCommand, Guid>
 {
     private static readonly Error SinHojaDeVida = Error.Validation("Portal.SinHojaDeVida", "Sube tu hoja de vida en tu perfil para postularte con un clic.");
 
@@ -122,6 +122,12 @@ internal sealed class PostularmeConMiPerfilHandler(
         if (!vacante.RecibePostulaciones)
         {
             return VacanteErrors.NoPublicada;
+        }
+
+        // Si ya aparece en sus postulaciones, no se vuelve a postular
+        if ((await postulaciones.PostulacionesAsync(cuenta.Documento, cuenta.Correo, cancellationToken)).Any(p => p.VacanteCodigo == vacante.Codigo))
+        {
+            return CandidatoErrors.YaPostulado;
         }
 
         var archivo = cuenta.ArchivoHojaDeVidaId is { } archivoId ? await almacen.LeerAsync(archivoId, cancellationToken) : null;

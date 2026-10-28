@@ -2,6 +2,7 @@ import { type CSSProperties, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { IconoCheck, IconoCompartir, IconoCupos, IconoDinero, IconoEscudo, IconoFlecha, IconoReloj, IconoUbicacion } from '../../shared/ui/Iconos'
+import { useMiPortal } from '../portal-persona/api'
 import { rangoSalario, useVacantePublica } from './api'
 
 const v = (i: number) => ({ '--i': i }) as CSSProperties
@@ -10,6 +11,7 @@ const iniciales = (nombre: string) => nombre.split(/\s+/).filter((p) => p.length
 export function PortalVacante() {
   const { codigo = '' } = useParams()
   const vacante = useVacantePublica(codigo)
+  const miPortal = useMiPortal()
   const [copiado, setCopiado] = useState(false)
 
   if (vacante.isPending) {
@@ -49,7 +51,11 @@ export function PortalVacante() {
     }
   }
 
-  const accion = x.recibePostulaciones ? (
+  // Con sesión del portal, si ya se postuló no se ofrece postularse otra vez
+  const yaPostulado = miPortal.data?.postulaciones.some((p) => p.vacanteCodigo === x.codigo)
+  const accion = yaPostulado ? (
+    <Link to="/mi-portal" className="boton boton-secundario portal-postular">Ya te postulaste · ver en mi portal</Link>
+  ) : x.recibePostulaciones ? (
     <Link to={`/empleos/${x.codigo}/postular`} className="boton boton-primario portal-postular portal-brillo">Postularme en 2 minutos <IconoFlecha /></Link>
   ) : (
     <p className="aviso aviso-alerta">Esta vacante ya cerró y no recibe postulaciones.</p>

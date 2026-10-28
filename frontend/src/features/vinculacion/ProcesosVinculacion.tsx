@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
+import { IconoCheck } from '../../shared/ui/Iconos'
 import { Buscador, Paginacion } from '../../shared/ui/Paginacion'
 import { usePaginacion } from '../../shared/ui/paginado'
 import { type EtapaVinculacion, estadosOferta, etapas, fechaCorta, pesos, useProcesos } from './api'
@@ -39,7 +40,7 @@ export function ProcesosVinculacion() {
         <div className="tabla-envoltura">
           <table className="tabla">
             <thead>
-              <tr><th>Persona</th><th>Cargo</th><th>Contrato</th><th style={{ textAlign: 'right' }}>Salario</th><th>Ingreso</th><th>Etapa</th><th>Oferta</th></tr>
+              <tr><th>Persona</th><th>Cargo</th><th>Contrato</th><th style={{ textAlign: 'right' }}>Salario</th><th>Ingreso</th><th>Pasos</th><th>Oferta</th></tr>
             </thead>
             <tbody>
               {procesos.isPending
@@ -51,7 +52,7 @@ export function ProcesosVinculacion() {
                       <td style={{ color: 'var(--color-texto-suave)' }}>{p.tipoContrato}</td>
                       <td className="num">{pesos.format(p.salarioCop)}</td>
                       <td className="mono" style={{ fontSize: 13 }}>{fechaCorta(p.fechaIngreso)}</td>
-                      <td><span className="pill pill-neutra">{etapas[p.etapa]}</span></td>
+                      <td><PasosEnTabla etapa={p.etapa} /></td>
                       <td><span className={`pill ${estadosOferta[p.estadoOferta].clase}`}>{estadosOferta[p.estadoOferta].texto}</span></td>
                     </tr>
                   ))}
@@ -64,5 +65,23 @@ export function ProcesosVinculacion() {
         {procesos.data && <Paginacion pagina={procesos.data.procesos} cargando={procesos.isPlaceholderData} onCambiar={setPagina} onCambiarTamano={setTamano} />}
       </section>
     </>
+  )
+}
+
+const pasosTabla = [['Oferta', 'Oferta y contrato'], ['Documentos', 'Documentos'], ['Afiliaciones', 'Afiliaciones y alta'], ['Onboarding', 'Onboarding']] as const
+
+/** Los mismos pasos del detalle, en pequeño: los hechos con chulo, el actual relleno y los que vienen en gris. */
+function PasosEnTabla({ etapa }: { etapa: EtapaVinculacion }) {
+  if (etapa === 'Cancelado') return <span className="pill pill-neutra">{etapas[etapa]}</span>
+  const actual = etapa === 'Vinculado' ? pasosTabla.length : Math.max(0, pasosTabla.findIndex(([e]) => e === etapa))
+  return (
+    <ol className="vin-pasos-tabla" aria-label={`Paso actual: ${etapas[etapa]}`}>
+      {pasosTabla.map(([clave, nombre], i) => (
+        <li key={clave} className={i < actual ? 'hecho' : i === actual ? 'actual' : ''} title={nombre}>
+          <span className="vin-paso-num mono">{i < actual ? <IconoCheck /> : i + 1}</span>
+          <span className="vin-pasos-tabla-texto">{nombre}</span>
+        </li>
+      ))}
+    </ol>
   )
 }

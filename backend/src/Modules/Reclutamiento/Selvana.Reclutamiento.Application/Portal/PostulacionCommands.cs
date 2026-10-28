@@ -4,6 +4,7 @@ using Selvana.Reclutamiento.Application.Abstracciones;
 using Selvana.Reclutamiento.Application.Ranking;
 using Selvana.Reclutamiento.Contracts;
 using Selvana.Reclutamiento.Domain.Candidatos;
+using Selvana.Reclutamiento.Domain.Portal;
 using Selvana.Reclutamiento.Domain.Postulaciones;
 using Selvana.Reclutamiento.Domain.Vacantes;
 using Selvana.SharedKernel.Messaging;
@@ -85,14 +86,21 @@ internal sealed class IniciarPostulacionHandler(
 }
 
 internal sealed class EnviarPostulacionHandler(
-    IBorradoresPostulacion borradores, IVacantes vacantes, ICandidatos candidatos, ICalibracionRanking calibracion, IBitacora bitacora, IEventosReclutamiento eventos,
+    IPersonaActual persona, ICuentasCandidato cuentas, IBorradoresPostulacion borradores, IVacantes vacantes, ICandidatos candidatos, ICalibracionRanking calibracion, IBitacora bitacora, IEventosReclutamiento eventos,
     IUnidadReclutamiento unidad, TimeProvider reloj) : ICommandHandler<EnviarPostulacionCommand, string>
 {
     public async Task<Result<string>> Handle(EnviarPostulacionCommand c, CancellationToken cancellationToken)
     {
+        // Solo se postula quien tiene cuenta en el portal (ADR 0013), y con su correo y su identificación: nunca a nombre de otra persona
+        var cuenta = persona.CuentaId is { } cuentaId ? await cuentas.ObtenerAsync(cuentaId, cancellationToken) : null;
+        if (cuenta is null)
+        {
+            return CuentaErrors.NoExiste;
+        }
+
         var ahora = reloj.GetUtcNow();
         var borrador = await borradores.ObtenerAsync(c.BorradorId, cancellationToken);
-        if (borrador is null || borrador.Vencido(ahora))
+        if (borrador is null || borrador.Vencido(ahora) || borrador.DatosLeidos?.Documento != cuenta.Documento)
         {
             return BorradorErrors.NoExiste;
         }
@@ -112,9 +120,9 @@ internal sealed class EnviarPostulacionHandler(
         var datos = new DatosCandidato
         {
             Nombre = c.Nombre.Trim(),
-            Documento = Candidato.NormalizarDocumento(c.Documento),
+            Documento = cuenta.Documento,
             Celular = new string([.. c.Celular.Where(char.IsDigit)]),
-            Correo = (c.Correo ?? "").Trim().ToLowerInvariant(),
+            Correo = cuenta.Correo,
             Ciudad = (c.Ciudad ?? "").Trim(),
             Experiencia = leidos.Experiencia,
             Formacion = leidos.Formacion,

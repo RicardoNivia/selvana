@@ -144,6 +144,32 @@ export function useSalirPortal() {
 
 export const useActualizarMisDatos = () => useMutacionCuenta((v: DatosEditables) => apiSend('PUT', `${base}/datos`, v))
 
+export interface MensajeChat {
+  autor: string
+  esMio: boolean
+  texto: string
+  en: string
+}
+
+/** Historial del chat de preselección de una de sus postulaciones. */
+export function useChatDePostulacion(postulacionId: string, activo: boolean) {
+  return useQuery({
+    queryKey: ['portal-persona', 'chat', postulacionId],
+    queryFn: ({ signal }) => apiGet<{ abierto: boolean; mensajes: MensajeChat[] }>(`${base}/postulaciones/${postulacionId}/chat`, signal),
+    enabled: activo,
+  })
+}
+
+/** Su hoja de vida escrita o corregida a mano (reemplaza experiencia, estudios, cursos y habilidades). */
+export interface PerfilEditable extends DatosEditables {
+  experiencia: { cargo: string; empresa: string; desde: string; hasta: string }[]
+  formacion: { titulo: string; institucion: string; anio: string }[]
+  cursos: string[]
+  habilidades: string[]
+}
+
+export const useActualizarMiPerfil = () => useMutacionCuenta((v: PerfilEditable) => apiSend('PUT', `${base}/perfil`, v))
+
 export const useActualizarMiHojaDeVida = () => useMutacionCuenta((v: DatosEditables & { borradorId: string }) => apiSend('PUT', `${base}/hoja-de-vida`, v))
 
 /** Renueva el enlace del pendiente (solo si es de la persona) y devuelve la pantalla donde se responde. */

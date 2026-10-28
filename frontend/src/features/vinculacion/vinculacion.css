@@ -128,3 +128,13 @@
 .vin-campo-ia .entrada { border-color: var(--color-ia-borde); background: var(--color-ia-suave); }
 .vin-confirmar { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
 .vin-confirmar input { margin-top: 3px; accent-color: var(--color-primario); }
+/* Pasos en la tabla de procesos: los mismos del detalle, en pequeño */
+.vin-pasos-tabla { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; align-items: center; }
+.vin-pasos-tabla li { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-texto-tenue); white-space: nowrap; }
+.vin-pasos-tabla li + li::before { content: ''; width: 10px; height: 1px; background: var(--color-borde); }
+.vin-pasos-tabla .vin-paso-num { width: 20px; height: 20px; }
+.vin-pasos-tabla li.hecho { color: var(--color-exito); }
+.vin-pasos-tabla li.actual { color: var(--color-texto); font-weight: 600; }
+.vin-pasos-tabla li.actual .vin-paso-num { background: var(--color-primario); color: var(--color-sobre-primario); }
+/* En la tabla solo se lee el nombre del paso actual; los demás quedan como número con su nombre al pasar el cursor */
+.vin-pasos-tabla li:not(.actual) .vin-pasos-tabla-texto { display: none; }
