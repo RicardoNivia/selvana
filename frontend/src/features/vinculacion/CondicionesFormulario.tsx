@@ -1,5 +1,6 @@
-import { IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Iconos'
-import { type Alerta, type CondicionesRequest, pesos, type TipoContrato, tiposContrato } from './api'
+import { Link } from 'react-router-dom'
+import { IconoAlerta, IconoCheck, IconoDocumento, IconoEscudo } from '../../shared/ui/Iconos'
+import { type Alerta, type CondicionesRequest, pesos, type TipoContrato, tiposContrato, useTiposContrato } from './api'
 
 const conFin: TipoContrato[] = ['TerminoFijo', 'MisionTemporal', 'Aprendizaje', 'ObraOLabor']
 const conLabor: TipoContrato[] = ['ObraOLabor', 'MisionTemporal']
@@ -28,16 +29,30 @@ export function CondicionesFormulario({ valor, onCambiar, empresaUsuaria }: {
   empresaUsuaria: string | null
 }) {
   const poner = (c: Partial<CondicionesRequest>) => onCambiar({ ...valor, ...c })
+  const maestro = useTiposContrato(true)
+  const tipos = maestro.data ?? []
+  // El tipo del maestro elegido; si las condiciones solo traen la modalidad, el primero activo de esa modalidad
+  const elegido = tipos.find((t) => t.id === valor.tipoContratoId) ?? tipos.find((t) => t.modalidad === valor.tipo)
+  const cambiarTipo = (tipo: TipoContrato, tipoContratoId: string | null) =>
+    poner({ tipo, tipoContratoId, fechaFin: tipo === 'Indefinido' ? null : valor.fechaFin, labor: conLabor.includes(tipo) ? valor.labor : null })
+
   return (
     <div className="vin-condiciones">
       <label>
         Tipo de contrato
-        <select className="selector" value={valor.tipo} onChange={(e) => {
-          const tipo = e.target.value as TipoContrato
-          poner({ tipo, fechaFin: tipo === 'Indefinido' ? null : valor.fechaFin, labor: conLabor.includes(tipo) ? valor.labor : null })
-        }}>
-          {tiposContrato.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
-        </select>
+        {tipos.length > 0 ? (
+          <select className="selector" value={elegido?.id ?? ''} onChange={(e) => {
+            const t = tipos.find((x) => x.id === e.target.value)
+            if (t) cambiarTipo(t.modalidad, t.id)
+          }}>
+            {!elegido && <option value="">Elija un tipo</option>}
+            {tipos.map((t) => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+          </select>
+        ) : (
+          <select className="selector" value={valor.tipo} onChange={(e) => cambiarTipo(e.target.value as TipoContrato, null)}>
+            {tiposContrato.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+          </select>
+        )}
       </label>
       <label>
         Salario mensual
@@ -59,6 +74,17 @@ export function CondicionesFormulario({ valor, onCambiar, empresaUsuaria }: {
         <input className="entrada mono" type="number" min={0} max={60} value={valor.periodoPruebaDias}
           onChange={(e) => poner({ periodoPruebaDias: Math.max(0, Number(e.target.value) || 0) })} />
       </label>
+      {elegido && (
+        <div className="vin-ancho vin-tipo-como">
+          <span className="vin-tipo-como-titulo">
+            Cómo se trabaja este contrato
+            {elegido.plantillaNombre && <span className="pill pill-neutra"><IconoDocumento />Con plantilla</span>}
+            <Link to="/consola/empresa/tipos-contrato">Editar</Link>
+          </span>
+          <p>{elegido.descripcion}</p>
+          <span className="ayuda">La IA sigue esta descripción{elegido.plantillaNombre ? ' y la plantilla' : ''} al redactar la oferta y el contrato.</span>
+        </div>
+      )}
       {conLabor.includes(valor.tipo) && (
         <label className="vin-ancho">
           Obra o labor contratada{valor.tipo === 'MisionTemporal' && empresaUsuaria ? ` en ${empresaUsuaria}` : ''}

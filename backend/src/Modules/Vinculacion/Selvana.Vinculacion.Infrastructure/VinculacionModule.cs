@@ -25,6 +25,8 @@ public static class VinculacionModule
         services.AddDbContext<VinculacionDbContext>(o => o.UseModulePostgres(connectionString, VinculacionDbContext.SchemaName));
         services.AddScoped<IUnidadVinculacion>(sp => sp.GetRequiredService<VinculacionDbContext>());
         services.AddScoped<IProcesos, ProcesosRepositorio>();
+        services.AddScoped<ITiposContrato, TiposContratoRepositorio>();
+        services.AddScoped<ILecturaTiposContrato, LecturaTiposContrato>();
         services.AddScoped<IProcesosDeLaPersona, ProcesosDeLaPersona>();
         services.AddScoped<IEventosVinculacion, EventosVinculacion>();
         services.AddScoped<IBitacora, Bitacora>();

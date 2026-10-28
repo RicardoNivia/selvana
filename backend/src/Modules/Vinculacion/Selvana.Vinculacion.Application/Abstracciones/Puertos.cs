@@ -1,6 +1,7 @@
 using Selvana.SharedKernel.Messaging;
 using Selvana.SharedKernel.Results;
 using Selvana.Vinculacion.Domain.Procesos;
+using Selvana.Vinculacion.Domain.TiposContrato;
 
 namespace Selvana.Vinculacion.Application.Abstracciones;
 
@@ -37,6 +38,30 @@ public interface IProcesos
     Task<ProcesoVinculacion?> AbiertoDePostulacionAsync(Guid empresaId, Guid postulacionId, CancellationToken cancellationToken);
 
     void Agregar(ProcesoVinculacion proceso);
+}
+
+/// <summary>Maestro de tipos de contrato de cada empresa.</summary>
+public interface ITiposContrato
+{
+    Task<TipoContratoEmpresa?> PorIdAsync(Guid empresaId, Guid id, CancellationToken cancellationToken);
+
+    /// <summary>El primer tipo activo de esa modalidad (el de la semilla, si sigue); null si la empresa no tiene.</summary>
+    Task<TipoContratoEmpresa?> ActivoDeModalidadAsync(Guid empresaId, TipoContrato modalidad, CancellationToken cancellationToken);
+
+    Task<bool> ExisteNombreAsync(Guid empresaId, string nombre, Guid? excepto, CancellationToken cancellationToken);
+
+    Task<int> ContarAsync(Guid empresaId, CancellationToken cancellationToken);
+
+    void Agregar(TipoContratoEmpresa tipo);
+}
+
+public sealed record TipoContratoDto(
+    Guid Id, string Nombre, string Modalidad, string ModalidadNombre, string Descripcion, bool Activo, bool PorDefecto, string? PlantillaNombre,
+    DateTimeOffset ActualizadoEn, string ActualizadoPor);
+
+public interface ILecturaTiposContrato
+{
+    Task<IReadOnlyList<TipoContratoDto>> DeLaEmpresaAsync(Guid empresaId, bool soloActivos, CancellationToken cancellationToken);
 }
 
 public interface IEventosVinculacion

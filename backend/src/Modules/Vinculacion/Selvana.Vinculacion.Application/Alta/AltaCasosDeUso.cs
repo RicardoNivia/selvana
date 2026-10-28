@@ -158,7 +158,7 @@ internal sealed class CrearEmpleadoHandler(IUsuarioActual usuario, IProcesos pro
 
         string Entidad(TipoAfiliacion t) => p.Afiliaciones.FirstOrDefault(a => a.Tipo == t) is { Estado: EstadoAfiliacion.Confirmada } a ? a.Entidad : "";
         eventos.Publicar(new EmpleadoVinculado(Guid.CreateVersion7(), ahora, p.EmpresaId, p.Id, p.Vacante.CandidatoId, p.EmpresaUsuariaId, p.Persona.Documento, p.Persona.Nombre,
-            p.Persona.Correo, p.Persona.Celular, p.Persona.Ciudad, p.Vacante.Cargo, p.Alta.Area, p.Alta.CentroCosto, p.Alta.Sede, ReglasContrato.Nombre(p.Condiciones.Tipo),
+            p.Persona.Correo, p.Persona.Celular, p.Persona.Ciudad, p.Vacante.Cargo, p.Alta.Area, p.Alta.CentroCosto, p.Alta.Sede, ReglasContrato.Nombre(p.Condiciones),
             p.Condiciones.SalarioCop, p.Condiciones.FechaIngreso, p.Condiciones.FechaFin, Entidad(TipoAfiliacion.Eps), Entidad(TipoAfiliacion.Pension), Entidad(TipoAfiliacion.Arl),
             p.Afiliaciones.FirstOrDefault(a => a.Tipo == TipoAfiliacion.Arl)?.ClaseRiesgo, Entidad(TipoAfiliacion.CajaCompensacion), usuario.Nombre));
         eventos.Publicar(new PropuestaResuelta(Guid.CreateVersion7(), ahora, p.EmpresaId, Altas.TipoBandeja, p.Id, "Empleado creado", usuario.Nombre));

@@ -48,6 +48,10 @@ export interface Condiciones {
   ciudad: string
   auxilioTransporte: boolean
   auxilioTransporteCop: number
+  /** Tipo del maestro de la empresa (copia del momento) y cómo se trabaja; la IA lo sigue al redactar. */
+  tipoContratoId: string | null
+  tipoContratoDescripcion: string | null
+  conPlantilla: boolean
 }
 
 export interface CondicionesRequest {
@@ -57,6 +61,7 @@ export interface CondicionesRequest {
   fechaFin: string | null
   periodoPruebaDias: number
   labor: string | null
+  tipoContratoId: string | null
 }
 
 export interface Alerta { nivel: 'Bloquea' | 'Revisar' | 'Info'; texto: string; fuente: string }
@@ -229,7 +234,57 @@ export interface OfertaPublica {
 
 export const aRequest = (c: Condiciones): CondicionesRequest => ({
   tipo: c.tipo, salarioCop: c.salarioCop, fechaIngreso: c.fechaIngreso, fechaFin: c.fechaFin, periodoPruebaDias: c.periodoPruebaDias, labor: c.labor,
+  tipoContratoId: c.tipoContratoId,
 })
+
+/* ---------- Maestro de tipos de contrato ---------- */
+
+export interface TipoContratoEmpresa {
+  id: string
+  nombre: string
+  modalidad: TipoContrato
+  modalidadNombre: string
+  descripcion: string
+  activo: boolean
+  porDefecto: boolean
+  plantillaNombre: string | null
+  actualizadoEn: string
+  actualizadoPor: string
+}
+
+export interface TipoContratoRequest { nombre: string; modalidad: TipoContrato; descripcion: string; activo: boolean }
+
+const claveTipos = ['vinculacion', 'tipos-contrato'] as const
+
+export function useTiposContrato(soloActivos = false) {
+  return useQuery({
+    queryKey: [...claveTipos, soloActivos],
+    queryFn: ({ signal }) => apiGet<TipoContratoEmpresa[]>(`/api/v1/vinculacion/tipos-contrato?soloActivos=${soloActivos}`, signal),
+  })
+}
+
+function useMutacionTipos<V, R = unknown>(fn: (v: V) => Promise<R>) {
+  const cliente = useQueryClient()
+  return useMutation({ mutationFn: fn, onSuccess: () => cliente.invalidateQueries({ queryKey: claveTipos }) })
+}
+
+export const useCrearTipoContrato = () => useMutacionTipos((v: TipoContratoRequest) => apiSend<{ id: string }>('POST', '/api/v1/vinculacion/tipos-contrato', v))
+export const useEditarTipoContrato = () =>
+  useMutacionTipos((v: TipoContratoRequest & { id: string }) => apiSend('PUT', `/api/v1/vinculacion/tipos-contrato/${v.id}`, v))
+export const useCargarTiposPorDefecto = () => useMutacionTipos(() => apiSend<{ creados: number }>('POST', '/api/v1/vinculacion/tipos-contrato/por-defecto'))
+export const useSubirPlantillaContrato = () =>
+  useMutacionTipos((v: { id: string; archivo: File }) => {
+    const f = new FormData()
+    f.append('archivo', v.archivo)
+    return apiUpload(`/api/v1/vinculacion/tipos-contrato/${v.id}/plantilla`, f)
+  })
+export const useQuitarPlantillaContrato = () => useMutacionTipos((id: string) => apiSend('DELETE', `/api/v1/vinculacion/tipos-contrato/${id}/plantilla`))
+
+/** Abre la plantilla en otra pestaña (o la descarga si es Word). */
+export async function abrirPlantilla(id: string) {
+  const archivo = await apiArchivo(`/api/v1/vinculacion/tipos-contrato/${id}/plantilla/archivo`, {})
+  window.open(URL.createObjectURL(archivo), '_blank', 'noopener')
+}
 
 export function useContratacionSugerida(postulacionId: string | null) {
   return useQuery({

@@ -5,7 +5,7 @@ import { iniciales, nombreRol, usePuede, useSalir, useSesion } from '../features
 import { elegirEmpresaUsuaria, useEmpresaUsuariaActual } from '../features/sesion/empresaUsuaria'
 import {
   Chispa, IconoBandeja, IconoCandado, IconoConexion, IconoEstructura, IconoPersonas, IconoSalir, IconoUsuarios,
-  IconoVacantes, IconoDocumento, IconoCupos, IconoInsignia, Isotipo,
+  IconoVacantes, IconoDocumento, IconoCupos, IconoInsignia, IconoManos, Isotipo,
 } from '../shared/ui/Iconos'
 
 function Pronto({ icono, texto, cuando }: { icono: ReactNode; texto: string; cuando: string }) {
@@ -61,6 +61,7 @@ export function Layout() {
           {(configura || gestionaUsuarios || veBitacora) && <div className="nav-grupo">Empresa</div>}
           {configura && <Enlace a="/consola/empresa/conectar-nomina" icono={<IconoConexion />} texto="Conectar nómina" />}
           {configura && <Enlace a="/consola/empresa/estructura" icono={<IconoEstructura />} texto="Estructura y cargos" />}
+          {configura && <Enlace a="/consola/empresa/tipos-contrato" icono={<IconoManos />} texto="Tipos de contrato" />}
           {gestionaUsuarios && <Enlace a="/consola/empresa/usuarios" icono={<IconoUsuarios />} texto="Usuarios y roles" />}
           {veBitacora && <Enlace a="/consola/empresa/privacidad" icono={<IconoCandado />} texto="Privacidad y auditoría" />}
           <Pronto icono={<Chispa />} texto="Agentes y autonomía" cuando="Pronto" />

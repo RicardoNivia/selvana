@@ -66,6 +66,17 @@ public sealed class CondicionesContratacion
     public string? Labor { get; init; }
     public string Jornada { get; init; } = "";
     public string Ciudad { get; init; } = "";
+
+    /// <summary>Tipo del maestro de la empresa que se eligió (copia del momento: si luego se edita el maestro, este contrato no cambia).</summary>
+    public Guid? TipoContratoId { get; init; }
+    public string? TipoContratoNombre { get; init; }
+
+    /// <summary>Cómo se trabaja ese contrato en la empresa; la IA lo sigue al redactar.</summary>
+    public string? TipoContratoDescripcion { get; init; }
+
+    /// <summary>Plantilla del tipo de contrato que la IA sigue al redactar (copia del momento).</summary>
+    public Guid? PlantillaArchivoId { get; init; }
+    public string? PlantillaTipoContenido { get; init; }
 }
 
 public sealed class Clausula

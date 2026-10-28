@@ -91,7 +91,7 @@ internal sealed class LecturaVinculacion(VinculacionDbContext db) : ILecturaVinc
         var total = await q.CountAsync(cancellationToken);
         var filas = await q.OrderByDescending(p => p.ActualizadoEn).Skip(pagina.Omitir).Take(pagina.Tamano).ToListAsync(cancellationToken);
         return new Pagina<FilaProcesoDto>([.. filas.Select(p => new FilaProcesoDto(p.Id, p.Codigo, p.Persona.Nombre, p.Persona.Documento, p.Vacante.Cargo,
-            p.Vacante.Titulo, p.EmpresaUsuaria, ReglasContrato.Nombre(p.Condiciones.Tipo), p.Condiciones.SalarioCop, p.Condiciones.FechaIngreso,
+            p.Vacante.Titulo, p.EmpresaUsuaria, ReglasContrato.Nombre(p.Condiciones), p.Condiciones.SalarioCop, p.Condiciones.FechaIngreso,
             p.Etapa.ToString(), p.Oferta.Estado.ToString(), p.ActualizadoEn))], pagina.Numero, pagina.Tamano, total);
     }
 

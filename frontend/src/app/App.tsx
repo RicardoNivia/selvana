@@ -26,6 +26,7 @@ import { VacantesLista } from '../features/vacantes/VacantesLista'
 import { OfertaCandidato } from '../features/vinculacion/OfertaCandidato'
 import { ProcesoVinculacion } from '../features/vinculacion/ProcesoVinculacion'
 import { ProcesosVinculacion } from '../features/vinculacion/ProcesosVinculacion'
+import { TiposContrato } from '../features/vinculacion/TiposContrato'
 import { Layout } from './Layout'
 
 const router = createBrowserRouter([
@@ -79,6 +80,7 @@ const router = createBrowserRouter([
       { path: 'empresa/estructura', element: <EstructuraCargos /> },
       { path: 'empresa/estructura/cargos/nuevo', element: <CargoNuevo /> },
       { path: 'empresa/estructura/cargos/:id', element: <CargoDetalle /> },
+      { path: 'empresa/tipos-contrato', element: <TiposContrato /> },
       { path: 'empresa/usuarios', element: <UsuariosRoles /> },
       { path: 'empresa/privacidad', element: <PrivacidadAuditoria /> },
     ],

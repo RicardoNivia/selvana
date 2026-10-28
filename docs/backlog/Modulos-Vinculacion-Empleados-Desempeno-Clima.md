@@ -19,6 +19,18 @@ Planeación ejecutable de las Etapas 2 a 5 del [plan de trabajo](../Selvana-Plan
 | 3 | **Desempeño** | Evalúa a los empleados del expediente |
 | 4 | **Clima** | Encuestas anónimas sobre los empleados y su estructura |
 
+## Estado (28 de octubre de 2026)
+
+| Bloque | Estado |
+| --- | --- |
+| A1 a A4 · Filtros ATS | Hecho |
+| V1 · Contratación y oferta | Hecho, con maestro de tipos de contrato y plantillas (28/10) |
+| V2 · Documentos de ingreso · V3 · Alta y afiliaciones | Hechos |
+| **V4 · Onboarding** | **En curso** |
+| P1 a P3b · Portal de la persona | Hecho y rediseñado; P4 y P5 después de E1 |
+| E1 a E4 · Empleados | Sigue |
+| Desempeño · Clima | Después |
+
 ## 0. Reclutamiento · Filtros ATS (pedido el 23 de octubre de 2026)
 
 Se construye justo después de Vinculación V1 y antes de V2. Un ATS clásico descarta en automático; en Selvana el filtro **propone** y una persona decide.
@@ -36,7 +48,7 @@ Se construye justo después de Vinculación V1 y antes de V2. Un ATS clásico de
 
 | Bloque | Qué se construye ahora | Qué queda para las integraciones |
 | --- | --- | --- |
-| **V1 · Contratación y oferta** | Desde la terna, «Aprobar contratación» (decisión humana) abre el proceso de vinculación con los datos del candidato y la vacante. La IA redacta la carta oferta y el contrato desde plantillas por tipo de contrato (término fijo, indefinido, obra o labor, aprendizaje, misión en temporal) y explica cada decisión; RRHH ajusta y aprueba. El candidato acepta la oferta por su enlace (aceptación electrónica con evidencia: fecha, IP, navegador y huella SHA-256). | Firma electrónica certificada; revisión jurídica de plantillas |
+| **V1 · Contratación y oferta** | Maestro de tipos de contrato por empresa (nombre, modalidad legal, cómo se trabaja y plantilla opcional en PDF o Word); se siembran indefinido, término fijo, obra o labor, aprendizaje y misión en temporales. Desde la terna, «Aprobar contratación» (decisión humana) abre el proceso de vinculación con los datos del candidato y la vacante. La IA redacta la carta oferta y el contrato desde plantillas por tipo de contrato (término fijo, indefinido, obra o labor, aprendizaje, misión en temporal) y explica cada decisión; RRHH ajusta y aprueba. El candidato acepta la oferta por su enlace (aceptación electrónica con evidencia: fecha, IP, navegador y huella SHA-256). | Firma electrónica certificada; revisión jurídica de plantillas |
 | **V2 · Documentos de ingreso** | Lista de documentos por tipo de contrato. El candidato los sube por su enlace; la IA lee cada uno (cédula, certificado bancario, EPS, AFP, diplomas, certificados) y propone si es válido y si coincide con sus datos; RRHH aprueba en la bandeja. Antecedentes y examen médico con su soporte cargado y el concepto (apto, apto con restricciones, no apto) cifrado. | Pedido y seguimiento por WhatsApp; consulta automática de antecedentes |
 | **V3 · Alta y afiliaciones** | Lista de afiliaciones (EPS, AFP, ARL, caja de compensación) con alertas. Al completar todo, «Crear empleado» publica el evento de vinculación: el empleado nace en Empleados y se genera el archivo de alta para el ERP (formato canónico). | Alta directa en el ERP por conector o API |
 | **V4 · Onboarding** | Plan de inducción generado por la IA según el cargo (tareas, responsables y fechas), con seguimiento. | Asistente de bienvenida por WhatsApp; encuestas de 30, 60 y 90 días (van con Clima) |
@@ -78,7 +90,7 @@ Se construye justo después de Vinculación V1 y antes de V2. Un ATS clásico de
 
 Formación (LMS, plan de capacitación) y Carrera y sucesión siguen en la Etapa 5 del plan, después de estos bloques.
 
-## 5. Portal del candidato y del empleado (pedido el 23 de octubre de 2026, para después)
+## 5. Portal del candidato y del empleado (pedido el 23 de octubre de 2026; P1 a P3b hechos y rediseñados el 28)
 
 Hoy cada cosa llega por un enlace distinto (preselección, pruebas, oferta y documentos). El portal las reúne en un solo lugar con la cuenta de la persona.
 
@@ -88,6 +100,7 @@ Hoy cada cosa llega por un enlace distinto (preselección, pruebas, oferta y doc
 | **P2 · Mis postulaciones** | Cada postulación con su estado en palabras claras (recibida, en revisión, en preselección, finalista, contratada, no seleccionada), sin puntajes internos ni motivos que la expongan. Se unen a la cuenta solo si el correo y la cédula coinciden. |
 | **P3 · Mis pendientes** | Una bandeja de lo que la persona debe hacer: chat de preselección, pruebas por presentar, oferta por aceptar y firmar, documentos por subir o corregir. Los enlaces que se envían llevan al portal. |
 | **P3b · Ofertas para ti** | Vacantes publicadas que encajan con su hoja de vida (reglas sobre cargos, habilidades y ciudad), para postularse con un clic con la hoja de vida que ya subió. |
+| **Hecho además** | Rediseño con la marca (bienvenida, cifras, navegación animada, hoja de vida por partes), hoja de vida en PDF, «Completa tu perfil», «Mi cuenta y privacidad» y sesión visible en el portal de empleo (menú con nombre y tarjeta «Hola, …»). |
 | **P4 · Mis documentos** | Subir y reemplazar documentos (cédula, certificados) una sola vez y reutilizarlos en otros procesos de la misma empresa, con su vigencia. |
 | **P5 · Empleado** | Al vincularse, el mismo portal pasa a ser el del empleado: certificados, solicitudes y actualización de datos (conecta con Empleados E2 y E3). |
 

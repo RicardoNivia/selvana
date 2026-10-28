@@ -184,6 +184,76 @@ namespace Selvana.Vinculacion.Infrastructure.Persistence.Migrations
                     b.ToTable("procesos", "vinculacion");
                 });
 
+            modelBuilder.Entity("Selvana.Vinculacion.Domain.TiposContrato.TipoContratoEmpresa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("activo");
+
+                    b.Property<DateTimeOffset>("ActualizadoEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("actualizado_en");
+
+                    b.Property<string>("ActualizadoPor")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("actualizado_por");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("descripcion");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<string>("Modalidad")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("modalidad");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("nombre");
+
+                    b.Property<Guid?>("PlantillaArchivoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plantilla_archivo_id");
+
+                    b.Property<string>("PlantillaNombre")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("plantilla_nombre");
+
+                    b.Property<string>("PlantillaTipoContenido")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("plantilla_tipo_contenido");
+
+                    b.Property<bool>("PorDefecto")
+                        .HasColumnType("boolean")
+                        .HasColumnName("por_defecto");
+
+                    b.HasKey("Id")
+                        .HasName("pk_tipos_contrato");
+
+                    b.HasIndex("EmpresaId", "Nombre")
+                        .IsUnique()
+                        .HasDatabaseName("ix_tipos_contrato_empresa_id_nombre");
+
+                    b.ToTable("tipos_contrato", "vinculacion");
+                });
+
             modelBuilder.Entity("Selvana.Vinculacion.Infrastructure.ArchivoDocumento", b =>
                 {
                     b.Property<Guid>("Id")
@@ -286,10 +356,20 @@ namespace Selvana.Vinculacion.Infrastructure.Persistence.Migrations
 
                             b1.Property<int>("PeriodoPruebaDias");
 
+                            b1.Property<Guid?>("PlantillaArchivoId");
+
+                            b1.Property<string>("PlantillaTipoContenido");
+
                             b1.Property<decimal>("SalarioCop");
 
                             b1.Property<string>("Tipo")
                                 .IsRequired();
+
+                            b1.Property<string>("TipoContratoDescripcion");
+
+                            b1.Property<Guid?>("TipoContratoId");
+
+                            b1.Property<string>("TipoContratoNombre");
 
                             b1.HasKey("ProcesoVinculacionId");
 

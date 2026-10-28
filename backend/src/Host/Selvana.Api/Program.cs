@@ -65,6 +65,12 @@ if (app.Environment.IsDevelopment() && Guid.TryParse(app.Configuration["Desarrol
         app.Configuration["Desarrollo:Contrasena"]);
 }
 
+// Datos maestros por defecto de cada empresa (idempotente): tipos de contrato
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    await app.Services.SembrarTiposContratoAsync();
+}
+
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseCors(CorsSetup.PolicyName);

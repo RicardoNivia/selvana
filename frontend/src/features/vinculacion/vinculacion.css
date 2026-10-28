@@ -165,3 +165,33 @@
 .vin-pasos-tabla li.actual .vin-paso-num { background: var(--color-primario); color: var(--color-sobre-primario); }
 /* En la tabla solo se lee el nombre del paso actual; los demás quedan como número con su nombre al pasar el cursor */
 .vin-pasos-tabla li:not(.actual) .vin-pasos-tabla-texto { display: none; }
+
+/* Tipos de contrato: cómo se trabaja cada uno (lo sigue la IA) y su plantilla */
+.vin-tipos-encabezado { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--espacio-4); flex-wrap: wrap; }
+.vin-tipos-encabezado > div { flex: 1 1 420px; }
+.vin-tipos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: var(--espacio-4); }
+.vin-tipos-vacio { display: flex; flex-direction: column; align-items: flex-start; gap: var(--espacio-3); padding: var(--espacio-6); }
+.vin-tipos-vacio p { margin: 0; max-width: 64ch; color: var(--color-texto-suave); }
+.vin-tipo { display: flex; flex-direction: column; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-6); margin-bottom: 0; }
+.vin-tipo.inactivo { opacity: 0.75; }
+.vin-tipo > header, .vin-tipo > footer { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--espacio-3); }
+.vin-tipo > footer { align-items: center; margin-top: auto; padding-top: var(--espacio-3); border-top: 1px solid var(--color-borde); }
+.vin-tipo h2 { margin: 0; font-size: 17px; }
+.vin-tipo-meta { font-size: 12px; color: var(--color-texto-suave); }
+.vin-tipo-descripcion { margin: 0; font-size: 14px; color: var(--color-texto); display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.vin-plantilla { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2) var(--espacio-3); padding: var(--espacio-3); border: 1px dashed var(--color-borde); border-radius: var(--radio-m); background: var(--color-fondo); }
+.vin-plantilla-icono { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: var(--radio-s); background: var(--color-primario-suave); color: var(--color-primario); }
+.vin-plantilla-icono svg { width: 16px; height: 16px; }
+.vin-plantilla-texto { flex: 1 1 180px; display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 13px; overflow-wrap: anywhere; }
+.vin-plantilla-texto > span { font-size: 12px; color: var(--color-texto-suave); }
+.vin-plantilla-error { flex-basis: 100%; margin: 0; }
+.vin-tipo-editor { gap: var(--espacio-4); margin-bottom: var(--espacio-4); }
+.vin-tipo-editor label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.vin-tipo-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--espacio-3); }
+.vin-tipo-editor label.vin-tipo-activo { flex-direction: row; align-items: center; gap: var(--espacio-2); font-weight: 500; }
+.vin-tipo-activo input { width: 18px; height: 18px; accent-color: var(--color-primario); }
+.vin-tipo-acciones { display: flex; gap: var(--espacio-2); justify-content: flex-end; }
+.vin-tipo-como { display: flex; flex-direction: column; gap: 6px; padding: var(--espacio-3) var(--espacio-4); border-radius: var(--radio-m); background: var(--color-superficie-2); }
+.vin-tipo-como-titulo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); font-size: 13px; font-weight: 600; }
+.vin-tipo-como-titulo a { margin-left: auto; font-size: 12px; }
+.vin-tipo-como p { margin: 0; font-size: 13px; font-weight: 400; color: var(--color-texto); white-space: pre-wrap; }

@@ -13,7 +13,7 @@ internal sealed class ArchivoAltaCsv : IArchivoAlta
         ArgumentNullException.ThrowIfNull(p);
         string Entidad(TipoAfiliacion t) => p.Afiliaciones.FirstOrDefault(a => a.Tipo == t) is { Estado: EstadoAfiliacion.Confirmada } a ? a.Entidad : "";
         var alta = new AltaEmpleadoNomina(p.Persona.Documento, p.Persona.Nombre, p.Persona.Correo, p.Persona.Celular, p.Persona.Ciudad, p.Vacante.Cargo, p.Alta.Area,
-            p.Alta.CentroCosto, p.Alta.Sede, ReglasContrato.Nombre(p.Condiciones.Tipo), p.Condiciones.SalarioCop, auxilioTransporte, p.Condiciones.FechaIngreso,
+            p.Alta.CentroCosto, p.Alta.Sede, ReglasContrato.Nombre(p.Condiciones), p.Condiciones.SalarioCop, auxilioTransporte, p.Condiciones.FechaIngreso,
             p.Condiciones.FechaFin, p.Condiciones.PeriodoPruebaDias, Entidad(TipoAfiliacion.Eps), Entidad(TipoAfiliacion.Pension), Entidad(TipoAfiliacion.Arl),
             p.Afiliaciones.FirstOrDefault(a => a.Tipo == TipoAfiliacion.Arl)?.ClaseRiesgo, Entidad(TipoAfiliacion.CajaCompensacion), p.Alta.Banco, p.Alta.TipoCuenta,
             p.Alta.NumeroCuenta, p.EmpresaUsuaria);

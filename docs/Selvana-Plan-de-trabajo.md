@@ -19,6 +19,27 @@ Selvana se construye en **6 etapas y 30 sprints de 2 semanas (unos 14 meses)**. 
 
 Cada etapa termina con un **gate**: no se arranca la siguiente sin cumplir sus criterios de salida.
 
+## Avance y orden de trabajo (actualizado el 28/10/2026)
+
+El orden real se ajustó para tener un flujo completo de punta a punta antes de cerrar la Etapa 1: se adelantaron Vinculación (Etapa 2) y el portal de la persona. Las integraciones (WhatsApp, correo, firma certificada, conectores de ERP) van al final; mientras tanto cada paso tiene su versión manual asistida o por enlace.
+
+| Bloque | Estado |
+| --- | --- |
+| Etapa D · Marca Dosel y design system | Hecho |
+| Etapa 0 · Cimientos (gateway de IA, mensajería, nómina por archivo, estructura, usuarios y roles, bitácora, Ley 1581) | Hecho; falta pgvector |
+| Etapa 1 · Sprints 4, 6, 7 y 8 (web) | Hechos |
+| Etapa 1 · Sprint 5 · Portal de empleo y postulación | Hecho; marca propia y bolsas externas, después |
+| Etapa 1 · Sprint 9 · Suite psicotécnica fase 1 e informe de finalistas | Hecho; fases 2 y 3 esperan al psicólogo |
+| Etapa 2 · V1 Contratación y oferta, con maestro de tipos de contrato y plantillas | Hecho |
+| Etapa 2 · V2 Documentos de ingreso · V3 Alta y afiliaciones | Hechos |
+| Portal de la persona · P1 a P3b (cuenta, procesos, pendientes, ofertas para ti) y rediseño | Hecho |
+| **Etapa 2 · V4 Onboarding** | **En curso** |
+| Etapa 3 · Empleados E1 a E4 | Sigue |
+| Portal · P4 Mis documentos · P5 Portal del empleado | Después de E1 |
+| Etapa 4 · Desempeño · Etapa 5 · Clima | Después |
+| Etapa 1 · Sprint 10 · Estabilización y lanzamiento | Antes de vender el primer plan |
+| Integraciones (WhatsApp, correo, firma, ERP) | Al final |
+
 ## IA primero: qué hace la IA y qué aprueba el usuario
 
 La diferencia con una aplicación normal de talento humano es que cada proceso tiene un **agente** que ejecuta el trabajo y deja al usuario una bandeja de aprobaciones.
@@ -273,12 +294,22 @@ Objetivo: que el candidato aprobado quede contratado, afiliado y creado en nómi
 **Sprint 11 – Oferta y contrato**
 
 - [x] Carta oferta y contrato generados por IA desde plantillas y tipo de contrato — *adelantado el 23/10/2026 (bloque V1 de `docs/backlog/Modulos-Vinculacion-Empleados-Desempeno-Clima.md`): módulo `Vinculacion` con su esquema. Desde la terna, «Aprobar contratación» con condiciones prellenadas por reglas y revisión legal (salario mínimo, término fijo, misión, periodo de prueba, auxilio de transporte); el agente redactor de ofertas (sin nombre ni documento) escribe carta y contrato con su explicación; RRHH ajusta y aprueba; el candidato acepta en `/vinculacion/:token` con nombre y documento y queda la evidencia (fecha, IP, navegador, SHA-256). La firma certificada y la revisión jurídica quedan para las integraciones*
+- [x] Maestro de tipos de contrato (agregado el 28/10/2026) — *por empresa, en `/consola/empresa/tipos-contrato`: nombre, modalidad legal (activa las reglas de ley), «cómo se trabaja este contrato» (lo sigue la IA) y una plantilla o contrato de ejemplo opcional (PDF o Word, cifrado). Se siembran por defecto término indefinido, término fijo (fecha de inicio y de fin), obra o labor, aprendizaje y, en temporales, misión en empresa usuaria. Al aprobar la contratación se elige el tipo; las condiciones guardan una copia (nombre, descripción y plantilla) y el agente redactor escribe el contrato con la estructura de la plantilla, sin copiar datos de personas del ejemplo. Lo editan el Gerente RRHH y el Administrador; todo queda en la bitácora*
 - [ ] Firma electrónica del candidato y del representante
 - [ ] Revisión automática de cláusulas contra la plantilla aprobada por jurídico
 
 **Portal del candidato y del empleado (pedido el 23/10/2026, se programa después)**
 
-- [ ] Un solo portal con la cuenta de la persona (código de un solo uso por correo o celular): mis postulaciones con su estado, mis pendientes (pruebas, preselección, oferta, documentos por subir o corregir) y mis documentos reutilizables; al vincularse pasa a ser el portal del empleado. Detalle en `docs/backlog/Modulos-Vinculacion-Empleados-Desempeno-Clima.md`, sección 5
+Adelantado (ADR 0013). Detalle en `docs/backlog/Modulos-Vinculacion-Empleados-Desempeno-Clima.md`, sección 5.
+
+- [x] P1 · Cuenta y acceso — *registro en dos pasos con correo, identificación, contraseña y autorización Ley 1581; sesión propia del portal (`/mi-portal`), distinta de la consola. Las postulaciones previas se unen por correo e identificación*
+- [x] P2 · Mis procesos — *cada postulación con su avance en palabras claras (recibida, en revisión, preselección, finalista, contratación), filtro en curso o terminados y el chat de preselección*
+- [x] P3 · Mis pendientes — *chat, pruebas y oferta en «Para hacer hoy», con cuánto falta para que venza; abrir renueva el enlace de un solo dueño*
+- [x] P3b · Ofertas para ti — *vacantes que encajan por reglas (cargo, habilidades, ciudad) con el porqué, y postularse con la hoja de vida del perfil*
+- [x] Rediseño del portal (28/10/2026) — *bienvenida con cifras, anillo de perfil y buscador; navegación con indicador deslizante (barra inferior en el celular); hoja de vida por partes con etiquetas y barra de guardar; transiciones de la marca que se apagan con movimiento reducido*
+- [x] Funciones nuevas del portal (28/10/2026) — *hoja de vida en PDF con la marca (sin foto, edad ni dirección), «Completa tu perfil» (reglas), «Mi cuenta y privacidad» (autorización Ley 1581 y solicitudes del titular) y sesión visible en el portal de empleo: nombre y menú en la cabecera y tarjeta «Hola, …» con pendientes, procesos y perfil*
+- [ ] P4 · Mis documentos — *subir cédula y certificados una vez y reutilizarlos en otros procesos de la misma empresa, con su vigencia*
+- [ ] P5 · Portal del empleado — *al vincularse, el mismo portal muestra certificados, solicitudes y actualización de datos (necesita Empleados E1)*
 
 **Sprint 12 – Agente de documentos**
 

@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Selvana.SharedKernel.Messaging;
+using Selvana.Vinculacion.Application.Abstracciones;
 using Selvana.Vinculacion.Application.Alta;
 using Selvana.Vinculacion.Application.Documentos;
 using Selvana.Vinculacion.Application.Procesos;
+using Selvana.Vinculacion.Application.TiposContrato;
 using Selvana.Web.Common;
 
 namespace Selvana.Vinculacion.Api;
@@ -18,6 +20,10 @@ public sealed record CancelarProcesoRequest(string Motivo);
 public sealed record ResponderOfertaRequest(bool Acepta, string? Nombre, string? Documento, string? Motivo);
 
 public sealed record ProcesoCreadoResponse(Guid Id);
+
+public sealed record TiposCargadosResponse(int Creados);
+
+public sealed record TipoCreadoResponse(Guid Id);
 
 public sealed record RechazarDocumentoRequest(string Motivo);
 
@@ -54,6 +60,7 @@ public static class VinculacionEndpoints
     {
         MapConsola(app.MapGroup("/vinculacion").WithTags("Vinculación").RequireAuthorization(Politicas.VerHojasDeVida));
         MapDocumentos(app.MapGroup("/vinculacion/procesos/{id:guid}/documentos").WithTags("Vinculación · documentos").RequireAuthorization(Politicas.VerHojasDeVida));
+        MapTiposContrato(app.MapGroup("/vinculacion/tipos-contrato").WithTags("Vinculación · tipos de contrato").RequireAuthorization(Politicas.VerHojasDeVida));
         MapAlta(app.MapGroup("/vinculacion/procesos/{id:guid}").WithTags("Vinculación · afiliaciones y alta").RequireAuthorization(Politicas.VerHojasDeVida));
         MapCandidato(app.MapGroup("/portal/vinculacion").WithTags("Vinculación (candidato)").AllowAnonymous().RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         return app;
@@ -130,6 +137,59 @@ public static class VinculacionEndpoints
                 return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
             })
             .WithName("DescargarAlta");
+    }
+
+    /// <summary>Maestro de tipos de contrato: lo ve quien contrata; lo edita quien configura la estructura.</summary>
+    private static void MapTiposContrato(RouteGroupBuilder g)
+    {
+        var configurar = Politicas.DeAccion("ConfigurarEstructura");
+
+        g.MapGet("", async (bool? soloActivos, IQueryHandler<ListarTiposContratoQuery, IReadOnlyList<TipoContratoDto>> h, CancellationToken ct) =>
+                (await h.Handle(new ListarTiposContratoQuery(soloActivos ?? false), ct)).ToHttp())
+            .WithName("ListarTiposContrato").Produces<IReadOnlyList<TipoContratoDto>>();
+
+        g.MapPost("", async (TipoContratoRequest b, ICommandHandler<CrearTipoContratoCommand, Guid> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new CrearTipoContratoCommand(b), ct);
+                return r.IsSuccess ? Results.Ok(new TipoCreadoResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("CrearTipoContrato").Produces<TipoCreadoResponse>().RequireAuthorization(configurar);
+
+        g.MapPut("/{id:guid}", async (Guid id, TipoContratoRequest b, ICommandHandler<EditarTipoContratoCommand> h, CancellationToken ct) =>
+                (await h.Handle(new EditarTipoContratoCommand(id, b), ct)).ToHttp())
+            .WithName("EditarTipoContrato").RequireAuthorization(configurar);
+
+        g.MapPost("/por-defecto", async (ICommandHandler<CargarTiposPorDefectoCommand, int> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new CargarTiposPorDefectoCommand(), ct);
+                return r.IsSuccess ? Results.Ok(new TiposCargadosResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("CargarTiposContratoPorDefecto").Produces<TiposCargadosResponse>().RequireAuthorization(configurar);
+
+        g.MapPost("/{id:guid}/plantilla", async (Guid id, IFormFile archivo, ICommandHandler<SubirPlantillaContratoCommand> h, CancellationToken ct) =>
+            {
+                var (nombre, tipoContenido, contenido) = await Leer(archivo, ct);
+                // Algunos navegadores mandan el Word sin tipo o como octet-stream: se deduce por la extensión
+                tipoContenido = Path.GetExtension(nombre).ToUpperInvariant() switch
+                {
+                    ".PDF" => "application/pdf",
+                    ".DOCX" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    _ => tipoContenido,
+                };
+                return (await h.Handle(new SubirPlantillaContratoCommand(id, nombre, tipoContenido, contenido), ct)).ToHttp();
+            })
+            .WithName("SubirPlantillaContrato").DisableAntiforgery().RequireAuthorization(configurar);
+
+        g.MapDelete("/{id:guid}/plantilla", async (Guid id, ICommandHandler<QuitarPlantillaContratoCommand> h, CancellationToken ct) =>
+                (await h.Handle(new QuitarPlantillaContratoCommand(id), ct)).ToHttp())
+            .WithName("QuitarPlantillaContrato").RequireAuthorization(configurar);
+
+        g.MapPost("/{id:guid}/plantilla/archivo", async (Guid id, IQueryHandler<ObtenerPlantillaContratoQuery, Application.Documentos.ArchivoDto> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new ObtenerPlantillaContratoQuery(id), ct);
+                return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
+            })
+            .WithName("DescargarPlantillaContrato");
     }
 
     private static void MapDocumentos(RouteGroupBuilder g)

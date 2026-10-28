@@ -3,11 +3,13 @@ using Selvana.Vinculacion.Domain.Procesos;
 namespace Selvana.Vinculacion.Application.Procesos;
 
 /// <summary>Condiciones que RRHH define (o ajusta) al aprobar la contratación.</summary>
-public sealed record CondicionesRequest(string Tipo, decimal SalarioCop, DateOnly FechaIngreso, DateOnly? FechaFin, int PeriodoPruebaDias, string? Labor);
+/// <summary>Condiciones que envía RRHH. <paramref name="TipoContratoId"/> es el tipo del maestro de la empresa; si falta, se usa la modalidad <paramref name="Tipo"/>.</summary>
+public sealed record CondicionesRequest(string Tipo, decimal SalarioCop, DateOnly FechaIngreso, DateOnly? FechaFin, int PeriodoPruebaDias, string? Labor,
+    Guid? TipoContratoId = null);
 
 public sealed record CondicionesDto(
     string Tipo, string TipoNombre, decimal SalarioCop, DateOnly FechaIngreso, DateOnly? FechaFin, int PeriodoPruebaDias, string? Labor, string Jornada,
-    string Ciudad, bool AuxilioTransporte, decimal AuxilioTransporteCop);
+    string Ciudad, bool AuxilioTransporte, decimal AuxilioTransporteCop, Guid? TipoContratoId, string? TipoContratoDescripcion, bool ConPlantilla);
 
 public sealed record AlertaDto(string Nivel, string Texto, string Fuente);
 
@@ -67,8 +69,8 @@ public sealed record EnlaceOfertaDto(Guid ProcesoId, string Token);
 internal static class Mapeo
 {
     public static CondicionesDto Dto(CondicionesContratacion c, ParametrosLegales p) =>
-        new(c.Tipo.ToString(), ReglasContrato.Nombre(c.Tipo), c.SalarioCop, c.FechaIngreso, c.FechaFin, c.PeriodoPruebaDias, c.Labor, c.Jornada, c.Ciudad,
-            ReglasContrato.TieneAuxilioTransporte(c, p), p.AuxilioTransporteCop);
+        new(c.Tipo.ToString(), ReglasContrato.Nombre(c), c.SalarioCop, c.FechaIngreso, c.FechaFin, c.PeriodoPruebaDias, c.Labor, c.Jornada, c.Ciudad,
+            ReglasContrato.TieneAuxilioTransporte(c, p), p.AuxilioTransporteCop, c.TipoContratoId, c.TipoContratoDescripcion, c.PlantillaArchivoId is not null);
 
     public static AlertaDto Dto(AlertaContrato a) => new(a.Nivel.ToString(), a.Texto, a.Fuente);
 
