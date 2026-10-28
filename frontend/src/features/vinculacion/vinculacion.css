@@ -138,7 +138,7 @@
 .vin-rechazo, .vin-empresa { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .vin-rechazo .entrada, .vin-empresa .entrada { flex: 1 1 200px; }
 .vin-empresa .selector { width: auto; }
-.vin-empresa .selector, .vin-rechazo .entrada { height: 32px; }
+.vin-empresa .selector, .vin-rechazo .entrada { height: 32px; padding-block: 0; font-size: 13px; line-height: 30px; }
 .vin-subir { cursor: pointer; }
 .vin-error { display: block; font-size: 12px; color: var(--color-error); }
 .vin-alerta-texto { display: block; font-size: 13px; color: var(--color-alerta); }
