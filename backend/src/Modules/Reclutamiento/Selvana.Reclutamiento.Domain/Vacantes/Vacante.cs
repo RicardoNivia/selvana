@@ -93,6 +93,7 @@ public static class VacanteErrors
     public static readonly Error Incompleta = Error.Validation("Vacante.Incompleta", "Para publicar, la vacante necesita título, ciudad, cupos, descripción y un rango salarial.");
     public static readonly Error SalarioInvalido = Error.Validation("Vacante.Salario", "El salario máximo no puede ser menor que el mínimo.");
     public static readonly Error SinAprobar = Error.Conflict("Vacante.SinAprobar", "La requisición debe aprobarse (RRHH y gerencia) antes de publicarse.");
+    public static readonly Error Publicada = Error.Conflict("Vacante.Publicada", "La vacante ya está aprobada y publicada: no se puede modificar. Si necesita cambiarla, ciérrela y cree otra.");
     public static readonly Error EnAprobacion = Error.Conflict("Vacante.EnAprobacion", "La requisición está en aprobación: para editarla, quien aprueba debe devolverla.");
     public static readonly Error NoEstaEnAprobacion = Error.Conflict("Vacante.NoEstaEnAprobacion", "La requisición no está esperando aprobación.");
     public static readonly Error NoApruebaEstaEtapa = Error.Validation("Vacante.NoApruebaEstaEtapa", "Su rol no aprueba esta etapa de la requisición.");
@@ -349,6 +350,12 @@ public sealed class Vacante : AggregateRoot<Guid>
         if (Estado == EstadoVacante.EnAprobacion)
         {
             return Result.Failure(VacanteErrors.EnAprobacion);
+        }
+
+        // Lo aprobado es lo que se publicó: después de publicarse no cambia
+        if (Estado == EstadoVacante.Publicada)
+        {
+            return Result.Failure(VacanteErrors.Publicada);
         }
 
         if (contenido.SalarioMaximo < contenido.SalarioMinimo)

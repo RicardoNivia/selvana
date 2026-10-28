@@ -185,6 +185,7 @@ public sealed class VacanteTests
         vacante.RecibePostulaciones.Should().BeFalse("enviar a aprobación no publica");
         vacante.Aprobar("Andrés", Gerencia, Ahora).IsSuccess.Should().BeTrue();
         vacante.RecibePostulaciones.Should().BeTrue();
+        vacante.Editar(Contenido() with { Cupos = 99 }).Error.Should().Be(VacanteErrors.Publicada, "lo que se aprobó es lo que se publicó");
         vacante.PublicadaEn.Should().Be(Ahora);
 
         vacante.Cerrar(Ahora.AddDays(10)).IsSuccess.Should().BeTrue();

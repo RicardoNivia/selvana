@@ -101,7 +101,8 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
   const rol = useSesion().data?.rol ?? ''
   const cerrar = useCerrarVacante(v.id)
   const deIa = !v.editadaPorPersona && v.modeloIa !== null
-  const bloqueada = v.estado === 'Cerrada' || v.estado === 'EnAprobacion'
+  // Solo el borrador se edita: en aprobación la devuelve quien aprueba; publicada o cerrada ya no cambia
+  const bloqueada = v.estado !== 'Borrador'
   const [municipio, setMunicipio] = useState(v.codigoMunicipio)
   const [ciudadTocada, setCiudadTocada] = useState(false)
   const [publicacion, setPublicacion] = useState({ empresaConfidencial: v.empresaConfidencial, salarioOculto: v.salarioOculto })
@@ -132,6 +133,7 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
           <p className="aviso aviso-alerta"><IconoAlerta />La devolvieron: «{v.aprobacion.motivoDevolucion}». Ajuste la vacante y vuelva a enviarla.</p>
         )}
         {v.estado === 'EnAprobacion' && <p className="aviso aviso-neutro"><IconoEscudo />La requisición está en aprobación: para cambiarla, quien aprueba debe devolverla.</p>}
+        {v.estado === 'Publicada' && <p className="aviso aviso-neutro"><IconoEscudo />Está aprobada y publicada: no se puede modificar. Si necesita cambiarla, ciérrela y cree otra.</p>}
         {v.mensajeIa && <p className="aviso aviso-alerta"><IconoAlerta />{v.mensajeIa} Complete la vacante a mano.</p>}
         {(v.aclaraciones?.length ?? 0) > 0 && (
           <div className="aviso aviso-alerta" style={{ flexDirection: 'column', gap: 6 }}>
