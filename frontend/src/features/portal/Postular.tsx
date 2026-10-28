@@ -1,5 +1,6 @@
 import { type CSSProperties, type DragEvent, useEffect, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { AutocompletarMunicipio, resolverMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { Chispa, IconoAlerta, IconoCheck, IconoDocumento, IconoEscudo, IconoFlecha, IconoSubir } from '../../shared/ui/Iconos'
@@ -186,6 +187,11 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
     nombre: leidos?.nombre ?? '', documento: leidos?.documento ?? '', celular: leidos?.celular ?? '', correo: leidos?.correo ?? '', ciudad: leidos?.ciudad ?? '',
   })
   const [editados, setEditados] = useState<Partial<Record<Campo, boolean>>>({})
+  // La ciudad que leyó la IA se busca en el DANE; si corresponde a un solo municipio, queda elegida
+  const [ciudadCodigo, setCiudadCodigo] = useState<string | null>(null)
+  useEffect(() => {
+    if (leidos?.ciudad) void resolverMunicipio(leidos.ciudad).then((m) => { if (m) { setValores((x) => ({ ...x, ciudad: m.municipio })); setCiudadCodigo(m.codigo) } })
+  }, [leidos?.ciudad])
   const [respuestas, setRespuestas] = useState<(boolean | undefined)[]>(borrador.preguntasFiltro.map(() => undefined))
   const [acepta, setAcepta] = useState(false)
   // Lo que el candidato pegó manda sobre lo que la IA encontró en el PDF
@@ -218,6 +224,17 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
       <div className="postular-grupo">
         {(Object.keys(etiquetas) as Campo[]).map((c, i) => {
           const ia = Boolean(leidos && leidos[c]) && !editados[c]
+          if (c === 'ciudad') {
+            return (
+              <label key={c} className="postular-campo" style={v(i)}>
+                {etiquetas[c]}
+                {/* La ciudad se elige de la DIVIPOLA del DANE */}
+                <AutocompletarMunicipio valor={{ codigo: ciudadCodigo, ciudad: valores.ciudad }} ia={ia} requerido
+                  onElegir={(m, texto) => { cambiar('ciudad', m?.municipio ?? texto); setCiudadCodigo(m?.codigo ?? null) }} />
+                {ia && <span className="postular-nota-ia"><Chispa />Leído de tu hoja de vida</span>}
+              </label>
+            )
+          }
           return (
             <label key={c} className="postular-campo" style={v(i)}>
               {etiquetas[c]}
@@ -279,11 +296,11 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
 
       {enviar.error && <p role="alert" className="aviso aviso-alerta postular-error"><IconoAlerta />{enviar.error.message}</p>}
       <div className="postular-enviar-barra">
-        <Boton type="submit" variante="primario" cargando={enviar.isPending} textoCargando="Enviando…" disabled={!acepta || !completas || linkedInMal} className="postular-enviar">
+        <Boton type="submit" variante="primario" cargando={enviar.isPending} textoCargando="Enviando…" disabled={!acepta || !completas || linkedInMal || !ciudadCodigo} className="postular-enviar">
           Enviar postulación <IconoFlecha />
         </Boton>
         <span className="postular-ayuda">
-          {!completas ? 'Responde las preguntas de la empresa.' : !acepta ? 'Acepta la autorización de datos para enviar.' : 'Todo listo. Puedes corregir cualquier dato antes de enviar.'}
+          {!ciudadCodigo ? 'Elige tu ciudad de la lista.' : !completas ? 'Responde las preguntas de la empresa.' : !acepta ? 'Acepta la autorización de datos para enviar.' : 'Todo listo. Puedes corregir cualquier dato antes de enviar.'}
         </span>
       </div>
     </form>
