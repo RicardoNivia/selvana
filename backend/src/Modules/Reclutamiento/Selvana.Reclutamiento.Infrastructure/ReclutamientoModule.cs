@@ -59,6 +59,19 @@ public static class ReclutamientoModule
         return services;
     }
 
+    /// <summary>
+    /// Ambiente de pruebas en línea: vacantes, candidatos y postulaciones de ejemplo en cada empresa (si aún no tiene vacantes), sin IA.
+    /// Devuelve las postulaciones de la terna que deben seguir a Vinculación y hasta qué paso.
+    /// </summary>
+    public static async Task<IReadOnlyList<(Guid EmpresaId, PostulanteContratable Postulante, string Avance)>> SembrarEjemploReclutamientoAsync(
+        this IServiceProvider services, IReadOnlyList<Core.Contracts.Empresas.EmpresaResumen> empresas, string nombreDueno)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await Ejemplo.SemillaEjemplo.SembrarAsync(sp.GetRequiredService<ReclutamientoDbContext>(), sp.GetRequiredService<IAlmacenHojasDeVida>(),
+            sp.GetRequiredService<ITokensPruebas>(), empresas, nombreDueno, sp.GetRequiredService<TimeProvider>());
+    }
+
     public static async Task MigrateReclutamientoModuleAsync(this IServiceProvider services)
     {
         await using var scope = services.CreateAsyncScope();

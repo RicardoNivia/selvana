@@ -3,3 +3,6 @@
 *.jpg binary
 *.docx binary
 *.xlsx binary
+# Archivos que corren en Linux (VM de Azure, contenedores): siempre con LF
+deploy/** text eol=lf
+*.sh text eol=lf

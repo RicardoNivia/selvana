@@ -1,8 +1,10 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Selvana.Api;
 using Selvana.Core.Api;
 using Selvana.Core.Infrastructure;
+using Selvana.Core.Infrastructure.Empresas;
 using Selvana.Core.Infrastructure.Persistence;
 using Selvana.Infrastructure.Common.Cqrs;
 using Selvana.Infrastructure.Common.Messaging;
@@ -33,7 +35,24 @@ builder.Services.AddReclutamientoModule(builder.Configuration);
 builder.Services.AddVinculacionModule(builder.Configuration);
 
 // Hojas de vida cifradas (historia 188) y portal público protegido contra abuso: 60 peticiones por minuto por IP
-builder.Services.AddDataProtection().SetApplicationName("Selvana");
+var proteccion = builder.Services.AddDataProtection().SetApplicationName("Selvana");
+// En contenedores las llaves van a un volumen: si se pierden, se cierran las sesiones y los archivos cifrados quedan ilegibles
+if (builder.Configuration["DataProtection:RutaLlaves"] is { Length: > 0 } rutaLlaves)
+{
+    proteccion.PersistKeysToFileSystem(new DirectoryInfo(rutaLlaves));
+}
+
+// Detrás del proxy (Caddy) la IP real llega en X-Forwarded-For; sin esto el límite de peticiones sería uno solo para todos
+if (builder.Configuration.GetValue<bool>("Proxy:ConfiarEncabezados"))
+{
+    builder.Services.Configure<ForwardedHeadersOptions>(o =>
+    {
+        o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        // La API solo es alcanzable por la red interna de Docker, a través del proxy
+        o.KnownIPNetworks.Clear();
+        o.KnownProxies.Clear();
+    });
+}
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -55,10 +74,27 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await app.Services.MigrateVinculacionModuleAsync();
 }
 
-if (app.Environment.IsDevelopment() && Guid.TryParse(app.Configuration["Desarrollo:EmpresaId"], out var empresaDesarrollo))
+// El ambiente de pruebas en línea también lleva la empresa de ejemplo, con la contraseña desde sus secretos
+if ((app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Pruebas")) && Guid.TryParse(app.Configuration["Desarrollo:EmpresaId"], out var empresaDesarrollo))
 {
     await app.Services.SembrarDesarrolloCoreAsync(empresaDesarrollo, app.Configuration["Desarrollo:Usuario"] ?? "Laura Moreno",
         app.Configuration["Desarrollo:Contrasena"]);
+}
+
+// Datos de ejemplo del flujo completo (tres empresas), sin IA: los pide el ambiente de pruebas en línea con Ejemplo:Sembrar
+if (app.Configuration.GetValue<bool>("Ejemplo:Sembrar"))
+{
+    var ejemplo = app.Configuration.GetSection("Ejemplo");
+    var dueno = ejemplo["NombreDueno"] ?? "Dueño del ambiente";
+    var empresas = await app.Services.SembrarEjemploCoreAsync(new AccesoEjemplo(ejemplo["CorreoDueno"] ?? "", dueno,
+        ejemplo["ContrasenaDueno"] ?? "", ejemplo["ContrasenaFicticios"] ?? ""));
+    var contratables = await app.Services.SembrarEjemploReclutamientoAsync(empresas, dueno);
+    await app.Services.SembrarEjemploVinculacionAsync(contratables, "Valentina Ríos");
+}
+
+if (app.Configuration.GetValue<bool>("Proxy:ConfiarEncabezados"))
+{
+    app.UseForwardedHeaders();
 }
 
 app.UseExceptionHandler();

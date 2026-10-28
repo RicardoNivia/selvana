@@ -49,4 +49,7 @@ export const IconoInsignia = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="tru
 export const IconoManos = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M2.5 9.5 6 6l3 1.5L11.5 6l6 3.5M9 7.5l-2.5 2.6a1.3 1.3 0 0 0 1.9 1.8l1.8-1.6 4 3.2M13.5 13.5l-1.7 1.5M11 15.7l-.9.8M6 6 2.5 12.5l2 1.8" /></svg>
 export const IconoContraer = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><rect x="2.5" y="3.5" width="15" height="13" rx="2" /><path d="M7.5 3.5v13M13.5 8l-2 2 2 2" /></svg>
 export const IconoExpandir = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><rect x="2.5" y="3.5" width="15" height="13" rx="2" /><path d="M7.5 3.5v13M11.5 8l2 2-2 2" /></svg>
-export const IconoSalir = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M8 4H5a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 5 16h3M13 6.5 16.5 10 13 13.5M16.5 10H8" /></svg>
+export const IconoSol = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><circle cx="10" cy="10" r="3.5" /><path d="M10 2.5v1.5M10 16v1.5M2.5 10H4M16 10h1.5M4.7 4.7l1 1M14.3 14.3l1 1M4.7 15.3l1-1M14.3 5.7l1-1" /></svg>
+export const IconoLuna = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M16.5 12A7 7 0 0 1 8 3.5a7 7 0 1 0 8.5 8.5Z" /></svg>
+export const IconoPantalla = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><rect x="2.5" y="3.5" width="15" height="10" rx="2" /><path d="M7 17h6M10 13.5V17" /></svg>
+export const IconoSalir =(p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M8 4H5a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 5 16h3M13 6.5 16.5 10 13 13.5M16.5 10H8" /></svg>

@@ -32,9 +32,13 @@ Las decisiones que afectan a una persona (descartar, contratar, sancionar, calif
 | `backend/` | Todo lo de .NET: `Selvana.slnx`, `src/`, `tests/`, `Directory.*.props`, Dockerfiles de API y worker |
 | `frontend/` | Todo lo de React + TypeScript (Vite), con su Dockerfile |
 | `docker-compose.yml` | Aplicación completa en contenedores (PostgreSQL, API, worker, web) |
+| `deploy/azure/` | Ambiente de pruebas en línea (Azure): compose con Caddy, `desplegar.ps1`, datos de ejemplo; guía en su `README.md` |
+| `.github/workflows/ci-cd.yml` | CI/CD: compila y prueba cada PR; el merge a `main` despliega en el ambiente de pruebas |
 | `.env.example` | Plantilla del `.env` (git ignora el `.env`): contraseñas de compose y `AZURE_DEVOPS_PAT` |
 
 Repositorio: GitHub `https://github.com/RicardoNivia/selvana`, rama `main` (ADR 0012). Carpeta local: `C:\Soluciones\selvana`. Nunca se hace commit directo en `main`: cada funcionalidad va en su propia rama (`feature/<nombre>`) con pull request en GitHub. Azure DevOps se usa solo para Azure Boards (backlog); su repositorio de código es una copia histórica.
+
+Ambiente de pruebas en línea: `https://selvana-pruebas.northcentralus.cloudapp.azure.com` (cuenta gratuita de Azure, región North Central US). Siembra tres empresas de ejemplo con el flujo completo y sin IA (`Ejemplo:Sembrar`); usuarios y datos en `deploy/azure/README.md`. Los secretos del servidor viven en `deploy/azure/.env.pruebas` (git lo ignora) y en `/opt/selvana/.env` de la VM.
 
 ## Stack (decidido)
 
@@ -143,6 +147,7 @@ cd backend && dotnet run --project src/Workers/Selvana.AI.Worker -- probar-vacan
 cd backend && dotnet run --project src/Workers/Selvana.AI.Worker -- probar-agente              # demo del motor de agentes (herramientas, memoria, propuestas)
 cd backend && DOTNET_ENVIRONMENT=Development dotnet run --project src/Workers/Selvana.AI.Worker -- evaluar   # banco de pruebas de IA (muestra mínima; --completo para todo)
 docker compose up --build        # todo en contenedores (requiere .env)
+./deploy/azure/desplegar.ps1     # despliegue manual al ambiente de pruebas en línea (requiere az login y deploy/azure/.env.pruebas)
 ```
 
 ## Próximo paso

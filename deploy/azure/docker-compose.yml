@@ -1,0 +1,86 @@
+# Ambiente de pruebas en línea (Azure): VM con Caddy, API, worker y web; PostgreSQL administrado por fuera.
+# Lo copia y levanta deploy/azure/desplegar.ps1; los valores salen del .env del servidor (plantilla: .env.example).
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO:?Defina DOMINIO en .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+      - web
+
+  api:
+    image: ${REGISTRO}/selvana-api:${VERSION:-latest}
+    restart: unless-stopped
+    mem_limit: 400m
+    environment:
+      ASPNETCORE_ENVIRONMENT: Pruebas
+      DOTNET_gcServer: "0"
+      ConnectionStrings__Selvana: ${CADENA_BD:?Defina CADENA_BD en .env}
+      Database__MigrateOnStartup: "true"
+      DataProtection__RutaLlaves: /llaves
+      Proxy__ConfiarEncabezados: "true"
+      Mensajeria__ClaveInterna: ${MENSAJERIA_CLAVE:?Defina MENSAJERIA_CLAVE en .env}
+      Desarrollo__EmpresaId: 0192f0a1-5e1c-7b11-9a8d-5e1ec7a0a001
+      Desarrollo__Usuario: Laura Moreno
+      Desarrollo__Contrasena: ${CONTRASENA_PRUEBAS:?Defina CONTRASENA_PRUEBAS en .env}
+      # Tres empresas de ejemplo con el flujo completo, sin IA (deploy/azure/README.md)
+      Ejemplo__Sembrar: "true"
+      Ejemplo__CorreoDueno: ${EJEMPLO_CORREO:?Defina EJEMPLO_CORREO en .env}
+      Ejemplo__NombreDueno: ${EJEMPLO_NOMBRE:-Dueño del ambiente}
+      Ejemplo__ContrasenaDueno: ${EJEMPLO_CONTRASENA:?Defina EJEMPLO_CONTRASENA en .env}
+      Ejemplo__ContrasenaFicticios: ${CONTRASENA_PRUEBAS}
+      # Igual que appsettings.json: a quién va cada evento del outbox (ADR 0008)
+      Mensajeria__Destinos__0__Url: http://ai-worker:8080/eventos
+      Mensajeria__Destinos__0__Prefijos__0: Selvana.Core.Contracts.Estructura.
+      Mensajeria__Destinos__0__Prefijos__1: Selvana.Reclutamiento.Contracts.
+      Mensajeria__Destinos__0__Prefijos__2: Selvana.Vinculacion.Contracts.Ia.
+      Mensajeria__Destinos__1__Url: http://localhost:8080/internal/eventos/core
+      Mensajeria__Destinos__1__Prefijos__0: Selvana.Core.Contracts.Auditoria.
+      Mensajeria__Destinos__1__Prefijos__1: Selvana.Core.Contracts.Bandeja.
+      Mensajeria__Destinos__2__Url: http://localhost:8080/internal/eventos/reclutamiento
+      Mensajeria__Destinos__2__Prefijos__0: Selvana.Core.Contracts.Privacidad.
+      Mensajeria__Destinos__2__Prefijos__1: Selvana.Vinculacion.Contracts.Eventos.
+    volumes:
+      - llaves:/llaves
+
+  ai-worker:
+    image: ${REGISTRO}/selvana-ai-worker:${VERSION:-latest}
+    restart: unless-stopped
+    mem_limit: 350m
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DOTNET_gcServer: "0"
+      ConnectionStrings__Selvana: ${CADENA_BD}
+      Database__MigrateOnStartup: "true"
+      Mensajeria__ClaveInterna: ${MENSAJERIA_CLAVE}
+      Mensajeria__Destinos__0__Url: http://api:8080/internal/eventos/core
+      Mensajeria__Destinos__0__Prefijos__0: Selvana.AI.Contracts.Estructura.
+      Mensajeria__Destinos__1__Url: http://api:8080/internal/eventos/reclutamiento
+      Mensajeria__Destinos__1__Prefijos__0: Selvana.AI.Contracts.Reclutamiento.
+      Mensajeria__Destinos__2__Url: http://api:8080/internal/eventos/vinculacion
+      Mensajeria__Destinos__2__Prefijos__0: Selvana.AI.Contracts.Vinculacion.
+      Reclutamiento__UrlArchivos: http://api:8080/internal/archivos/
+      Vinculacion__UrlArchivos: http://api:8080/internal/archivos/vinculacion/
+      Ia__Proveedores__Gemini__ApiKey: ${GEMINI_API_KEY}
+      Ia__Proveedores__Anthropic__ApiKey: ${ANTHROPIC_API_KEY}
+    depends_on:
+      - api
+
+  web:
+    image: ${REGISTRO}/selvana-web:${VERSION:-latest}
+    restart: unless-stopped
+    mem_limit: 64m
+
+volumes:
+  caddy-data:
+  caddy-config:
+  llaves:
