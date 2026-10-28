@@ -299,6 +299,9 @@ function Ofertas() {
   )
 }
 
+type SeccionHv = 'datos' | 'experiencia' | 'estudios' | 'cursos'
+const seccionesHv: [SeccionHv, string][] = [['datos', 'Datos personales'], ['experiencia', 'Experiencia'], ['estudios', 'Estudios'], ['cursos', 'Cursos y habilidades']]
+
 /**
  * Su hoja de vida: subir una nueva (hoja de vida o el PDF de LinkedIn) para que la IA la lea, o escribirla y corregirla a mano.
  * Lo que leyó la IA llena el formulario en violeta; nada se guarda hasta que la persona pulsa «Guardar mi hoja de vida».
@@ -318,6 +321,7 @@ function MiHojaDeVida() {
   const [deIa, setDeIa] = useState(false)
   const [ciudadCodigo, setCiudadCodigo] = useState<string | null>(c.datos.ciudad ? 'guardada' : null)
   const [guardado, setGuardado] = useState(false)
+  const [seccion, setSeccion] = useState<SeccionHv>('datos')
   const poner = (cambio: Partial<PerfilEditable>) => { setP((x) => ({ ...x, ...cambio })); setGuardado(false) }
 
   // Cuando la IA termina de leer la hoja de vida nueva, llena el formulario en violeta para revisarlo
@@ -374,8 +378,19 @@ function MiHojaDeVida() {
       </section>
 
       <form className="tarjeta mp-seccion" onSubmit={(e) => { e.preventDefault(); enviar() }}>
-        <h3>Tus datos</h3>
-        <div className="postular-grupo">
+        <div role="tablist" aria-label="Partes de tu hoja de vida" className="pestanas mp-hv-pestanas">
+          {seccionesHv.map(([clave, texto]) => (
+            <button key={clave} type="button" role="tab" className="pestana" aria-selected={seccion === clave} onClick={() => setSeccion(clave)}>
+              {texto}
+              {clave === 'experiencia' && <span className="mp-hv-cuenta mono">{p.experiencia.length}</span>}
+              {clave === 'estudios' && <span className="mp-hv-cuenta mono">{p.formacion.length}</span>}
+            </button>
+          ))}
+        </div>
+
+        <div role="tabpanel" className="mp-hv-panel">
+        {seccion === 'datos' && (
+        <div className="mp-datos-grilla">
           <label className="postular-campo">Nombres y apellidos<input className={`entrada${ia}`} value={p.nombre} onChange={(e) => poner({ nombre: e.target.value })} required /></label>
           <label className="postular-campo">Celular (WhatsApp)<input className={`entrada${ia}`} inputMode="tel" value={p.celular} onChange={(e) => poner({ celular: e.target.value })} /></label>
           <label className="postular-campo">Ciudad donde vives
@@ -386,8 +401,10 @@ function MiHojaDeVida() {
             <input className="entrada" inputMode="url" placeholder="linkedin.com/in/tu-nombre" value={p.linkedIn ?? ''} onChange={(e) => poner({ linkedIn: e.target.value })} />
           </label>
         </div>
+        )}
 
-        <h3>Experiencia</h3>
+        {seccion === 'experiencia' && (<>
+        {p.experiencia.length === 0 && <p className="postular-nota-suave">Aún no tienes experiencia registrada.</p>}
         {p.experiencia.map((x, i) => (
           <div key={i} className={`mp-fila-editable${ia}`}>
             <input className="entrada" aria-label="Cargo" placeholder="Cargo" value={x.cargo} onChange={(e) => poner({ experiencia: p.experiencia.map((y, j) => (j === i ? { ...y, cargo: e.target.value } : y)) })} />
@@ -398,8 +415,10 @@ function MiHojaDeVida() {
           </div>
         ))}
         <button type="button" className="enlace-boton" onClick={() => poner({ experiencia: [...p.experiencia, { cargo: '', empresa: '', desde: '', hasta: '' }] })}>+ Agregar experiencia</button>
+        </>)}
 
-        <h3>Estudios</h3>
+        {seccion === 'estudios' && (<>
+        {p.formacion.length === 0 && <p className="postular-nota-suave">Aún no tienes estudios registrados.</p>}
         {p.formacion.map((x, i) => (
           <div key={i} className={`mp-fila-editable mp-fila-estudio${ia}`}>
             <input className="entrada" aria-label="Título" placeholder="Título" value={x.titulo} onChange={(e) => poner({ formacion: p.formacion.map((y, j) => (j === i ? { ...y, titulo: e.target.value } : y)) })} />
@@ -409,7 +428,9 @@ function MiHojaDeVida() {
           </div>
         ))}
         <button type="button" className="enlace-boton" onClick={() => poner({ formacion: [...p.formacion, { titulo: '', institucion: '', anio: '' }] })}>+ Agregar estudio</button>
+        </>)}
 
+        {seccion === 'cursos' && (
         <div className="dos-campos">
           <label className="postular-campo">Cursos y certificaciones <span className="postular-opcional">uno por línea</span>
             <textarea className={`area-texto${ia}`} rows={5} value={p.cursos.join('\n')} onChange={(e) => poner({ cursos: e.target.value.split('\n') })} />
@@ -417,6 +438,8 @@ function MiHojaDeVida() {
           <label className="postular-campo">Habilidades <span className="postular-opcional">una por línea</span>
             <textarea className={`area-texto${ia}`} rows={5} value={p.habilidades.join('\n')} onChange={(e) => poner({ habilidades: e.target.value.split('\n') })} />
           </label>
+        </div>
+        )}
         </div>
 
         <p className="postular-nota-suave">Tu correo (<b>{c.correo}</b>) y tu identificación (<span className="mono">{c.tipoDocumento} {c.datos.documento}</span>) unen tu cuenta con tus postulaciones; para cambiarlos, pídelo desde <Link to="/empleos/mis-datos">tus datos personales</Link>.</p>

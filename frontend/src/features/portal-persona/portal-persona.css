@@ -35,10 +35,18 @@
 .mp-chat li.mio { align-self: flex-end; background: var(--color-primario-suave); }
 .mp-chat li p { margin: 2px 0 0; font-size: 14px; color: var(--color-texto); white-space: pre-wrap; }
 .mp-chat-autor { font-size: 12px; color: var(--color-texto-tenue); }
-.mp-fila-editable { display: grid; grid-template-columns: 1.4fr 1.2fr 0.8fr 0.8fr auto; gap: var(--espacio-2); align-items: center; }
-.mp-fila-estudio { grid-template-columns: 1.6fr 1.4fr 0.6fr auto; }
+.mp-fila-editable { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.3fr) 112px 112px auto; gap: var(--espacio-2); align-items: center; }
+.mp-fila-estudio { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) 88px auto; }
 .mp-fila-editable.entrada-ia .entrada { border-color: var(--color-ia-borde); background: var(--color-ia-suave); }
 @media (max-width: 720px) { .mp-fila-editable, .mp-fila-estudio { grid-template-columns: 1fr 1fr; } }
+.mp-hv-pestanas { margin: 0 calc(-1 * var(--espacio-1)); }
+.mp-hv-pestanas .pestana { display: inline-flex; align-items: center; gap: 6px; }
+.mp-hv-cuenta { font-size: 11px; font-weight: 500; padding: 0 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); color: var(--color-texto-suave); }
+.mp-hv-pestanas .pestana[aria-selected="true"] .mp-hv-cuenta { background: var(--color-primario-suave); color: var(--color-primario); }
+.mp-hv-panel { display: flex; flex-direction: column; gap: var(--espacio-2); min-height: 220px; padding-top: var(--espacio-2); }
+.mp-hv-panel > .enlace-boton { align-self: flex-start; }
+.mp-datos-grilla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--espacio-3) var(--espacio-4); }
+@media (max-width: 720px) { .mp-datos-grilla { grid-template-columns: 1fr; } }
 /* Tarjeta de postulación: título y estado arriba, avance del proceso, explicación y chat abajo */
 .mp-item { display: flex; flex-direction: column; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-6); border-radius: var(--radio-m); }
 .mp-item-cabeza { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--espacio-3); }
