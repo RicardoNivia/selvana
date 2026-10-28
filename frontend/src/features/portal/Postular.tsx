@@ -8,6 +8,7 @@ import { type BorradorPostulacion, esLinkedIn, rangoSalario, useBorrador, useEnv
 
 const tipos = '.pdf,.docx,image/jpeg,image/png,image/webp'
 const v = (i: number) => ({ '--i': i }) as CSSProperties
+const miles = new Intl.NumberFormat('es-CO')
 const pasos = ['Hoja de vida', 'Tus datos', 'Enviada']
 
 /** Flujo de postulación: subir la hoja de vida → la IA la lee → el candidato confirma → envía. */
@@ -193,13 +194,17 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
     if (leidos?.ciudad) void resolverMunicipio(leidos.ciudad).then((m) => { if (m) { setValores((x) => ({ ...x, ciudad: m.municipio })); setCiudadCodigo(m.codigo) } })
   }, [leidos?.ciudad])
   const [respuestas, setRespuestas] = useState<(boolean | undefined)[]>(borrador.preguntasFiltro.map(() => undefined))
+  // Preguntas de número o de pesos: se responden con la cifra (solo dígitos)
+  const tiposPregunta = borrador.preguntasFiltro.map((_, i) => borrador.tiposPreguntasFiltro?.[i] ?? 'SiNo')
+  const [cifras, setCifras] = useState<string[]>(borrador.preguntasFiltro.map(() => ''))
+  const respondida = (i: number) => (tiposPregunta[i] === 'SiNo' ? respuestas[i] !== undefined : cifras[i] !== '')
   const [acepta, setAcepta] = useState(false)
   // Lo que el candidato pegó manda sobre lo que la IA encontró en el PDF
   const [linkedIn, setLinkedIn] = useState(linkedInDado.trim() || leidos?.linkedIn || '')
   const [linkedInEditado, setLinkedInEditado] = useState(Boolean(linkedInDado.trim()))
   const linkedInMal = linkedIn.trim().length > 0 && !esLinkedIn(linkedIn)
-  const completas = respuestas.every((r) => r !== undefined)
-  const respondidas = respuestas.filter((r) => r !== undefined).length
+  const completas = tiposPregunta.every((_, i) => respondida(i))
+  const respondidas = tiposPregunta.filter((_, i) => respondida(i)).length
 
   const cambiar = (c: Campo, valor: string) => {
     setValores((x) => ({ ...x, [c]: valor }))
@@ -211,7 +216,8 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
       className="postular-cuerpo"
       onSubmit={(e) => {
         e.preventDefault()
-        enviar.mutate({ ...valores, linkedIn: linkedIn.trim() || undefined, respuestas: respuestas.map(Boolean), aceptaAutorizacion: acepta, canal }, { onSuccess: (r) => onEnviada(r.numero) })
+        enviar.mutate({ ...valores, linkedIn: linkedIn.trim() || undefined, respuestas: tiposPregunta.map((t, i) => (t === 'SiNo' ? Boolean(respuestas[i]) : true)),
+          valores: tiposPregunta.map((t, i) => (t === 'SiNo' ? null : Number(cifras[i]))), aceptaAutorizacion: acepta, canal }, { onSuccess: (r) => onEnviada(r.numero) })
       }}
     >
       <h1>Revisa tus datos</h1>
@@ -277,13 +283,20 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
           {borrador.preguntasFiltro.map((p, i) => (
             <div key={p} className="postular-pregunta" style={v(i)}>
               <span>{p}</span>
-              <div className="postular-sino" role="group" aria-label={p}>
-                {[true, false].map((valor) => (
-                  <button key={String(valor)} type="button" aria-pressed={respuestas[i] === valor} onClick={() => setRespuestas((r) => r.map((x, j) => (j === i ? valor : x)))}>
-                    {valor ? 'Sí' : 'No'}
-                  </button>
-                ))}
-              </div>
+              {tiposPregunta[i] === 'SiNo' ? (
+                <div className="postular-sino" role="group" aria-label={p}>
+                  {[true, false].map((valor) => (
+                    <button key={String(valor)} type="button" aria-pressed={respuestas[i] === valor} onClick={() => setRespuestas((r) => r.map((x, j) => (j === i ? valor : x)))}>
+                      {valor ? 'Sí' : 'No'}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <input className="entrada mono" inputMode="numeric" aria-label={p}
+                  placeholder={tiposPregunta[i] === 'Pesos' ? '$ 0' : 'Escribe un número'}
+                  value={tiposPregunta[i] === 'Pesos' && cifras[i] ? `$ ${miles.format(Number(cifras[i]))}` : cifras[i]}
+                  onChange={(e) => { const d = e.target.value.replace(/\D/g, '').slice(0, 12); setCifras((c) => c.map((x, j) => (j === i ? d : x))) }} />
+              )}
             </div>
           ))}
         </fieldset>

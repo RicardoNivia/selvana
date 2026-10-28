@@ -72,7 +72,7 @@ public sealed record DatosCandidatoDto(
 public sealed record BorradorPostulacionDto(
     Guid Id, string Estado, string? Mensaje, string NombreArchivo, DatosCandidatoDto? Datos,
     string VacanteCodigo, string VacanteTitulo, string Empresa, string Ciudad, IReadOnlyList<string> PreguntasFiltro,
-    string VersionAutorizacion, string TextoAutorizacion);
+    string VersionAutorizacion, string TextoAutorizacion, IReadOnlyList<string>? TiposPreguntasFiltro = null);
 
 /// <summary>Lado de lectura (CQRS) del módulo: consultas sin tracking y paginadas que implementa Infrastructure.</summary>
 public interface ILecturaReclutamiento

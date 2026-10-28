@@ -17,7 +17,8 @@ public sealed record IniciarPostulacionCommand(string CodigoVacante, string Nomb
 /// <summary>El candidato confirmó sus datos, respondió las preguntas y aceptó la autorización: la postulación llega a la vacante.</summary>
 public sealed record EnviarPostulacionCommand(
     Guid BorradorId, string Nombre, string Documento, string Celular, string Correo, string Ciudad,
-    IReadOnlyList<bool> Respuestas, bool AceptaAutorizacion, string? Canal, string Ip, string Navegador, string? LinkedIn = null) : ICommand<string>;
+    IReadOnlyList<bool> Respuestas, bool AceptaAutorizacion, string? Canal, string Ip, string Navegador, string? LinkedIn = null,
+    IReadOnlyList<decimal?>? Valores = null) : ICommand<string>;
 
 internal sealed class IniciarPostulacionValidator : AbstractValidator<IniciarPostulacionCommand>
 {
@@ -134,7 +135,14 @@ internal sealed class EnviarPostulacionHandler(
             candidato.ActualizarDatos(datos, ahora);
         }
 
-        var respuestas = vacante.PreguntasFiltro.Select((p, i) => new RespuestaFiltro { Pregunta = p, Respuesta = i < c.Respuestas.Count && c.Respuestas[i] });
+        // Sí o no en Respuestas; las preguntas de número o de pesos traen su cifra en Valores (misma posición)
+        var respuestas = vacante.PreguntasFiltro.Select((p, i) =>
+        {
+            var valor = PreguntasFiltro.Tipo(p) == TipoPreguntaFiltro.SiNo ? null : c.Valores is { } vs && i < vs.Count ? vs[i] : null;
+            return valor is { } v
+                ? new RespuestaFiltro { Pregunta = p, Respuesta = true, Valor = Math.Max(0, v) }
+                : new RespuestaFiltro { Pregunta = p, Respuesta = i < c.Respuestas.Count && c.Respuestas[i] };
+        });
         var autorizacion = c.AceptaAutorizacion
             ? new AutorizacionDatos
             {

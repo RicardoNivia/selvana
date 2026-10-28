@@ -100,8 +100,8 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
         var items = filas.Select(f => new PostulanteDto(
             f.Postulacion.Id, f.Id, f.Postulacion.Numero, f.Datos.Nombre, Enmascarar(f.Documento), f.Datos.Celular, f.Datos.Ciudad,
             f.Postulacion.Canal.ToString(),
-            string.Join(" · ", f.Postulacion.Respuestas.Select(r => r.Respuesta ? "Sí" : "No")),
-            f.Postulacion.Respuestas.Count(r => !r.Respuesta),
+            string.Join(" · ", f.Postulacion.Respuestas.Select(r => r.Texto)),
+            f.Postulacion.Respuestas.Count(r => r.EsNegativa),
             $"Aceptada {f.Postulacion.Autorizacion.Version}", f.Postulacion.RecibidaEn, f.Otras, f.Postulacion.CamposCorregidos, f.Datos.LinkedIn,
             Afinidad(f.Postulacion.Afinidad), f.Postulacion.Retroalimentacion?.Valor.ToString(), f.Postulacion.Retroalimentacion?.Nota)).ToList();
 
@@ -173,7 +173,8 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
             d is null ? null : new DatosCandidatoDto(d.Nombre, d.Documento, d.Celular, d.Correo, d.Ciudad,
                 [.. d.Experiencia.Select(x => new ExperienciaDto(x.Cargo, x.Empresa, x.Desde, x.Hasta))],
                 [.. d.Formacion.Select(x => new FormacionDto(x.Titulo, x.Institucion, x.Anio))], d.Cursos, d.Habilidades),
-            v.Codigo, v.Titulo, v.EmpresaEnPortal, v.Ciudad, v.PreguntasFiltro, PoliticaDatos.Version, PoliticaDatos.Texto(v.ResponsableDatos));
+            v.Codigo, v.Titulo, v.EmpresaEnPortal, v.Ciudad, v.PreguntasFiltro, PoliticaDatos.Version, PoliticaDatos.Texto(v.ResponsableDatos),
+            [.. v.PreguntasFiltro.Select(p => PreguntasFiltro.Tipo(p).ToString())]);
     }
 
     private static AfinidadDto? Afinidad(AfinidadPostulacion? a) => a is null ? null : new AfinidadDto(

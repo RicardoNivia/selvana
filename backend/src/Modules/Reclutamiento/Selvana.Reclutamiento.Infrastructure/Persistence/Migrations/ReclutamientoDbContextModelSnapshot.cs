@@ -1055,6 +1055,8 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
 
                             b1.Property<bool>("Respuesta");
 
+                            b1.Property<decimal?>("Valor");
+
                             b1.HasKey("PostulacionId", "__synthesizedOrdinal");
 
                             b1.ToTable("postulaciones", "reclutamiento");

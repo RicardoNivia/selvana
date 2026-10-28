@@ -1,3 +1,4 @@
+using Selvana.Reclutamiento.Domain.Vacantes;
 using System.Text.RegularExpressions;
 using Selvana.SharedKernel.Domain;
 using Selvana.SharedKernel.Results;
@@ -51,7 +52,20 @@ public enum CanalPostulacion
 public sealed class RespuestaFiltro
 {
     public string Pregunta { get; init; } = "";
+
+    /// <summary>Sí o no; en preguntas de número o de pesos es true si la respondió.</summary>
     public bool Respuesta { get; init; }
+
+    /// <summary>La cifra en preguntas de número (años, personas) o de pesos (aspiración salarial); null en las de sí o no.</summary>
+    public decimal? Valor { get; init; }
+
+    /// <summary>Lo que respondió, para mostrar: «Sí», «No», «3» o «$2.500.000».</summary>
+    public string Texto => Valor is { } v
+        ? PreguntasFiltro.Tipo(Pregunta) == TipoPreguntaFiltro.Pesos ? v.ToString("C0", new System.Globalization.CultureInfo("es-CO")) : v.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)
+        : Respuesta ? "Sí" : "No";
+
+    /// <summary>Respondió que no a una pregunta de sí o no.</summary>
+    public bool EsNegativa => Valor is null && !Respuesta;
 }
 
 /// <summary>Evidencia de la autorización de tratamiento de datos (Ley 1581 de 2012).</summary>

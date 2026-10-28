@@ -213,7 +213,7 @@ export function VacanteNueva() {
         <label>Descripción<textarea className={clase('descripcion', 'area-texto')} rows={5} value={f.descripcion} onChange={(e) => poner('descripcion', e.target.value)} /></label>
         <div className="dos-campos">
           <label>Requisitos <span className="ayuda">Uno por línea</span><textarea className={clase('requisitos', 'area-texto')} rows={6} value={f.requisitos} onChange={(e) => poner('requisitos', e.target.value)} /></label>
-          <label>Preguntas filtro <span className="ayuda">Una por línea; el candidato responde sí o no</span><textarea className={clase('preguntas', 'area-texto')} rows={6} value={f.preguntas} onChange={(e) => poner('preguntas', e.target.value)} /></label>
+          <label>Preguntas filtro <span className="ayuda">Una por línea. «¿Tienes…?» se responde sí o no; «¿Cuántos…?», con un número; la aspiración salarial, en pesos</span><textarea className={clase('preguntas', 'area-texto')} rows={6} value={f.preguntas} onChange={(e) => poner('preguntas', e.target.value)} /></label>
         </div>
         <OpcionesPublicacion {...publicacion} onCambiar={setPublicacion} />
 

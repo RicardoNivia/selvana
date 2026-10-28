@@ -65,7 +65,7 @@ internal sealed class LecturaCandidatos(ReclutamientoDbContext db) : ILecturaCan
             {
                 var v = vacantes[p.VacanteId];
                 return new PostulacionCandidatoDto(p.Id, p.Numero, v.Id, v.Codigo, v.Titulo, v.Estado.ToString(), p.Canal.ToString(), p.RecibidaEn,
-                    p.Respuestas.Count(r => !r.Respuesta), p.ArchivoHojaDeVidaId);
+                    p.Respuestas.Count(r => r.EsNegativa), p.ArchivoHojaDeVidaId);
             }).ToList();
         if (alcance is not null && postulaciones.Count == 0)
         {

@@ -74,7 +74,7 @@ public sealed record TerminarPruebaRequest(IReadOnlyList<RespuestaDto>? Respuest
 
 public sealed record EnviarPostulacionRequest(
     string Nombre, string Documento, string Celular, string Correo, string Ciudad, IReadOnlyList<bool> Respuestas, bool AceptaAutorizacion, string? Canal,
-    string? LinkedIn = null);
+    string? LinkedIn = null, IReadOnlyList<decimal?>? Valores = null);
 
 public sealed record PostulacionEnviadaResponse(string Numero);
 
@@ -439,7 +439,7 @@ public static class ReclutamientoEndpoints
             {
                 var r = await h.Handle(new EnviarPostulacionCommand(borradorId, b.Nombre, b.Documento, b.Celular, b.Correo, b.Ciudad,
                     b.Respuestas ?? [], b.AceptaAutorizacion, b.Canal, http.Connection.RemoteIpAddress?.ToString() ?? "",
-                    http.Request.Headers.UserAgent.ToString(), b.LinkedIn), ct);
+                    http.Request.Headers.UserAgent.ToString(), b.LinkedIn, b.Valores), ct);
                 return r.IsSuccess ? Results.Ok(new PostulacionEnviadaResponse(r.Value)) : r.ToHttp();
             })
             .WithName("EnviarPostulacion").Produces<PostulacionEnviadaResponse>();

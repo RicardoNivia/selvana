@@ -38,7 +38,13 @@ internal sealed class RedactorVacantesAgente(
         - Nunca pidas ni sugieras requisitos de edad, género, estado civil, hijos, apariencia, foto, religión, barrio, estrato ni dirección exacta.
         - El rango salarial es mensual en pesos colombianos (COP), coherente con el cargo y la ciudad; no puede ser inferior al salario mínimo vigente.
         - Entre 3 y 5 razones que expliquen las decisiones principales. Cada razón cita su evidencia: el fragmento literal de la frase entre comillas, o "Supuesto" si no sale de la frase.
-        - Entre 3 y 5 preguntas filtro cortas, para hacer por WhatsApp, que se respondan con sí o no o con un dato corto.
+        - Entre 3 y 5 preguntas filtro cortas, para hacer por WhatsApp, tuteando al candidato. Cada pregunta se entiende sola,
+          sin contexto: nunca digas "la empresa", "el cargo" o "aquí" sin nombrarlos (mal: "¿Cuántos años tienes en la empresa?";
+          bien: "¿Cuántos años de experiencia tienes como operario de montacargas?"). Solo tres formas, según la respuesta:
+          · Sí o no: empieza con "¿Tienes…?", "¿Cuentas con…?", "¿Puedes…?" o "¿Estás…?" ("¿Tienes curso de montacargas vigente?").
+          · Un número: empieza con "¿Cuántos…?" o "¿Cuántas…?" y di la unidad ("¿Cuántos años de experiencia tienes como…?").
+          · Pesos: solo para la aspiración salarial, exactamente "¿Cuál es tu aspiración salarial mensual en pesos?".
+          Nunca preguntes por edad, estado civil, hijos ni otras variables protegidas.
         - Requisitos y competencias concretos y verificables.
         - Una vacante es de UN solo cargo; "cupos" son las posiciones disponibles de ese cargo (si la frase dice "25 auxiliares", cupos = 25).
         - Antes de redactar, revisa si puedes. Si la frase pide dos o más cargos distintos (por ejemplo "un contador y dos mensajeros"),

@@ -157,7 +157,7 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
         <label>Descripción<textarea {...campo('descripcion')} rows={5} /></label>
         <div className="dos-campos">
           <label>Requisitos <span className="ayuda">Uno por línea</span><textarea {...campo('requisitos')} rows={6} /></label>
-          <label>Preguntas filtro <span className="ayuda">Una por línea; el candidato responde sí o no</span><textarea {...campo('preguntas')} rows={6} /></label>
+          <label>Preguntas filtro <span className="ayuda">Una por línea. «¿Tienes…?» se responde sí o no; «¿Cuántos…?», con un número; la aspiración salarial, en pesos</span><textarea {...campo('preguntas')} rows={6} /></label>
         </div>
         <OpcionesPublicacion {...publicacion} disabled={bloqueada} onCambiar={(p) => { setPublicacion(p); setTocado(true) }} />
         {error && <span role="alert" className="error-formulario">{error.message}</span>}
