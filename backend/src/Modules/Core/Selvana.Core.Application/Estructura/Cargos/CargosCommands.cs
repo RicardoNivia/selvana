@@ -1,5 +1,6 @@
 using FluentValidation;
 using Selvana.Core.Application.Abstracciones;
+using Selvana.Core.Application.Bandeja;
 using Selvana.Core.Contracts.Estructura;
 using Selvana.Core.Domain.Estructura;
 using Selvana.SharedKernel.Messaging;
@@ -99,7 +100,7 @@ internal sealed class CrearCargoHandler(
     }
 }
 
-internal sealed class EditarCargoHandler(IContextoUsuario usuario, IEstructuras estructuras, IUnitOfWork unidad, TimeProvider reloj)
+internal sealed class EditarCargoHandler(IContextoUsuario usuario, IEstructuras estructuras, IBandeja bandeja, IUnitOfWork unidad, TimeProvider reloj)
     : ICommandHandler<EditarCargoCommand>
 {
     public async Task<Result> Handle(EditarCargoCommand command, CancellationToken cancellationToken)
@@ -114,6 +115,12 @@ internal sealed class EditarCargoHandler(IContextoUsuario usuario, IEstructuras 
             PerfilesEditados.APerfil(command.Perfil), usuario.Nombre, reloj.GetUtcNow());
         if (resultado.IsSuccess)
         {
+            // Guardar el perfil lo aprueba: la propuesta de la IA en la bandeja queda resuelta, como si se aprobara desde allá
+            if (command.Perfil is not null)
+            {
+                await bandeja.ResolverAsync(usuario.EmpresaId, "PerfilCargo", command.CargoId, "Perfil aprobado al guardarlo", usuario.Nombre, cancellationToken);
+            }
+
             await unidad.SaveChangesAsync(cancellationToken);
         }
 
