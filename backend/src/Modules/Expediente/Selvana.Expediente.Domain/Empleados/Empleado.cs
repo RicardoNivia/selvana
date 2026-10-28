@@ -52,10 +52,13 @@ public sealed class VersionDocumento
 {
     public Guid ArchivoId { get; init; }
     public string NombreArchivo { get; init; } = "";
-    public DateOnly? VenceEn { get; init; }
+    public DateOnly? VenceEn { get; set; }
     public string? Nota { get; init; }
     public string SubidoPor { get; init; } = "";
     public DateTimeOffset SubidoEn { get; init; }
+
+    /// <summary>Lectura de la IA de esta versión, si se pidió.</summary>
+    public LecturaDocumento? Lectura { get; set; }
 }
 
 /// <summary>Un documento de la carpeta (cédula, contrato, certificado…) con todas sus versiones; la vigente es la última.</summary>
@@ -92,7 +95,7 @@ public static class EmpleadoErrors
 /// Expediente vivo del empleado: datos, situación laboral actual, afiliaciones, historial de novedades y carpeta documental con versiones.
 /// Nace al cerrar la vinculación, a mano o desde el archivo de planta; todo lo que cambia queda como novedad con su fecha efectiva.
 /// </summary>
-public sealed class Empleado : AggregateRoot<Guid>
+public sealed partial class Empleado : AggregateRoot<Guid>
 {
     public const int DiasAvisoVencimiento = 30;
     private static readonly CultureInfo Colombia = new("es-CO");

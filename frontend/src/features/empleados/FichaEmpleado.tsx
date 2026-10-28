@@ -5,8 +5,9 @@ import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { IconoAlerta, IconoCheck, IconoDocumento, IconoSubir } from '../../shared/ui/Iconos'
 import { usePuede } from '../sesion/api'
 import { CamposAfiliaciones, CamposSituacion } from './Empleados'
+import { LecturaDocumento } from './LecturaDocumento'
 import {
-  abrirArchivo, type Afiliaciones, type Documento, type Empleado, fechaCorta, nombreNovedad, novedadesRegistrables, pesos, type Situacion, type TipoNovedad,
+  abrirArchivo, type Afiliaciones, legiblePorIa, type Documento, type Empleado, fechaCorta, nombreNovedad, novedadesRegistrables, pesos, type Situacion, type TipoNovedad,
   tiposDocumento, useActualizarDatos, useEmpleado, useGuardarDocumento, useRegistrarNovedad, useRetirar,
 } from './api'
 import './empleados.css'
@@ -250,6 +251,7 @@ function DocumentoFila({ e, d }: { e: Empleado; d: Documento }) {
         {e.estado === 'Activo' && <Boton pequeno icono={<IconoSubir />} onClick={() => setNueva((v) => !v)}>Nueva versión</Boton>}
         {d.versiones.length > 1 && <button type="button" className="enlace-boton" aria-expanded={versiones} onClick={() => setVersiones((v) => !v)}>{d.versiones.length} versiones</button>}
       </div>
+      <LecturaDocumento e={e} d={d} />
       {nueva && <SubirDocumento e={e} documento={d} onListo={() => setNueva(false)} />}
       {versiones && (
         <ol className="emp-versiones">
@@ -276,8 +278,10 @@ function SubirDocumento({ e, documento, onListo }: { e: Empleado; documento?: Do
   const [nombre, setNombre] = useState('')
   const [vence, setVence] = useState(documento?.venceEn ?? '')
   const [nota, setNota] = useState('')
+  const [leerConIa, setLeerConIa] = useState(true)
   const enviar = () => elegido && guardar.mutate(
-    { archivo: elegido, documentoId: documento?.id, tipo: documento ? undefined : tipo, nombre: documento ? undefined : (nombre || tipo), venceEn: vence || null, nota },
+    { archivo: elegido, documentoId: documento?.id, tipo: documento ? undefined : tipo, nombre: documento ? undefined : (nombre || tipo), venceEn: vence || null, nota,
+      leerConIa: leerConIa && legiblePorIa(elegido.name) },
     { onSuccess: onListo })
 
   return (
@@ -302,6 +306,10 @@ function SubirDocumento({ e, documento, onListo }: { e: Empleado; documento?: Do
           </span>
         </label>
       </div>
+      <label className="emp-leer-ia">
+        <input type="checkbox" checked={leerConIa} onChange={(x) => setLeerConIa(x.target.checked)} />
+        <span>Leer con IA y proponer cambios al expediente <span className="emp-sub">(PDF o foto; usted decide qué se aplica)</span></span>
+      </label>
       {guardar.error && <p role="alert" className="aviso aviso-error"><IconoAlerta />{guardar.error.message}</p>}
       <div className="vin-acciones">
         <Boton variante="primario" icono={<IconoCheck />} disabled={!elegido} cargando={guardar.isPending} textoCargando="Subiendo…" onClick={enviar}>Guardar</Boton>

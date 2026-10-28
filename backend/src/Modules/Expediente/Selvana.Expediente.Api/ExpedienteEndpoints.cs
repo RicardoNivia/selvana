@@ -18,8 +18,19 @@ public sealed record RetiroRequest(DateOnly Fecha, string Motivo);
 
 public sealed record CreadoResponse(Guid Id);
 
+public sealed record AplicarLecturaRequest(IReadOnlyList<CambioAplicadoRequest> Cambios);
+
 public static class ExpedienteEndpoints
 {
+    /// <summary>El lector de IA descarga el documento descifrado. Solo con la clave interna del worker.</summary>
+    public static IEndpointRouteBuilder MapExpedienteInterno(this IEndpointRouteBuilder app)
+    {
+        app.MapGet("/internal/archivos/expediente/{id:guid}", async (Guid id, Application.Abstracciones.IAlmacenArchivos almacen, CancellationToken ct) =>
+                await almacen.LeerInternoAsync(id, ct) is { } a ? Results.File(a.Contenido, a.TipoContenido, a.Nombre) : Results.NotFound())
+            .RequiereClaveInterna();
+        return app;
+    }
+
     public static IEndpointRouteBuilder MapExpedienteEndpoints(this IEndpointRouteBuilder app)
     {
         var g = app.MapGroup("/expediente/empleados").WithTags("Empleados · expediente").RequireAuthorization(Politicas.DeAccion("GestionarEmpleados"));
@@ -52,7 +63,7 @@ public static class ExpedienteEndpoints
             .WithName("RetirarEmpleado").RequireAuthorization(Politicas.DeAccion("AprobarBandeja"));
 
         g.MapPost("/{id:guid}/documentos", async (Guid id, IFormFile archivo, Guid? documentoId, string? tipo, string? nombre, DateOnly? venceEn, string? nota,
-                ICommandHandler<GuardarDocumentoEmpleadoCommand, Guid> h, CancellationToken ct) =>
+                bool? leerConIa, ICommandHandler<GuardarDocumentoEmpleadoCommand, Guid> h, CancellationToken ct) =>
             {
                 await using var flujo = archivo.OpenReadStream();
                 using var memoria = new MemoryStream();
@@ -65,10 +76,23 @@ public static class ExpedienteEndpoints
                     _ => archivo.ContentType,
                 };
                 var r = await h.Handle(new GuardarDocumentoEmpleadoCommand(id, documentoId, tipo ?? "", nombre ?? "", venceEn, nota, archivo.FileName, tipoContenido,
-                    memoria.ToArray()), ct);
+                    memoria.ToArray(), leerConIa ?? false), ct);
                 return r.IsSuccess ? Results.Ok(new CreadoResponse(r.Value)) : r.ToHttp();
             })
             .WithName("GuardarDocumentoEmpleado").DisableAntiforgery().Produces<CreadoResponse>();
+
+        // Actualización inteligente (E2): la IA lee, las reglas proponen y una persona aplica o descarta
+        g.MapPost("/{id:guid}/documentos/{documentoId:guid}/leer", async (Guid id, Guid documentoId, ICommandHandler<PedirLecturaDocumentoCommand> h, CancellationToken ct) =>
+                (await h.Handle(new PedirLecturaDocumentoCommand(id, documentoId), ct)).ToHttp())
+            .WithName("PedirLecturaDocumento");
+
+        g.MapPost("/{id:guid}/documentos/{documentoId:guid}/aplicar", async (Guid id, Guid documentoId, AplicarLecturaRequest b, ICommandHandler<AplicarLecturaCommand> h,
+                CancellationToken ct) => (await h.Handle(new AplicarLecturaCommand(id, documentoId, b.Cambios ?? []), ct)).ToHttp())
+            .WithName("AplicarLectura");
+
+        g.MapPost("/{id:guid}/documentos/{documentoId:guid}/descartar", async (Guid id, Guid documentoId, ICommandHandler<DescartarLecturaCommand> h, CancellationToken ct) =>
+                (await h.Handle(new DescartarLecturaCommand(id, documentoId), ct)).ToHttp())
+            .WithName("DescartarLectura");
 
         g.MapPost("/{id:guid}/archivos/{archivoId:guid}", async (Guid id, Guid archivoId, IQueryHandler<ObtenerArchivoEmpleadoQuery, ArchivoDto> h, CancellationToken ct) =>
             {

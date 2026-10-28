@@ -65,3 +65,19 @@
 .emp-zona { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-3); padding: var(--espacio-4); border: 2px dashed var(--color-borde); border-radius: var(--radio-m); background: var(--color-fondo); }
 .emp-planta-cifras { margin: 0; }
 .emp-planta-cifras .emp-cifra { cursor: default; }
+/* Actualización inteligente: propuesta de la IA en violeta hasta que una persona decide */
+.emp-lectura-pedir { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2) var(--espacio-3); }
+.emp-lectura-pedir .aviso { flex-basis: 100%; margin: 0; }
+.emp-lectura-estado { padding: var(--espacio-2) var(--espacio-3); }
+.emp-lectura-resuelta { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; color: var(--color-texto-suave); }
+.emp-lectura-resuelta svg { width: 14px; height: 14px; color: var(--color-exito); }
+.emp-lectura .decision { padding: var(--espacio-3) var(--espacio-4); }
+.emp-lectura-alerta { width: 14px; height: 14px; flex: none; margin-top: 2px; color: var(--color-alerta); }
+.emp-cambios { list-style: none; margin: 0; padding: var(--espacio-2) var(--espacio-4); display: flex; flex-direction: column; gap: var(--espacio-2); border-top: 1px solid var(--color-borde); }
+.emp-cambios li { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto minmax(0, 1.2fr) auto; align-items: center; gap: var(--espacio-2); font-size: 14px; opacity: 0.6; }
+.emp-cambios li.activo { opacity: 1; }
+.emp-cambio-marca { display: flex; align-items: center; gap: var(--espacio-2); }
+.emp-cambio-marca input, .emp-leer-ia input { width: 18px; height: 18px; accent-color: var(--color-primario); flex: none; }
+.emp-cambio-actual { color: var(--color-texto-suave); text-decoration: line-through; text-decoration-color: var(--color-texto-tenue); overflow-wrap: anywhere; }
+@media (max-width: 720px) { .emp-cambios li { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); } .emp-cambio-marca, .emp-cambios .cita { grid-column: 1 / -1; } }
+.emp-leer-ia { display: flex; align-items: flex-start; gap: var(--espacio-2); font-size: 13px; }

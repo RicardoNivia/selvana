@@ -402,6 +402,148 @@ namespace Selvana.Expediente.Infrastructure.Persistence.Migrations
                                     b2.WithOwner()
                                         .HasForeignKey("DocumentoEmpleadoEmpleadoId", "DocumentoEmpleado__synthesizedOrdinal")
                                         .HasConstraintName("fk_empleados_empleados_documento_empleado_empleado_id_documento_em");
+
+                                    b2.OwnsOne("Selvana.Expediente.Domain.Empleados.LecturaDocumento", "Lectura", b3 =>
+                                        {
+                                            b3.Property<Guid>("VersionDocumentoDocumentoEmpleadoEmpleadoId");
+
+                                            b3.Property<int>("VersionDocumentoDocumentoEmpleado__synthesizedOrdinal");
+
+                                            b3.Property<int>("VersionDocumento__synthesizedOrdinal");
+
+                                            b3.Property<decimal>("CostoUsd");
+
+                                            b3.Property<string>("Error");
+
+                                            b3.Property<string>("Estado")
+                                                .IsRequired();
+
+                                            b3.Property<bool>("Legible");
+
+                                            b3.Property<string>("Modelo");
+
+                                            b3.PrimitiveCollection<string>("Observaciones")
+                                                .IsRequired();
+
+                                            b3.Property<DateTimeOffset?>("ResueltaEn");
+
+                                            b3.Property<string>("ResueltaPor");
+
+                                            b3.Property<bool>("TipoCorrecto");
+
+                                            b3.Property<string>("TipoDetectado")
+                                                .IsRequired();
+
+                                            b3.HasKey("VersionDocumentoDocumentoEmpleadoEmpleadoId", "VersionDocumentoDocumentoEmpleado__synthesizedOrdinal", "VersionDocumento__synthesizedOrdinal")
+                                                .HasName("pk_empleados");
+
+                                            b3.ToTable("empleados", "expediente");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("VersionDocumentoDocumentoEmpleadoEmpleadoId", "VersionDocumentoDocumentoEmpleado__synthesizedOrdinal", "VersionDocumento__synthesizedOrdinal")
+                                                .HasConstraintName("fk_empleados_empleados_version_documento_documento_empleado_emplea");
+
+                                            b3.OwnsMany("Selvana.Expediente.Domain.Empleados.CambioPropuesto", "Cambios", b4 =>
+                                                {
+                                                    b4.Property<Guid>("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId");
+
+                                                    b4.Property<int>("LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal")
+                                                        .HasColumnName("LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesized~");
+
+                                                    b4.Property<int>("LecturaDocumentoVersionDocumento__synthesizedOrdinal");
+
+                                                    b4.Property<int>("__synthesizedOrdinal")
+                                                        .ValueGeneratedOnAdd();
+
+                                                    b4.Property<string>("Actual")
+                                                        .IsRequired();
+
+                                                    b4.Property<string>("Clave")
+                                                        .IsRequired();
+
+                                                    b4.Property<string>("Etiqueta")
+                                                        .IsRequired();
+
+                                                    b4.Property<string>("Evidencia")
+                                                        .IsRequired();
+
+                                                    b4.Property<string>("Propuesto")
+                                                        .IsRequired();
+
+                                                    b4.HasKey("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId", "LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal", "LecturaDocumentoVersionDocumento__synthesizedOrdinal", "__synthesizedOrdinal");
+
+                                                    b4.ToTable("empleados", "expediente");
+
+                                                    b4.WithOwner()
+                                                        .HasForeignKey("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId", "LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal", "LecturaDocumentoVersionDocumento__synthesizedOrdinal")
+                                                        .HasConstraintName("fk_empleados_empleados_lectura_documento_version_documento_documen");
+                                                });
+
+                                            b3.OwnsMany("Selvana.Expediente.Domain.Empleados.CampoLeido", "Campos", b4 =>
+                                                {
+                                                    b4.Property<Guid>("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId");
+
+                                                    b4.Property<int>("LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal")
+                                                        .HasColumnName("LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesized~");
+
+                                                    b4.Property<int>("LecturaDocumentoVersionDocumento__synthesizedOrdinal");
+
+                                                    b4.Property<int>("__synthesizedOrdinal")
+                                                        .ValueGeneratedOnAdd();
+
+                                                    b4.Property<string>("Campo")
+                                                        .IsRequired();
+
+                                                    b4.Property<string>("Valor")
+                                                        .IsRequired();
+
+                                                    b4.HasKey("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId", "LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal", "LecturaDocumentoVersionDocumento__synthesizedOrdinal", "__synthesizedOrdinal");
+
+                                                    b4.ToTable("empleados", "expediente");
+
+                                                    b4.WithOwner()
+                                                        .HasForeignKey("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId", "LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal", "LecturaDocumentoVersionDocumento__synthesizedOrdinal")
+                                                        .HasConstraintName("fk_empleados_empleados_lectura_documento_version_documento_documen");
+                                                });
+
+                                            b3.OwnsMany("Selvana.Expediente.Domain.Empleados.RazonLectura", "Razones", b4 =>
+                                                {
+                                                    b4.Property<Guid>("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId");
+
+                                                    b4.Property<int>("LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal")
+                                                        .HasColumnName("LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesized~");
+
+                                                    b4.Property<int>("LecturaDocumentoVersionDocumento__synthesizedOrdinal");
+
+                                                    b4.Property<int>("__synthesizedOrdinal")
+                                                        .ValueGeneratedOnAdd();
+
+                                                    b4.Property<string>("Fuente")
+                                                        .IsRequired();
+
+                                                    b4.Property<string>("Signo")
+                                                        .IsRequired();
+
+                                                    b4.Property<string>("Texto")
+                                                        .IsRequired();
+
+                                                    b4.HasKey("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId", "LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal", "LecturaDocumentoVersionDocumento__synthesizedOrdinal", "__synthesizedOrdinal");
+
+                                                    b4.ToTable("empleados", "expediente");
+
+                                                    b4.WithOwner()
+                                                        .HasForeignKey("LecturaDocumentoVersionDocumentoDocumentoEmpleadoEmpleadoId", "LecturaDocumentoVersionDocumentoDocumentoEmpleado__synthesizedOrdinal", "LecturaDocumentoVersionDocumento__synthesizedOrdinal")
+                                                        .HasConstraintName("fk_empleados_empleados_lectura_documento_version_documento_documen");
+                                                });
+
+                                            b3.Navigation("Cambios");
+
+                                            b3.Navigation("Campos");
+
+                                            b3.Navigation("Razones");
+                                        });
+
+                                    b2.Navigation("Lectura");
                                 });
 
                             b1.Navigation("Versiones");

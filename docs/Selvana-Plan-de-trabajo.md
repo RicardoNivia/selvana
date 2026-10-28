@@ -35,7 +35,8 @@ El orden real se ajustó para tener un flujo completo de punta a punta antes de 
 | Portal de la persona · P1 a P3b (cuenta, procesos, pendientes, ofertas para ti) y rediseño | Hecho |
 | Etapa 2 · V4 Onboarding · plan de inducción con seguimiento | Hecho; asistente de bienvenida con las integraciones y encuestas de 30, 60 y 90 días con Clima |
 | Etapa 3 · Empleados E1 · Expediente digital y carga de la planta | Hecho |
-| **Etapa 3 · Empleados E2 a E4** | **Sigue** |
+| Etapa 3 · Empleados E2 · Actualización inteligente | Hecho; campaña anual con el asistente, con las integraciones |
+| **Etapa 3 · Empleados E3 y E4** | **Sigue** |
 | Portal · P4 Mis documentos · P5 Portal del empleado | Después de E1 |
 | Etapa 4 · Desempeño · Etapa 5 · Clima | Después |
 | Etapa 1 · Sprint 10 · Estabilización y lanzamiento | Antes de vender el primer plan |

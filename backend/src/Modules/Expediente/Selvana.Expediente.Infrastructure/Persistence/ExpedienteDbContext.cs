@@ -50,7 +50,13 @@ internal sealed class EmpleadoConfiguration : IEntityTypeConfiguration<Empleado>
         {
             x.ToJson();
             x.Ignore(d => d.Vigente);
-            x.OwnsMany(d => d.Versiones);
+            x.OwnsMany(d => d.Versiones, v => v.OwnsOne(y => y.Lectura, l =>
+            {
+                l.Property(z => z.Estado).HasConversion<string>();
+                l.OwnsMany(z => z.Campos);
+                l.OwnsMany(z => z.Razones);
+                l.OwnsMany(z => z.Cambios);
+            }));
         });
     }
 }

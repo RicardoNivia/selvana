@@ -99,6 +99,7 @@ app.MapEventosEntrantes<VinculacionDbContext>("/internal/eventos/vinculacion");
 app.MapEventosEntrantes<ExpedienteDbContext>("/internal/eventos/expediente");
 app.MapReclutamientoInterno();
 app.MapVinculacionInterno();
+app.MapExpedienteInterno();
 
 var v1 = app.MapGroup("/api/v1");
 v1.MapCoreEndpoints();

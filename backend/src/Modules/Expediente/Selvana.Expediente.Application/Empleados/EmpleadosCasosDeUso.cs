@@ -19,7 +19,15 @@ public sealed record AfiliacionesDto(string Eps, string FondoPension, string Arl
 
 public sealed record NovedadDto(Guid Id, string Tipo, DateOnly FechaEfectiva, IReadOnlyList<string> Cambios, string Motivo, string Por, DateTimeOffset En);
 
-public sealed record VersionDto(Guid ArchivoId, string NombreArchivo, DateOnly? VenceEn, string? Nota, string SubidoPor, DateTimeOffset SubidoEn);
+public sealed record CambioPropuestoDto(string Clave, string Etiqueta, string Actual, string Propuesto, string Evidencia);
+
+public sealed record LecturaDto(
+    string Estado, string TipoDetectado, bool Legible, bool TipoCorrecto, IReadOnlyList<string> Observaciones, IReadOnlyList<RazonLecturaDto> Razones,
+    IReadOnlyList<CambioPropuestoDto> Cambios, string? Modelo, string? Error, string? ResueltaPor, DateTimeOffset? ResueltaEn);
+
+public sealed record RazonLecturaDto(string Signo, string Texto, string Fuente);
+
+public sealed record VersionDto(Guid ArchivoId, string NombreArchivo, DateOnly? VenceEn, string? Nota, string SubidoPor, DateTimeOffset SubidoEn, LecturaDto? Lectura);
 
 public sealed record DocumentoDto(Guid Id, string Tipo, string Nombre, DateOnly? VenceEn, string EstadoVigencia, IReadOnlyList<VersionDto> Versiones);
 
@@ -56,8 +64,8 @@ public sealed record RetirarEmpleadoCommand(Guid Id, DateOnly Fecha, string Moti
 
 /// <summary>Documento nuevo en la carpeta, o versión nueva de uno que ya está (con <see cref="DocumentoId"/>).</summary>
 public sealed record GuardarDocumentoEmpleadoCommand(
-    Guid Id, Guid? DocumentoId, string Tipo, string Nombre, DateOnly? VenceEn, string? Nota, string NombreArchivo, string TipoContenido, byte[] Contenido)
-    : ICommand<Guid>;
+    Guid Id, Guid? DocumentoId, string Tipo, string Nombre, DateOnly? VenceEn, string? Nota, string NombreArchivo, string TipoContenido, byte[] Contenido,
+    bool LeerConIa = false) : ICommand<Guid>;
 
 internal static class Expedientes
 {
@@ -91,6 +99,10 @@ internal static class Expedientes
         _ => "Vigente",
     };
 
+    public static LecturaDto? Lectura(LecturaDocumento? l) => l is null ? null : new LecturaDto(l.Estado.ToString(), l.TipoDetectado, l.Legible, l.TipoCorrecto,
+        l.Observaciones, [.. l.Razones.Select(r => new RazonLecturaDto(r.Signo, r.Texto, r.Fuente))],
+        [.. l.Cambios.Select(c => new CambioPropuestoDto(c.Clave, c.Etiqueta, c.Actual, c.Propuesto, c.Evidencia))], l.Modelo, l.Error, l.ResueltaPor, l.ResueltaEn);
+
     public static EmpleadoDto Dto(Empleado e, DateOnly hoy)
     {
         var s = e.Situacion;
@@ -102,7 +114,7 @@ internal static class Expedientes
             [.. e.Novedades.OrderByDescending(n => n.FechaEfectiva).ThenByDescending(n => n.En)
                 .Select(n => new NovedadDto(n.Id, n.Tipo.ToString(), n.FechaEfectiva, n.Cambios, n.Motivo, n.Por, n.En))],
             [.. e.Documentos.OrderBy(d => d.Tipo).ThenBy(d => d.Nombre).Select(d => new DocumentoDto(d.Id, d.Tipo, d.Nombre, d.Vigente?.VenceEn, Vigencia(d, hoy),
-                [.. d.Versiones.AsEnumerable().Reverse().Select(v => new VersionDto(v.ArchivoId, v.NombreArchivo, v.VenceEn, v.Nota, v.SubidoPor, v.SubidoEn))]))],
+                [.. d.Versiones.AsEnumerable().Reverse().Select(v => new VersionDto(v.ArchivoId, v.NombreArchivo, v.VenceEn, v.Nota, v.SubidoPor, v.SubidoEn, Lectura(v.Lectura)))]))],
             e.CreadoEn, e.ActualizadoEn);
     }
 }
@@ -326,8 +338,8 @@ internal sealed class RetirarEmpleadoHandler(IUsuarioActual usuario, IEmpleados 
     }
 }
 
-internal sealed class GuardarDocumentoEmpleadoHandler(IUsuarioActual usuario, IEmpleados empleados, IAlmacenArchivos almacen, IBitacora bitacora, IUnidadExpediente unidad,
-    TimeProvider reloj) : ICommandHandler<GuardarDocumentoEmpleadoCommand, Guid>
+internal sealed class GuardarDocumentoEmpleadoHandler(IUsuarioActual usuario, IEmpleados empleados, IAlmacenArchivos almacen, IEventosExpediente eventos, IBitacora bitacora,
+    IUnidadExpediente unidad, TimeProvider reloj) : ICommandHandler<GuardarDocumentoEmpleadoCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(GuardarDocumentoEmpleadoCommand c, CancellationToken cancellationToken)
     {
@@ -349,6 +361,12 @@ internal sealed class GuardarDocumentoEmpleadoHandler(IUsuarioActual usuario, IE
         bitacora.Registrar(usuario.EmpresaId, TipoActor.Persona, usuario.Nombre,
             c.DocumentoId is null ? $"Agregó «{doc.Value.Nombre}» a la carpeta de {e.Nombre}" : $"Subió una versión nueva de «{doc.Value.Nombre}» de {e.Nombre}",
             $"{e.Codigo} · {c.NombreArchivo}{(c.VenceEn is { } v ? $" · vence {v:dd/MM/yyyy}" : "")}", null, "Empleado", e.Id);
+        // La IA lee el documento solo si se pidió y si lo puede leer (PDF o imagen); si no, queda como se subió (camino manual)
+        if (c.LeerConIa && Lecturas.Legible(c.TipoContenido) && e.PedirLectura(doc.Value.Id, ahora).IsSuccess)
+        {
+            eventos.Publicar(Lecturas.Solicitud(e, doc.Value, ahora));
+        }
+
         await unidad.SaveChangesAsync(cancellationToken);
         return doc.Value.Id;
     }

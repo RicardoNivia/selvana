@@ -5,6 +5,7 @@
     <ProjectReference Include="..\..\Modules\Core\Selvana.Core.Contracts\Selvana.Core.Contracts.csproj" />
     <ProjectReference Include="..\..\Modules\Reclutamiento\Selvana.Reclutamiento.Contracts\Selvana.Reclutamiento.Contracts.csproj" />
     <ProjectReference Include="..\..\Modules\Vinculacion\Selvana.Vinculacion.Contracts\Selvana.Vinculacion.Contracts.csproj" />
+    <ProjectReference Include="..\..\Modules\Expediente\Selvana.Expediente.Contracts\Selvana.Expediente.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Anthropic" />

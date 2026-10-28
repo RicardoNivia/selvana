@@ -138,4 +138,10 @@ internal sealed class AlmacenArchivos(ExpedienteDbContext db, IDataProtectionPro
         var a = await db.Set<ArchivoEmpleado>().AsNoTracking().FirstOrDefaultAsync(x => x.Id == id && x.EmpresaId == empresaId, cancellationToken);
         return a is null ? null : (a.Nombre, a.TipoContenido, _protector.Unprotect(a.ContenidoCifrado));
     }
+
+    public async Task<(string Nombre, string TipoContenido, byte[] Contenido)?> LeerInternoAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var a = await db.Set<ArchivoEmpleado>().AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        return a is null ? null : (a.Nombre, a.TipoContenido, _protector.Unprotect(a.ContenidoCifrado));
+    }
 }

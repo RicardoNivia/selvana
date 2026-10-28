@@ -53,7 +53,22 @@ export interface FilaEmpleado {
 
 export interface Alerta { nivel: 'Vencido' | 'PorVencer' | 'Falta'; texto: string; fuente: string }
 export interface Novedad { id: string; tipo: TipoNovedad; fechaEfectiva: string; cambios: string[]; motivo: string; por: string; en: string }
-export interface Version { archivoId: string; nombreArchivo: string; venceEn: string | null; nota: string | null; subidoPor: string; subidoEn: string }
+export type EstadoLectura = 'Leyendo' | 'Fallida' | 'PorRevisar' | 'SinCambios' | 'Aplicada' | 'Descartada'
+export interface CambioPropuesto { clave: string; etiqueta: string; actual: string; propuesto: string; evidencia: string }
+export interface Lectura {
+  estado: EstadoLectura
+  tipoDetectado: string
+  legible: boolean
+  tipoCorrecto: boolean
+  observaciones: string[]
+  razones: { signo: string; texto: string; fuente: string }[]
+  cambios: CambioPropuesto[]
+  modelo: string | null
+  error: string | null
+  resueltaPor: string | null
+  resueltaEn: string | null
+}
+export interface Version { archivoId: string; nombreArchivo: string; venceEn: string | null; nota: string | null; subidoPor: string; subidoEn: string; lectura: Lectura | null }
 export interface Documento { id: string; tipo: string; nombre: string; venceEn: string | null; estadoVigencia: 'SinVencimiento' | 'Vigente' | 'PorVencer' | 'Vencido'; versiones: Version[] }
 
 export interface Empleado {
@@ -113,7 +128,12 @@ export function useEmpleados(f: { pagina: number; tamano: number; buscar: string
 }
 
 export function useEmpleado(id: string) {
-  return useQuery({ queryKey: ['empleados', 'ficha', id], queryFn: ({ signal }) => apiGet<Empleado>(`${base}/${id}`, signal) })
+  return useQuery({
+    queryKey: ['empleados', 'ficha', id],
+    queryFn: ({ signal }) => apiGet<Empleado>(`${base}/${id}`, signal),
+    // Mientras la IA lee un documento, se consulta seguido
+    refetchInterval: (q) => (q.state.data?.documentos.some((d) => d.versiones[0]?.lectura?.estado === 'Leyendo') ? 2500 : false),
+  })
 }
 
 function useAccion<V, R = unknown>(fn: (v: V) => Promise<R>) {
@@ -129,7 +149,7 @@ export const useRegistrarNovedad = (id: string) =>
 export const useRetirar = (id: string) => useAccion((v: { fecha: string; motivo: string }) => apiSend('POST', `${base}/${id}/retiro`, v))
 
 export const useGuardarDocumento = (id: string) =>
-  useAccion((v: { archivo: File; documentoId?: string; tipo?: string; nombre?: string; venceEn?: string | null; nota?: string }) => {
+  useAccion((v: { archivo: File; documentoId?: string; tipo?: string; nombre?: string; venceEn?: string | null; nota?: string; leerConIa?: boolean }) => {
     const f = new FormData()
     f.append('archivo', v.archivo)
     const q = new URLSearchParams()
@@ -138,6 +158,7 @@ export const useGuardarDocumento = (id: string) =>
     if (v.nombre) q.set('nombre', v.nombre)
     if (v.venceEn) q.set('venceEn', v.venceEn)
     if (v.nota) q.set('nota', v.nota)
+    if (v.leerConIa) q.set('leerConIa', 'true')
     return apiUpload<{ id: string }>(`${base}/${id}/documentos?${q}`, f)
   })
 
@@ -181,3 +202,14 @@ export function descargarPlantillaPlanta() {
   enlace.download = 'plantilla-planta-selvana.csv'
   enlace.click()
 }
+
+/* ---------- Actualización inteligente (E2): la IA lee, las reglas proponen, RRHH decide ---------- */
+
+const rutaDoc = (id: string, documentoId: string) => `${base}/${id}/documentos/${documentoId}`
+export const usePedirLectura = (id: string) => useAccion((documentoId: string) => apiSend('POST', `${rutaDoc(id, documentoId)}/leer`))
+export const useAplicarLectura = (id: string) =>
+  useAccion((v: { documentoId: string; cambios: { clave: string; valor: string }[] }) => apiSend('POST', `${rutaDoc(id, v.documentoId)}/aplicar`, { cambios: v.cambios }))
+export const useDescartarLectura = (id: string) => useAccion((documentoId: string) => apiSend('POST', `${rutaDoc(id, documentoId)}/descartar`))
+
+/** La IA lee PDF y fotos; los Word se revisan a mano. */
+export const legiblePorIa = (nombre: string) => /\.(pdf|jpe?g|png|webp)$/i.test(nombre)

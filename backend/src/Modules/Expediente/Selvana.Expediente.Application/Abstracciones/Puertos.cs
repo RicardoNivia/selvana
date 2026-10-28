@@ -58,6 +58,9 @@ public interface IAlmacenArchivos
     Guid Guardar(Guid empresaId, string nombre, string tipoContenido, byte[] contenido, DateTimeOffset ahora);
 
     Task<(string Nombre, string TipoContenido, byte[] Contenido)?> LeerAsync(Guid empresaId, Guid id, CancellationToken cancellationToken);
+
+    /// <summary>Solo para el worker de IA, con la clave interna.</summary>
+    Task<(string Nombre, string TipoContenido, byte[] Contenido)?> LeerInternoAsync(Guid id, CancellationToken cancellationToken);
 }
 
 public sealed record FilaEmpleadoDto(
