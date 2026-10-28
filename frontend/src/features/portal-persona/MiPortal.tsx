@@ -1,244 +1,381 @@
-import { useRef, useState } from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { AutocompletarMunicipio } from '../../shared/ui/AutocompletarMunicipio'
+import { type CSSProperties, type ReactNode, useState } from 'react'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
-import { Chispa, IconoAlerta, IconoCheck, IconoFlecha, IconoSubir } from '../../shared/ui/Iconos'
-import { rangoSalario } from '../portal/api'
+import { HojasCayendo } from '../../shared/ui/HojasCayendo'
 import {
-  type Pendiente, type Registro, type TipoDocumento, tiposDocumento, useAbrirPendiente, useActualizarMiHojaDeVida, useHojaDeVidaPerfil, useIngresarPortal,
-  type PerfilEditable, useActualizarMiPerfil, useChatDePostulacion, useMiCuenta, useMiPortal, useOfertasParaTi, usePostularmeConMiPerfil, useRegistrarme, useSalirPortal, useSubirHojaDeVidaPerfil,
+  Chispa, IconoAlerta, IconoBuscar, IconoCandado, IconoChat, IconoCheck, IconoDocumento, IconoEscudo, IconoFlecha, IconoInicio,
+  IconoPrueba, IconoSalir, IconoSubir, IconoUbicacion, IconoUsuarios, IconoVacantes,
+} from '../../shared/ui/Iconos'
+import { useContador } from '../../shared/ui/animaciones'
+import { rangoSalario } from '../portal/api'
+import { HojaDeVidaPdf } from './HojaDeVidaPdf'
+import { MiHojaDeVida } from './MiHojaDeVida'
+import { type SeccionHv, faltantesPerfil, totalPasosPerfil } from './perfil'
+import {
+  type MiCuenta, type MiPostulacion, type OfertaParaTi, type Pendiente, useAbrirPendiente, useChatDePostulacion, useMiCuenta, useMiPortal,
+  useOfertasParaTi, usePostularmeConMiPerfil, useSalirPortal,
 } from './api'
 import './portal-persona.css'
 
+export { IngresarPortal, RegistroPortal } from './Acceso'
+
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' })
 const fechaHora = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
-const tiposArchivo = '.pdf,.docx,image/jpeg,image/png,image/webp'
+const relativo = new Intl.RelativeTimeFormat('es-CO', { numeric: 'auto' })
 
-/* ---------- Ingresar ---------- */
+type Seccion = 'inicio' | 'procesos' | 'ofertas' | 'hv' | 'cuenta'
+const secciones: { clave: Seccion; texto: string; corto: string; icono: ReactNode }[] = [
+  { clave: 'inicio', texto: 'Inicio', corto: 'Inicio', icono: <IconoInicio /> },
+  { clave: 'procesos', texto: 'Mis procesos', corto: 'Procesos', icono: <IconoVacantes /> },
+  { clave: 'ofertas', texto: 'Ofertas para ti', corto: 'Ofertas', icono: <IconoBuscar /> },
+  { clave: 'hv', texto: 'Mi hoja de vida', corto: 'Hoja de vida', icono: <IconoDocumento /> },
+  { clave: 'cuenta', texto: 'Mi cuenta', corto: 'Cuenta', icono: <IconoUsuarios /> },
+]
 
-/** A dónde volver después de entrar o registrarse (por ejemplo, la vacante a la que se iba a postular). Solo rutas internas. */
-function useVolver() {
-  const v = new URLSearchParams(useLocation().search).get('volver')
-  return v && v.startsWith('/') && !v.startsWith('//') ? v : '/mi-portal'
-}
-
-export function IngresarPortal() {
-  const navegar = useNavigate()
-  const volver = useVolver()
-  const ingresar = useIngresarPortal()
-  const [correo, setCorreo] = useState('')
-  const [contrasena, setContrasena] = useState('')
-
-  return (
-    <main className="portal-ancho mp-acceso">
-      <form className="postular-cuerpo" onSubmit={(e) => { e.preventDefault(); ingresar.mutate({ correo, contrasena }, { onSuccess: () => navegar(volver) }) }}>
-        <h1>Entra a tu portal</h1>
-        <p className="postular-ayuda">Tus postulaciones, el chat con las empresas, tus pruebas y tu contrato, en un solo lugar.</p>
-        <label className="postular-campo">Correo<input className="entrada" type="email" autoComplete="email" value={correo} onChange={(e) => setCorreo(e.target.value)} required /></label>
-        <label className="postular-campo">Contraseña<input className="entrada" type="password" autoComplete="current-password" value={contrasena} onChange={(e) => setContrasena(e.target.value)} required /></label>
-        {ingresar.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{ingresar.error.message}</p>}
-        <Boton type="submit" variante="primario" cargando={ingresar.isPending} textoCargando="Entrando…">Entrar <IconoFlecha /></Boton>
-        <p className="postular-ayuda">¿Primera vez? <Link to={volver === '/mi-portal' ? '/mi-portal/registro' : `/mi-portal/registro?volver=${encodeURIComponent(volver)}`}>Crea tu cuenta</Link></p>
-      </form>
-    </main>
-  )
-}
-
-/* ---------- Registro: lo mínimo; la hoja de vida se sube después en el portal ---------- */
-
-const textoAutorizacion =
-  'Autorizo a Selvana a tratar mis datos personales (hoja de vida y datos de contacto) para crear mi perfil, mostrarme vacantes que encajen conmigo, ' +
-  'permitirme postularme y ver el estado de mis procesos, según la Ley 1581 de 2012. Al postularme a una vacante autorizo también a la empresa que la ' +
-  'publica. Puedo consultar, actualizar o pedir que se supriman mis datos en cualquier momento.'
-
-export function RegistroPortal() {
-  const navegar = useNavigate()
-  const volver = useVolver()
-  const registrar = useRegistrarme()
-  const [f, setF] = useState<Registro>({ correo: '', contrasena: '', nombre: '', tipoDocumento: 'CC', numeroDocumento: '', aceptaAutorizacion: false })
-  const poner = (cambio: Partial<Registro>) => setF((x) => ({ ...x, ...cambio }))
-
-  return (
-    <main className="portal-ancho mp-acceso">
-      <form className="postular-cuerpo" onSubmit={(e) => { e.preventDefault(); registrar.mutate(f, { onSuccess: () => navegar(volver) }) }}>
-        <h1>Crea tu cuenta</h1>
-        <p className="postular-ayuda">Con tu cuenta sigues tus postulaciones, respondes el chat de las empresas y firmas tu contrato. Después subes tu hoja de vida y la IA llena tu perfil.</p>
-        <label className="postular-campo">Correo<input className="entrada" type="email" autoComplete="email" value={f.correo} onChange={(e) => poner({ correo: e.target.value })} required /></label>
-        <label className="postular-campo">Nombres y apellidos<input className="entrada" autoComplete="name" value={f.nombre} onChange={(e) => poner({ nombre: e.target.value })} required /></label>
-        <div className="postular-grupo mp-identificacion">
-          <label className="postular-campo">Tipo de identificación
-            <select className="selector" value={f.tipoDocumento} onChange={(e) => poner({ tipoDocumento: e.target.value as TipoDocumento })}>
-              {tiposDocumento.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
-            </select>
-          </label>
-          <label className="postular-campo">Número<input className="entrada mono" inputMode={f.tipoDocumento === 'PA' ? 'text' : 'numeric'} value={f.numeroDocumento} onChange={(e) => poner({ numeroDocumento: e.target.value })} required /></label>
-        </div>
-        <label className="postular-campo">Contraseña <span className="postular-opcional">mínimo 8 caracteres</span>
-          <input className="entrada" type="password" autoComplete="new-password" minLength={8} value={f.contrasena} onChange={(e) => poner({ contrasena: e.target.value })} required />
-        </label>
-        <p className="postular-nota-suave">Con tu correo y tu identificación unimos a tu cuenta las postulaciones que ya hiciste: usa los mismos que diste al postularte.</p>
-        <label className={`postular-autorizacion ${f.aceptaAutorizacion ? 'aceptada' : ''}`}>
-          <input type="checkbox" checked={f.aceptaAutorizacion} onChange={(e) => poner({ aceptaAutorizacion: e.target.checked })} />
-          <span>{textoAutorizacion}</span>
-        </label>
-        {registrar.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{registrar.error.message}</p>}
-        <Boton type="submit" variante="primario" cargando={registrar.isPending} textoCargando="Creando tu cuenta…" disabled={!f.aceptaAutorizacion}>
-          Crear mi cuenta <IconoFlecha />
-        </Boton>
-        <p className="postular-ayuda">¿Ya tienes cuenta? <Link to="/mi-portal/ingresar">Entra aquí</Link></p>
-      </form>
-    </main>
-  )
-}
-
-function LeyendoHojaDeVida() {
-  return (
-    <section className="postular-cuerpo postular-leyendo" role="status">
-      <div className="estado-agente"><span className="orbe trabajando" /><span>La IA está leyendo tu hoja de vida…</span></div>
-      {[60, 40, 80].map((a, i) => <Esqueleto key={i} alto={a} />)}
-    </section>
-  )
+const saludo = () => {
+  const h = new Date().getHours()
+  return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
 }
 
 /* ---------- Mi portal ---------- */
 
-type Pestana = 'pendientes' | 'postulaciones' | 'ofertas' | 'hv'
-
 export function MiPortal() {
   const cuenta = useMiCuenta()
   const portal = useMiPortal()
-  const salir = useSalirPortal()
-  const navegar = useNavigate()
-  const [pestana, setPestana] = useState<Pestana>('pendientes')
+  const ofertas = useOfertasParaTi(cuenta.isSuccess)
+  const [parametros, setParametros] = useSearchParams()
+  const seccion = (secciones.some((s) => s.clave === parametros.get('ver')) ? parametros.get('ver') : 'inicio') as Seccion
+  const parteHv = (parametros.get('parte') ?? undefined) as SeccionHv | undefined
+  const [direccion, setDireccion] = useState<'adelante' | 'atras'>('adelante')
+  const indice = secciones.findIndex((s) => s.clave === seccion)
+
+  const ir = (s: Seccion, parte?: SeccionHv) => {
+    setDireccion(secciones.findIndex((x) => x.clave === s) >= indice ? 'adelante' : 'atras')
+    setParametros(s === 'inicio' ? {} : parte ? { ver: s, parte } : { ver: s })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   if (cuenta.isError) return <Navigate to="/mi-portal/ingresar" replace />
-  if (cuenta.isPending) return <main className="portal-ancho mp"><Esqueleto alto={40} ancho="50%" /><Esqueleto alto={200} style={{ marginTop: 16 }} /></main>
+  if (cuenta.isPending) return <EsqueletoPortal />
 
+  const c = cuenta.data
   const pendientes = portal.data?.pendientes ?? []
-  const pestanas: [Pestana, string][] = [
-    ['pendientes', `Pendientes${pendientes.length ? ` · ${pendientes.length}` : ''}`],
-    ['postulaciones', `Mis postulaciones${portal.data ? ` · ${portal.data.postulaciones.length}` : ''}`],
-    ['ofertas', 'Ofertas para ti'],
-    ['hv', 'Mi hoja de vida'],
-  ]
+  const postulaciones = portal.data?.postulaciones ?? []
+  const insignias: Partial<Record<Seccion, number>> = { inicio: pendientes.length, ofertas: ofertas.data?.length }
 
   return (
-    <main className="portal-ancho mp">
-      <header className="mp-cabeza">
-        <div>
-          <h1>Hola, {cuenta.data.datos.nombre.split(' ')[0]}</h1>
-          <p className="postular-ayuda">{pendientes.length ? `Tienes ${pendientes.length} ${pendientes.length === 1 ? 'cosa pendiente' : 'cosas pendientes'}.` : 'No tienes nada pendiente.'}</p>
-        </div>
-        <Boton pequeno cargando={salir.isPending} textoCargando="Saliendo…" onClick={() => salir.mutate(undefined, { onSettled: () => navegar('/mi-portal/ingresar') })}>Salir</Boton>
-      </header>
+    <main className="mp">
+      <Bienvenida cuenta={c} pendientes={pendientes.length} enCurso={postulaciones.filter(enCurso).length} ofertas={ofertas.data?.length} cargando={portal.isPending} ir={ir} />
 
-      {!cuenta.data.nombreArchivoHojaDeVida && pestana !== 'hv' && (
-        <div className="bloque-ia mp-invitacion">
-          <div className="bloque-ia-cabeza"><Chispa />Sube tu hoja de vida y la IA llena tu perfil</div>
-          <div className="mp-invitacion-cuerpo">
-            <span>Con tu hoja de vida te mostramos ofertas que encajan contigo y te postulas con un clic.</span>
-            <Boton variante="ia" icono={<IconoSubir />} onClick={() => setPestana('hv')}>Subir mi hoja de vida</Boton>
-          </div>
-        </div>
-      )}
+      <div className="portal-ancho mp-cuerpo">
+        <nav className="mp-nav" role="tablist" aria-label="Mi portal" style={{ '--n': secciones.length, '--activa': indice } as CSSProperties}>
+          <span className="mp-nav-indicador" aria-hidden="true" />
+          {secciones.map((s) => (
+            <button key={s.clave} type="button" role="tab" aria-selected={seccion === s.clave} onClick={() => ir(s.clave)}>
+              <span className="mp-nav-icono">{s.icono}{insignias[s.clave] ? <span className="mp-nav-insignia mono">{insignias[s.clave]}</span> : null}</span>
+              <span className="mp-nav-texto">{s.texto}</span>
+              <span className="mp-nav-corto">{s.corto}</span>
+            </button>
+          ))}
+        </nav>
 
-      <div role="tablist" aria-label="Mi portal" className="pestanas mp-pestanas">
-        {pestanas.map(([clave, texto]) => (
-          <button key={clave} type="button" role="tab" className="pestana" aria-selected={pestana === clave} onClick={() => setPestana(clave)}>{texto}</button>
-        ))}
+        <div key={seccion} role="tabpanel" className={`mp-panel mp-panel-${direccion}`}>
+          {seccion === 'inicio' && <Inicio cuenta={c} pendientes={pendientes} postulaciones={postulaciones} ofertas={ofertas.data} cargando={portal.isPending} ir={ir} />}
+          {seccion === 'procesos' && <Procesos postulaciones={postulaciones} cargando={portal.isPending} />}
+          {seccion === 'ofertas' && <Ofertas ofertas={ofertas.data} cargando={ofertas.isPending} ir={ir} />}
+          {seccion === 'hv' && <MiHojaDeVida cuenta={c} seccionInicial={parteHv} />}
+          {seccion === 'cuenta' && <MiCuentaPanel cuenta={c} />}
+        </div>
       </div>
-
-      {pestana === 'pendientes' && <Pendientes pendientes={pendientes} cargando={portal.isPending} />}
-      {pestana === 'postulaciones' && <Postulaciones />}
-      {pestana === 'ofertas' && <Ofertas />}
-      {pestana === 'hv' && <MiHojaDeVida />}
     </main>
   )
 }
 
-const iconoPendiente: Record<Pendiente['tipo'], string> = { Chat: 'Chat', Pruebas: 'Pruebas', Oferta: 'Contratación' }
+function EsqueletoPortal() {
+  return (
+    <main className="mp" aria-busy="true">
+      <section className="mp-hero"><div className="portal-ancho mp-hero-fila"><div className="mp-hero-texto"><Esqueleto alto={14} ancho={120} /><Esqueleto alto={44} ancho="60%" /><Esqueleto alto={16} ancho="40%" /></div></div></section>
+      <div className="portal-ancho mp-cuerpo"><Esqueleto alto={52} /><Esqueleto alto={120} /><Esqueleto alto={120} /></div>
+    </main>
+  )
+}
+
+/* ---------- Bienvenida: saludo, perfil y cifras que llevan a cada sección ---------- */
+
+function Bienvenida({ cuenta, pendientes, enCurso, ofertas, cargando, ir }: {
+  cuenta: MiCuenta; pendientes: number; enCurso: number; ofertas?: number; cargando: boolean; ir: (s: Seccion, parte?: SeccionHv) => void
+}) {
+  const navegar = useNavigate()
+  const [buscar, setBuscar] = useState('')
+  const nombre = cuenta.datos.nombre.split(' ')[0]
+  const completo = Math.round(((totalPasosPerfil - faltantesPerfil(cuenta).length) / totalPasosPerfil) * 100)
+  const cifras: { valor?: number; texto: string; seccion: Seccion }[] = [
+    { valor: cargando ? undefined : pendientes, texto: pendientes === 1 ? 'pendiente por hacer' : 'pendientes por hacer', seccion: 'inicio' },
+    { valor: cargando ? undefined : enCurso, texto: enCurso === 1 ? 'proceso en curso' : 'procesos en curso', seccion: 'procesos' },
+    { valor: ofertas, texto: ofertas === 1 ? 'oferta para ti' : 'ofertas para ti', seccion: 'ofertas' },
+  ]
+
+  return (
+    <section className="mp-hero">
+      <HojasCayendo cantidad={7} className="hojas-claras" />
+      <div className="portal-ancho mp-hero-fila">
+        <div className="mp-hero-texto">
+          <span className="mp-hero-ceja">{saludo()}</span>
+          <h1>{['Hola,', `${nombre}`].map((p, i) => <span key={i} className="mp-palabra" style={{ '--i': i } as CSSProperties}>{p} </span>)}</h1>
+          <p>{pendientes ? `Tienes ${pendientes} ${pendientes === 1 ? 'cosa' : 'cosas'} por hacer hoy.` : 'Estás al día. Mira las ofertas que encajan contigo.'}</p>
+        </div>
+        <button type="button" className="mp-anillo" onClick={() => ir('hv')} aria-label={`Tu perfil está al ${completo} %. Ir a tu hoja de vida`}>
+          <Anillo porcentaje={completo} />
+          <span>{completo === 100 ? 'Perfil completo' : 'Tu perfil'}</span>
+        </button>
+      </div>
+      <div className="portal-ancho mp-cifras">
+        <form className="mp-hero-buscar" role="search" onSubmit={(e) => { e.preventDefault(); navegar(buscar.trim() ? `/empleos?buscar=${encodeURIComponent(buscar.trim())}` : '/empleos') }}>
+          <IconoBuscar />
+          <input value={buscar} onChange={(e) => setBuscar(e.target.value)} placeholder="Busca otras vacantes: cargo, empresa o ciudad" aria-label="Buscar vacantes" />
+          <button type="submit" aria-label="Buscar"><IconoFlecha /></button>
+        </form>
+        {cifras.map((x, i) => (
+          <button key={x.seccion} type="button" className="mp-cifra" style={{ '--i': i } as CSSProperties} onClick={() => ir(x.seccion)}>
+            {x.valor === undefined ? <Esqueleto alto={22} ancho={28} /> : <Cifra valor={x.valor} />}
+            <span>{x.texto}</span>
+            <IconoFlecha className="mp-cifra-flecha" />
+          </button>
+        ))}
+      </div>
+      <svg className="mp-hero-onda" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30C240 6 480 6 720 22s480 26 720 4V48H0Z" /></svg>
+    </section>
+  )
+}
+
+function Cifra({ valor }: { valor: number }) {
+  return <b className="mp-cifra-numero">{useContador(0, valor, true, 900)}</b>
+}
+
+function Anillo({ porcentaje }: { porcentaje: number }) {
+  const valor = useContador(0, porcentaje, true, 1200)
+  const r = 30
+  const largo = 2 * Math.PI * r
+  return (
+    <span className="mp-anillo-svg">
+      <svg viewBox="0 0 72 72" aria-hidden="true">
+        <circle cx="36" cy="36" r={r} className="mp-anillo-fondo" />
+        <circle cx="36" cy="36" r={r} className="mp-anillo-valor" strokeDasharray={largo} strokeDashoffset={largo * (1 - valor / 100)} />
+      </svg>
+      <b className="mono">{valor}<small>%</small></b>
+    </span>
+  )
+}
+
+/* ---------- Inicio: lo que hay que hacer hoy primero, luego procesos, perfil y ofertas ---------- */
+
+function Inicio({ cuenta, pendientes, postulaciones, ofertas, cargando, ir }: {
+  cuenta: MiCuenta; pendientes: Pendiente[]; postulaciones: MiPostulacion[]; ofertas?: OfertaParaTi[]; cargando: boolean; ir: (s: Seccion, parte?: SeccionHv) => void
+}) {
+  const faltan = faltantesPerfil(cuenta)
+  const activos = postulaciones.filter(enCurso).slice(0, 3)
+  return (
+    <div className="mp-inicio">
+      <div className="mp-col">
+        {!cuenta.nombreArchivoHojaDeVida && (
+          <div className="bloque-ia mp-invitacion">
+            <div className="bloque-ia-cabeza"><Chispa />Sube tu hoja de vida y la IA llena tu perfil</div>
+            <div className="mp-invitacion-cuerpo">
+              <span>Con tu hoja de vida te mostramos ofertas que encajan contigo y te postulas con un clic.</span>
+              <Boton variante="ia" icono={<IconoSubir />} onClick={() => ir('hv')}>Subir mi hoja de vida</Boton>
+            </div>
+          </div>
+        )}
+
+        <Bloque titulo="Para hacer hoy" cuenta={pendientes.length || undefined}>
+          <Pendientes pendientes={pendientes} cargando={cargando} />
+        </Bloque>
+
+        <Bloque titulo="Tus procesos en curso" accion={postulaciones.length ? <button type="button" className="enlace-boton" onClick={() => ir('procesos')}>Ver todos</button> : undefined}>
+          {cargando ? <Esqueleto alto={84} /> : activos.length === 0
+            ? <Vacio texto="No tienes procesos en curso." accion={<Link to="/empleos" className="boton boton-secundario">Ver vacantes</Link>} />
+            : <ul className="mp-mini-procesos">{activos.map((p, i) => <MiniProceso key={p.postulacionId} p={p} i={i} onAbrir={() => ir('procesos')} />)}</ul>}
+        </Bloque>
+      </div>
+
+      <aside className="mp-col">
+        {faltan.length > 0 && (
+          <Bloque titulo="Completa tu perfil" cuenta={`${totalPasosPerfil - faltan.length}/${totalPasosPerfil}`}>
+            <p className="mp-bloque-ayuda">Un perfil completo encaja con más ofertas.</p>
+            <ul className="mp-faltan">
+              {faltan.map((f, i) => (
+                <li key={f.texto} style={{ '--i': i } as CSSProperties}>
+                  <button type="button" onClick={() => ir('hv', f.seccion === 'archivo' ? undefined : f.seccion)}><span className="mp-faltan-punto" />{f.texto}<IconoFlecha /></button>
+                </li>
+              ))}
+            </ul>
+          </Bloque>
+        )}
+        <Bloque titulo="Ofertas para ti" accion={ofertas?.length ? <button type="button" className="enlace-boton" onClick={() => ir('ofertas')}>Ver todas</button> : undefined}>
+          {!ofertas ? <Esqueleto alto={120} /> : ofertas.length === 0
+            ? <Vacio texto="Aún no hay ofertas que encajen con tu perfil." accion={<button type="button" className="enlace-boton" onClick={() => ir('hv')}>Completar mi hoja de vida</button>} />
+            : (
+              <ul className="mp-mini-ofertas">
+                {ofertas.slice(0, 3).map((o, i) => (
+                  <li key={o.codigo} style={{ '--i': i } as CSSProperties}>
+                    <Link to={`/empleos/${o.codigo}`}>
+                      <b>{o.titulo}</b>
+                      <span>{o.empresa} · {o.ciudad}</span>
+                      <span className="mono">{rangoSalario(o.salarioMinimo, o.salarioMaximo)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+        </Bloque>
+      </aside>
+    </div>
+  )
+}
+
+function Bloque({ titulo, cuenta, accion, children }: { titulo: string; cuenta?: number | string; accion?: ReactNode; children: ReactNode }) {
+  return (
+    <section className="mp-bloque">
+      <header><h2>{titulo}{cuenta !== undefined && <span className="mp-bloque-cuenta mono">{cuenta}</span>}</h2>{accion}</header>
+      {children}
+    </section>
+  )
+}
+
+function Vacio({ texto, accion, icono }: { texto: string; accion?: ReactNode; icono?: ReactNode }) {
+  return <div className="mp-vacio">{icono}<p>{texto}</p>{accion}</div>
+}
+
+const tipoPendiente: Record<Pendiente['tipo'], { texto: string; icono: ReactNode }> = {
+  Chat: { texto: 'Responder el chat', icono: <IconoChat /> },
+  Pruebas: { texto: 'Presentar pruebas', icono: <IconoPrueba /> },
+  Oferta: { texto: 'Revisar tu oferta', icono: <IconoDocumento /> },
+}
+
+function vence(en: string) {
+  const ms = new Date(en).getTime() - Date.now()
+  const horas = ms / 36e5
+  const texto = Math.abs(horas) < 24 ? relativo.format(Math.round(horas), 'hour') : relativo.format(Math.round(horas / 24), 'day')
+  return { texto: `Vence ${texto}`, urgente: horas < 48 }
+}
 
 function Pendientes({ pendientes, cargando }: { pendientes: Pendiente[]; cargando: boolean }) {
   const abrir = useAbrirPendiente()
   const navegar = useNavigate()
   const [abriendo, setAbriendo] = useState<string>()
 
-  if (cargando) return <div className="mp-lista">{[1, 2].map((i) => <Esqueleto key={i} alto={88} />)}</div>
-  if (pendientes.length === 0) return <div className="tarjeta vacio mp-vacio"><IconoCheck /><p>Estás al día. Aquí te aparecen el chat de las empresas, tus pruebas y tu contrato cuando te los envíen.</p></div>
-
+  if (cargando) return <div className="mp-lista">{[1, 2].map((i) => <Esqueleto key={i} alto={92} />)}</div>
+  if (pendientes.length === 0) {
+    return <Vacio icono={<span className="mp-al-dia"><IconoCheck /></span>} texto="Estás al día. Aquí te aparecen el chat de las empresas, tus pruebas y tu contrato cuando te los envíen." />
+  }
   return (
     <div className="mp-lista">
       {abrir.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{abrir.error.message}</p>}
-      {pendientes.map((p) => (
-        <article key={`${p.tipo}-${p.id}`} className="tarjeta mp-tarjeta mp-pendiente">
-          <div>
-            <span className="pill pill-alerta">{iconoPendiente[p.tipo]}</span>
-            <h3>{p.titulo}</h3>
-            <p>{p.vacante} · {p.empresa}{p.venceEn ? <> · vence el <span className="mono">{fechaHora.format(new Date(p.venceEn))}</span></> : null}</p>
-          </div>
-          <Boton variante="primario" cargando={abrir.isPending && abriendo === p.id} textoCargando="Abriendo…" disabled={abrir.isPending}
-            onClick={() => { setAbriendo(p.id); abrir.mutate(p, { onSuccess: (r) => navegar(r.ruta) }) }}>
-            Abrir <IconoFlecha />
-          </Boton>
-        </article>
-      ))}
+      {pendientes.map((p, i) => {
+        const v = p.venceEn ? vence(p.venceEn) : null
+        return (
+          <article key={`${p.tipo}-${p.id}`} className={`mp-pendiente mp-pendiente-${p.tipo.toLowerCase()}`} style={{ '--i': i } as CSSProperties}>
+            <span className="mp-pendiente-icono">{tipoPendiente[p.tipo].icono}</span>
+            <div className="mp-pendiente-texto">
+              <span className="mp-pendiente-tipo">{tipoPendiente[p.tipo].texto}</span>
+              <h3>{p.titulo}</h3>
+              <p>{p.vacante} · {p.empresa}</p>
+              {v && p.venceEn && <span className={`pill ${v.urgente ? 'pill-alerta' : 'pill-neutra'}`} title={fechaHora.format(new Date(p.venceEn))}>{v.texto}</span>}
+            </div>
+            <Boton variante="primario" cargando={abrir.isPending && abriendo === p.id} textoCargando="Abriendo…" disabled={abrir.isPending}
+              onClick={() => { setAbriendo(p.id); abrir.mutate(p, { onSuccess: (r) => navegar(r.ruta) }) }}>
+              Abrir <IconoFlecha />
+            </Boton>
+          </article>
+        )
+      })}
     </div>
   )
 }
 
-const claseEstado = (estado: string) =>
-  estado === 'Contratada' || estado === 'Finalista' ? 'pill-ok' : estado === 'No seleccionada' || estado.includes('cerrad') ? 'pill-neutra' : 'pill-info'
+/* ---------- Procesos: avance en palabras de la persona y chat ---------- */
 
-/** Avance del proceso en palabras de la persona; las postulaciones cerradas o no seleccionadas no muestran avance. */
+/** Avance del proceso; las postulaciones cerradas o no seleccionadas no muestran avance. */
 const etapasAvance = ['Recibida', 'En revisión', 'Preselección', 'Finalista', 'Contratación'] as const
 const indiceAvance: Record<string, number> = {
   Recibida: 0, 'En revisión': 1, 'En preselección': 2, Pruebas: 2, Finalista: 3, 'En contratación': 4, Contratada: 5,
 }
+const enCurso = (p: MiPostulacion) => indiceAvance[p.estado] !== undefined && p.estado !== 'Contratada'
+const claseEstado = (estado: string) =>
+  estado === 'Contratada' || estado === 'Finalista' ? 'pill-ok' : estado === 'No seleccionada' || estado.includes('cerrad') ? 'pill-neutra' : 'pill-info'
 
-function Postulaciones() {
-  const portal = useMiPortal()
+function MiniProceso({ p, i, onAbrir }: { p: MiPostulacion; i: number; onAbrir: () => void }) {
+  const avance = indiceAvance[p.estado] ?? 0
+  return (
+    <li style={{ '--i': i } as CSSProperties}>
+      <button type="button" onClick={onAbrir}>
+        <span className="mp-mini-titulo"><b>{p.vacante}</b><span className={`pill ${claseEstado(p.estado)}`}>{p.estado}</span></span>
+        <span className="mp-mini-meta">{p.empresa}</span>
+        <span className="mp-mini-barra" aria-hidden="true"><span style={{ '--avance': `${Math.min(100, (avance / (etapasAvance.length - 1)) * 100)}%` } as CSSProperties} /></span>
+      </button>
+    </li>
+  )
+}
+
+type Filtro = 'curso' | 'cerradas' | 'todas'
+
+function Procesos({ postulaciones, cargando }: { postulaciones: MiPostulacion[]; cargando: boolean }) {
+  const [filtro, setFiltro] = useState<Filtro>('curso')
   const [abierta, setAbierta] = useState<string>()
-  if (portal.isPending) return <div className="mp-lista">{[1, 2].map((i) => <Esqueleto key={i} alto={150} />)}</div>
-  const lista = portal.data?.postulaciones ?? []
-  if (lista.length === 0) {
+  if (cargando) return <div className="mp-lista">{[1, 2].map((i) => <Esqueleto key={i} alto={170} />)}</div>
+  if (postulaciones.length === 0) {
     return (
-      <div className="tarjeta vacio mp-vacio">
-        <p>Aún no vemos postulaciones con tu correo y tu identificación. Si te postulaste con otros datos, escríbenos desde <Link to="/empleos/mis-datos">tus datos personales</Link>.</p>
-        <Link to="/empleos" className="boton boton-secundario">Ver vacantes</Link>
-      </div>
+      <Vacio texto="Aún no vemos postulaciones con tu correo y tu identificación. Si te postulaste con otros datos, pídelo desde tus datos personales."
+        accion={<div className="mp-vacio-acciones"><Link to="/empleos" className="boton boton-primario">Ver vacantes</Link><Link to="/empleos/mis-datos" className="boton boton-secundario">Tus datos personales</Link></div>} />
     )
   }
+  const cuentas: Record<Filtro, number> = {
+    curso: postulaciones.filter(enCurso).length, cerradas: postulaciones.filter((p) => !enCurso(p)).length, todas: postulaciones.length,
+  }
+  const lista = postulaciones.filter((p) => (filtro === 'todas' ? true : filtro === 'curso' ? enCurso(p) : !enCurso(p)))
+
   return (
     <div className="mp-lista">
-      {lista.map((p) => {
+      <div className="segmentado mp-filtro" role="group" aria-label="Qué procesos ver">
+        {([['curso', 'En curso'], ['cerradas', 'Terminados'], ['todas', 'Todos']] as [Filtro, string][]).map(([f, t]) => (
+          <button key={f} type="button" aria-pressed={filtro === f} onClick={() => setFiltro(f)}>{t} <span className="mono">{cuentas[f]}</span></button>
+        ))}
+      </div>
+      {lista.length === 0 && <Vacio texto={filtro === 'curso' ? 'No tienes procesos en curso ahora.' : 'Aún no tienes procesos terminados.'} />}
+      {lista.map((p, i) => {
         const avance = indiceAvance[p.estado]
         const chatAbierto = abierta === p.postulacionId
         return (
-          <article key={p.postulacionId} className="tarjeta mp-item">
-            <header className="mp-item-cabeza">
-              <div className="mp-item-titulo">
+          <article key={p.postulacionId} className="mp-proceso" style={{ '--i': i } as CSSProperties}>
+            <header className="mp-proceso-cabeza">
+              <div>
                 <h3><Link to={`/empleos/${p.vacanteCodigo}`}>{p.vacante}</Link></h3>
-                <p className="mp-item-meta">{p.empresa} · {p.ciudad} · <span className="mono">{p.numero}</span> · {fecha.format(new Date(p.recibidaEn))}</p>
+                <p>{p.empresa} · <IconoUbicacion />{p.ciudad} · <span className="mono">{p.numero}</span> · {fecha.format(new Date(p.recibidaEn))}</p>
               </div>
               <span className={`pill ${claseEstado(p.estado)}`}>{p.estado}</span>
             </header>
 
             {avance !== undefined && (
-              <ol className="mp-avance" aria-label={`Avance: ${p.estado}`}>
-                {etapasAvance.map((e, i) => (
-                  <li key={e} className={i < avance ? 'hecho' : i === avance ? 'actual' : ''}><span>{e}</span></li>
+              <ol className="mp-etapas" aria-label={`Avance: ${p.estado}`} style={{ '--avance': `${Math.min(100, (avance / (etapasAvance.length - 1)) * 100)}%` } as CSSProperties}>
+                {etapasAvance.map((e, j) => (
+                  <li key={e} className={j < avance ? 'hecho' : j === avance ? 'actual' : ''} style={{ '--j': j } as CSSProperties}>
+                    <span className="mp-etapa-punto">{j < avance ? <IconoCheck /> : null}</span>
+                    <span className="mp-etapa-texto">{e}</span>
+                  </li>
                 ))}
               </ol>
             )}
 
-            <footer className="mp-item-pie">
-              <p>{p.explicacion}</p>
-              <Boton pequeno aria-expanded={chatAbierto} onClick={() => setAbierta(chatAbierto ? undefined : p.postulacionId)}>
-                {chatAbierto ? 'Ocultar el chat' : 'Ver el chat'}
-              </Boton>
+            <p className="mp-proceso-explicacion">{p.explicacion}</p>
+            <footer className="mp-proceso-pie">
+              <button type="button" className="mp-chat-boton" aria-expanded={chatAbierto} onClick={() => setAbierta(chatAbierto ? undefined : p.postulacionId)}>
+                <IconoChat />{chatAbierto ? 'Ocultar el chat' : 'Ver el chat'}
+              </button>
             </footer>
-            {chatAbierto && <HistorialChat postulacionId={p.postulacionId} />}
+            <div className={`mp-plegable ${chatAbierto ? 'abierto' : ''}`}>
+              <div>{chatAbierto && <HistorialChat postulacionId={p.postulacionId} />}</div>
+            </div>
           </article>
         )
       })}
@@ -249,13 +386,13 @@ function Postulaciones() {
 /** Lo que se habló en la preselección: el asistente, la persona de la empresa y la persona misma. */
 function HistorialChat({ postulacionId }: { postulacionId: string }) {
   const chat = useChatDePostulacion(postulacionId, true)
-  if (chat.isPending) return <div className="mp-chat"><Esqueleto alto={48} /><Esqueleto alto={48} /></div>
+  if (chat.isPending) return <div className="mp-chat"><Esqueleto alto={48} ancho="70%" /><Esqueleto alto={48} ancho="60%" style={{ alignSelf: 'flex-end' }} /></div>
   const mensajes = chat.data?.mensajes ?? []
-  if (mensajes.length === 0) return <p className="postular-nota-suave mp-chat">Todavía no hay chat en esta postulación.</p>
+  if (mensajes.length === 0) return <p className="mp-nota mp-chat">Todavía no hay chat en esta postulación.</p>
   return (
     <ol className="mp-chat" aria-label="Historial del chat">
       {mensajes.map((m, i) => (
-        <li key={i} className={m.esMio ? 'mio' : ''}>
+        <li key={i} className={m.esMio ? 'mio' : ''} style={{ '--i': Math.min(i, 8) } as CSSProperties}>
           <span className="mp-chat-autor">{m.autor} · <span className="mono">{fechaHora.format(new Date(m.en))}</span></span>
           <p>{m.texto}</p>
         </li>
@@ -264,208 +401,105 @@ function HistorialChat({ postulacionId }: { postulacionId: string }) {
   )
 }
 
-function Ofertas() {
-  const ofertas = useOfertasParaTi(true)
+/* ---------- Ofertas para ti: vacantes que encajan, con el porqué (reglas) ---------- */
+
+function Ofertas({ ofertas, cargando, ir }: { ofertas?: OfertaParaTi[]; cargando: boolean; ir: (s: Seccion) => void }) {
   const postular = usePostularmeConMiPerfil()
   const navegar = useNavigate()
   const [eligiendo, setEligiendo] = useState<string>()
 
-  if (ofertas.isPending) return <div className="mp-lista">{[1, 2, 3].map((i) => <Esqueleto key={i} alto={110} />)}</div>
-  if ((ofertas.data ?? []).length === 0) {
+  if (cargando || !ofertas) return <div className="mp-ofertas">{[1, 2, 3, 4].map((i) => <Esqueleto key={i} alto={210} />)}</div>
+  if (ofertas.length === 0) {
     return (
-      <div className="tarjeta vacio mp-vacio">
-        <p>Aún no encontramos vacantes que encajen con tu hoja de vida. Actualízala con tu experiencia y tus cursos, o mira todas las vacantes.</p>
-        <Link to="/empleos" className="boton boton-secundario">Ver todas las vacantes</Link>
-      </div>
+      <Vacio texto="Aún no encontramos vacantes que encajen con tu hoja de vida. Actualízala con tu experiencia y tus cursos, o mira todas las vacantes."
+        accion={<div className="mp-vacio-acciones"><Boton onClick={() => ir('hv')}>Actualizar mi hoja de vida</Boton><Link to="/empleos" className="boton boton-primario">Ver todas las vacantes</Link></div>} />
     )
   }
   return (
-    <div className="mp-lista">
+    <>
       {postular.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{postular.error.message}</p>}
-      {ofertas.data?.map((o) => (
-        <article key={o.codigo} className="tarjeta mp-tarjeta">
-          <div>
+      <p className="mp-bloque-ayuda">Las elegimos comparando tu hoja de vida con los requisitos de cada vacante.</p>
+      <div className="mp-ofertas">
+        {ofertas.map((o, i) => (
+          <article key={o.codigo} className="mp-oferta" style={{ '--i': i } as CSSProperties}>
+            <span className="mp-oferta-empresa">{o.empresa}</span>
             <h3><Link to={`/empleos/${o.codigo}`}>{o.titulo}</Link></h3>
-            <p>{o.empresa} · {o.ciudad} · {o.jornada} · <span className="mono">{rangoSalario(o.salarioMinimo, o.salarioMaximo)}</span></p>
-            <ul className="mp-porque">{o.porque.map((r) => <li key={r}><IconoCheck />{r}</li>)}</ul>
-          </div>
-          <Boton variante="primario" cargando={postular.isPending && eligiendo === o.codigo} textoCargando="Preparando…" disabled={postular.isPending}
-            onClick={() => { setEligiendo(o.codigo); postular.mutate(o.codigo, { onSuccess: (r) => navegar(`/empleos/${o.codigo}/postular?borrador=${r.id}`) }) }}>
-            Postularme
-          </Boton>
-        </article>
-      ))}
-    </div>
+            <div className="mp-oferta-datos">
+              <span><IconoUbicacion />{o.ciudad}</span>
+              <span>{o.jornada}</span>
+              <span className="mono">{rangoSalario(o.salarioMinimo, o.salarioMaximo)}</span>
+            </div>
+            <div className="mp-oferta-porque">
+              <span>Por qué encaja contigo</span>
+              <ul>{o.porque.map((r) => <li key={r}><IconoCheck />{r}</li>)}</ul>
+            </div>
+            <footer>
+              <Link to={`/empleos/${o.codigo}`} className="enlace-boton">Ver la vacante</Link>
+              <Boton variante="primario" pequeno cargando={postular.isPending && eligiendo === o.codigo} textoCargando="Preparando…" disabled={postular.isPending}
+                onClick={() => { setEligiendo(o.codigo); postular.mutate(o.codigo, { onSuccess: (r) => navegar(`/empleos/${o.codigo}/postular?borrador=${r.id}`) }) }}>
+                Postularme <IconoFlecha />
+              </Boton>
+            </footer>
+          </article>
+        ))}
+      </div>
+    </>
   )
 }
 
-type SeccionHv = 'datos' | 'experiencia' | 'estudios' | 'cursos'
-const seccionesHv: [SeccionHv, string][] = [['datos', 'Datos personales'], ['experiencia', 'Experiencia'], ['estudios', 'Estudios'], ['cursos', 'Cursos y habilidades']]
+/* ---------- Mi cuenta: hoja de vida en PDF, autorización y derechos sobre los datos, salir ---------- */
 
-/**
- * Su hoja de vida: subir una nueva (hoja de vida o el PDF de LinkedIn) para que la IA la lea, o escribirla y corregirla a mano.
- * Lo que leyó la IA llena el formulario en violeta; nada se guarda hasta que la persona pulsa «Guardar mi hoja de vida».
- */
-function MiHojaDeVida() {
-  const cuenta = useMiCuenta()
-  const guardar = useActualizarMiPerfil()
-  const actualizarHv = useActualizarMiHojaDeVida()
-  const [nuevaHv, setNuevaHv] = useState<string>()
-  const [modo, setModo] = useState<'hv' | 'linkedin'>('hv')
-  const hv = useHojaDeVidaPerfil(nuevaHv)
-  const c = cuenta.data!
-  const [p, setP] = useState<PerfilEditable>(() => ({
-    nombre: c.datos.nombre, celular: c.datos.celular, ciudad: c.datos.ciudad, linkedIn: c.datos.linkedIn,
-    experiencia: c.datos.experiencia, formacion: c.datos.formacion, cursos: c.datos.cursos, habilidades: c.datos.habilidades,
-  }))
-  const [deIa, setDeIa] = useState(false)
-  const [ciudadCodigo, setCiudadCodigo] = useState<string | null>(c.datos.ciudad ? 'guardada' : null)
-  const [guardado, setGuardado] = useState(false)
-  const [seccion, setSeccion] = useState<SeccionHv>('datos')
-  const poner = (cambio: Partial<PerfilEditable>) => { setP((x) => ({ ...x, ...cambio })); setGuardado(false) }
-
-  // Cuando la IA termina de leer la hoja de vida nueva, llena el formulario en violeta para revisarlo
-  const leida = nuevaHv && hv.data && hv.data.estado !== 'Leyendo' ? hv.data : null
-  const leyendo = Boolean(nuevaHv) && !leida
-  const [aplicada, setAplicada] = useState<string>()
-  if (leida?.datos && aplicada !== leida.id) {
-    const d = leida.datos
-    setAplicada(leida.id)
-    setDeIa(true)
-    setP((x) => ({
-      nombre: x.nombre || d.nombre, celular: x.celular || d.celular, ciudad: x.ciudad || d.ciudad, linkedIn: x.linkedIn || d.linkedIn,
-      experiencia: d.experiencia, formacion: d.formacion, cursos: d.cursos, habilidades: d.habilidades,
-    }))
-  }
-
-  const enviar = () => {
-    // Con una hoja de vida nueva, se guarda el archivo y lo corregido; si no, solo lo escrito a mano
-    if (nuevaHv && leida) {
-      actualizarHv.mutate({ borradorId: nuevaHv, ...p }, {
-        onSuccess: () => guardar.mutate(p, { onSuccess: () => { setNuevaHv(undefined); setDeIa(false); setGuardado(true) } }),
-      })
-    } else {
-      guardar.mutate(p, { onSuccess: () => { setDeIa(false); setGuardado(true) } })
-    }
-  }
-
-  const error = actualizarHv.error ?? guardar.error
-  const ocupado = actualizarHv.isPending || guardar.isPending
-  const ia = deIa ? ' entrada-ia' : ''
+function MiCuentaPanel({ cuenta }: { cuenta: MiCuenta }) {
+  const salir = useSalirPortal()
+  const navegar = useNavigate()
+  const [verCv, setVerCv] = useState(false)
+  const iniciales = cuenta.datos.nombre.split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('')
 
   return (
-    <div className="mp-lista">
-      <section className="tarjeta mp-seccion">
-        <h3>Tu hoja de vida</h3>
-        <p className="postular-ayuda">
-          {c.nombreArchivoHojaDeVida
-            ? <>Tienes <b>{c.nombreArchivoHojaDeVida}</b>{c.hojaDeVidaActualizadaEn && <>, actualizada el {fecha.format(new Date(c.hojaDeVidaActualizadaEn))}</>}. Puedes subir una nueva o corregirla abajo.</>
-            : 'Sube tu hoja de vida o el PDF de tu LinkedIn y la IA llena tu perfil. También puedes escribirla abajo desde cero.'}
-        </p>
-        {!nuevaHv && (
-          <div className="mp-subir">
-            <div className="segmentado" role="group" aria-label="Qué quieres subir">
-              <button type="button" aria-pressed={modo === 'hv'} onClick={() => setModo('hv')}>Hoja de vida</button>
-              <button type="button" aria-pressed={modo === 'linkedin'} onClick={() => setModo('linkedin')}>PDF de LinkedIn</button>
-            </div>
-            <SubirCompacto onSubida={setNuevaHv} texto={modo === 'linkedin' ? 'Sube el PDF de tu perfil de LinkedIn' : 'Sube tu hoja de vida (PDF, Word o foto)'} />
-            {modo === 'linkedin' && <span className="ayuda">En linkedin.com abre tu perfil, toca <b>Más</b> y luego <b>Guardar en PDF</b>. LinkedIn no deja leer el perfil solo con el enlace.</span>}
-          </div>
-        )}
-        {leyendo && <LeyendoHojaDeVida />}
-        {leida?.estado === 'Fallida' && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{leida.mensaje} Escríbela abajo.</p>}
-        {leida?.datos && <p className="postular-ayuda"><span className="pill pill-ia"><Chispa />Leída por la IA</span> Revisa lo que está en violeta y guarda.</p>}
+    <div className="mp-cuenta">
+      <section className="mp-tarjeta-cuenta mp-perfil-tarjeta">
+        <span className="mp-avatar" aria-hidden="true">{iniciales}</span>
+        <div>
+          <h2>{cuenta.datos.nombre}</h2>
+          <p>{cuenta.correo} · <span className="mono">{cuenta.tipoDocumento} {cuenta.datos.documento}</span></p>
+          <p className="mp-nota">Con nosotros desde el {fecha.format(new Date(cuenta.creadaEn))}</p>
+        </div>
       </section>
 
-      <form className="tarjeta mp-seccion" onSubmit={(e) => { e.preventDefault(); enviar() }}>
-        <div role="tablist" aria-label="Partes de tu hoja de vida" className="pestanas mp-hv-pestanas">
-          {seccionesHv.map(([clave, texto]) => (
-            <button key={clave} type="button" role="tab" className="pestana" aria-selected={seccion === clave} onClick={() => setSeccion(clave)}>
-              {texto}
-              {clave === 'experiencia' && <span className="mp-hv-cuenta mono">{p.experiencia.length}</span>}
-              {clave === 'estudios' && <span className="mp-hv-cuenta mono">{p.formacion.length}</span>}
-            </button>
-          ))}
+      <section className="mp-tarjeta-cuenta">
+        <span className="mp-cuenta-icono"><IconoDocumento /></span>
+        <div>
+          <h3>Tu hoja de vida en PDF</h3>
+          <p>Descárgala con un diseño limpio para enviarla por correo o llevarla impresa. Sale de lo que guardaste en tu perfil.</p>
         </div>
+        <Boton onClick={() => setVerCv(true)}>Ver y descargar</Boton>
+      </section>
 
-        <div role="tabpanel" className="mp-hv-panel">
-        {seccion === 'datos' && (
-        <div className="mp-datos-grilla">
-          <label className="postular-campo">Nombres y apellidos<input className={`entrada${ia}`} value={p.nombre} onChange={(e) => poner({ nombre: e.target.value })} required /></label>
-          <label className="postular-campo">Celular (WhatsApp)<input className={`entrada${ia}`} inputMode="tel" value={p.celular} onChange={(e) => poner({ celular: e.target.value })} /></label>
-          <label className="postular-campo">Ciudad donde vives
-            <AutocompletarMunicipio valor={{ codigo: ciudadCodigo, ciudad: p.ciudad }}
-              onElegir={(m, texto) => { poner({ ciudad: m?.municipio ?? texto }); setCiudadCodigo(m?.codigo ?? null) }} />
-          </label>
-          <label className="postular-campo">Perfil de LinkedIn <span className="postular-opcional">opcional</span>
-            <input className="entrada" inputMode="url" placeholder="linkedin.com/in/tu-nombre" value={p.linkedIn ?? ''} onChange={(e) => poner({ linkedIn: e.target.value })} />
-          </label>
+      <section className="mp-tarjeta-cuenta">
+        <span className="mp-cuenta-icono"><IconoEscudo /></span>
+        <div>
+          <h3>Tu autorización de datos</h3>
+          <p>Autorizaste el tratamiento de tus datos el <b>{fecha.format(new Date(cuenta.autorizadaEn))}</b>, versión <span className="mono">{cuenta.versionAutorizacion}</span>, según la Ley 1581 de 2012.</p>
+          <Link to="/legal/tratamiento-de-datos">Leer la política de datos</Link>
         </div>
-        )}
+      </section>
 
-        {seccion === 'experiencia' && (<>
-        {p.experiencia.length === 0 && <p className="postular-nota-suave">Aún no tienes experiencia registrada.</p>}
-        {p.experiencia.map((x, i) => (
-          <div key={i} className={`mp-fila-editable${ia}`}>
-            <input className="entrada" aria-label="Cargo" placeholder="Cargo" value={x.cargo} onChange={(e) => poner({ experiencia: p.experiencia.map((y, j) => (j === i ? { ...y, cargo: e.target.value } : y)) })} />
-            <input className="entrada" aria-label="Empresa" placeholder="Empresa" value={x.empresa} onChange={(e) => poner({ experiencia: p.experiencia.map((y, j) => (j === i ? { ...y, empresa: e.target.value } : y)) })} />
-            <input className="entrada mono" aria-label="Desde" placeholder="Desde (03/2021)" value={x.desde} onChange={(e) => poner({ experiencia: p.experiencia.map((y, j) => (j === i ? { ...y, desde: e.target.value } : y)) })} />
-            <input className="entrada mono" aria-label="Hasta" placeholder="Hasta (o «Actual»)" value={x.hasta} onChange={(e) => poner({ experiencia: p.experiencia.map((y, j) => (j === i ? { ...y, hasta: e.target.value } : y)) })} />
-            <button type="button" className="enlace-boton" onClick={() => poner({ experiencia: p.experiencia.filter((_, j) => j !== i) })}>Quitar</button>
-          </div>
-        ))}
-        <button type="button" className="enlace-boton" onClick={() => poner({ experiencia: [...p.experiencia, { cargo: '', empresa: '', desde: '', hasta: '' }] })}>+ Agregar experiencia</button>
-        </>)}
-
-        {seccion === 'estudios' && (<>
-        {p.formacion.length === 0 && <p className="postular-nota-suave">Aún no tienes estudios registrados.</p>}
-        {p.formacion.map((x, i) => (
-          <div key={i} className={`mp-fila-editable mp-fila-estudio${ia}`}>
-            <input className="entrada" aria-label="Título" placeholder="Título" value={x.titulo} onChange={(e) => poner({ formacion: p.formacion.map((y, j) => (j === i ? { ...y, titulo: e.target.value } : y)) })} />
-            <input className="entrada" aria-label="Institución" placeholder="Institución" value={x.institucion} onChange={(e) => poner({ formacion: p.formacion.map((y, j) => (j === i ? { ...y, institucion: e.target.value } : y)) })} />
-            <input className="entrada mono" aria-label="Año" placeholder="Año" value={x.anio} onChange={(e) => poner({ formacion: p.formacion.map((y, j) => (j === i ? { ...y, anio: e.target.value } : y)) })} />
-            <button type="button" className="enlace-boton" onClick={() => poner({ formacion: p.formacion.filter((_, j) => j !== i) })}>Quitar</button>
-          </div>
-        ))}
-        <button type="button" className="enlace-boton" onClick={() => poner({ formacion: [...p.formacion, { titulo: '', institucion: '', anio: '' }] })}>+ Agregar estudio</button>
-        </>)}
-
-        {seccion === 'cursos' && (
-        <div className="dos-campos">
-          <label className="postular-campo">Cursos y certificaciones <span className="postular-opcional">uno por línea</span>
-            <textarea className={`area-texto${ia}`} rows={5} value={p.cursos.join('\n')} onChange={(e) => poner({ cursos: e.target.value.split('\n') })} />
-          </label>
-          <label className="postular-campo">Habilidades <span className="postular-opcional">una por línea</span>
-            <textarea className={`area-texto${ia}`} rows={5} value={p.habilidades.join('\n')} onChange={(e) => poner({ habilidades: e.target.value.split('\n') })} />
-          </label>
+      <section className="mp-tarjeta-cuenta">
+        <span className="mp-cuenta-icono"><IconoCandado /></span>
+        <div>
+          <h3>Tus derechos sobre tus datos</h3>
+          <p>Puedes consultar, corregir o pedir que borremos tus datos, y cambiar tu correo o tu identificación. Te respondemos dentro de los plazos de ley.</p>
         </div>
-        )}
-        </div>
+        <Link to="/empleos/mis-datos" className="boton boton-secundario">Hacer una solicitud</Link>
+      </section>
 
-        <p className="postular-nota-suave">Tu correo (<b>{c.correo}</b>) y tu identificación (<span className="mono">{c.tipoDocumento} {c.datos.documento}</span>) unen tu cuenta con tus postulaciones; para cambiarlos, pídelo desde <Link to="/empleos/mis-datos">tus datos personales</Link>.</p>
-        {error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{error.message}</p>}
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Boton type="submit" variante="primario" icono={<IconoCheck />} cargando={ocupado} textoCargando="Guardando…" disabled={leyendo}>Guardar mi hoja de vida</Boton>
-          {nuevaHv && <Boton onClick={() => { setNuevaHv(undefined); setDeIa(false) }} disabled={ocupado}>Descartar la hoja de vida nueva</Boton>}
-          {guardado && <span className="pill pill-ok"><IconoCheck />Guardada</span>}
-        </div>
-      </form>
-    </div>
-  )
-}
+      <section className="mp-tarjeta-cuenta mp-salir">
+        <span className="mp-cuenta-icono"><IconoSalir /></span>
+        <div><h3>Salir de tu portal</h3><p>Cierra la sesión en este dispositivo.</p></div>
+        <Boton cargando={salir.isPending} textoCargando="Saliendo…" onClick={() => salir.mutate(undefined, { onSettled: () => navegar('/mi-portal/ingresar') })}>Salir</Boton>
+      </section>
 
-/** Subida en una franja: para el portal, donde la hoja de vida es una sección más y no la pantalla entera. */
-function SubirCompacto({ texto, onSubida }: { texto: string; onSubida: (id: string) => void }) {
-  const subir = useSubirHojaDeVidaPerfil()
-  const archivo = useRef<HTMLInputElement>(null)
-  const enviar = (f?: File) => f && subir.mutate(f, { onSuccess: (r) => onSubida(r.id) })
-  return (
-    <div className="mp-subir-franja" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); enviar(e.dataTransfer.files[0]) }}>
-      <input ref={archivo} type="file" accept={tiposArchivo} hidden onChange={(e) => enviar(e.target.files?.[0])} />
-      <span className="mp-subir-icono"><IconoSubir /></span>
-      <span className="mp-subir-texto"><b>{texto}</b><span><Chispa /> La IA la lee y llena el formulario. Se guarda cifrada.</span></span>
-      <Boton pequeno cargando={subir.isPending} textoCargando="Subiendo…" onClick={() => archivo.current?.click()}>Elegir archivo</Boton>
-      {subir.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{subir.error.message}</p>}
+      {verCv && <HojaDeVidaPdf cuenta={cuenta} onCerrar={() => setVerCv(false)} />}
     </div>
   )
 }

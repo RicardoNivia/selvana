@@ -100,8 +100,8 @@ export function useMiCuenta() {
   return useQuery({ queryKey: claves.cuenta, queryFn: ({ signal }) => apiGet<MiCuenta>(`${base}/`, signal), retry: false })
 }
 
-export function useMiPortal() {
-  return useQuery({ queryKey: claves.portal, queryFn: ({ signal }) => apiGet<MiPortal>(`${base}/portal`, signal), retry: false, refetchInterval: 30_000 })
+export function useMiPortal(activo = true) {
+  return useQuery({ queryKey: claves.portal, queryFn: ({ signal }) => apiGet<MiPortal>(`${base}/portal`, signal), retry: false, refetchInterval: 30_000, enabled: activo })
 }
 
 export function useOfertasParaTi(activo: boolean) {
@@ -139,7 +139,7 @@ export const useIngresarPortal = () => useMutacionCuenta((v: { correo: string; c
 
 export function useSalirPortal() {
   const cliente = useQueryClient()
-  return useMutation({ mutationFn: () => apiSend('POST', `${base}/salir`), onSettled: () => cliente.removeQueries({ queryKey: ['portal-persona'] }) })
+  return useMutation({ mutationFn: () => apiSend('POST', `${base}/salir`), onSettled: () => cliente.resetQueries({ queryKey: ['portal-persona'] }) })
 }
 
 export const useActualizarMisDatos = () => useMutacionCuenta((v: DatosEditables) => apiSend('PUT', `${base}/datos`, v))

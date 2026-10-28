@@ -48,3 +48,8 @@ export const IconoIdioma = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true"
 export const IconoInsignia = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><circle cx="10" cy="8" r="5" /><path d="M7.5 12.3 6.5 18l3.5-2 3.5 2-1-5.7M8 8l1.4 1.4L12.2 6.6" /></svg>
 export const IconoManos = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M2.5 9.5 6 6l3 1.5L11.5 6l6 3.5M9 7.5l-2.5 2.6a1.3 1.3 0 0 0 1.9 1.8l1.8-1.6 4 3.2M13.5 13.5l-1.7 1.5M11 15.7l-.9.8M6 6 2.5 12.5l2 1.8" /></svg>
 export const IconoSalir = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M8 4H5a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 5 16h3M13 6.5 16.5 10 13 13.5M16.5 10H8" /></svg>
+export const IconoChat = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M3.5 5.5A2 2 0 0 1 5.5 3.5h9a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-3.5 3v-3a2 2 0 0 1-2-2v-6Z" /><path d="M7 8h6M7 10.5h4" /></svg>
+export const IconoPrueba = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><rect x="4" y="3.5" width="12" height="14" rx="2" /><path d="M7.5 3.5V2.5h5v1M7 9l1.5 1.5L11 8M7 13.5h6" /></svg>
+export const IconoMas = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M10 4v12M4 10h12" /></svg>
+export const IconoCerrar = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M5 5l10 10M15 5 5 15" /></svg>
+export const IconoInicio = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M3 9 10 3l7 6v7.5a1 1 0 0 1-1 1h-3.5V12h-5v5.5H4a1 1 0 0 1-1-1V9Z" /></svg>
