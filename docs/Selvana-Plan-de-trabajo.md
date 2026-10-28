@@ -44,6 +44,8 @@ El orden real se ajustó para tener un flujo completo de punta a punta antes de 
 
 La diferencia con una aplicación normal de talento humano es que cada proceso tiene un **agente** que ejecuta el trabajo y deja al usuario una bandeja de aprobaciones.
 
+**Regla general (28/10/2026): todo lo que hace o configura la IA también lo puede hacer o configurar una persona a mano.** Cada resultado de la IA se edita, se crea desde cero sin IA o parte de una plantilla o regla de base; lo que la IA usa para trabajar (descripciones, plantillas, filtros, catálogos, pesos) lo configura el usuario; y ningún flujo se detiene si la IA falla, se apaga o la empresa no quiere usarla. Cada bloque nuevo se entrega con su camino manual.
+
 | Proceso | Aplicación tradicional (el usuario hace) | Selvana (la IA hace) | El usuario solo… |
 | --- | --- | --- | --- |
 | Crear vacante | Redacta perfil y aviso | Genera perfil, aviso, preguntas filtro y rango salarial sugerido a partir de una frase o un cargo existente | Aprueba o ajusta |

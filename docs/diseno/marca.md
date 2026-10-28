@@ -87,3 +87,4 @@ Escala: display 56/60 · h1 32/38 · h2 22/28 · body 15/24 · label 13/18 · da
 2. **Nada sin explicación:** todo puntaje o sugerencia muestra sus razones con fuente y se puede corregir.
 3. **Prellenado, nunca en blanco:** ningún formulario aparece vacío si la IA puede llenarlo.
 4. **Celular primero para el operativo:** WhatsApp y web móvil liviana, sin app que instalar.
+5. **Todo lo de la IA también se hace a mano:** cada propuesta de la IA se edita, se crea desde cero o parte de una plantilla o regla de base, y lo que la IA usa para trabajar se configura en la pantalla. Si la IA falla o está apagada, el flujo sigue a mano: nunca un botón violeta como único camino.
