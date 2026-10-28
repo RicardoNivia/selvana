@@ -82,7 +82,7 @@ public sealed class RazonVacante
 public sealed record ContenidoVacante(
     string Titulo, string Cargo, string Ciudad, int Cupos, string Jornada, string Descripcion,
     decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
-    string? CodigoMunicipio = null);
+    string? CodigoMunicipio = null, bool EmpresaConfidencial = false, bool SalarioOculto = false);
 
 public static class VacanteErrors
 {
@@ -191,6 +191,23 @@ public sealed class Vacante : AggregateRoot<Guid>
     /// <summary>Empresa que se muestra en el portal: la empresa usuaria si es una EST, si no la empresa.</summary>
     public string EmpresaVisible => EmpresaUsuariaNombre ?? EmpresaNombre;
 
+    public const string NombreConfidencial = "Empresa confidencial";
+
+    /// <summary>La oferta se publica sin decir qué empresa contrata.</summary>
+    public bool EmpresaConfidencial { get; private set; }
+
+    /// <summary>El portal no muestra el rango salarial («A convenir»); la vacante lo conserva para el ranking y la oferta.</summary>
+    public bool SalarioOculto { get; private set; }
+
+    /// <summary>Nombre que ve el candidato en el portal.</summary>
+    public string EmpresaEnPortal => EmpresaConfidencial ? NombreConfidencial : EmpresaVisible;
+
+    /// <summary>
+    /// A quién autoriza el candidato el tratamiento de sus datos (Ley 1581: el responsable debe estar identificado).
+    /// Si la oferta es confidencial, se nombra a la empresa que opera Selvana (la EST o la empresa misma), no a la empresa usuaria.
+    /// </summary>
+    public string ResponsableDatos => EmpresaConfidencial ? EmpresaNombre : EmpresaVisible;
+
     public bool RecibePostulaciones => Estado == EstadoVacante.Publicada;
 
     public static Result<Vacante> Solicitar(
@@ -293,6 +310,8 @@ public sealed class Vacante : AggregateRoot<Guid>
         }
 
         // Si parte de un cargo del catálogo, el nombre del cargo es el del catálogo, diga lo que diga la IA
+        // Lo que la persona decidió de la publicación (empresa confidencial, salario oculto) no lo cambia la IA
+        contenido = contenido with { EmpresaConfidencial = EmpresaConfidencial, SalarioOculto = SalarioOculto };
         Aplicar(CargoId is null || string.IsNullOrWhiteSpace(Cargo) ? contenido : contenido with { Cargo = Cargo });
         JustificacionSalario = justificacionSalario;
         Competencias = [.. competencias];
@@ -487,6 +506,8 @@ public sealed class Vacante : AggregateRoot<Guid>
         Cargo = c.Cargo.Trim();
         Ciudad = c.Ciudad.Trim();
         CodigoMunicipio = string.IsNullOrWhiteSpace(c.CodigoMunicipio) ? null : c.CodigoMunicipio.Trim();
+        EmpresaConfidencial = c.EmpresaConfidencial;
+        SalarioOculto = c.SalarioOculto;
         Cupos = c.Cupos;
         Jornada = c.Jornada.Trim();
         Descripcion = c.Descripcion.Trim();

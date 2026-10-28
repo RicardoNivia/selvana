@@ -18,7 +18,7 @@ public sealed record VacanteDto(
     IReadOnlyList<RazonDto> Razones, string? ModeloIa, string? MensajeIa, bool EditadaPorPersona,
     DateTimeOffset CreadaEn, string CreadaPor, DateTimeOffset? PublicadaEn, int Postulantes, IReadOnlyList<ConteoDto> Canales,
     IReadOnlyList<Pruebas.PruebaEnBateriaDto> Pruebas, AprobacionRequisicionDto Aprobacion, Guid? CargoId = null, CargoCatalogoDto? CargoCatalogo = null,
-    string? CodigoMunicipio = null, IReadOnlyList<AclaracionDto>? Aclaraciones = null);
+    string? CodigoMunicipio = null, IReadOnlyList<AclaracionDto>? Aclaraciones = null, bool EmpresaConfidencial = false, bool SalarioOculto = false);
 
 /// <summary>Pregunta de la IA antes de redactar, con opciones para elegir.</summary>
 public sealed record AclaracionDto(string Pregunta, IReadOnlyList<string> Opciones);
@@ -52,13 +52,14 @@ public sealed record AfinidadDto(
 
 public sealed record VacantePublicaDto(
     string Codigo, string Titulo, string Empresa, string Ciudad, string Jornada, int Cupos, decimal SalarioMinimo, decimal SalarioMaximo,
-    string Resumen, DateTimeOffset PublicadaEn);
+    string Resumen, DateTimeOffset PublicadaEn, bool SalarioOculto = false);
 
 public sealed record PortalDto(Pagina<VacantePublicaDto> Vacantes, IReadOnlyList<ConteoDto> Ciudades, IReadOnlyList<ConteoDto> Jornadas, int Empresas);
 
 public sealed record VacantePublicaDetalleDto(
     string Codigo, string Titulo, string Empresa, string Ciudad, string Jornada, int Cupos, decimal SalarioMinimo, decimal SalarioMaximo,
-    string Descripcion, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro, DateTimeOffset PublicadaEn, bool RecibePostulaciones);
+    string Descripcion, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro, DateTimeOffset PublicadaEn, bool RecibePostulaciones,
+    bool SalarioOculto = false);
 
 public sealed record ExperienciaDto(string Cargo, string Empresa, string Desde, string Hasta);
 

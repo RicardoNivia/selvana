@@ -627,6 +627,10 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("editada_por_persona");
 
+                    b.Property<bool>("EmpresaConfidencial")
+                        .HasColumnType("boolean")
+                        .HasColumnName("empresa_confidencial");
+
                     b.Property<Guid>("EmpresaId")
                         .HasColumnType("uuid")
                         .HasColumnName("empresa_id");
@@ -713,6 +717,10 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasPrecision(14, 2)
                         .HasColumnType("numeric(14,2)")
                         .HasColumnName("salario_minimo");
+
+                    b.Property<bool>("SalarioOculto")
+                        .HasColumnType("boolean")
+                        .HasColumnName("salario_oculto");
 
                     b.PrimitiveCollection<List<string>>("Supuestos")
                         .IsRequired()

@@ -121,6 +121,8 @@ export const esLinkedIn = (texto: string) => /^(https?:\/\/)?([a-z]{2,3}\.)?link
 
 export const pesos = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
 
+/** Rango salarial para el portal; si la empresa decidió no mostrarlo, la API lo manda en cero y se lee «A convenir». */
 export function rangoSalario(min: number, max: number) {
+  if (min <= 0 && max <= 0) return 'A convenir'
   return max > min ? `${pesos.format(min)} – ${pesos.format(max)}` : pesos.format(min)
 }

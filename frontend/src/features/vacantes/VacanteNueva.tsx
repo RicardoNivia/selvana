@@ -6,6 +6,7 @@ import { Chispa, IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Ic
 import { useSesion } from '../sesion/api'
 import { useEmpresaUsuariaActual } from '../sesion/empresaUsuaria'
 import { ElegirCargo } from './CargoDelCatalogo'
+import { OpcionesPublicacion } from './OpcionesPublicacion'
 import { type Aclaracion, type CargoCatalogo, type ContenidoVacante, type Vacante, useCrearVacante, useEditarVacante, useEnviarAAprobacion, useEmpresaActual, useRedactarVacante, useSolicitarVacante, useVacante } from './api'
 
 /** Lo que llega desde la barra de la lista: la frase, el cargo y la empresa usuaria; con generar, se pide a la IA al abrir. */
@@ -54,6 +55,7 @@ export function VacanteNueva() {
   const [modalAbierto, setModalAbierto] = useState(false)
   const [falta, setFalta] = useState<string>()
   const [enviando, setEnviando] = useState(false)
+  const [publicacion, setPublicacion] = useState({ empresaConfidencial: false, salarioOculto: false })
   const visibles = new Set(sesion?.empresasUsuarias.map((e) => e.id))
   const usuarias = empresa.data?.empresasUsuarias.filter((e) => e.activa && visibles.has(e.id)) ?? []
 
@@ -112,7 +114,7 @@ export function VacanteNueva() {
   const contenido = (): ContenidoVacante => ({
     titulo: f.titulo, cargo: cargo?.nombre ?? f.cargo, ciudad: f.ciudad, codigoMunicipio: f.codigoMunicipio, cupos: Number(f.cupos) || 0, jornada: f.jornada,
     descripcion: f.descripcion, salarioMinimo: Number(f.salarioMinimo) || 0, salarioMaximo: Number(f.salarioMaximo) || 0,
-    requisitos: lineas(f.requisitos), preguntasFiltro: lineas(f.preguntas),
+    requisitos: lineas(f.requisitos), preguntasFiltro: lineas(f.preguntas), ...publicacion,
   })
 
   // Guardar deja el borrador; con «enviar», además lo manda a aprobación. Después se sigue en el detalle de la vacante
@@ -213,6 +215,7 @@ export function VacanteNueva() {
           <label>Requisitos <span className="ayuda">Uno por línea</span><textarea className={clase('requisitos', 'area-texto')} rows={6} value={f.requisitos} onChange={(e) => poner('requisitos', e.target.value)} /></label>
           <label>Preguntas filtro <span className="ayuda">Una por línea; el candidato responde sí o no</span><textarea className={clase('preguntas', 'area-texto')} rows={6} value={f.preguntas} onChange={(e) => poner('preguntas', e.target.value)} /></label>
         </div>
+        <OpcionesPublicacion {...publicacion} onCambiar={setPublicacion} />
 
         {hayIa && vacante && vacante.razones.length > 0 && (
           <div className="bloque-ia">

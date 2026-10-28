@@ -20,7 +20,7 @@ public sealed record SolicitarVacanteCommand(string Frase, Guid? EmpresaUsuariaI
 public sealed record EditarVacanteCommand(
     Guid VacanteId, string Titulo, string Cargo, string Ciudad, int Cupos, string Jornada, string Descripcion,
     decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
-    string? CodigoMunicipio = null) : ICommand;
+    string? CodigoMunicipio = null, bool EmpresaConfidencial = false, bool SalarioOculto = false) : ICommand;
 
 /// <summary>Envía la requisición a aprobación (RRHH → gerencia); la última aprobación la publica en el portal.</summary>
 public sealed record SolicitarAprobacionVacanteCommand(Guid VacanteId) : ICommand;
@@ -107,7 +107,7 @@ internal sealed class EditarVacanteHandler(IUsuarioActual usuario, IVacantes vac
         }
 
         var resultado = vacante.Editar(new ContenidoVacante(c.Titulo, c.Cargo, c.Ciudad, c.Cupos, c.Jornada, c.Descripcion,
-            c.SalarioMinimo, c.SalarioMaximo, c.Requisitos, c.PreguntasFiltro, c.CodigoMunicipio));
+            c.SalarioMinimo, c.SalarioMaximo, c.Requisitos, c.PreguntasFiltro, c.CodigoMunicipio, c.EmpresaConfidencial, c.SalarioOculto));
         if (resultado.IsSuccess)
         {
             bitacora.Registrar(vacante.EmpresaId, TipoActor.Persona, usuario.Nombre, $"Editó la vacante {vacante.Codigo}", vacante.Titulo,

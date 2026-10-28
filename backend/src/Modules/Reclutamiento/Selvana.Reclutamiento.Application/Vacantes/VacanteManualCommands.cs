@@ -18,7 +18,8 @@ namespace Selvana.Reclutamiento.Application.Vacantes;
 /// </summary>
 public sealed record CrearVacanteCommand(
     Guid? EmpresaUsuariaId, Guid? CargoId, string Titulo, string Cargo, string Ciudad, string? CodigoMunicipio, int Cupos, string Jornada,
-    string Descripcion, decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro) : ICommand<Guid>;
+    string Descripcion, decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
+    bool EmpresaConfidencial = false, bool SalarioOculto = false) : ICommand<Guid>;
 
 /// <summary>Pide a la IA un borrador nuevo de una vacante en borrador, con otra frase (por ejemplo, la respuesta a sus aclaraciones).</summary>
 public sealed record RedactarVacanteCommand(Guid VacanteId, string Frase) : ICommand;
@@ -72,7 +73,7 @@ internal sealed class CrearVacanteHandler(
         var nombreCargo = cargo?.Nombre ?? c.Cargo;
         var resultado = Vacante.CrearManual(empresa.Id, empresa.Nombre, usuaria?.Id, usuaria?.Nombre,
             new ContenidoVacante(c.Titulo, nombreCargo, c.Ciudad, c.Cupos, c.Jornada, c.Descripcion, c.SalarioMinimo, c.SalarioMaximo,
-                c.Requisitos, c.PreguntasFiltro, c.CodigoMunicipio),
+                c.Requisitos, c.PreguntasFiltro, c.CodigoMunicipio, c.EmpresaConfidencial, c.SalarioOculto),
             usuario.Nombre, reloj.GetUtcNow(), cargo?.Id);
         if (resultado.IsFailure)
         {

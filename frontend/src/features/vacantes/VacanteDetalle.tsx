@@ -12,6 +12,7 @@ import { AbrirHojaDeVida } from './AbrirHojaDeVida'
 import { ExplicacionAfinidad, PuntajeAfinidad } from './AfinidadPostulante'
 import { AprobacionRequisicion } from './AprobacionRequisicion'
 import { CargoDeLaVacante } from './CargoDelCatalogo'
+import { OpcionesPublicacion } from './OpcionesPublicacion'
 import { DelBanco } from './DelBanco'
 import { ComparativoFinalistas } from './ComparativoFinalistas'
 import { FiltrosAts } from './FiltrosAts'
@@ -103,6 +104,7 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
   const bloqueada = v.estado === 'Cerrada' || v.estado === 'EnAprobacion'
   const [municipio, setMunicipio] = useState(v.codigoMunicipio)
   const [ciudadTocada, setCiudadTocada] = useState(false)
+  const [publicacion, setPublicacion] = useState({ empresaConfidencial: v.empresaConfidencial, salarioOculto: v.salarioOculto })
   const [f, setF] = useState({
     titulo: v.titulo, cargo: v.cargo, ciudad: v.ciudad, cupos: String(v.cupos || ''), jornada: v.jornada, descripcion: v.descripcion,
     salarioMinimo: String(v.salarioMinimo || ''), salarioMaximo: String(v.salarioMaximo || ''), requisitos: v.requisitos.join('\n'), preguntas: v.preguntasFiltro.join('\n'),
@@ -117,7 +119,7 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
   const contenido = () => ({
     titulo: f.titulo, cargo: f.cargo, ciudad: f.ciudad, cupos: Number(f.cupos) || 0, jornada: f.jornada, descripcion: f.descripcion,
     salarioMinimo: Number(f.salarioMinimo) || 0, salarioMaximo: Number(f.salarioMaximo) || 0, requisitos: lineas(f.requisitos), preguntasFiltro: lineas(f.preguntas),
-    codigoMunicipio: municipio,
+    codigoMunicipio: municipio, ...publicacion,
   })
   const guardarYEnviar = () => (tocado ? editar.mutate(contenido(), { onSuccess: () => solicitar.mutate() }) : solicitar.mutate())
   const error = editar.error ?? solicitar.error ?? aprobar.error ?? cerrar.error
@@ -157,6 +159,7 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
           <label>Requisitos <span className="ayuda">Uno por línea</span><textarea {...campo('requisitos')} rows={6} /></label>
           <label>Preguntas filtro <span className="ayuda">Una por línea; el candidato responde sí o no</span><textarea {...campo('preguntas')} rows={6} /></label>
         </div>
+        <OpcionesPublicacion {...publicacion} disabled={bloqueada} onCambiar={(p) => { setPublicacion(p); setTocado(true) }} />
         {error && <span role="alert" className="error-formulario">{error.message}</span>}
         <div className="decision" style={{ padding: '8px 0 0', borderTop: 0 }}>
           {/* Un paso a la vez: borrador → enviar a aprobación → aprobar (la última aprobación la publica) → cerrar */}

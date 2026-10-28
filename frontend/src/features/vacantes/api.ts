@@ -102,6 +102,8 @@ export interface Vacante {
   codigoMunicipio: string | null
   /** Preguntas de la IA antes de redactar (por ejemplo, si la frase pide dos cargos). */
   aclaraciones: Aclaracion[] | null
+  empresaConfidencial: boolean
+  salarioOculto: boolean
 }
 
 /** Afinidad con la vacante: sugerencia del agente de ranking y, si existe, el ajuste de una persona. */
@@ -161,6 +163,10 @@ export interface ContenidoVacante {
   requisitos: string[]
   preguntasFiltro: string[]
   codigoMunicipio?: string | null
+  /** En el portal la oferta sale como «Empresa confidencial». */
+  empresaConfidencial?: boolean
+  /** El portal muestra «A convenir» en lugar del rango salarial. */
+  salarioOculto?: boolean
 }
 
 function query(params: Record<string, string | number | undefined>) {

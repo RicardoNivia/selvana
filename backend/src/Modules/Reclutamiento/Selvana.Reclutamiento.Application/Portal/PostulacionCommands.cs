@@ -139,11 +139,11 @@ internal sealed class EnviarPostulacionHandler(
             ? new AutorizacionDatos
             {
                 Version = PoliticaDatos.Version,
-                Texto = PoliticaDatos.Texto(vacante.EmpresaVisible),
+                Texto = PoliticaDatos.Texto(vacante.ResponsableDatos),
                 AceptadaEn = ahora,
                 Ip = c.Ip,
                 Navegador = c.Navegador.Length <= 300 ? c.Navegador : c.Navegador[..300],
-                Huella = AutorizacionDatos.CalcularHuella(PoliticaDatos.Version, PoliticaDatos.Texto(vacante.EmpresaVisible), ahora, c.Ip,
+                Huella = AutorizacionDatos.CalcularHuella(PoliticaDatos.Version, PoliticaDatos.Texto(vacante.ResponsableDatos), ahora, c.Ip,
                     c.Navegador.Length <= 300 ? c.Navegador : c.Navegador[..300], datos.Documento),
             }
             : null;
