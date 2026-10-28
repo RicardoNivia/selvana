@@ -8,7 +8,9 @@ namespace Selvana.Reclutamiento.Domain.Portal;
 public static class CuentaErrors
 {
     public static readonly Error CorreoInvalido = Error.Validation("Cuenta.CorreoInvalido", "Escribe un correo válido, por ejemplo nombre@correo.com.");
-    public static readonly Error DocumentoInvalido = Error.Validation("Cuenta.DocumentoInvalido", "Escribe tu número de cédula (solo números, entre 6 y 12 dígitos).");
+    public static readonly Error DocumentoInvalido = Error.Validation("Cuenta.DocumentoInvalido", "Escribe tu número de identificación (entre 5 y 15 caracteres; el pasaporte puede llevar letras).");
+    public static readonly Error TipoDocumentoInvalido = Error.Validation("Cuenta.TipoDocumentoInvalido", "Elige el tipo de identificación.");
+    public static readonly Error DocumentoYaRegistrado = Error.Conflict("Cuenta.DocumentoYaRegistrado", "Ya existe una cuenta con esa identificación. Por ahora, contacta a soporte para recuperarla.");
     public static readonly Error SinAutorizacion = Error.Validation("Cuenta.SinAutorizacion", "Para crear tu cuenta debes aceptar la autorización de tratamiento de datos.");
     public static readonly Error YaExiste = Error.Conflict("Cuenta.YaExiste", "Ya hay una cuenta con ese correo. Entra con tu contraseña.");
     public static readonly Error CredencialesInvalidas = Error.Validation("Cuenta.Credenciales", "El correo o la contraseña no coinciden. Revísalos e intenta de nuevo.");
@@ -32,7 +34,10 @@ public sealed class CuentaCandidato : AggregateRoot<Guid>
     /// <summary>En minúsculas y sin espacios: es la llave para entrar.</summary>
     public string Correo { get; private set; } = "";
 
-    /// <summary>Solo dígitos.</summary>
+    /// <summary>CC, CE, TI, PA (pasaporte) o PPT (permiso por protección temporal).</summary>
+    public string TipoDocumento { get; private set; } = "CC";
+
+    /// <summary>Solo dígitos; el pasaporte, letras y dígitos en mayúscula.</summary>
     public string Documento { get; private set; } = "";
     public string ContrasenaHash { get; private set; } = "";
 
@@ -49,21 +54,33 @@ public sealed class CuentaCandidato : AggregateRoot<Guid>
     public int IntentosFallidos { get; private set; }
     public DateTimeOffset? BloqueadaHasta { get; private set; }
 
+    public static readonly IReadOnlyList<string> TiposDocumento = ["CC", "CE", "TI", "PA", "PPT"];
+
     public static string NormalizarCorreo(string correo) => (correo ?? "").Trim().ToLowerInvariant();
 
+    /// <summary>Igual que en la postulación (solo dígitos), salvo el pasaporte, que puede llevar letras.</summary>
+    public static string NormalizarDocumento(string tipo, string numero) => tipo == "PA"
+        ? new string([.. (numero ?? "").Where(char.IsLetterOrDigit).Select(char.ToUpperInvariant)])
+        : Candidato.NormalizarDocumento(numero);
+
+    /// <summary>Se registra con lo mínimo; la hoja de vida la sube después en su portal y la IA la lee.</summary>
     public static Result<CuentaCandidato> Registrar(
-        string correo, string contrasenaHash, DatosCandidato datos, AutorizacionDatos? autorizacion, Guid? archivoHojaDeVidaId, string nombreArchivo,
-        DateTimeOffset ahora)
+        string correo, string contrasenaHash, string nombre, string tipoDocumento, string numeroDocumento, AutorizacionDatos? autorizacion, DateTimeOffset ahora)
     {
-        ArgumentNullException.ThrowIfNull(datos);
         var c = NormalizarCorreo(correo);
         if (!EsCorreo(c))
         {
             return CuentaErrors.CorreoInvalido;
         }
 
-        var documento = Candidato.NormalizarDocumento(datos.Documento);
-        if (documento.Length is < 6 or > 12)
+        var tipo = (tipoDocumento ?? "").Trim().ToUpperInvariant();
+        if (!TiposDocumento.Contains(tipo))
+        {
+            return CuentaErrors.TipoDocumentoInvalido;
+        }
+
+        var documento = NormalizarDocumento(tipo, numeroDocumento);
+        if (documento.Length is < 5 or > 15)
         {
             return CuentaErrors.DocumentoInvalido;
         }
@@ -76,13 +93,11 @@ public sealed class CuentaCandidato : AggregateRoot<Guid>
         return new CuentaCandidato(Guid.CreateVersion7())
         {
             Correo = c,
+            TipoDocumento = tipo,
             Documento = documento,
             ContrasenaHash = contrasenaHash,
-            Datos = ConCorreoYDocumento(datos, c, documento),
+            Datos = ConCorreoYDocumento(new DatosCandidato { Nombre = nombre }, c, documento),
             Autorizacion = autorizacion,
-            ArchivoHojaDeVidaId = archivoHojaDeVidaId,
-            NombreArchivoHojaDeVida = archivoHojaDeVidaId is null ? "" : nombreArchivo,
-            HojaDeVidaActualizadaEn = archivoHojaDeVidaId is null ? null : ahora,
             CreadaEn = ahora,
         };
     }

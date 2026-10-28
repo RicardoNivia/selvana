@@ -21,6 +21,8 @@ public interface ICuentasCandidato
 
     Task<CuentaCandidato?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken);
 
+    Task<bool> ExisteDocumentoAsync(string tipoDocumento, string documento, CancellationToken cancellationToken);
+
     void Agregar(CuentaCandidato cuenta);
 }
 
@@ -50,7 +52,7 @@ public sealed record DatosPerfilDto(
 
 public sealed record HojaDeVidaPerfilDto(Guid Id, string Estado, string? Mensaje, string NombreArchivo, DatosPerfilDto? Datos, string VersionAutorizacion, string TextoAutorizacion);
 
-public sealed record MiCuentaDto(Guid Id, string Correo, DatosPerfilDto Datos, string? NombreArchivoHojaDeVida, DateTimeOffset? HojaDeVidaActualizadaEn,
+public sealed record MiCuentaDto(Guid Id, string Correo, string TipoDocumento, DatosPerfilDto Datos, string? NombreArchivoHojaDeVida, DateTimeOffset? HojaDeVidaActualizadaEn,
     string VersionAutorizacion, DateTimeOffset AutorizadaEn, DateTimeOffset CreadaEn);
 
 public sealed record SesionPortal(Guid CuentaId, string Nombre);
@@ -58,14 +60,14 @@ public sealed record SesionPortal(Guid CuentaId, string Nombre);
 /// <summary>Lo que la persona confirma o corrige de sus datos.</summary>
 public sealed record DatosEditables(string Nombre, string Celular, string Ciudad, string? LinkedIn);
 
-/// <summary>Paso 1 del registro (o de actualizar la hoja de vida): sube el archivo y la IA lo lee, igual que en la postulación.</summary>
+/// <summary>Ya con cuenta, sube su hoja de vida y la IA la lee, igual que en la postulación.</summary>
 public sealed record SubirHojaDeVidaPerfilCommand(string NombreArchivo, string TipoContenido, byte[] Contenido) : ICommand<Guid>;
 
 public sealed record ObtenerHojaDeVidaPerfilQuery(Guid BorradorId) : IQuery<HojaDeVidaPerfilDto>;
 
-/// <summary>Paso 2: la persona confirma sus datos, escoge su contraseña y acepta la autorización. Queda con sesión.</summary>
+/// <summary>Registro con lo mínimo: correo, nombre, tipo y número de identificación, contraseña y autorización. Queda con sesión.</summary>
 public sealed record RegistrarCuentaCommand(
-    Guid? BorradorId, string Correo, string Contrasena, string Documento, DatosEditables Datos, bool AceptaAutorizacion, string Ip, string Navegador)
+    string Correo, string Contrasena, string Nombre, string TipoDocumento, string NumeroDocumento, bool AceptaAutorizacion, string Ip, string Navegador)
     : ICommand<SesionPortal>;
 
 public sealed record IngresarCuentaCommand(string Correo, string Contrasena) : ICommand<SesionPortal>;
@@ -88,8 +90,8 @@ internal sealed class DatosEditablesValidator : AbstractValidator<DatosEditables
     public DatosEditablesValidator()
     {
         RuleFor(d => d.Nombre).NotEmpty().WithMessage("Escribe tu nombre completo.").MaximumLength(200);
-        RuleFor(d => d.Celular).NotEmpty().WithMessage("Escribe tu celular.").MaximumLength(30);
-        RuleFor(d => d.Ciudad).NotEmpty().WithMessage("Elige tu ciudad.").MaximumLength(100);
+        RuleFor(d => d.Celular).MaximumLength(30);
+        RuleFor(d => d.Ciudad).MaximumLength(100);
     }
 }
 
@@ -99,8 +101,9 @@ internal sealed class RegistrarCuentaValidator : AbstractValidator<RegistrarCuen
     {
         RuleFor(c => c.Correo).NotEmpty().WithMessage("Escribe tu correo.").MaximumLength(200);
         RuleFor(c => c.Contrasena).MinimumLength(8).WithMessage("Tu contraseña debe tener al menos 8 caracteres.").MaximumLength(200);
-        RuleFor(c => c.Documento).NotEmpty().WithMessage("Escribe tu número de cédula.");
-        RuleFor(c => c.Datos).SetValidator(new DatosEditablesValidator());
+        RuleFor(c => c.Nombre).NotEmpty().WithMessage("Escribe tu nombre completo.").MaximumLength(200);
+        RuleFor(c => c.TipoDocumento).NotEmpty().WithMessage("Elige el tipo de identificación.");
+        RuleFor(c => c.NumeroDocumento).NotEmpty().WithMessage("Escribe tu número de identificación.").MaximumLength(30);
     }
 }
 
@@ -185,32 +188,26 @@ internal sealed class ObtenerHojaDeVidaPerfilHandler(IBorradoresPostulacion borr
     }
 }
 
-internal sealed class RegistrarCuentaHandler(
-    ICuentasCandidato cuentas, IBorradoresPostulacion borradores, IHasherClavesPortal hasher, IUnidadReclutamiento unidad, TimeProvider reloj)
+internal sealed class RegistrarCuentaHandler(ICuentasCandidato cuentas, IHasherClavesPortal hasher, IUnidadReclutamiento unidad, TimeProvider reloj)
     : ICommandHandler<RegistrarCuentaCommand, SesionPortal>
 {
     public async Task<Result<SesionPortal>> Handle(RegistrarCuentaCommand c, CancellationToken cancellationToken)
     {
         var ahora = reloj.GetUtcNow();
-        if (await cuentas.ObtenerPorCorreoAsync(CuentaCandidato.NormalizarCorreo(c.Correo), cancellationToken) is not null)
+        var correo = CuentaCandidato.NormalizarCorreo(c.Correo);
+        if (await cuentas.ObtenerPorCorreoAsync(correo, cancellationToken) is not null)
         {
             return CuentaErrors.YaExiste;
         }
 
-        BorradorPostulacion? borrador = null;
-        if (c.BorradorId is { } id)
+        // Una identificación, una cuenta: si ya existe, por ahora la recupera soporte
+        var tipo = c.TipoDocumento.Trim().ToUpperInvariant();
+        var documento = CuentaCandidato.NormalizarDocumento(tipo, c.NumeroDocumento);
+        if (await cuentas.ExisteDocumentoAsync(tipo, documento, cancellationToken))
         {
-            var b = await HojaDeVidaPerfil.ObtenerLeidoAsync(borradores, id, ahora, cancellationToken);
-            if (b.IsFailure)
-            {
-                return b.Error;
-            }
-
-            borrador = b.Value;
+            return CuentaErrors.DocumentoYaRegistrado;
         }
 
-        var documento = Candidato.NormalizarDocumento(c.Documento);
-        var correo = CuentaCandidato.NormalizarCorreo(c.Correo);
         var autorizacion = c.AceptaAutorizacion
             ? new AutorizacionDatos
             {
@@ -223,8 +220,7 @@ internal sealed class RegistrarCuentaHandler(
             }
             : null;
 
-        var cuenta = CuentaCandidato.Registrar(correo, hasher.Calcular(c.Contrasena), HojaDeVidaPerfil.Combinar(borrador?.DatosLeidos, documento, correo, c.Datos),
-            autorizacion, borrador?.ArchivoId, borrador?.NombreArchivo ?? "", ahora);
+        var cuenta = CuentaCandidato.Registrar(correo, hasher.Calcular(c.Contrasena), c.Nombre, tipo, c.NumeroDocumento, autorizacion, ahora);
         if (cuenta.IsFailure)
         {
             return cuenta.Error;
@@ -232,11 +228,6 @@ internal sealed class RegistrarCuentaHandler(
 
         cuenta.Value.Ingresar(contrasenaValida: true, ahora);
         cuentas.Agregar(cuenta.Value);
-        if (borrador is not null)
-        {
-            borradores.Quitar(borrador);
-        }
-
         await unidad.SaveChangesAsync(cancellationToken);
         return new SesionPortal(cuenta.Value.Id, cuenta.Value.Datos.Nombre);
     }
@@ -269,7 +260,7 @@ internal sealed class ObtenerMiCuentaHandler(IPersonaActual persona, ICuentasCan
         var c = persona.CuentaId is { } id ? await cuentas.ObtenerAsync(id, cancellationToken) : null;
         return c is null
             ? CuentaErrors.NoExiste
-            : new MiCuentaDto(c.Id, c.Correo, HojaDeVidaPerfil.Dto(c.Datos), c.ArchivoHojaDeVidaId is null ? null : c.NombreArchivoHojaDeVida,
+            : new MiCuentaDto(c.Id, c.Correo, c.TipoDocumento, HojaDeVidaPerfil.Dto(c.Datos), c.ArchivoHojaDeVidaId is null ? null : c.NombreArchivoHojaDeVida,
                 c.HojaDeVidaActualizadaEn, c.Autorizacion.Version, c.Autorizacion.AceptadaEn, c.CreadaEn);
     }
 }

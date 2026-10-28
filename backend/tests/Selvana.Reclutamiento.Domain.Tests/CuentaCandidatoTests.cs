@@ -9,32 +9,40 @@ public sealed class CuentaCandidatoTests
     private static readonly DateTimeOffset Ahora = new(2026, 10, 28, 8, 0, 0, TimeSpan.Zero);
     private static readonly AutorizacionDatos Autorizacion = new() { Version = "portal-v1", Texto = "Autorizo", AceptadaEn = Ahora };
 
-    private static DatosCandidato Datos(string documento = "1.023.456.789") => new() { Nombre = " Ana Pérez ", Documento = documento, Celular = "3001234567", Ciudad = "Funza" };
+    private static CuentaCandidato Cuenta() => CuentaCandidato.Registrar("ana@correo.com", "hash", "Ana Pérez", "CC", "1.023.456.789", Autorizacion, Ahora).Value;
 
     [Fact]
-    public void SeRegistraConCorreoNormalizadoYCedulaSoloConDigitos()
+    public void SeRegistraConLoMinimoYCorreoYCedulaNormalizados()
     {
-        var cuenta = CuentaCandidato.Registrar(" Ana.Perez@Correo.COM ", "hash", Datos(), Autorizacion, null, "", Ahora).Value;
+        var cuenta = CuentaCandidato.Registrar(" Ana.Perez@Correo.COM ", "hash", " Ana Pérez ", "cc", "1.023.456.789", Autorizacion, Ahora).Value;
 
         cuenta.Correo.Should().Be("ana.perez@correo.com");
+        cuenta.TipoDocumento.Should().Be("CC");
         cuenta.Documento.Should().Be("1023456789");
-        cuenta.Datos.Correo.Should().Be("ana.perez@correo.com");
         cuenta.Datos.Nombre.Should().Be("Ana Pérez");
-        cuenta.ArchivoHojaDeVidaId.Should().BeNull();
+        cuenta.Datos.Documento.Should().Be("1023456789");
+        cuenta.ArchivoHojaDeVidaId.Should().BeNull("la hoja de vida se sube después, en el portal");
     }
 
     [Fact]
-    public void NoSeRegistraSinCorreoValidoSinCedulaOSinAutorizacion()
+    public void ElPasaporteConservaLasLetras()
     {
-        CuentaCandidato.Registrar("ana@", "hash", Datos(), Autorizacion, null, "", Ahora).Error.Should().Be(CuentaErrors.CorreoInvalido);
-        CuentaCandidato.Registrar("ana@correo.com", "hash", Datos("12"), Autorizacion, null, "", Ahora).Error.Should().Be(CuentaErrors.DocumentoInvalido);
-        CuentaCandidato.Registrar("ana@correo.com", "hash", Datos(), null, null, "", Ahora).Error.Should().Be(CuentaErrors.SinAutorizacion);
+        CuentaCandidato.Registrar("ana@correo.com", "hash", "Ana", "PA", "ab-123456", Autorizacion, Ahora).Value.Documento.Should().Be("AB123456");
+    }
+
+    [Fact]
+    public void NoSeRegistraSinCorreoTipoIdentificacionValidosOSinAutorizacion()
+    {
+        CuentaCandidato.Registrar("ana@", "hash", "Ana", "CC", "1023456789", Autorizacion, Ahora).Error.Should().Be(CuentaErrors.CorreoInvalido);
+        CuentaCandidato.Registrar("ana@correo.com", "hash", "Ana", "XX", "1023456789", Autorizacion, Ahora).Error.Should().Be(CuentaErrors.TipoDocumentoInvalido);
+        CuentaCandidato.Registrar("ana@correo.com", "hash", "Ana", "CC", "12", Autorizacion, Ahora).Error.Should().Be(CuentaErrors.DocumentoInvalido);
+        CuentaCandidato.Registrar("ana@correo.com", "hash", "Ana", "CC", "1023456789", null, Ahora).Error.Should().Be(CuentaErrors.SinAutorizacion);
     }
 
     [Fact]
     public void CincoIntentosFallidosBloqueanQuinceMinutos()
     {
-        var cuenta = CuentaCandidato.Registrar("ana@correo.com", "hash", Datos(), Autorizacion, null, "", Ahora).Value;
+        var cuenta = Cuenta();
 
         for (var i = 0; i < CuentaCandidato.IntentosAntesDeBloquear; i++)
         {
@@ -47,9 +55,9 @@ public sealed class CuentaCandidatoTests
     }
 
     [Fact]
-    public void ActualizarDatosNoCambiaElCorreoNiLaCedulaQueUnenLasPostulaciones()
+    public void LaHojaDeVidaNuevaNoCambiaElCorreoNiLaCedulaQueUnenLasPostulaciones()
     {
-        var cuenta = CuentaCandidato.Registrar("ana@correo.com", "hash", Datos(), Autorizacion, null, "", Ahora).Value;
+        var cuenta = Cuenta();
 
         cuenta.ActualizarHojaDeVida(Guid.NewGuid(), "hv.pdf",
             new DatosCandidato { Nombre = "Ana María Pérez", Documento = "999999", Correo = "otra@correo.com", Celular = "3109998877", Ciudad = "Bogotá, D.C." }, Ahora);

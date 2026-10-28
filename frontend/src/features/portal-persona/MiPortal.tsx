@@ -1,4 +1,4 @@
-import { type FormEvent, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { AutocompletarMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
@@ -6,7 +6,7 @@ import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { Chispa, IconoAlerta, IconoCheck, IconoEscudo, IconoFlecha, IconoSubir } from '../../shared/ui/Iconos'
 import { rangoSalario } from '../portal/api'
 import {
-  type DatosEditables, type Pendiente, useAbrirPendiente, useActualizarMiHojaDeVida, useActualizarMisDatos, useHojaDeVidaPerfil, useIngresarPortal,
+  type DatosEditables, type Pendiente, type Registro, type TipoDocumento, tiposDocumento, useAbrirPendiente, useActualizarMiHojaDeVida, useActualizarMisDatos, useHojaDeVidaPerfil, useIngresarPortal,
   useMiCuenta, useMiPortal, useOfertasParaTi, usePostularmeConMiPerfil, useRegistrarme, useSalirPortal, useSubirHojaDeVidaPerfil,
 } from './api'
 import './portal-persona.css'
@@ -38,36 +38,60 @@ export function IngresarPortal() {
   )
 }
 
-/* ---------- Registro: hoja de vida → la IA la lee → confirma y crea la cuenta ---------- */
+/* ---------- Registro: lo mínimo; la hoja de vida se sube después en el portal ---------- */
+
+const textoAutorizacion =
+  'Autorizo a Selvana a tratar mis datos personales (hoja de vida y datos de contacto) para crear mi perfil, mostrarme vacantes que encajen conmigo, ' +
+  'permitirme postularme y ver el estado de mis procesos, según la Ley 1581 de 2012. Al postularme a una vacante autorizo también a la empresa que la ' +
+  'publica. Puedo consultar, actualizar o pedir que se supriman mis datos en cualquier momento.'
 
 export function RegistroPortal() {
-  const [borradorId, setBorradorId] = useState<string>()
-  const [sinHojaDeVida, setSinHojaDeVida] = useState(false)
-  const hv = useHojaDeVidaPerfil(borradorId)
+  const navegar = useNavigate()
+  const registrar = useRegistrarme()
+  const [f, setF] = useState<Registro>({ correo: '', contrasena: '', nombre: '', tipoDocumento: 'CC', numeroDocumento: '', aceptaAutorizacion: false })
+  const poner = (cambio: Partial<Registro>) => setF((x) => ({ ...x, ...cambio }))
 
   return (
     <main className="portal-ancho mp-acceso">
-      {!borradorId && !sinHojaDeVida ? (
-        <SubirHojaDeVida titulo="Crea tu cuenta" ayuda="Sube tu hoja de vida y la IA llena tu perfil. Tú solo revisas, escoges tu contraseña y listo."
-          onSubida={setBorradorId} onSinHojaDeVida={() => setSinHojaDeVida(true)} />
-      ) : borradorId && (hv.isPending || hv.data?.estado === 'Leyendo') ? (
-        <LeyendoHojaDeVida />
-      ) : (
-        <ConfirmarRegistro borradorId={borradorId ?? null} leidos={hv.data?.datos ?? null} mensaje={hv.data?.mensaje ?? null}
-          textoAutorizacion={hv.data?.textoAutorizacion} />
-      )}
+      <form className="postular-cuerpo" onSubmit={(e) => { e.preventDefault(); registrar.mutate(f, { onSuccess: () => navegar('/mi-portal') }) }}>
+        <h1>Crea tu cuenta</h1>
+        <p className="postular-ayuda">Con tu cuenta sigues tus postulaciones, respondes el chat de las empresas y firmas tu contrato. Después subes tu hoja de vida y la IA llena tu perfil.</p>
+        <label className="postular-campo">Correo<input className="entrada" type="email" autoComplete="email" value={f.correo} onChange={(e) => poner({ correo: e.target.value })} required /></label>
+        <label className="postular-campo">Nombres y apellidos<input className="entrada" autoComplete="name" value={f.nombre} onChange={(e) => poner({ nombre: e.target.value })} required /></label>
+        <div className="postular-grupo mp-identificacion">
+          <label className="postular-campo">Tipo de identificación
+            <select className="selector" value={f.tipoDocumento} onChange={(e) => poner({ tipoDocumento: e.target.value as TipoDocumento })}>
+              {tiposDocumento.map(([v, t]) => <option key={v} value={v}>{t}</option>)}
+            </select>
+          </label>
+          <label className="postular-campo">Número<input className="entrada mono" inputMode={f.tipoDocumento === 'PA' ? 'text' : 'numeric'} value={f.numeroDocumento} onChange={(e) => poner({ numeroDocumento: e.target.value })} required /></label>
+        </div>
+        <label className="postular-campo">Contraseña <span className="postular-opcional">mínimo 8 caracteres</span>
+          <input className="entrada" type="password" autoComplete="new-password" minLength={8} value={f.contrasena} onChange={(e) => poner({ contrasena: e.target.value })} required />
+        </label>
+        <p className="postular-nota-suave">Con tu correo y tu identificación unimos a tu cuenta las postulaciones que ya hiciste: usa los mismos que diste al postularte.</p>
+        <label className={`postular-autorizacion ${f.aceptaAutorizacion ? 'aceptada' : ''}`}>
+          <input type="checkbox" checked={f.aceptaAutorizacion} onChange={(e) => poner({ aceptaAutorizacion: e.target.checked })} />
+          <span>{textoAutorizacion}</span>
+        </label>
+        {registrar.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{registrar.error.message}</p>}
+        <Boton type="submit" variante="primario" cargando={registrar.isPending} textoCargando="Creando tu cuenta…" disabled={!f.aceptaAutorizacion}>
+          Crear mi cuenta <IconoFlecha />
+        </Boton>
+        <p className="postular-ayuda">¿Ya tienes cuenta? <Link to="/mi-portal/ingresar">Entra aquí</Link></p>
+      </form>
     </main>
   )
 }
 
-function SubirHojaDeVida({ titulo, ayuda, onSubida, onSinHojaDeVida }: { titulo: string; ayuda: string; onSubida: (id: string) => void; onSinHojaDeVida?: () => void }) {
+function SubirHojaDeVida({ titulo, ayuda, onSubida }: { titulo: string; ayuda: string; onSubida: (id: string) => void }) {
   const subir = useSubirHojaDeVidaPerfil()
   const archivo = useRef<HTMLInputElement>(null)
   const enviar = (f?: File) => f && subir.mutate(f, { onSuccess: (r) => onSubida(r.id) })
 
   return (
     <section className="postular-cuerpo">
-      <h1>{titulo}</h1>
+      {titulo && <h1>{titulo}</h1>}
       <p className="postular-ayuda">{ayuda}</p>
       <input ref={archivo} type="file" accept={tiposArchivo} hidden onChange={(e) => enviar(e.target.files?.[0])} />
       <button type="button" className={`postular-subir ${subir.isPending ? 'subiendo' : ''}`} disabled={subir.isPending} aria-busy={subir.isPending || undefined}
@@ -78,7 +102,6 @@ function SubirHojaDeVida({ titulo, ayuda, onSubida, onSinHojaDeVida }: { titulo:
         <span className="pill pill-ia postular-subir-ia"><Chispa />La IA la lee por ti</span>
       </button>
       {subir.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{subir.error.message}</p>}
-      {onSinHojaDeVida && <button type="button" className="enlace-boton" onClick={onSinHojaDeVida}>Crear mi cuenta sin hoja de vida por ahora</button>}
       <p className="postular-confianza"><IconoEscudo />Tu hoja de vida se guarda cifrada. No usamos tu edad, género, estado civil ni foto para evaluarte.</p>
     </section>
   )
@@ -90,60 +113,6 @@ function LeyendoHojaDeVida() {
       <div className="estado-agente"><span className="orbe trabajando" /><span>La IA está leyendo tu hoja de vida…</span></div>
       {[60, 40, 80].map((a, i) => <Esqueleto key={i} alto={a} />)}
     </section>
-  )
-}
-
-function ConfirmarRegistro({ borradorId, leidos, mensaje, textoAutorizacion }: {
-  borradorId: string | null
-  leidos: { nombre: string; documento: string; celular: string; correo: string; ciudad: string; linkedIn: string } | null
-  mensaje: string | null
-  textoAutorizacion?: string
-}) {
-  const navegar = useNavigate()
-  const registrar = useRegistrarme()
-  const [correo, setCorreo] = useState(leidos?.correo ?? '')
-  const [contrasena, setContrasena] = useState('')
-  const [documento, setDocumento] = useState(leidos?.documento ?? '')
-  const [datos, setDatos] = useState<DatosEditables>({ nombre: leidos?.nombre ?? '', celular: leidos?.celular ?? '', ciudad: '', linkedIn: leidos?.linkedIn ?? '' })
-  const [ciudadCodigo, setCiudadCodigo] = useState<string | null>(null)
-  const [acepta, setAcepta] = useState(false)
-  const ia = (valor: string | undefined, actual: string) => Boolean(valor) && valor === actual
-
-  const enviar = (e: FormEvent) => {
-    e.preventDefault()
-    registrar.mutate({ borradorId, correo, contrasena, documento, ...datos, aceptaAutorizacion: acepta }, { onSuccess: () => navegar('/mi-portal') })
-  }
-
-  return (
-    <form className="postular-cuerpo" onSubmit={enviar}>
-      <h1>Revisa tus datos</h1>
-      {leidos
-        ? <p className="postular-ayuda"><span className="pill pill-ia"><Chispa />En violeta</span> lo que leímos de tu hoja de vida. Corrígelo si hace falta.</p>
-        : mensaje && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{mensaje}</p>}
-      <div className="postular-grupo">
-        <label className="postular-campo">Correo<input className={`entrada${ia(leidos?.correo, correo) ? ' entrada-ia' : ''}`} type="email" autoComplete="email" value={correo} onChange={(e) => setCorreo(e.target.value)} required /></label>
-        <label className="postular-campo">Contraseña <span className="postular-opcional">mínimo 8 caracteres</span>
-          <input className="entrada" type="password" autoComplete="new-password" minLength={8} value={contrasena} onChange={(e) => setContrasena(e.target.value)} required />
-        </label>
-        <label className="postular-campo">Nombre completo<input className={`entrada${ia(leidos?.nombre, datos.nombre) ? ' entrada-ia' : ''}`} value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} required /></label>
-        <label className="postular-campo">Cédula<input className={`entrada mono${ia(leidos?.documento, documento) ? ' entrada-ia' : ''}`} inputMode="numeric" value={documento} onChange={(e) => setDocumento(e.target.value)} required /></label>
-        <label className="postular-campo">Celular (WhatsApp)<input className={`entrada${ia(leidos?.celular, datos.celular) ? ' entrada-ia' : ''}`} inputMode="tel" value={datos.celular} onChange={(e) => setDatos({ ...datos, celular: e.target.value })} required /></label>
-        <label className="postular-campo">Ciudad donde vives
-          <AutocompletarMunicipio valor={{ codigo: ciudadCodigo, ciudad: datos.ciudad || (leidos?.ciudad ?? '') }} ia={Boolean(leidos?.ciudad) && !ciudadCodigo} requerido
-            onElegir={(m, texto) => { setDatos({ ...datos, ciudad: m?.municipio ?? texto }); setCiudadCodigo(m?.codigo ?? null) }} />
-        </label>
-      </div>
-      <p className="postular-nota-suave">Con tu correo y tu cédula unimos a tu cuenta las postulaciones que ya hiciste. Revisa que sean los mismos que diste al postularte.</p>
-      <label className={`postular-autorizacion ${acepta ? 'aceptada' : ''}`}>
-        <input type="checkbox" checked={acepta} onChange={(e) => setAcepta(e.target.checked)} />
-        <span>{textoAutorizacion ?? 'Autorizo a Selvana a tratar mis datos personales para crear mi perfil, según la Ley 1581 de 2012.'}</span>
-      </label>
-      {registrar.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{registrar.error.message}</p>}
-      <Boton type="submit" variante="primario" cargando={registrar.isPending} textoCargando="Creando tu cuenta…" disabled={!acepta || !ciudadCodigo}>
-        Crear mi cuenta <IconoFlecha />
-      </Boton>
-      {!ciudadCodigo && <span className="postular-ayuda">Elige tu ciudad de la lista.</span>}
-    </form>
   )
 }
 
@@ -178,6 +147,16 @@ export function MiPortal() {
         </div>
         <Boton pequeno cargando={salir.isPending} textoCargando="Saliendo…" onClick={() => salir.mutate(undefined, { onSettled: () => navegar('/mi-portal/ingresar') })}>Salir</Boton>
       </header>
+
+      {!cuenta.data.nombreArchivoHojaDeVida && pestana !== 'hv' && (
+        <div className="bloque-ia mp-invitacion">
+          <div className="bloque-ia-cabeza"><Chispa />Sube tu hoja de vida y la IA llena tu perfil</div>
+          <div className="mp-invitacion-cuerpo">
+            <span>Con tu hoja de vida te mostramos ofertas que encajan contigo y te postulas con un clic.</span>
+            <Boton variante="ia" icono={<IconoSubir />} onClick={() => setPestana('hv')}>Subir mi hoja de vida</Boton>
+          </div>
+        </div>
+      )}
 
       <div role="tablist" aria-label="Mi portal" className="pestanas mp-pestanas">
         {pestanas.map(([clave, texto]) => (
@@ -321,7 +300,14 @@ function MiHojaDeVida() {
             {actualizarHv.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{actualizarHv.error.message}</p>}
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <Boton variante="primario" cargando={actualizarHv.isPending} textoCargando="Guardando…"
-                onClick={() => actualizarHv.mutate({ borradorId: nuevaHv!, ...datos }, { onSuccess: () => setNuevaHv(undefined) })}>
+                onClick={() => actualizarHv.mutate({
+                  borradorId: nuevaHv!,
+                  // Lo que la persona no había llenado lo toma de lo que leyó la IA
+                  nombre: datos.nombre || leida.datos?.nombre || '',
+                  celular: datos.celular || leida.datos?.celular || '',
+                  ciudad: datos.ciudad || leida.datos?.ciudad || '',
+                  linkedIn: datos.linkedIn || leida.datos?.linkedIn || '',
+                }, { onSuccess: () => setNuevaHv(undefined) })}>
                 Usar esta hoja de vida
               </Boton>
               <Boton onClick={() => setNuevaHv(undefined)} disabled={actualizarHv.isPending}>Cancelar</Boton>

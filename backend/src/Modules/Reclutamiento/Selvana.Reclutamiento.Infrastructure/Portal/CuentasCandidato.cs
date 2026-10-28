@@ -15,6 +15,9 @@ internal sealed class CuentasCandidatoRepositorio(ReclutamientoDbContext db) : I
     public Task<CuentaCandidato?> ObtenerPorCorreoAsync(string correo, CancellationToken cancellationToken) =>
         db.Set<CuentaCandidato>().FirstOrDefaultAsync(c => c.Correo == correo, cancellationToken);
 
+    public Task<bool> ExisteDocumentoAsync(string tipoDocumento, string documento, CancellationToken cancellationToken) =>
+        db.Set<CuentaCandidato>().AnyAsync(c => c.TipoDocumento == tipoDocumento && c.Documento == documento, cancellationToken);
+
     public void Agregar(CuentaCandidato cuenta) => db.Add(cuenta);
 }
 
@@ -34,8 +37,10 @@ internal sealed class CuentaCandidatoConfiguration : IEntityTypeConfiguration<Cu
         builder.Ignore(c => c.DomainEvents);
         builder.Property(c => c.Correo).HasMaxLength(200);
         builder.HasIndex(c => c.Correo).IsUnique();
+        builder.Property(c => c.TipoDocumento).HasMaxLength(4).HasDefaultValue("CC");
         builder.Property(c => c.Documento).HasMaxLength(20);
         builder.HasIndex(c => c.Documento);
+        builder.HasIndex(c => new { c.TipoDocumento, c.Documento }).IsUnique();
         builder.Property(c => c.ContrasenaHash).HasMaxLength(200);
         builder.Property(c => c.NombreArchivoHojaDeVida).HasMaxLength(260);
         builder.OwnsOne(c => c.Datos, d =>

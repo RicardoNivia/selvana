@@ -291,6 +291,14 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(260)")
                         .HasColumnName("nombre_archivo_hoja_de_vida");
 
+                    b.Property<string>("TipoDocumento")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4)
+                        .HasColumnType("character varying(4)")
+                        .HasDefaultValue("CC")
+                        .HasColumnName("tipo_documento");
+
                     b.Property<DateTimeOffset?>("UltimoIngreso")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("ultimo_ingreso");
@@ -304,6 +312,10 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Documento")
                         .HasDatabaseName("ix_cuentas_candidato_documento");
+
+                    b.HasIndex("TipoDocumento", "Documento")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cuentas_candidato_tipo_documento_documento");
 
                     b.ToTable("cuentas_candidato", "reclutamiento");
                 });

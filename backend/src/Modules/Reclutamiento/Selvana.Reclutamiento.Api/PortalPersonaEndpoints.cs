@@ -7,8 +7,7 @@ using Selvana.Web.Common;
 
 namespace Selvana.Reclutamiento.Api;
 
-public sealed record RegistrarCuentaRequest(
-    Guid? BorradorId, string Correo, string Contrasena, string Documento, string Nombre, string Celular, string Ciudad, string? LinkedIn, bool AceptaAutorizacion);
+public sealed record RegistrarCuentaRequest(string Correo, string Contrasena, string Nombre, string TipoDocumento, string NumeroDocumento, bool AceptaAutorizacion);
 
 public sealed record IngresarCuentaRequest(string Correo, string Contrasena)
 {
@@ -28,8 +27,10 @@ public static class PortalPersonaEndpoints
     {
         var publico = app.MapGroup("/portal/cuenta").WithTags("Portal de la persona").AllowAnonymous().RequireRateLimiting(SesionesPortal.PoliticaIngreso);
 
-        // Paso 1: sube la hoja de vida y la IA la lee (igual que al postularse)
-        publico.MapPost("/hoja-de-vida", async (IFormFile hojaDeVida, ICommandHandler<SubirHojaDeVidaPerfilCommand, Guid> h, CancellationToken ct) =>
+        var cuenta = app.MapGroup("/portal/cuenta").WithTags("Portal de la persona").RequireAuthorization(SesionesPortal.Politica);
+
+        // Ya con cuenta, sube su hoja de vida y la IA la lee (igual que al postularse)
+        cuenta.MapPost("/hoja-de-vida", async (IFormFile hojaDeVida, ICommandHandler<SubirHojaDeVidaPerfilCommand, Guid> h, CancellationToken ct) =>
             {
                 await using var flujo = hojaDeVida.OpenReadStream();
                 using var memoria = new MemoryStream();
@@ -39,16 +40,14 @@ public static class PortalPersonaEndpoints
             })
             .WithName("SubirHojaDeVidaPerfil").DisableAntiforgery().Produces<CreadoResponse>(StatusCodes.Status201Created);
 
-        app.MapGroup("/portal/cuenta").WithTags("Portal de la persona").AllowAnonymous()
-            .MapGet("/hoja-de-vida/{borradorId:guid}", async (Guid borradorId, IQueryHandler<ObtenerHojaDeVidaPerfilQuery, HojaDeVidaPerfilDto> h, CancellationToken ct) =>
+        cuenta.MapGet("/hoja-de-vida/{borradorId:guid}", async (Guid borradorId, IQueryHandler<ObtenerHojaDeVidaPerfilQuery, HojaDeVidaPerfilDto> h, CancellationToken ct) =>
                 (await h.Handle(new ObtenerHojaDeVidaPerfilQuery(borradorId), ct)).ToHttp())
             .WithName("ObtenerHojaDeVidaPerfil").Produces<HojaDeVidaPerfilDto>();
 
-        // Paso 2: confirma sus datos, escoge la contraseña y acepta la autorización; queda con sesión
+        // Registro con lo mínimo (correo, nombre, identificación, contraseña y autorización); queda con sesión
         publico.MapPost("/registro", async (RegistrarCuentaRequest b, HttpContext http, ICommandHandler<RegistrarCuentaCommand, SesionPortal> h, CancellationToken ct) =>
             {
-                var r = await h.Handle(new RegistrarCuentaCommand(b.BorradorId, b.Correo, b.Contrasena, b.Documento,
-                    new DatosEditables(b.Nombre, b.Celular, b.Ciudad, b.LinkedIn), b.AceptaAutorizacion,
+                var r = await h.Handle(new RegistrarCuentaCommand(b.Correo, b.Contrasena, b.Nombre, b.TipoDocumento, b.NumeroDocumento, b.AceptaAutorizacion,
                     http.Connection.RemoteIpAddress?.ToString() ?? "", http.Request.Headers.UserAgent.ToString()), ct);
                 if (r.IsFailure)
                 {
@@ -72,8 +71,6 @@ public static class PortalPersonaEndpoints
                 return Results.Ok(r.Value);
             })
             .WithName("IngresarPortal").Produces<SesionPortal>();
-
-        var cuenta = app.MapGroup("/portal/cuenta").WithTags("Portal de la persona").RequireAuthorization(SesionesPortal.Politica);
 
         cuenta.MapPost("/salir", async (HttpContext http) =>
             {

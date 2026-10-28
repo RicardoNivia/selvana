@@ -18,6 +18,7 @@ export interface HojaDeVidaPerfil {
 export interface MiCuenta {
   id: string
   correo: string
+  tipoDocumento: TipoDocumento
   datos: DatosCandidato
   nombreArchivoHojaDeVida: string | null
   hojaDeVidaActualizadaEn: string | null
@@ -72,13 +73,25 @@ export interface DatosEditables {
   linkedIn?: string
 }
 
-export interface Registro extends DatosEditables {
-  borradorId: string | null
+/** Registro con lo mínimo; la hoja de vida se sube después en el portal. */
+export interface Registro {
   correo: string
   contrasena: string
-  documento: string
+  nombre: string
+  tipoDocumento: TipoDocumento
+  numeroDocumento: string
   aceptaAutorizacion: boolean
 }
+
+export type TipoDocumento = 'CC' | 'CE' | 'TI' | 'PA' | 'PPT'
+
+export const tiposDocumento: [TipoDocumento, string][] = [
+  ['CC', 'Cédula de ciudadanía'],
+  ['CE', 'Cédula de extranjería'],
+  ['TI', 'Tarjeta de identidad'],
+  ['PA', 'Pasaporte'],
+  ['PPT', 'Permiso por protección temporal'],
+]
 
 const claves = { cuenta: ['portal-persona', 'cuenta'] as const, portal: ['portal-persona', 'portal'] as const }
 
