@@ -123,7 +123,11 @@ export interface Afinidad {
   razonesRetiradas: number
 }
 
+/** Cómo va la preselección con el agente; null si no se ha invitado. */
+export type EstadoPreseleccion = 'Invitada' | 'EsperaCandidato' | 'IaRespondiendo' | 'NecesitaPersona' | 'Completada'
+
 export interface Postulante {
+  preseleccion: EstadoPreseleccion | null
   afinidad: Afinidad | null
   retroalimentacion: 'Bueno' | 'NoEncaja' | null
   notaRetroalimentacion: string | null

@@ -40,7 +40,25 @@ public sealed record AprobacionRequisicionDto(
 public sealed record PostulanteDto(
     Guid PostulacionId, Guid CandidatoId, string Numero, string Nombre, string Documento, string Celular, string Ciudad, string Canal,
     string Respuestas, int RespuestasNegativas, string Autorizacion, DateTimeOffset RecibidaEn, int OtrasPostulaciones, IReadOnlyList<string> CamposCorregidos,
-    string LinkedIn, AfinidadDto? Afinidad = null, string? Retroalimentacion = null, string? NotaRetroalimentacion = null);
+    string LinkedIn, AfinidadDto? Afinidad = null, string? Retroalimentacion = null, string? NotaRetroalimentacion = null, string? Preseleccion = null);
+
+/// <summary>Cómo va la preselección con el agente, para la tabla de postulantes.</summary>
+public static class EstadoPreseleccionPostulante
+{
+    /// <summary>Se envió el enlace y el candidato aún no escribe.</summary>
+    public const string Invitada = "Invitada";
+
+    /// <summary>El agente escribió y espera la respuesta del candidato.</summary>
+    public const string EsperaCandidato = "EsperaCandidato";
+
+    /// <summary>El candidato escribió y el agente está respondiendo.</summary>
+    public const string IaRespondiendo = "IaRespondiendo";
+
+    /// <summary>Se escaló: una persona debe responder.</summary>
+    public const string NecesitaPersona = "NecesitaPersona";
+
+    public const string Completada = "Completada";
+}
 
 /// <summary>
 /// Afinidad con la vacante: el puntaje que manda (el de la persona si lo ajustó), el de la IA, sus razones con evidencia,

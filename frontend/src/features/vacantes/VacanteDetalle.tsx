@@ -18,7 +18,7 @@ import { ComparativoFinalistas } from './ComparativoFinalistas'
 import { FiltrosAts } from './FiltrosAts'
 import { ReporteSesgo } from './ReporteSesgo'
 import { TableroVacante } from './TableroVacante'
-import { estadoVacante, type Vacante, useCalcularAfinidad, useCerrarVacante, useEditarVacante, usePostulantes, useAprobarRequisicion, useSolicitarAprobacion, useVacante } from './api'
+import { type EstadoPreseleccion, estadoVacante, type Vacante, useCalcularAfinidad, useCerrarVacante, useEditarVacante, usePostulantes, useAprobarRequisicion, useSolicitarAprobacion, useVacante } from './api'
 import { textoAprobar } from './AprobacionRequisicion'
 import { useSesion } from '../sesion/api'
 
@@ -249,10 +249,10 @@ function Postulantes({ vacante }: { vacante: Vacante }) {
         </div>
         <div className="tabla-envoltura">
           <table className="tabla">
-            <thead><tr><th>Afinidad</th><th>Postulante</th><th>Canal</th><th>Preguntas filtro</th><th>Ley 1581</th><th>Llegó</th><th>Hoja de vida</th></tr></thead>
+            <thead><tr><th>Afinidad</th><th>Postulante</th><th>Canal</th><th>Preselección</th><th>Preguntas filtro</th><th>Ley 1581</th><th>Llegó</th><th>Hoja de vida</th></tr></thead>
             <tbody>
               {datos.isPending
-                ? Array.from({ length: 5 }, (_, i) => <tr key={i}>{[20, 50, 20, 30, 25, 25, 30].map((a, j) => <td key={j}><Esqueleto ancho={`${a}%`} /></td>)}</tr>)
+                ? Array.from({ length: 5 }, (_, i) => <tr key={i}>{[20, 50, 20, 30, 30, 25, 25, 30].map((a, j) => <td key={j}><Esqueleto ancho={`${a}%`} /></td>)}</tr>)
                 : datos.data?.items.map((p) => (
                     <Fragment key={p.postulacionId}>
                     <tr>
@@ -268,13 +268,14 @@ function Postulantes({ vacante }: { vacante: Vacante }) {
                         {p.camposCorregidos.length > 0 && <span style={{ fontSize: 12, color: 'var(--color-texto-tenue)' }}>Corrigió lo leído por la IA: {p.camposCorregidos.join(', ')}</span>}
                       </td>
                       <td><span className="pill pill-neutra">{p.canal}</span></td>
+                      <td><EstadoPreseleccionCelda estado={p.preseleccion} onAbrir={() => setAbierta(p.postulacionId)} /></td>
                       <td className="mono" style={{ color: p.respuestasNegativas > 0 ? 'var(--color-alerta)' : 'var(--color-exito)' }}>{p.respuestas || '—'}</td>
                       <td style={{ fontSize: 13, color: 'var(--color-texto-suave)' }}>{p.autorizacion}</td>
                       <td className="mono" style={{ fontSize: 13 }}>{fecha.format(new Date(p.recibidaEn))}</td>
                       <td><AbrirHojaDeVida postulacionId={p.postulacionId} /></td>
                     </tr>
                     {abierta === p.postulacionId && (
-                      <tr className="fila-explicacion"><td colSpan={7}>
+                      <tr className="fila-explicacion"><td colSpan={8}>
                         <div className="fila-explicacion-cuerpo">
                           {p.afinidad?.estado === 'Lista' && <ExplicacionAfinidad postulante={p} afinidad={p.afinidad} />}
                           <PreseleccionPostulante postulacionId={p.postulacionId} />
@@ -295,5 +296,25 @@ function Postulantes({ vacante }: { vacante: Vacante }) {
         {datos.data && <Paginacion pagina={datos.data} cargando={datos.isPlaceholderData} onCambiar={setPagina} onCambiarTamano={setTamano} />}
       </section>
     </>
+  )
+}
+
+const preseleccion: Record<EstadoPreseleccion, { texto: string; clase: string }> = {
+  NecesitaPersona: { texto: 'Pendiente: responder', clase: 'pill-alerta' },
+  IaRespondiendo: { texto: 'La IA está respondiendo', clase: 'pill-ia' },
+  EsperaCandidato: { texto: 'Espera al candidato', clase: 'pill-neutra' },
+  Invitada: { texto: 'Invitado, sin responder', clase: 'pill-neutra' },
+  Completada: { texto: 'Completa', clase: 'pill-ok' },
+}
+
+/** En la tabla: cómo va la conversación de preselección; si una persona debe responder, se destaca y abre la conversación. */
+function EstadoPreseleccionCelda({ estado, onAbrir }: { estado: EstadoPreseleccion | null; onAbrir: () => void }) {
+  if (!estado) return <span style={{ color: 'var(--color-texto-tenue)' }}>—</span>
+  const e = preseleccion[estado]
+  return (
+    <button type="button" className={'pill ' + e.clase} style={{ border: 0, cursor: 'pointer', fontWeight: estado === 'NecesitaPersona' ? 700 : undefined }}
+      onClick={onAbrir} title="Ver la conversación">
+      {e.texto}
+    </button>
   )
 }

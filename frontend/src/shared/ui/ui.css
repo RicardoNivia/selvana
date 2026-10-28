@@ -77,7 +77,8 @@
 .fila .cuerpo span { font-size: 13px; color: var(--color-texto-suave); }
 
 .decision { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: var(--espacio-4); border-top: 1px solid var(--color-borde); }
-.decision .registro { margin-left: auto; font-size: 12px; color: var(--color-texto-tenue); }
+.decision .registro { margin-left: auto; font-size: 12px; color: var(--color-texto-tenue); display: inline-flex; align-items: center; gap: 6px; }
+.decision .registro svg { width: 14px; height: 14px; flex: none; }
 
 .estado-agente { display: flex; align-items: center; gap: var(--espacio-3); padding: var(--espacio-4); border-radius: var(--radio-m); background: var(--color-superficie); border: 1px solid var(--color-ia-borde); }
 .orbe { position: relative; flex: 0 0 28px; height: 28px; border-radius: 50%; background: var(--color-ia-suave); display: grid; place-items: center; }

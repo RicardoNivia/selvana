@@ -4,6 +4,7 @@ using Selvana.Reclutamiento.Application.Abstracciones;
 using Selvana.Reclutamiento.Application.Privacidad;
 using Selvana.Reclutamiento.Domain.Candidatos;
 using Selvana.Reclutamiento.Domain.Postulaciones;
+using Selvana.Reclutamiento.Domain.Preseleccion;
 using Selvana.Reclutamiento.Domain.Vacantes;
 using Selvana.Reclutamiento.Infrastructure.Persistence;
 using Selvana.SharedKernel.Results;
@@ -97,13 +98,29 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
             .Select(x => new { x.Candidato.Id, x.Candidato.Documento, x.Candidato.Datos, x.Postulacion, Otras = x.Candidato.Postulaciones.Count - 1 })
             .ToListAsync(ct);
 
+        // La conversación más reciente de cada postulación dice si hay algo pendiente en la preselección
+        var ids = filas.Select(f => f.Postulacion.Id).ToList();
+        var conversaciones = (await db.Set<ConversacionPreseleccion>().AsNoTracking().Where(c => ids.Contains(c.PostulacionId))
+                .Select(c => new { c.PostulacionId, c.Estado, c.Pensando, c.CreadaEn }).ToListAsync(ct))
+            .GroupBy(c => c.PostulacionId).ToDictionary(g => g.Key, g => g.MaxBy(c => c.CreadaEn)!);
+        string? Preseleccion(Guid postulacionId) => conversaciones.TryGetValue(postulacionId, out var c)
+            ? c.Estado switch
+            {
+                EstadoConversacion.Escalada => EstadoPreseleccionPostulante.NecesitaPersona,
+                EstadoConversacion.Completada => EstadoPreseleccionPostulante.Completada,
+                EstadoConversacion.Invitada => EstadoPreseleccionPostulante.Invitada,
+                _ => c.Pensando ? EstadoPreseleccionPostulante.IaRespondiendo : EstadoPreseleccionPostulante.EsperaCandidato,
+            }
+            : null;
+
         var items = filas.Select(f => new PostulanteDto(
             f.Postulacion.Id, f.Id, f.Postulacion.Numero, f.Datos.Nombre, Enmascarar(f.Documento), f.Datos.Celular, f.Datos.Ciudad,
             f.Postulacion.Canal.ToString(),
             string.Join(" · ", f.Postulacion.Respuestas.Select(r => r.Texto)),
             f.Postulacion.Respuestas.Count(r => r.EsNegativa),
             $"Aceptada {f.Postulacion.Autorizacion.Version}", f.Postulacion.RecibidaEn, f.Otras, f.Postulacion.CamposCorregidos, f.Datos.LinkedIn,
-            Afinidad(f.Postulacion.Afinidad), f.Postulacion.Retroalimentacion?.Valor.ToString(), f.Postulacion.Retroalimentacion?.Nota)).ToList();
+            Afinidad(f.Postulacion.Afinidad), f.Postulacion.Retroalimentacion?.Valor.ToString(), f.Postulacion.Retroalimentacion?.Nota,
+            Preseleccion(f.Postulacion.Id))).ToList();
 
         return new Pagina<PostulanteDto>(items, pagina.Numero, pagina.Tamano, total);
     }
