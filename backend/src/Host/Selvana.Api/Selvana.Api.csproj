@@ -4,6 +4,8 @@
     <ProjectReference Include="..\..\Modules\Core\Selvana.Core.Infrastructure\Selvana.Core.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Reclutamiento\Selvana.Reclutamiento.Api\Selvana.Reclutamiento.Api.csproj" />
     <ProjectReference Include="..\..\Modules\Reclutamiento\Selvana.Reclutamiento.Infrastructure\Selvana.Reclutamiento.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Expediente\Selvana.Expediente.Api\Selvana.Expediente.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Expediente\Selvana.Expediente.Infrastructure\Selvana.Expediente.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Vinculacion\Selvana.Vinculacion.Api\Selvana.Vinculacion.Api.csproj" />
     <ProjectReference Include="..\..\Modules\Vinculacion\Selvana.Vinculacion.Infrastructure\Selvana.Vinculacion.Infrastructure.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Selvana.Infrastructure.Common\Selvana.Infrastructure.Common.csproj" />

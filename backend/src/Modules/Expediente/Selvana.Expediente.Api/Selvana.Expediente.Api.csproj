@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Selvana.Expediente.Application\Selvana.Expediente.Application.csproj" />
+    <ProjectReference Include="..\Selvana.Expediente.Contracts\Selvana.Expediente.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Selvana.Web.Common\Selvana.Web.Common.csproj" />
+  </ItemGroup>
+</Project>

@@ -38,6 +38,8 @@ services:
       Mensajeria__Destinos__2__Url: http://localhost:8080/internal/eventos/reclutamiento
       Mensajeria__Destinos__2__Prefijos__0: Selvana.Core.Contracts.Privacidad.
       Mensajeria__Destinos__2__Prefijos__1: Selvana.Vinculacion.Contracts.Eventos.
+      Mensajeria__Destinos__3__Url: http://localhost:8080/internal/eventos/expediente
+      Mensajeria__Destinos__3__Prefijos__0: Selvana.Vinculacion.Contracts.Empleados.
     ports:
       - "${API_PORT:-5000}:8080"
     depends_on:

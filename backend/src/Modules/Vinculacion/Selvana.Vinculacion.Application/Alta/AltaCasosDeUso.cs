@@ -160,7 +160,7 @@ internal sealed class CrearEmpleadoHandler(IUsuarioActual usuario, IProcesos pro
         eventos.Publicar(new EmpleadoVinculado(Guid.CreateVersion7(), ahora, p.EmpresaId, p.Id, p.Vacante.CandidatoId, p.EmpresaUsuariaId, p.Persona.Documento, p.Persona.Nombre,
             p.Persona.Correo, p.Persona.Celular, p.Persona.Ciudad, p.Vacante.Cargo, p.Alta.Area, p.Alta.CentroCosto, p.Alta.Sede, ReglasContrato.Nombre(p.Condiciones),
             p.Condiciones.SalarioCop, p.Condiciones.FechaIngreso, p.Condiciones.FechaFin, Entidad(TipoAfiliacion.Eps), Entidad(TipoAfiliacion.Pension), Entidad(TipoAfiliacion.Arl),
-            p.Afiliaciones.FirstOrDefault(a => a.Tipo == TipoAfiliacion.Arl)?.ClaseRiesgo, Entidad(TipoAfiliacion.CajaCompensacion), usuario.Nombre));
+            p.Afiliaciones.FirstOrDefault(a => a.Tipo == TipoAfiliacion.Arl)?.ClaseRiesgo, Entidad(TipoAfiliacion.CajaCompensacion), usuario.Nombre, p.EmpresaUsuaria));
         eventos.Publicar(new PropuestaResuelta(Guid.CreateVersion7(), ahora, p.EmpresaId, Altas.TipoBandeja, p.Id, "Empleado creado", usuario.Nombre));
         eventos.Publicar(Onboarding.Onboardings.Solicitud(p, ahora));
         bitacora.Registrar(p.EmpresaId, TipoActor.Persona, usuario.Nombre, $"Creó el empleado {p.Persona.Nombre}",

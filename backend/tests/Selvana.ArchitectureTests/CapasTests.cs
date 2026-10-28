@@ -7,7 +7,7 @@ namespace Selvana.ArchitectureTests;
 /// <summary>Regla de dependencias de docs/arquitectura/backend.md, sección 1.</summary>
 public class CapasTests
 {
-    public static TheoryData<string> Modulos => new() { "Core", "Reclutamiento", "Vinculacion" };
+    public static TheoryData<string> Modulos => new() { "Core", "Reclutamiento", "Vinculacion", "Expediente" };
 
     [Theory]
     [MemberData(nameof(Modulos))]

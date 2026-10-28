@@ -26,6 +26,13 @@
     <Project Path="src/Modules/Reclutamiento/Selvana.Reclutamiento.Domain/Selvana.Reclutamiento.Domain.csproj" />
     <Project Path="src/Modules/Reclutamiento/Selvana.Reclutamiento.Infrastructure/Selvana.Reclutamiento.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Expediente/">
+    <Project Path="src/Modules/Expediente/Selvana.Expediente.Api/Selvana.Expediente.Api.csproj" />
+    <Project Path="src/Modules/Expediente/Selvana.Expediente.Application/Selvana.Expediente.Application.csproj" />
+    <Project Path="src/Modules/Expediente/Selvana.Expediente.Contracts/Selvana.Expediente.Contracts.csproj" />
+    <Project Path="src/Modules/Expediente/Selvana.Expediente.Domain/Selvana.Expediente.Domain.csproj" />
+    <Project Path="src/Modules/Expediente/Selvana.Expediente.Infrastructure/Selvana.Expediente.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Vinculacion/">
     <Project Path="src/Modules/Vinculacion/Selvana.Vinculacion.Api/Selvana.Vinculacion.Api.csproj" />
     <Project Path="src/Modules/Vinculacion/Selvana.Vinculacion.Application/Selvana.Vinculacion.Application.csproj" />
@@ -45,6 +52,7 @@
     <Project Path="tests/Selvana.Core.IntegrationTests/Selvana.Core.IntegrationTests.csproj" />
     <Project Path="tests/Selvana.Reclutamiento.Domain.Tests/Selvana.Reclutamiento.Domain.Tests.csproj" />
     <Project Path="tests/Selvana.SharedKernel.Tests/Selvana.SharedKernel.Tests.csproj" />
+    <Project Path="tests/Selvana.Expediente.Domain.Tests/Selvana.Expediente.Domain.Tests.csproj" />
     <Project Path="tests/Selvana.Vinculacion.Domain.Tests/Selvana.Vinculacion.Domain.Tests.csproj" />
   </Folder>
 </Solution>

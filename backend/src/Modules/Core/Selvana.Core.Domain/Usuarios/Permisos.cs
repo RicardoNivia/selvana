@@ -22,6 +22,9 @@ public enum Accion
     ConfigurarAgentes,
     VerBitacora,
     ConsultarSusDatos,
+
+    /// <summary>Expediente de los empleados: crear, editar, registrar novedades y documentos.</summary>
+    GestionarEmpleados,
 }
 
 /// <summary>Hasta dónde llega un permiso. Todo lo que no es <see cref="No"/> permite la acción con ese alcance.</summary>
@@ -51,6 +54,7 @@ public static class MatrizPermisos
         [Accion.ConfigurarAgentes] = [Alcance.Si, Alcance.Si, Alcance.No, Alcance.No, Alcance.No, Alcance.No],
         [Accion.VerBitacora] = [Alcance.Si, Alcance.Si, Alcance.No, Alcance.No, Alcance.No, Alcance.No],
         [Accion.ConsultarSusDatos] = [Alcance.No, Alcance.No, Alcance.No, Alcance.Si, Alcance.Si, Alcance.No],
+        [Accion.GestionarEmpleados] = [Alcance.Si, Alcance.Si, Alcance.Si, Alcance.No, Alcance.No, Alcance.No],
     };
 
     public static IReadOnlyList<Rol> Roles => Orden;

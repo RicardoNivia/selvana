@@ -36,6 +36,7 @@ export function Layout() {
   const gestionaUsuarios = usePuede('GestionarUsuarios')
   const veBitacora = usePuede('VerBitacora')
   const veCandidatos = usePuede('VerHojasDeVida')
+  const gestionaEmpleados = usePuede('GestionarEmpleados')
   const pendientes = useResumenBandeja(Boolean(sesion)).data?.pendientes ?? 0
   const conSelector = Boolean(sesion?.empresaTemporal && sesion.empresasUsuarias.length > 0)
   // El menú siempre está contraído (solo íconos) y se despliega encima de la página al acercar el mouse
@@ -57,6 +58,7 @@ export function Layout() {
           <Enlace a="/consola/vacantes" icono={<IconoVacantes />} texto="Vacantes" />
           {veCandidatos && <Enlace a="/consola/candidatos" icono={<IconoPersonas />} texto="Candidatos" />}
           {veCandidatos && <Enlace a="/consola/vinculacion" icono={<IconoDocumento />} texto="Vinculación" />}
+          {gestionaEmpleados && <Enlace a="/consola/empleados" icono={<IconoCupos />} texto="Empleados" />}
 
           {(configura || gestionaUsuarios || veBitacora) && <div className="nav-grupo">Empresa</div>}
           {configura && <Enlace a="/consola/empresa/conectar-nomina" icono={<IconoConexion />} texto="Conectar nómina" />}
@@ -68,7 +70,6 @@ export function Layout() {
 
           {/* Lo que viene en el plan de trabajo: visible pero desactivado, sin prometer pantallas que aún no existen */}
           <div className="nav-grupo">Próximas etapas</div>
-          <Pronto icono={<IconoCupos />} texto="Empleados" cuando="Etapa 3" />
           <Pronto icono={<IconoInsignia />} texto="Desempeño y clima" cuando="Etapa 4" />
         </div>
 

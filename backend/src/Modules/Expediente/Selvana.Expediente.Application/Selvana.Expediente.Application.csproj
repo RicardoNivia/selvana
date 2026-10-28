@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Selvana.Expediente.Domain\Selvana.Expediente.Domain.csproj" />
+    <ProjectReference Include="..\Selvana.Expediente.Contracts\Selvana.Expediente.Contracts.csproj" />
+    <ProjectReference Include="..\..\Core\Selvana.Core.Contracts\Selvana.Core.Contracts.csproj" />
+    <ProjectReference Include="..\..\Vinculacion\Selvana.Vinculacion.Contracts\Selvana.Vinculacion.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Selvana.SharedKernel\Selvana.SharedKernel.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
+</Project>

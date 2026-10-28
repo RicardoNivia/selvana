@@ -82,13 +82,15 @@ public static class Seguridad
         services.AddScoped<IContextoUsuario>(sp => sp.GetRequiredService<ContextoUsuarioHttp>());
         services.AddScoped<IUsuarioActual>(sp => sp.GetRequiredService<ContextoUsuarioHttp>());
         services.AddScoped<Vinculacion.Application.Abstracciones.IUsuarioActual>(sp => sp.GetRequiredService<ContextoUsuarioHttp>());
+        services.AddScoped<Expediente.Application.Abstracciones.IUsuarioActual>(sp => sp.GetRequiredService<ContextoUsuarioHttp>());
         services.AddScoped<IPersonaActual, PersonaActualHttp>();
         return services;
     }
 }
 
 /// <summary>Usuario, empresa y nombre de quien hace la petición, tomados de los claims de la sesión.</summary>
-internal sealed class ContextoUsuarioHttp(IHttpContextAccessor accesor) : IContextoUsuario, IUsuarioActual, Vinculacion.Application.Abstracciones.IUsuarioActual
+internal sealed class ContextoUsuarioHttp(IHttpContextAccessor accesor)
+    : IContextoUsuario, IUsuarioActual, Vinculacion.Application.Abstracciones.IUsuarioActual, Expediente.Application.Abstracciones.IUsuarioActual
 {
     private ClaimsPrincipal Usuario => accesor.HttpContext?.User ?? new ClaimsPrincipal();
 

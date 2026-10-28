@@ -28,7 +28,8 @@ Planeación ejecutable de las Etapas 2 a 5 del [plan de trabajo](../Selvana-Plan
 | V2 · Documentos de ingreso · V3 · Alta y afiliaciones | Hechos |
 | V4 · Onboarding | Hecho (plan de inducción con IA o plan base, aprobación y seguimiento); asistente y encuestas, después |
 | P1 a P3b · Portal de la persona | Hecho y rediseñado; P4 y P5 después de E1 |
-| **E1 a E4 · Empleados** | **Sigue** |
+| E1 · Expediente digital | Hecho (28/10): módulo `Expediente`; falta la carga desde el archivo de planta |
+| **E2 a E4 · Empleados** | **Sigue** |
 | Desempeño · Clima | Después |
 
 ## 0. Reclutamiento · Filtros ATS (pedido el 23 de octubre de 2026)
@@ -61,7 +62,7 @@ Se construye justo después de Vinculación V1 y antes de V2. Un ATS clásico de
 
 | Bloque | Qué se construye ahora | Qué queda para después |
 | --- | --- | --- |
-| **E1 · Expediente digital** | Empleado con datos, contrato, cargo, salario, sede, área, centro de costo y empresa usuaria; historial de cargos, salarios y traslados; carpeta documental con versiones y vencimientos. Lista paginada y ficha del empleado. Entra desde Vinculación y desde la carga del archivo de planta. | Migración asistida de carpetas escaneadas |
+| **E1 · Expediente digital** *(hecho el 28/10/2026, salvo la carga del archivo de planta)* | Empleado con datos, contrato, cargo, salario, sede, área, centro de costo y empresa usuaria; historial de cargos, salarios y traslados; carpeta documental con versiones y vencimientos. Lista paginada y ficha del empleado. Entra desde Vinculación y desde la carga del archivo de planta. | Migración asistida de carpetas escaneadas |
 | **E2 · Actualización inteligente** | RRHH o el empleado sube un documento; la IA identifica el tipo, extrae los datos y propone el cambio; RRHH aprueba en la bandeja. Alertas de documentos y certificados por vencer. | Campaña anual conducida por el asistente |
 | **E3 · Certificados y solicitudes** | Certificado laboral generado al instante; solicitudes de vacaciones y permisos con su aprobador. | Asistente por WhatsApp; desprendibles desde el ERP |
 | **E4 · Portal del líder** | Su equipo, pendientes y alertas; preguntas en lenguaje natural («¿quién tiene el curso de alturas vencido?»). | — |

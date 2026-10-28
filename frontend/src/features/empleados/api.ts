@@ -1,0 +1,147 @@
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiArchivo, apiGet, apiSend, apiUpload } from '../../shared/api/client'
+import type { Pagina } from '../../shared/ui/Paginacion'
+
+const base = '/api/v1/expediente/empleados'
+
+export type EstadoEmpleado = 'Activo' | 'Retirado'
+export type TipoNovedad = 'Ingreso' | 'CambioCargo' | 'CambioSalario' | 'Traslado' | 'CambioContrato' | 'ActualizacionDatos' | 'Retiro'
+
+export const nombreNovedad: Record<TipoNovedad, string> = {
+  Ingreso: 'Ingreso',
+  CambioCargo: 'Cambio de cargo',
+  CambioSalario: 'Cambio de salario',
+  Traslado: 'Traslado',
+  CambioContrato: 'Cambio de contrato',
+  ActualizacionDatos: 'Actualización de datos',
+  Retiro: 'Retiro',
+}
+
+export const novedadesRegistrables: TipoNovedad[] = ['CambioCargo', 'CambioSalario', 'Traslado', 'CambioContrato']
+
+export const tiposDocumento = ['Cédula', 'Contrato', 'Hoja de vida', 'Certificado de estudios', 'Curso o certificación', 'Licencia', 'Afiliación', 'Certificado bancario', 'Otro']
+
+export interface Situacion {
+  cargo: string
+  area: string
+  centroCosto: string
+  sede: string
+  empresaUsuariaId: string | null
+  empresaUsuaria: string | null
+  tipoContrato: string
+  salarioCop: number
+  fechaFinContrato: string | null
+}
+
+export interface Afiliaciones { eps: string; fondoPension: string; arl: string; claseRiesgoArl: number | null; cajaCompensacion: string }
+
+export interface FilaEmpleado {
+  id: string
+  codigo: string
+  nombre: string
+  documento: string
+  cargo: string
+  area: string
+  sede: string
+  empresaUsuaria: string | null
+  tipoContrato: string
+  salarioCop: number
+  fechaIngreso: string
+  estado: EstadoEmpleado
+  alertas: number
+}
+
+export interface Alerta { nivel: 'Vencido' | 'PorVencer' | 'Falta'; texto: string; fuente: string }
+export interface Novedad { id: string; tipo: TipoNovedad; fechaEfectiva: string; cambios: string[]; motivo: string; por: string; en: string }
+export interface Version { archivoId: string; nombreArchivo: string; venceEn: string | null; nota: string | null; subidoPor: string; subidoEn: string }
+export interface Documento { id: string; tipo: string; nombre: string; venceEn: string | null; estadoVigencia: 'SinVencimiento' | 'Vigente' | 'PorVencer' | 'Vencido'; versiones: Version[] }
+
+export interface Empleado {
+  id: string
+  codigo: string
+  documento: string
+  nombre: string
+  correo: string
+  celular: string
+  ciudad: string
+  origen: string
+  procesoVinculacionId: string | null
+  situacion: Situacion
+  fechaIngreso: string
+  afiliaciones: Afiliaciones
+  estado: EstadoEmpleado
+  fechaRetiro: string | null
+  motivoRetiro: string | null
+  alertas: Alerta[]
+  novedades: Novedad[]
+  documentos: Documento[]
+  creadoEn: string
+  actualizadoEn: string
+}
+
+export interface NuevoEmpleado {
+  documento: string
+  nombre: string
+  correo: string
+  celular: string
+  ciudad: string
+  situacion: Situacion
+  fechaIngreso: string
+  afiliaciones: Afiliaciones
+}
+
+export const pesos = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+
+/** Fechas de la API (aaaa-mm-dd) sin correrse un día por la zona horaria. */
+export function fechaCorta(iso: string | null) {
+  if (!iso) return '—'
+  const [a, m, d] = iso.slice(0, 10).split('-')
+  return `${d}/${m}/${a}`
+}
+
+export function useEmpleados(f: { pagina: number; tamano: number; buscar: string; estado: string; alertas: boolean }) {
+  const q = new URLSearchParams({ pagina: String(f.pagina), tamano: String(f.tamano) })
+  if (f.buscar) q.set('buscar', f.buscar)
+  if (f.estado) q.set('estado', f.estado)
+  if (f.alertas) q.set('alertas', 'true')
+  return useQuery({
+    queryKey: ['empleados', 'lista', f],
+    queryFn: ({ signal }) =>
+      apiGet<{ empleados: Pagina<FilaEmpleado>; conteo: { activos: number; retirados: number; conAlertas: number } }>(`${base}?${q}`, signal),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useEmpleado(id: string) {
+  return useQuery({ queryKey: ['empleados', 'ficha', id], queryFn: ({ signal }) => apiGet<Empleado>(`${base}/${id}`, signal) })
+}
+
+function useAccion<V, R = unknown>(fn: (v: V) => Promise<R>) {
+  const cliente = useQueryClient()
+  return useMutation({ mutationFn: fn, onSuccess: () => cliente.invalidateQueries({ queryKey: ['empleados'] }) })
+}
+
+export const useCrearEmpleado = () => useAccion((v: NuevoEmpleado) => apiSend<{ id: string }>('POST', base, v))
+export const useActualizarDatos = (id: string) =>
+  useAccion((v: { nombre: string; correo: string; celular: string; ciudad: string; afiliaciones: Afiliaciones }) => apiSend('PUT', `${base}/${id}/datos`, v))
+export const useRegistrarNovedad = (id: string) =>
+  useAccion((v: { tipo: TipoNovedad; situacion: Situacion; fechaEfectiva: string; motivo: string }) => apiSend('POST', `${base}/${id}/novedades`, v))
+export const useRetirar = (id: string) => useAccion((v: { fecha: string; motivo: string }) => apiSend('POST', `${base}/${id}/retiro`, v))
+
+export const useGuardarDocumento = (id: string) =>
+  useAccion((v: { archivo: File; documentoId?: string; tipo?: string; nombre?: string; venceEn?: string | null; nota?: string }) => {
+    const f = new FormData()
+    f.append('archivo', v.archivo)
+    const q = new URLSearchParams()
+    if (v.documentoId) q.set('documentoId', v.documentoId)
+    if (v.tipo) q.set('tipo', v.tipo)
+    if (v.nombre) q.set('nombre', v.nombre)
+    if (v.venceEn) q.set('venceEn', v.venceEn)
+    if (v.nota) q.set('nota', v.nota)
+    return apiUpload<{ id: string }>(`${base}/${id}/documentos?${q}`, f)
+  })
+
+export async function abrirArchivo(empleadoId: string, archivoId: string) {
+  const blob = await apiArchivo(`${base}/${empleadoId}/archivos/${archivoId}`, {})
+  window.open(URL.createObjectURL(blob), '_blank', 'noopener')
+}
