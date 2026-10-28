@@ -77,6 +77,28 @@ public static class ExpedienteEndpoints
             })
             .WithName("DescargarArchivoEmpleado");
 
+        // Planta que ya existía: primero se previsualiza (no guarda nada) y una persona confirma la carga
+        var planta = app.MapGroup("/expediente/planta").WithTags("Empleados · carga de planta").RequireAuthorization(Politicas.DeAccion("GestionarEmpleados"));
+
+        planta.MapPost("/previsualizar", async (IFormFile archivo, IQueryHandler<PrevisualizarPlantaQuery, PlantaPrevisualizadaDto> h, CancellationToken ct) =>
+                (await h.Handle(new PrevisualizarPlantaQuery(await Leer(archivo, ct)), ct)).ToHttp())
+            .WithName("PrevisualizarPlanta").DisableAntiforgery().Produces<PlantaPrevisualizadaDto>();
+
+        planta.MapPost("", async (IFormFile archivo, ICommandHandler<CargarPlantaCommand, PlantaCargadaDto> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new CargarPlantaCommand(await Leer(archivo, ct)), ct);
+                return r.IsSuccess ? Results.Ok(r.Value) : r.ToHttp();
+            })
+            .WithName("CargarPlanta").DisableAntiforgery().Produces<PlantaCargadaDto>();
+
         return app;
+    }
+
+    private static async Task<byte[]> Leer(IFormFile archivo, CancellationToken ct)
+    {
+        await using var flujo = archivo.OpenReadStream();
+        using var memoria = new MemoryStream();
+        await flujo.CopyToAsync(memoria, ct);
+        return memoria.ToArray();
     }
 }

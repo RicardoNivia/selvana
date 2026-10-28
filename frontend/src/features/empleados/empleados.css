@@ -60,3 +60,8 @@
 @media (max-width: 720px) { .emp-versiones li { grid-template-columns: 60px minmax(0, 1fr); } }
 .emp-subir { display: flex; flex-direction: column; gap: var(--espacio-3); padding: var(--espacio-3); border: 1px dashed var(--color-borde); border-radius: var(--radio-m); background: var(--color-fondo); }
 .emp-archivo { display: flex; align-items: center; gap: var(--espacio-2); font-weight: 400; }
+.emp-planta-cabeza { display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-3); flex-wrap: wrap; }
+.emp-planta .ayuda { margin: 0; font-size: 13px; color: var(--color-texto-suave); }
+.emp-zona { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-3); padding: var(--espacio-4); border: 2px dashed var(--color-borde); border-radius: var(--radio-m); background: var(--color-fondo); }
+.emp-planta-cifras { margin: 0; }
+.emp-planta-cifras .emp-cifra { cursor: default; }

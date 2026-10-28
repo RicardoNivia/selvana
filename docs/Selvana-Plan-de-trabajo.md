@@ -34,7 +34,7 @@ El orden real se ajustó para tener un flujo completo de punta a punta antes de 
 | Etapa 2 · V2 Documentos de ingreso · V3 Alta y afiliaciones | Hechos |
 | Portal de la persona · P1 a P3b (cuenta, procesos, pendientes, ofertas para ti) y rediseño | Hecho |
 | Etapa 2 · V4 Onboarding · plan de inducción con seguimiento | Hecho; asistente de bienvenida con las integraciones y encuestas de 30, 60 y 90 días con Clima |
-| Etapa 3 · Empleados E1 · Expediente digital | Hecho; falta la carga desde el archivo de planta |
+| Etapa 3 · Empleados E1 · Expediente digital y carga de la planta | Hecho |
 | **Etapa 3 · Empleados E2 a E4** | **Sigue** |
 | Portal · P4 Mis documentos · P5 Portal del empleado | Después de E1 |
 | Etapa 4 · Desempeño · Etapa 5 · Clima | Después |

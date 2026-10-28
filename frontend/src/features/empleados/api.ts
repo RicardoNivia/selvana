@@ -145,3 +145,39 @@ export async function abrirArchivo(empleadoId: string, archivoId: string) {
   const blob = await apiArchivo(`${base}/${empleadoId}/archivos/${archivoId}`, {})
   window.open(URL.createObjectURL(blob), '_blank', 'noopener')
 }
+
+/* ---------- Carga de la planta que ya existía (CSV) ---------- */
+
+export interface PlantaPrevisualizada {
+  leidas: number
+  porCrear: number
+  yaExisten: number
+  repetidas: number
+  errores: string[]
+  muestra: { fila: number; documento: string; nombre: string; cargo: string; sede: string; tipoContrato: string; salarioCop: number; fechaIngreso: string; resultado: string }[]
+}
+
+const conArchivo = (archivo: File) => {
+  const f = new FormData()
+  f.append('archivo', archivo)
+  return f
+}
+
+/** Revisa el archivo sin guardar nada. */
+export const usePrevisualizarPlanta = () =>
+  useMutation({ mutationFn: (archivo: File) => apiUpload<PlantaPrevisualizada>('/api/v1/expediente/planta/previsualizar', conArchivo(archivo)) })
+
+export const useCargarPlanta = () =>
+  useAccion((archivo: File) => apiUpload<{ creados: number; omitidos: number; conErrores: number }>('/api/v1/expediente/planta', conArchivo(archivo)))
+
+/** Plantilla CSV con punto y coma (Excel en español la abre directo) y una fila de ejemplo. */
+export function descargarPlantillaPlanta() {
+  const csv = '﻿' + [
+    'documento;nombre;cargo;salario;fecha_ingreso;area;centro_costo;sede;tipo_contrato;fecha_fin;correo;celular;ciudad;eps;pension;arl;clase_riesgo;caja',
+    '1016554209;Diana Gómez;Montacarguista;1900000;02/11/2026;Operaciones;CC-201;Funza;Término fijo;01/11/2027;diana@correo.co;3001234567;Funza;Sura;Porvenir;Positiva;3;Compensar',
+  ].join('\r\n')
+  const enlace = document.createElement('a')
+  enlace.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
+  enlace.download = 'plantilla-planta-selvana.csv'
+  enlace.click()
+}

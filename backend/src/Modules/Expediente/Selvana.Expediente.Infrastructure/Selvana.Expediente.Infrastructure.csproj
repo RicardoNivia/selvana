@@ -2,6 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Selvana.Expediente.Application\Selvana.Expediente.Application.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Selvana.Infrastructure.Common\Selvana.Infrastructure.Common.csproj" />
+    <ProjectReference Include="..\..\..\Integrations\Selvana.Integrations\Selvana.Integrations.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" />

@@ -34,6 +34,9 @@ public interface IEmpleados
 
     Task<bool> DeProcesoAsync(Guid procesoVinculacionId, CancellationToken cancellationToken);
 
+    /// <summary>De esos documentos, los que ya son empleados activos de la empresa.</summary>
+    Task<HashSet<string>> DocumentosActivosAsync(Guid empresaId, IReadOnlyList<string> documentos, CancellationToken cancellationToken);
+
     void Agregar(Empleado empleado);
 }
 

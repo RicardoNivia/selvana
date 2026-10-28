@@ -21,6 +21,10 @@ internal sealed class EmpleadosRepositorio(ExpedienteDbContext db) : IEmpleados
     public Task<bool> DeProcesoAsync(Guid procesoVinculacionId, CancellationToken cancellationToken) =>
         db.Set<Empleado>().AnyAsync(e => e.ProcesoVinculacionId == procesoVinculacionId, cancellationToken);
 
+    public async Task<HashSet<string>> DocumentosActivosAsync(Guid empresaId, IReadOnlyList<string> documentos, CancellationToken cancellationToken) =>
+        [.. await db.Set<Empleado>().Where(e => e.EmpresaId == empresaId && e.Estado == EstadoEmpleado.Activo && documentos.Contains(e.Documento))
+            .Select(e => e.Documento).ToListAsync(cancellationToken)];
+
     public void Agregar(Empleado empleado) => db.Add(empleado);
 }
 

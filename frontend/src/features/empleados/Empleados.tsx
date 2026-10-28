@@ -6,6 +6,7 @@ import { IconoAlerta } from '../../shared/ui/Iconos'
 import { Buscador, Paginacion } from '../../shared/ui/Paginacion'
 import { usePaginacion } from '../../shared/ui/paginado'
 import { useTiposContrato } from '../vinculacion/api'
+import { CargaPlanta } from './CargaPlanta'
 import { type Afiliaciones, fechaCorta, type NuevoEmpleado, pesos, type Situacion, useCrearEmpleado, useEmpleados } from './api'
 import './empleados.css'
 
@@ -16,6 +17,7 @@ export function Empleados() {
   const [estado, setEstado] = useState('Activo')
   const [alertas, setAlertas] = useState(false)
   const [creando, setCreando] = useState(false)
+  const [cargando, setCargando] = useState(false)
   const empleados = useEmpleados({ pagina, tamano, buscar, estado, alertas })
   const alBuscar = useCallback((t: string) => { setBuscar(t); setPagina(1) }, [setPagina])
   const c = empleados.data?.conteo
@@ -27,10 +29,16 @@ export function Empleados() {
           <h1>Empleados</h1>
           <p>El expediente de cada persona: contrato, cargo, salario, afiliaciones, historial de novedades y carpeta de documentos con vencimientos. Llegan solos al cerrar la vinculación; la planta que ya existía se crea a mano.</p>
         </div>
-        {!creando && <Boton variante="primario" onClick={() => setCreando(true)}>Crear empleado</Boton>}
+        {!creando && !cargando && (
+          <div className="vin-acciones">
+            <Boton onClick={() => setCargando(true)}>Cargar la planta</Boton>
+            <Boton variante="primario" onClick={() => setCreando(true)}>Crear empleado</Boton>
+          </div>
+        )}
       </header>
 
       {creando && <NuevoEmpleadoFormulario onListo={() => setCreando(false)} />}
+      {cargando && <CargaPlanta onListo={() => setCargando(false)} />}
 
       <div className="emp-cifras">
         <button type="button" className={`emp-cifra ${estado === 'Activo' && !alertas ? 'activa' : ''}`} onClick={() => { setEstado('Activo'); setAlertas(false); setPagina(1) }}>
@@ -73,7 +81,7 @@ export function Empleados() {
         </div>
         {empleados.data && empleados.data.empleados.total === 0 && (
           <div className="vacio" style={{ padding: 32 }}>
-            <p>{buscar ? 'No encontramos empleados con esa búsqueda.' : alertas ? 'Nadie tiene documentos por vencer ni afiliaciones pendientes.' : 'Aún no hay empleados aquí. Llegan al cerrar una vinculación, o créelos a mano con «Crear empleado».'}</p>
+            <p>{buscar ? 'No encontramos empleados con esa búsqueda.' : alertas ? 'Nadie tiene documentos por vencer ni afiliaciones pendientes.' : 'Aún no hay empleados aquí. Llegan al cerrar una vinculación; la planta que ya existía se carga con «Cargar la planta» o se crea a mano.'}</p>
           </div>
         )}
         {empleados.data && <Paginacion pagina={empleados.data.empleados} cargando={empleados.isPlaceholderData} onCambiar={setPagina} onCambiarTamano={setTamano} />}
