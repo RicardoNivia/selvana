@@ -58,6 +58,7 @@ internal sealed class VacanteConfiguration : IEntityTypeConfiguration<Vacante>
         builder.Property(v => v.Titulo).HasMaxLength(200);
         builder.Property(v => v.Cargo).HasMaxLength(200);
         builder.Property(v => v.Ciudad).HasMaxLength(100);
+        builder.Property(v => v.CodigoMunicipio).HasMaxLength(5);
         builder.Property(v => v.Jornada).HasMaxLength(200);
         builder.Property(v => v.Descripcion).HasMaxLength(4000);
         builder.Property(v => v.JustificacionSalario).HasMaxLength(1000);
@@ -74,6 +75,7 @@ internal sealed class VacanteConfiguration : IEntityTypeConfiguration<Vacante>
             f.Ignore(x => x.Vacios);
         });
         builder.OwnsMany(v => v.Pruebas, p => p.ToJson());
+        builder.OwnsMany(v => v.Aclaraciones, a => a.ToJson());
         builder.OwnsMany(v => v.Aprobaciones, a =>
         {
             a.ToJson();

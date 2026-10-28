@@ -60,7 +60,11 @@ export interface BorradorPostulacion {
   preguntasFiltro: string[]
   versionAutorizacion: string
   textoAutorizacion: string
+  /** Cómo se responde cada pregunta, en el mismo orden: SiNo, Numero o Pesos. */
+  tiposPreguntasFiltro: TipoPregunta[] | null
 }
+
+export type TipoPregunta = 'SiNo' | 'Numero' | 'Pesos'
 
 export function usePortal(filtro: { pagina: number; tamano: number; buscar: string; ciudad: string; jornada: string }) {
   const q = new URLSearchParams()
@@ -107,6 +111,8 @@ export interface EnvioPostulacion {
   correo: string
   ciudad: string
   respuestas: boolean[]
+  /** La cifra de las preguntas de número o de pesos, en la misma posición; null en las de sí o no. */
+  valores?: (number | null)[]
   aceptaAutorizacion: boolean
   canal: string
   linkedIn?: string
@@ -121,6 +127,8 @@ export const esLinkedIn = (texto: string) => /^(https?:\/\/)?([a-z]{2,3}\.)?link
 
 export const pesos = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
 
+/** Rango salarial para el portal; si la empresa decidió no mostrarlo, la API lo manda en cero y se lee «A convenir». */
 export function rangoSalario(min: number, max: number) {
+  if (min <= 0 && max <= 0) return 'A convenir'
   return max > min ? `${pesos.format(min)} – ${pesos.format(max)}` : pesos.format(min)
 }

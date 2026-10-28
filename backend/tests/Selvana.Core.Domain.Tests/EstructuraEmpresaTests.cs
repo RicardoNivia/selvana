@@ -220,7 +220,7 @@ public sealed class EstructuraEmpresaTests
         var estructura = Aplicada();
         var existente = estructura.Cargos[0];
 
-        estructura.CrearCargo($"  {existente.Nombre.ToUpperInvariant()} ", "Bodega", Ahora).Error.Should().Be(EstructuraErrors.CargoDuplicado);
+        estructura.CrearCargo($"  {existente.Nombre.ToUpperInvariant()} ", "Bodega", null, "Laura", Ahora).Error.Should().Be(EstructuraErrors.CargoDuplicado);
         estructura.EditarCargo(estructura.Cargos[1].Id, existente.Nombre, "Bodega", true, null, "Laura", Ahora).Error.Should().Be(EstructuraErrors.CargoDuplicado);
     }
 
@@ -229,12 +229,67 @@ public sealed class EstructuraEmpresaTests
     {
         var estructura = Aplicada();
 
-        var nuevo = estructura.CrearCargo("Analista de datos", "Administración", Ahora).Value;
+        var nuevo = estructura.CrearCargo("Analista de datos", "bodega", null, "Laura", Ahora).Value;
         Resincronizar(estructura);
+
+        nuevo.Area.Should().Be("Bodega", "el área se toma del maestro, con su nombre guardado");
 
         nuevo.EstadoPerfil.Should().Be(EstadoPerfil.SinPerfil);
         nuevo.PerfilSolicitadoEn.Should().Be(Ahora);
         estructura.Cargos.Should().Contain(c => c.Id == nuevo.Id && c.Nombre == "Analista de datos");
+    }
+
+    [Fact]
+    public void UnCargoCreadoConPerfilEscritoAManoQuedaAprobadoPorQuienLoEscribioSinPedirloALaIa()
+    {
+        var estructura = Aplicada();
+        var perfil = new PerfilCargo { Mision = "Analizar datos", Funciones = ["Construir tableros"], Requisitos = ["Profesional en estadística"], RiesgoArl = "Clase I" };
+
+        var nuevo = estructura.CrearCargo("Analista de datos", "Bodega", perfil, "Laura", Ahora).Value;
+
+        nuevo.EstadoPerfil.Should().Be(EstadoPerfil.Aprobado);
+        nuevo.AprobadoPor.Should().Be("Laura");
+        nuevo.PerfilSolicitadoEn.Should().BeNull();
+        nuevo.Perfil!.Mision.Should().Be("Analizar datos");
+    }
+
+    [Fact]
+    public void UnCargoNuevoSoloSeAsociaAUnAreaActivaDelMaestro()
+    {
+        var estructura = Aplicada();
+
+        estructura.CrearCargo("Analista de datos", "Administración", null, "Laura", Ahora).Error.Should().Be(EstructuraErrors.AreaNoValida);
+
+        estructura.CrearArea("Administración").IsSuccess.Should().BeTrue();
+        estructura.CrearCargo("Analista de datos", "Administración", null, "Laura", Ahora).IsSuccess.Should().BeTrue();
+
+        var area = estructura.Areas.Single(a => a.Nombre == "Bodega");
+        estructura.EditarArea(area.Id, "Bodega", activo: false);
+        estructura.CrearCargo("Montacarguista", "Bodega", null, "Laura", Ahora).Error.Should().Be(EstructuraErrors.AreaNoValida);
+    }
+
+    [Fact]
+    public void LosMaestrosCreadosAManoNoSeDuplicanYQuedanComoEditados()
+    {
+        var estructura = Aplicada();
+
+        estructura.CrearArea(" bodega ").Error.Should().Be(EstructuraErrors.AreaDuplicada);
+        estructura.CrearSede("Bogotá").Value.EditadoManualmente.Should().BeTrue();
+        estructura.CrearSede("BOGOTÁ").Error.Should().Be(EstructuraErrors.SedeDuplicada);
+        estructura.CrearCentroCosto("CC-90", "Comercial", "Bogotá").Value.Sede.Should().Be("Bogotá");
+        estructura.CrearCentroCosto("cc-90", "Otro", "").Error.Should().Be(EstructuraErrors.CentroCostoDuplicado);
+    }
+
+    [Fact]
+    public void UnAreaCreadaAManoSeReconoceSiDespuesLlegaEnLaNomina()
+    {
+        var estructura = EstructuraEmpresa.Crear(Guid.NewGuid());
+        var area = estructura.CrearArea("Bodega").Value;
+
+        Resincronizar(estructura);
+
+        estructura.Areas.Should().ContainSingle(a => a.Nombre == "Bodega").Which.Id.Should().Be(area.Id);
+        area.Empleados.Should().BeGreaterThan(0);
     }
 
     [Fact]

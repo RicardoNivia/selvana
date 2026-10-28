@@ -8,6 +8,7 @@ using Selvana.Vinculacion.Application;
 using Selvana.Vinculacion.Application.Abstracciones;
 using Selvana.Vinculacion.Application.Alta;
 using Selvana.Vinculacion.Application.Documentos;
+using Selvana.Vinculacion.Contracts;
 using Selvana.Vinculacion.Infrastructure.Persistence;
 
 namespace Selvana.Vinculacion.Infrastructure;
@@ -24,6 +25,9 @@ public static class VinculacionModule
         services.AddDbContext<VinculacionDbContext>(o => o.UseModulePostgres(connectionString, VinculacionDbContext.SchemaName));
         services.AddScoped<IUnidadVinculacion>(sp => sp.GetRequiredService<VinculacionDbContext>());
         services.AddScoped<IProcesos, ProcesosRepositorio>();
+        services.AddScoped<ITiposContrato, TiposContratoRepositorio>();
+        services.AddScoped<ILecturaTiposContrato, LecturaTiposContrato>();
+        services.AddScoped<IProcesosDeLaPersona, ProcesosDeLaPersona>();
         services.AddScoped<IEventosVinculacion, EventosVinculacion>();
         services.AddScoped<IBitacora, Bitacora>();
         services.AddScoped<ILecturaVinculacion, LecturaVinculacion>();

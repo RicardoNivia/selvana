@@ -16,6 +16,13 @@ public enum EstadoVacante
     Cerrada,
 }
 
+/// <summary>Pregunta de la IA antes de redactar la vacante, con respuestas cortas para elegir.</summary>
+public sealed class AclaracionVacante
+{
+    public string Pregunta { get; init; } = "";
+    public List<string> Opciones { get; init; } = [];
+}
+
 /// <summary>Etapas de aprobación de la requisición: líder → RRHH → gerencia.</summary>
 public enum EtapaAprobacion
 {
@@ -43,6 +50,9 @@ public static class FlujoRequisicion
     public const string Aprobada = "Aprobada";
     public const string Devuelta = "Devuelta";
 
+    /// <summary>Rol que, por ahora, aprueba todas las etapas de una vez.</summary>
+    public const string Administrador = "Administrador";
+
     public static readonly IReadOnlyList<EtapaAprobacion> Etapas = [EtapaAprobacion.Rrhh, EtapaAprobacion.Gerencia];
 
     private static readonly Dictionary<EtapaAprobacion, string[]> Aprobadores = new()
@@ -65,10 +75,14 @@ public sealed class RazonVacante
     public string Fuente { get; init; } = "";
 }
 
-/// <summary>Contenido de una vacante, tal como lo redacta la IA o lo edita una persona.</summary>
+/// <summary>
+/// Contenido de una vacante, tal como lo redacta la IA o lo edita una persona. Una vacante es de un solo cargo;
+/// <see cref="Cupos"/> son las posiciones disponibles de ese cargo. <see cref="CodigoMunicipio"/> es el código DANE de la ciudad.
+/// </summary>
 public sealed record ContenidoVacante(
     string Titulo, string Cargo, string Ciudad, int Cupos, string Jornada, string Descripcion,
-    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro);
+    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
+    string? CodigoMunicipio = null, bool EmpresaConfidencial = false, bool SalarioOculto = false);
 
 public static class VacanteErrors
 {
@@ -79,12 +93,14 @@ public static class VacanteErrors
     public static readonly Error Incompleta = Error.Validation("Vacante.Incompleta", "Para publicar, la vacante necesita título, ciudad, cupos, descripción y un rango salarial.");
     public static readonly Error SalarioInvalido = Error.Validation("Vacante.Salario", "El salario máximo no puede ser menor que el mínimo.");
     public static readonly Error SinAprobar = Error.Conflict("Vacante.SinAprobar", "La requisición debe aprobarse (RRHH y gerencia) antes de publicarse.");
+    public static readonly Error Publicada = Error.Conflict("Vacante.Publicada", "La vacante ya está aprobada y publicada: no se puede modificar. Si necesita cambiarla, ciérrela y cree otra.");
     public static readonly Error EnAprobacion = Error.Conflict("Vacante.EnAprobacion", "La requisición está en aprobación: para editarla, quien aprueba debe devolverla.");
     public static readonly Error NoEstaEnAprobacion = Error.Conflict("Vacante.NoEstaEnAprobacion", "La requisición no está esperando aprobación.");
     public static readonly Error NoApruebaEstaEtapa = Error.Validation("Vacante.NoApruebaEstaEtapa", "Su rol no aprueba esta etapa de la requisición.");
     public static readonly Error YaAproboOtraEtapa = Error.Validation("Vacante.YaAproboOtraEtapa", "Ya aprobó otra etapa de esta requisición: la siguiente la aprueba otra persona.");
     public static readonly Error SinMotivo = Error.Validation("Vacante.SinMotivo", "Diga por qué devuelve la requisición, para que puedan ajustarla.");
     public static readonly Error NoPublicada = Error.Conflict("Vacante.NoPublicada", "Esta vacante ya no recibe postulaciones.");
+    public static readonly Error NoSePuedeRedactar = Error.Conflict("Vacante.NoSePuedeRedactar", "Solo se le pide a la IA un borrador nuevo mientras la vacante es un borrador.");
 }
 
 public sealed class Vacante : AggregateRoot<Guid>
@@ -100,13 +116,16 @@ public sealed class Vacante : AggregateRoot<Guid>
 
     /// <summary>Código público para el portal y para compartir: VAC-261022-3F2A.</summary>
     public string Codigo { get; private init; } = "";
-    public string Frase { get; private init; } = "";
+    public string Frase { get; private set; } = "";
 
     /// <summary>Cargo del catálogo del que parte la vacante; null si se redactó desde cero.</summary>
     public Guid? CargoId { get; private init; }
     public string Titulo { get; private set; } = "";
     public string Cargo { get; private set; } = "";
     public string Ciudad { get; private set; } = "";
+
+    /// <summary>Código DANE (DIVIPOLA) del municipio; null si la ciudad aún no se eligió del catálogo.</summary>
+    public string? CodigoMunicipio { get; private set; }
     public int Cupos { get; private set; }
     public string Jornada { get; private set; } = "";
     public string Descripcion { get; private set; } = "";
@@ -139,6 +158,12 @@ public sealed class Vacante : AggregateRoot<Guid>
     public string? ModeloIa { get; private set; }
     public string? MensajeIa { get; private set; }
 
+    /// <summary>
+    /// Lo que la IA necesita saber antes de redactar (por ejemplo, si la frase pide dos cargos distintos).
+    /// Mientras haya aclaraciones, la vacante no tiene contenido: la persona responde y vuelve a pedir el borrador.
+    /// </summary>
+    public List<AclaracionVacante> Aclaraciones { get; private set; } = [];
+
     /// <summary>Una persona cambió lo que redactó la IA (queda confirmado por ella).</summary>
     public bool EditadaPorPersona { get; private set; }
 
@@ -166,6 +191,23 @@ public sealed class Vacante : AggregateRoot<Guid>
 
     /// <summary>Empresa que se muestra en el portal: la empresa usuaria si es una EST, si no la empresa.</summary>
     public string EmpresaVisible => EmpresaUsuariaNombre ?? EmpresaNombre;
+
+    public const string NombreConfidencial = "Empresa confidencial";
+
+    /// <summary>La oferta se publica sin decir qué empresa contrata.</summary>
+    public bool EmpresaConfidencial { get; private set; }
+
+    /// <summary>El portal no muestra el rango salarial («A convenir»); la vacante lo conserva para el ranking y la oferta.</summary>
+    public bool SalarioOculto { get; private set; }
+
+    /// <summary>Nombre que ve el candidato en el portal.</summary>
+    public string EmpresaEnPortal => EmpresaConfidencial ? NombreConfidencial : EmpresaVisible;
+
+    /// <summary>
+    /// A quién autoriza el candidato el tratamiento de sus datos (Ley 1581: el responsable debe estar identificado).
+    /// Si la oferta es confidencial, se nombra a la empresa que opera Selvana (la EST o la empresa misma), no a la empresa usuaria.
+    /// </summary>
+    public string ResponsableDatos => EmpresaConfidencial ? EmpresaNombre : EmpresaVisible;
 
     public bool RecibePostulaciones => Estado == EstadoVacante.Publicada;
 
@@ -195,6 +237,70 @@ public sealed class Vacante : AggregateRoot<Guid>
         };
     }
 
+    /// <summary>Una persona escribe la vacante a mano, sin pedírsela a la IA: nace como borrador confirmado por ella.</summary>
+    public static Result<Vacante> CrearManual(
+        Guid empresaId, string empresaNombre, Guid? empresaUsuariaId, string? empresaUsuariaNombre, ContenidoVacante contenido, string usuario,
+        DateTimeOffset ahora, Guid? cargoId = null)
+    {
+        ArgumentNullException.ThrowIfNull(contenido);
+        if (contenido.SalarioMaximo < contenido.SalarioMinimo)
+        {
+            return VacanteErrors.SalarioInvalido;
+        }
+
+        var id = Guid.CreateVersion7();
+        var vacante = new Vacante(id)
+        {
+            EmpresaId = empresaId,
+            EmpresaNombre = empresaNombre,
+            EmpresaUsuariaId = empresaUsuariaId,
+            EmpresaUsuariaNombre = empresaUsuariaNombre,
+            Codigo = $"VAC-{ahora:yyMMdd}-{id.ToString("N")[^4..].ToUpperInvariant()}",
+            CargoId = cargoId,
+            Estado = EstadoVacante.Borrador,
+            CreadaPor = usuario,
+            CreadaEn = ahora,
+            EditadaPorPersona = true,
+        };
+        vacante.Aplicar(contenido);
+        return vacante;
+    }
+
+    /// <summary>La IA no redactó porque la frase pide más de un cargo o le falta algo que no puede suponer: pregunta antes.</summary>
+    public void RegistrarAclaraciones(IEnumerable<AclaracionVacante> preguntas)
+    {
+        if (Estado == EstadoVacante.Redactando)
+        {
+            Aclaraciones = [.. preguntas.Where(p => !string.IsNullOrWhiteSpace(p.Pregunta))
+                .Select(p => new AclaracionVacante { Pregunta = p.Pregunta.Trim(), Opciones = [.. p.Opciones.Select(o => o.Trim()).Where(o => o.Length > 0)] })];
+            MensajeIa = null;
+            Estado = EstadoVacante.Borrador;
+        }
+    }
+
+    /// <summary>
+    /// Pide a la IA un borrador nuevo con otra frase (por ejemplo, después de responder sus aclaraciones).
+    /// Solo mientras es borrador: lo que ya se aprobó o publicó no lo reescribe la IA.
+    /// </summary>
+    public Result PedirRedaccion(string frase)
+    {
+        if (Estado != EstadoVacante.Borrador)
+        {
+            return Result.Failure(VacanteErrors.NoSePuedeRedactar);
+        }
+
+        if (string.IsNullOrWhiteSpace(frase))
+        {
+            return Result.Failure(VacanteErrors.FraseVacia);
+        }
+
+        Frase = frase.Trim();
+        Aclaraciones = [];
+        MensajeIa = null;
+        Estado = EstadoVacante.Redactando;
+        return Result.Success();
+    }
+
     public void RegistrarBorradorIa(ContenidoVacante contenido, string justificacionSalario, IEnumerable<string> competencias,
         IEnumerable<string> supuestos, IEnumerable<RazonVacante> razones, string modelo)
     {
@@ -205,6 +311,8 @@ public sealed class Vacante : AggregateRoot<Guid>
         }
 
         // Si parte de un cargo del catálogo, el nombre del cargo es el del catálogo, diga lo que diga la IA
+        // Lo que la persona decidió de la publicación (empresa confidencial, salario oculto) no lo cambia la IA
+        contenido = contenido with { EmpresaConfidencial = EmpresaConfidencial, SalarioOculto = SalarioOculto };
         Aplicar(CargoId is null || string.IsNullOrWhiteSpace(Cargo) ? contenido : contenido with { Cargo = Cargo });
         JustificacionSalario = justificacionSalario;
         Competencias = [.. competencias];
@@ -242,6 +350,12 @@ public sealed class Vacante : AggregateRoot<Guid>
         if (Estado == EstadoVacante.EnAprobacion)
         {
             return Result.Failure(VacanteErrors.EnAprobacion);
+        }
+
+        // Lo aprobado es lo que se publicó: después de publicarse no cambia
+        if (Estado == EstadoVacante.Publicada)
+        {
+            return Result.Failure(VacanteErrors.Publicada);
         }
 
         if (contenido.SalarioMaximo < contenido.SalarioMinimo)
@@ -282,13 +396,9 @@ public sealed class Vacante : AggregateRoot<Guid>
         AprobacionPedidaPor = por;
         MotivoDevolucion = null;
         Estado = EstadoVacante.EnAprobacion;
-        EtapaPendiente = FlujoRequisicion.Etapas[0];
-        while (EtapaPendiente is { } etapa && FlujoRequisicion.PuedeAprobar(rol, etapa))
-        {
-            Aprobaciones.Add(new AprobacionVacante { Etapa = etapa, Decision = FlujoRequisicion.Aprobada, Por = por, Rol = rol, Automatica = true, En = ahora });
-            Siguiente(ahora);
-        }
 
+        // Enviar no aprueba nada: aprobar es un paso aparte, aunque quien envía tenga autoridad para aprobar
+        EtapaPendiente = FlujoRequisicion.Etapas[0];
         return Result.Success();
     }
 
@@ -298,6 +408,18 @@ public sealed class Vacante : AggregateRoot<Guid>
         if (etapa.IsFailure)
         {
             return Result.Failure(etapa.Error);
+        }
+
+        // Por ahora el administrador aprueba de una vez todas las etapas que falten, y con eso la vacante se publica
+        if (rol == FlujoRequisicion.Administrador)
+        {
+            while (EtapaPendiente is { } pendiente)
+            {
+                Aprobaciones.Add(new AprobacionVacante { Etapa = pendiente, Decision = FlujoRequisicion.Aprobada, Por = por, Rol = rol, En = ahora });
+                Siguiente(ahora);
+            }
+
+            return Result.Success();
         }
 
         // Cuatro ojos: quien ya aprobó a mano una etapa no aprueba la siguiente
@@ -390,6 +512,9 @@ public sealed class Vacante : AggregateRoot<Guid>
         Titulo = c.Titulo.Trim();
         Cargo = c.Cargo.Trim();
         Ciudad = c.Ciudad.Trim();
+        CodigoMunicipio = string.IsNullOrWhiteSpace(c.CodigoMunicipio) ? null : c.CodigoMunicipio.Trim();
+        EmpresaConfidencial = c.EmpresaConfidencial;
+        SalarioOculto = c.SalarioOculto;
         Cupos = c.Cupos;
         Jornada = c.Jornada.Trim();
         Descripcion = c.Descripcion.Trim();

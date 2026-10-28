@@ -110,6 +110,21 @@ public sealed class AplicacionPruebas : AggregateRoot<Guid>
             VenceEn = ahora.Add(Vigencia),
         };
 
+    /// <summary>Pruebas por presentar o a medias, y todavía en plazo: es un pendiente de la persona en su portal.</summary>
+    public bool PorPresentar(DateTimeOffset ahora) => Estado is EstadoAplicacion.Enviada or EstadoAplicacion.EnCurso && ahora <= VenceEn;
+
+    /// <summary>La persona las abre desde su portal (ADR 0013): enlace nuevo, mismo plazo.</summary>
+    public bool AbrirDesdePortal(string huella, DateTimeOffset ahora)
+    {
+        if (!PorPresentar(ahora))
+        {
+            return false;
+        }
+
+        TokenHuella = huella;
+        return true;
+    }
+
     /// <summary>Reenviar: nuevo enlace y nuevo plazo; las pruebas ya terminadas se conservan.</summary>
     public void Reenviar(string huella, string usuario, DateTimeOffset ahora)
     {

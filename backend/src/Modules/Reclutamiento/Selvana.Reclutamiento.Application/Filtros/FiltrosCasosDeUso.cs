@@ -109,7 +109,8 @@ internal sealed class ObtenerFiltrosHandler(IUsuarioActual usuario, IVacantes va
 
         return new FiltrosDto(f is not null, f?.ConfiguradoPor, f?.ConfiguradoEn,
             [.. v.Requisitos.Select(r => new OpcionFiltroDto(r, Marcado(f?.RequisitosExcluyentes, EvaluadorFiltros.TipoRequisito, r), Sugerencia(EvaluadorFiltros.TipoRequisito, r)))],
-            [.. v.PreguntasFiltro.Select(p => new OpcionFiltroDto(p, Marcado(f?.PreguntasExcluyentes, EvaluadorFiltros.TipoPregunta, p), Sugerencia(EvaluadorFiltros.TipoPregunta, p)))],
+            // Solo las de sí o no pueden ser excluyentes: «Respondió No» descarta; una cifra no
+            [.. v.PreguntasFiltro.Where(p => PreguntasFiltro.Tipo(p) == TipoPreguntaFiltro.SiNo).Select(p => new OpcionFiltroDto(p, Marcado(f?.PreguntasExcluyentes, EvaluadorFiltros.TipoPregunta, p), Sugerencia(EvaluadorFiltros.TipoPregunta, p)))],
             f is null ? [.. sugeridos.Where(s => s.Tipo == EvaluadorFiltros.TipoCiudad).Select(s => s.Filtro)] : f.Ciudades, v.Ciudad,
             f is null ? null : f.ExperienciaMinimaMeses, porResultado, evaluaciones.Count(x => FiltrosAts.SeSugiereDescartar(x.p, x.e)));
     }

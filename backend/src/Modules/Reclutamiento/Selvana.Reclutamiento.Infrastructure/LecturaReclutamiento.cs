@@ -4,6 +4,7 @@ using Selvana.Reclutamiento.Application.Abstracciones;
 using Selvana.Reclutamiento.Application.Privacidad;
 using Selvana.Reclutamiento.Domain.Candidatos;
 using Selvana.Reclutamiento.Domain.Postulaciones;
+using Selvana.Reclutamiento.Domain.Preseleccion;
 using Selvana.Reclutamiento.Domain.Vacantes;
 using Selvana.Reclutamiento.Infrastructure.Persistence;
 using Selvana.SharedKernel.Results;
@@ -69,7 +70,7 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
                 v.AprobacionPedidaPor, v.MotivoDevolucion,
                 [.. v.Aprobaciones.Select(a => new AprobacionDto(FlujoRequisicion.Nombre(a.Etapa), a.Decision, a.Por, a.Rol, a.Motivo, a.Automatica, a.En))],
                 PuedeDecidir: false),
-            v.CargoId);
+            v.CargoId, CodigoMunicipio: v.CodigoMunicipio, EmpresaConfidencial: v.EmpresaConfidencial, SalarioOculto: v.SalarioOculto, Aclaraciones: [.. v.Aclaraciones.Select(a => new AclaracionDto(a.Pregunta, a.Opciones))]);
     }
 
     public async Task<Pagina<PostulanteDto>> PostulantesAsync(Guid empresaId, Guid vacanteId, PaginaSolicitada pagina, string? buscar, string? canal, CancellationToken ct)
@@ -97,13 +98,29 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
             .Select(x => new { x.Candidato.Id, x.Candidato.Documento, x.Candidato.Datos, x.Postulacion, Otras = x.Candidato.Postulaciones.Count - 1 })
             .ToListAsync(ct);
 
+        // La conversación más reciente de cada postulación dice si hay algo pendiente en la preselección
+        var ids = filas.Select(f => f.Postulacion.Id).ToList();
+        var conversaciones = (await db.Set<ConversacionPreseleccion>().AsNoTracking().Where(c => ids.Contains(c.PostulacionId))
+                .Select(c => new { c.PostulacionId, c.Estado, c.Pensando, c.CreadaEn }).ToListAsync(ct))
+            .GroupBy(c => c.PostulacionId).ToDictionary(g => g.Key, g => g.MaxBy(c => c.CreadaEn)!);
+        string? Preseleccion(Guid postulacionId) => conversaciones.TryGetValue(postulacionId, out var c)
+            ? c.Estado switch
+            {
+                EstadoConversacion.Escalada => EstadoPreseleccionPostulante.NecesitaPersona,
+                EstadoConversacion.Completada => EstadoPreseleccionPostulante.Completada,
+                EstadoConversacion.Invitada => EstadoPreseleccionPostulante.Invitada,
+                _ => c.Pensando ? EstadoPreseleccionPostulante.IaRespondiendo : EstadoPreseleccionPostulante.EsperaCandidato,
+            }
+            : null;
+
         var items = filas.Select(f => new PostulanteDto(
             f.Postulacion.Id, f.Id, f.Postulacion.Numero, f.Datos.Nombre, Enmascarar(f.Documento), f.Datos.Celular, f.Datos.Ciudad,
             f.Postulacion.Canal.ToString(),
-            string.Join(" · ", f.Postulacion.Respuestas.Select(r => r.Respuesta ? "Sí" : "No")),
-            f.Postulacion.Respuestas.Count(r => !r.Respuesta),
+            string.Join(" · ", f.Postulacion.Respuestas.Select(r => r.Texto)),
+            f.Postulacion.Respuestas.Count(r => r.EsNegativa),
             $"Aceptada {f.Postulacion.Autorizacion.Version}", f.Postulacion.RecibidaEn, f.Otras, f.Postulacion.CamposCorregidos, f.Datos.LinkedIn,
-            Afinidad(f.Postulacion.Afinidad), f.Postulacion.Retroalimentacion?.Valor.ToString(), f.Postulacion.Retroalimentacion?.Nota)).ToList();
+            Afinidad(f.Postulacion.Afinidad), f.Postulacion.Retroalimentacion?.Valor.ToString(), f.Postulacion.Retroalimentacion?.Nota,
+            Preseleccion(f.Postulacion.Id))).ToList();
 
         return new Pagina<PostulanteDto>(items, pagina.Numero, pagina.Tamano, total);
     }
@@ -132,11 +149,12 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
 
         var total = await q.CountAsync(ct);
         var filas = await q.OrderByDescending(v => v.PublicadaEn).Skip(pagina.Omitir).Take(pagina.Tamano)
-            .Select(v => new { v.Codigo, v.Titulo, Empresa = v.EmpresaUsuariaNombre ?? v.EmpresaNombre, v.Ciudad, v.Jornada, v.Cupos,
-                v.SalarioMinimo, v.SalarioMaximo, v.Descripcion, v.PublicadaEn })
+            .Select(v => new { v.Codigo, v.Titulo, Empresa = v.EmpresaConfidencial ? Vacante.NombreConfidencial : v.EmpresaUsuariaNombre ?? v.EmpresaNombre, v.Ciudad, v.Jornada, v.Cupos,
+                v.SalarioMinimo, v.SalarioMaximo, v.SalarioOculto, v.Descripcion, v.PublicadaEn })
             .ToListAsync(ct);
-        var items = filas.Select(v => new VacantePublicaDto(v.Codigo, v.Titulo, v.Empresa, v.Ciudad, v.Jornada, v.Cupos, v.SalarioMinimo, v.SalarioMaximo,
-            v.Descripcion.Length > 160 ? string.Concat(v.Descripcion.AsSpan(0, 160), "…") : v.Descripcion, v.PublicadaEn ?? DateTimeOffset.MinValue)).ToList();
+        var items = filas.Select(v => new VacantePublicaDto(v.Codigo, v.Titulo, v.Empresa, v.Ciudad, v.Jornada, v.Cupos,
+            v.SalarioOculto ? 0 : v.SalarioMinimo, v.SalarioOculto ? 0 : v.SalarioMaximo,
+            v.Descripcion.Length > 160 ? string.Concat(v.Descripcion.AsSpan(0, 160), "…") : v.Descripcion, v.PublicadaEn ?? DateTimeOffset.MinValue, v.SalarioOculto)).ToList();
 
         // Se ordena por el conteo antes de armar el DTO: EF no traduce un orden sobre un record construido
         var ciudades = (await facetas.GroupBy(v => v.Ciudad).Select(g => new { g.Key, Total = g.Count() }).OrderByDescending(x => x.Total).Take(12).ToListAsync(ct))
@@ -153,8 +171,9 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
         var normalizado = codigo.Trim().ToUpperInvariant();
         var v = await db.Set<Vacante>().AsNoTracking()
             .FirstOrDefaultAsync(x => x.Codigo == normalizado && (x.Estado == EstadoVacante.Publicada || x.Estado == EstadoVacante.Cerrada), ct);
-        return v is null ? null : new VacantePublicaDetalleDto(v.Codigo, v.Titulo, v.EmpresaVisible, v.Ciudad, v.Jornada, v.Cupos,
-            v.SalarioMinimo, v.SalarioMaximo, v.Descripcion, v.Requisitos, v.PreguntasFiltro, v.PublicadaEn ?? v.CreadaEn, v.RecibePostulaciones);
+        return v is null ? null : new VacantePublicaDetalleDto(v.Codigo, v.Titulo, v.EmpresaEnPortal, v.Ciudad, v.Jornada, v.Cupos,
+            v.SalarioOculto ? 0 : v.SalarioMinimo, v.SalarioOculto ? 0 : v.SalarioMaximo, v.Descripcion, v.Requisitos, v.PreguntasFiltro,
+            v.PublicadaEn ?? v.CreadaEn, v.RecibePostulaciones, v.SalarioOculto);
     }
 
     public async Task<BorradorPostulacionDto?> BorradorAsync(Guid borradorId, CancellationToken ct)
@@ -171,7 +190,8 @@ internal sealed class LecturaReclutamiento(ReclutamientoDbContext db) : ILectura
             d is null ? null : new DatosCandidatoDto(d.Nombre, d.Documento, d.Celular, d.Correo, d.Ciudad,
                 [.. d.Experiencia.Select(x => new ExperienciaDto(x.Cargo, x.Empresa, x.Desde, x.Hasta))],
                 [.. d.Formacion.Select(x => new FormacionDto(x.Titulo, x.Institucion, x.Anio))], d.Cursos, d.Habilidades),
-            v.Codigo, v.Titulo, v.EmpresaVisible, v.Ciudad, v.PreguntasFiltro, PoliticaDatos.Version, PoliticaDatos.Texto(v.EmpresaVisible));
+            v.Codigo, v.Titulo, v.EmpresaEnPortal, v.Ciudad, v.PreguntasFiltro, PoliticaDatos.Version, PoliticaDatos.Texto(v.ResponsableDatos),
+            [.. v.PreguntasFiltro.Select(p => PreguntasFiltro.Tipo(p).ToString())]);
     }
 
     private static AfinidadDto? Afinidad(AfinidadPostulacion? a) => a is null ? null : new AfinidadDto(

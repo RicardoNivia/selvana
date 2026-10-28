@@ -52,4 +52,9 @@ export const IconoExpandir = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="tru
 export const IconoSol = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><circle cx="10" cy="10" r="3.5" /><path d="M10 2.5v1.5M10 16v1.5M2.5 10H4M16 10h1.5M4.7 4.7l1 1M14.3 14.3l1 1M4.7 15.3l1-1M14.3 5.7l1-1" /></svg>
 export const IconoLuna = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M16.5 12A7 7 0 0 1 8 3.5a7 7 0 1 0 8.5 8.5Z" /></svg>
 export const IconoPantalla = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><rect x="2.5" y="3.5" width="15" height="10" rx="2" /><path d="M7 17h6M10 13.5V17" /></svg>
-export const IconoSalir =(p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M8 4H5a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 5 16h3M13 6.5 16.5 10 13 13.5M16.5 10H8" /></svg>
+export const IconoSalir = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M8 4H5a1.5 1.5 0 0 0-1.5 1.5v9A1.5 1.5 0 0 0 5 16h3M13 6.5 16.5 10 13 13.5M16.5 10H8" /></svg>
+export const IconoChat = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M3.5 5.5A2 2 0 0 1 5.5 3.5h9a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-3.5 3v-3a2 2 0 0 1-2-2v-6Z" /><path d="M7 8h6M7 10.5h4" /></svg>
+export const IconoPrueba = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><rect x="4" y="3.5" width="12" height="14" rx="2" /><path d="M7.5 3.5V2.5h5v1M7 9l1.5 1.5L11 8M7 13.5h6" /></svg>
+export const IconoMas = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M10 4v12M4 10h12" /></svg>
+export const IconoCerrar = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M5 5l10 10M15 5 5 15" /></svg>
+export const IconoInicio = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M3 9 10 3l7 6v7.5a1 1 0 0 1-1 1h-3.5V12h-5v5.5H4a1 1 0 0 1-1-1V9Z" /></svg>

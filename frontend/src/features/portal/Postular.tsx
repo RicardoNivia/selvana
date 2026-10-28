@@ -1,24 +1,32 @@
-import { type CSSProperties, type DragEvent, useEffect, useRef, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { type CSSProperties, useEffect, useState } from 'react'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { AutocompletarMunicipio, resolverMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
-import { Chispa, IconoAlerta, IconoCheck, IconoDocumento, IconoEscudo, IconoFlecha, IconoSubir } from '../../shared/ui/Iconos'
-import { type BorradorPostulacion, esLinkedIn, rangoSalario, useBorrador, useEnviarPostulacion, useSubirHojaDeVida, useVacantePublica } from './api'
+import { Chispa, IconoAlerta, IconoCheck, IconoDocumento, IconoFlecha } from '../../shared/ui/Iconos'
+import { useMiCuenta, useMiPortal, usePostularmeConMiPerfil } from '../portal-persona/api'
+import { type BorradorPostulacion, esLinkedIn, rangoSalario, useBorrador, useEnviarPostulacion, useVacantePublica } from './api'
 
-const tipos = '.pdf,.docx,image/jpeg,image/png,image/webp'
 const v = (i: number) => ({ '--i': i }) as CSSProperties
-const pasos = ['Hoja de vida', 'Tus datos', 'Enviada']
+const miles = new Intl.NumberFormat('es-CO')
+const pasos = ['Confirmar', 'Tus datos', 'Enviada']
 
-/** Flujo de postulación: subir la hoja de vida → la IA la lee → el candidato confirma → envía. */
+/** Flujo de postulación con la cuenta del portal: confirma que quiere postularse con su perfil → responde y acepta → envía. */
 export function Postular() {
   const { codigo = '' } = useParams()
   const [busqueda] = useSearchParams()
-  const [borradorId, setBorradorId] = useState<string>()
+  const cuenta = useMiCuenta()
+  const portal = useMiPortal()
+  // Desde «Ofertas para ti» llega con el borrador ya listo (su hoja de vida del perfil): empieza en «Tus datos»
+  const [borradorId, setBorradorId] = useState<string | undefined>(busqueda.get('borrador') ?? undefined)
   const [enviada, setEnviada] = useState<string>()
-  const [linkedIn, setLinkedIn] = useState('')
   const vacante = useVacantePublica(codigo)
   const borrador = useBorrador(borradorId)
 
+  // Solo se postula con cuenta del portal (ADR 0013): sin sesión, a ingresar o crear la cuenta y volver aquí
+  if (cuenta.isError) return <Navigate to={`/mi-portal/ingresar?volver=${encodeURIComponent(`/empleos/${codigo}/postular`)}`} replace />
+
+  const yaPostulado = !enviada && portal.data?.postulaciones.some((p) => p.vacanteCodigo === codigo)
   const paso = enviada ? 4 : !borradorId ? 1 : borrador.data?.estado === 'Leyendo' || borrador.isPending ? 2 : 3
   const indice = paso <= 2 ? 0 : paso === 3 ? 1 : 2
   const canal = busqueda.get('utm_source') ?? 'Portal'
@@ -49,91 +57,61 @@ export function Postular() {
       </ol>
 
       <div key={paso} className="postular-escena">
-        {paso === 1 && <Subir codigo={codigo} linkedIn={linkedIn} onLinkedIn={setLinkedIn} onSubido={setBorradorId} />}
-        {paso === 2 && <Leyendo nombre={borrador.data?.nombreArchivo} />}
-        {paso === 3 && borrador.data && <Confirmar borrador={borrador.data} canal={canal} linkedInDado={linkedIn} onEnviada={setEnviada} />}
-        {paso === 4 && <Enviada numero={enviada!} empresa={vacante.data?.empresa} />}
+        {cuenta.isPending || portal.isPending ? (
+          <section className="postular-cuerpo"><Esqueleto alto={120} /></section>
+        ) : yaPostulado ? (
+          <section className="postular-cuerpo postular-final" role="status">
+            <h1>Ya te postulaste a esta vacante</h1>
+            <p className="postular-ayuda">Mira cómo va, el chat con la empresa y tus pendientes en tu portal.</p>
+            <Link to="/mi-portal" className="boton boton-primario">Ir a mi portal</Link>
+          </section>
+        ) : paso === 1 ? (
+          <ConfirmarPostularme codigo={codigo} onListo={setBorradorId} />
+        ) : paso === 2 ? (
+          <Leyendo nombre={borrador.data?.nombreArchivo} />
+        ) : paso === 3 && borrador.data ? (
+          <Confirmar borrador={borrador.data} canal={canal} linkedInDado="" onEnviada={setEnviada} />
+        ) : paso === 4 ? (
+          <Enviada numero={enviada!} empresa={vacante.data?.empresa} />
+        ) : null}
       </div>
     </main>
   )
 }
 
-function Subir({ codigo, linkedIn, onLinkedIn, onSubido }: { codigo: string; linkedIn: string; onLinkedIn: (v: string) => void; onSubido: (id: string) => void }) {
-  const subir = useSubirHojaDeVida(codigo)
-  const archivo = useRef<HTMLInputElement>(null)
-  const [origen, setOrigen] = useState<'archivo' | 'ejemplo'>()
-  const [encima, setEncima] = useState(false)
-  const [modo, setModo] = useState<'hv' | 'linkedin'>('hv')
-  const linkedInMal = linkedIn.trim().length > 0 && !esLinkedIn(linkedIn)
+/** Antes de postular: «¿Quieres postularte con tu perfil?», con los datos y la hoja de vida que tiene guardados en el portal. */
+function ConfirmarPostularme({ codigo, onListo }: { codigo: string; onListo: (borradorId: string) => void }) {
+  const cuenta = useMiCuenta()
+  const postular = usePostularmeConMiPerfil()
+  const c = cuenta.data!
 
-  const enviar = (f: File | undefined, desde: 'archivo' | 'ejemplo') => {
-    if (!f) return
-    setOrigen(desde)
-    subir.mutate(f, { onSuccess: (r) => onSubido(r.id) })
-  }
-  const ejemplo = async () => {
-    setOrigen('ejemplo')
-    const r = await fetch('/ejemplos/hoja-de-vida-ejemplo.pdf')
-    enviar(new File([await r.blob()], 'hoja-de-vida-ejemplo.pdf', { type: 'application/pdf' }), 'ejemplo')
-  }
-  const soltar = (e: DragEvent) => {
-    e.preventDefault()
-    setEncima(false)
-    if (!subir.isPending) enviar(e.dataTransfer.files[0], 'archivo')
+  if (!c.nombreArchivoHojaDeVida) {
+    return (
+      <section className="postular-cuerpo">
+        <h1>Primero sube tu hoja de vida</h1>
+        <p className="postular-ayuda">Te postulas con la hoja de vida de tu portal. Súbela allí (o el PDF de tu LinkedIn) y la IA llena tu perfil.</p>
+        <Link to="/mi-portal" className="boton boton-primario">Ir a mi hoja de vida</Link>
+      </section>
+    )
   }
 
-  const subiendoArchivo = subir.isPending && origen === 'archivo'
   return (
     <section className="postular-cuerpo">
-      <h1>Postúlate en 2 minutos</h1>
-      <p className="postular-ayuda">Sube tu hoja de vida o tu perfil de LinkedIn y nosotros llenamos la postulación. Tú solo revisas y envías.</p>
-
-      <div className="postular-modos" role="tablist" aria-label="Cómo quieres postularte">
-        <button type="button" role="tab" aria-selected={modo === 'hv'} onClick={() => setModo('hv')}><IconoDocumento />Hoja de vida</button>
-        <button type="button" role="tab" aria-selected={modo === 'linkedin'} onClick={() => setModo('linkedin')}><span className="postular-in" aria-hidden="true">in</span>LinkedIn</button>
-        <span className="postular-modos-indicador" style={{ translate: modo === 'hv' ? '0 0' : '100% 0' }} aria-hidden="true" />
+      <h1>¿Quieres postularte?</h1>
+      <p className="postular-ayuda">Te postulas con los datos y la hoja de vida de tu portal. Después respondes las preguntas de la empresa y aceptas su autorización de datos.</p>
+      <div className="postular-grupo">
+        <span><b>{c.datos.nombre}</b></span>
+        <span className="postular-nota-suave">{c.correo} · {c.tipoDocumento} <span className="mono">{c.datos.documento}</span></span>
+        <span className="postular-nota-suave">{c.datos.celular || 'Sin celular'} · {c.datos.ciudad || 'Sin ciudad'}</span>
+        <span className="postular-nota-suave"><IconoDocumento /> {c.nombreArchivoHojaDeVida}</span>
       </div>
-
-      {modo === 'linkedin' && (
-        <div className="postular-linkedin">
-          <label className="postular-campo">
-            Enlace de tu perfil
-            <input className="entrada" inputMode="url" autoComplete="url" placeholder="linkedin.com/in/tu-nombre" value={linkedIn}
-              onChange={(e) => onLinkedIn(e.target.value)} aria-invalid={linkedInMal || undefined} />
-            {linkedInMal
-              ? <span className="postular-nota-error">Pega el enlace de tu perfil, por ejemplo linkedin.com/in/tu-nombre.</span>
-              : <span className="postular-nota-suave">La empresa lo verá junto a tu postulación.</span>}
-          </label>
-          <ol className="postular-linkedin-pasos">
-            <li style={v(0)}><b>Abre tu perfil</b> en linkedin.com desde el computador.</li>
-            <li style={v(1)}>Toca <b>Más</b> y luego <b>Guardar en PDF</b>.</li>
-            <li style={v(2)}><b>Sube ese PDF aquí</b> y nosotros leemos tu experiencia.</li>
-          </ol>
-          <span className="postular-nota-suave">LinkedIn no deja que otras páginas lean tu perfil con solo el enlace; por eso te pedimos el PDF que LinkedIn genera para ti.</span>
-        </div>
-      )}
-
-      <input ref={archivo} type="file" accept={tipos} hidden onChange={(e) => enviar(e.target.files?.[0], 'archivo')} />
-      <button
-        type="button"
-        className={`postular-subir ${encima ? 'encima' : ''} ${subiendoArchivo ? 'subiendo' : ''}`}
-        disabled={subir.isPending || linkedInMal}
-        aria-busy={subiendoArchivo || undefined}
-        onClick={() => archivo.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); setEncima(true) }}
-        onDragLeave={() => setEncima(false)}
-        onDrop={soltar}
-      >
-        <span className="postular-subir-icono">{subiendoArchivo ? <span className="indicador" aria-hidden="true" /> : <IconoSubir />}</span>
-        <b>{subiendoArchivo ? 'Subiendo…' : encima ? 'Suéltala aquí' : modo === 'linkedin' ? 'Toca para subir el PDF de LinkedIn' : 'Toca para subir tu hoja de vida'}</b>
-        <span>o arrástrala aquí · PDF, Word o una foto clara · máx. 10 MB</span>
-        <span className="pill pill-ia postular-subir-ia"><Chispa />La IA la lee por ti</span>
-      </button>
-      <Boton cargando={subir.isPending && origen === 'ejemplo'} textoCargando="Subiendo…" disabled={subir.isPending} onClick={() => void ejemplo()}>
-        Probar con una hoja de vida de ejemplo
-      </Boton>
-      {subir.error && <p role="alert" className="aviso aviso-alerta postular-error"><IconoAlerta />{subir.error.message}</p>}
-      <p className="postular-confianza"><IconoEscudo />Tu hoja de vida se guarda cifrada y solo la ve la empresa. No usamos tu edad, género, estado civil ni foto para evaluarte.</p>
+      {postular.error && <p role="alert" className="aviso aviso-alerta postular-error"><IconoAlerta />{postular.error.message}</p>}
+      <div className="postular-enviar-barra">
+        <Boton variante="primario" cargando={postular.isPending} textoCargando="Preparando…" onClick={() => postular.mutate(codigo, { onSuccess: (r) => onListo(r.id) })} className="postular-enviar">
+          Sí, quiero postularme <IconoFlecha />
+        </Boton>
+        <Link to="/mi-portal" className="postular-ayuda">Corregir mis datos en el portal</Link>
+      </div>
     </section>
   )
 }
@@ -186,14 +164,23 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
     nombre: leidos?.nombre ?? '', documento: leidos?.documento ?? '', celular: leidos?.celular ?? '', correo: leidos?.correo ?? '', ciudad: leidos?.ciudad ?? '',
   })
   const [editados, setEditados] = useState<Partial<Record<Campo, boolean>>>({})
+  // La ciudad que leyó la IA se busca en el DANE; si corresponde a un solo municipio, queda elegida
+  const [ciudadCodigo, setCiudadCodigo] = useState<string | null>(null)
+  useEffect(() => {
+    if (leidos?.ciudad) void resolverMunicipio(leidos.ciudad).then((m) => { if (m) { setValores((x) => ({ ...x, ciudad: m.municipio })); setCiudadCodigo(m.codigo) } })
+  }, [leidos?.ciudad])
   const [respuestas, setRespuestas] = useState<(boolean | undefined)[]>(borrador.preguntasFiltro.map(() => undefined))
+  // Preguntas de número o de pesos: se responden con la cifra (solo dígitos)
+  const tiposPregunta = borrador.preguntasFiltro.map((_, i) => borrador.tiposPreguntasFiltro?.[i] ?? 'SiNo')
+  const [cifras, setCifras] = useState<string[]>(borrador.preguntasFiltro.map(() => ''))
+  const respondida = (i: number) => (tiposPregunta[i] === 'SiNo' ? respuestas[i] !== undefined : cifras[i] !== '')
   const [acepta, setAcepta] = useState(false)
   // Lo que el candidato pegó manda sobre lo que la IA encontró en el PDF
   const [linkedIn, setLinkedIn] = useState(linkedInDado.trim() || leidos?.linkedIn || '')
   const [linkedInEditado, setLinkedInEditado] = useState(Boolean(linkedInDado.trim()))
   const linkedInMal = linkedIn.trim().length > 0 && !esLinkedIn(linkedIn)
-  const completas = respuestas.every((r) => r !== undefined)
-  const respondidas = respuestas.filter((r) => r !== undefined).length
+  const completas = tiposPregunta.every((_, i) => respondida(i))
+  const respondidas = tiposPregunta.filter((_, i) => respondida(i)).length
 
   const cambiar = (c: Campo, valor: string) => {
     setValores((x) => ({ ...x, [c]: valor }))
@@ -205,7 +192,8 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
       className="postular-cuerpo"
       onSubmit={(e) => {
         e.preventDefault()
-        enviar.mutate({ ...valores, linkedIn: linkedIn.trim() || undefined, respuestas: respuestas.map(Boolean), aceptaAutorizacion: acepta, canal }, { onSuccess: (r) => onEnviada(r.numero) })
+        enviar.mutate({ ...valores, linkedIn: linkedIn.trim() || undefined, respuestas: tiposPregunta.map((t, i) => (t === 'SiNo' ? Boolean(respuestas[i]) : true)),
+          valores: tiposPregunta.map((t, i) => (t === 'SiNo' ? null : Number(cifras[i]))), aceptaAutorizacion: acepta, canal }, { onSuccess: (r) => onEnviada(r.numero) })
       }}
     >
       <h1>Revisa tus datos</h1>
@@ -218,6 +206,17 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
       <div className="postular-grupo">
         {(Object.keys(etiquetas) as Campo[]).map((c, i) => {
           const ia = Boolean(leidos && leidos[c]) && !editados[c]
+          if (c === 'ciudad') {
+            return (
+              <label key={c} className="postular-campo" style={v(i)}>
+                {etiquetas[c]}
+                {/* La ciudad se elige de la DIVIPOLA del DANE */}
+                <AutocompletarMunicipio valor={{ codigo: ciudadCodigo, ciudad: valores.ciudad }} ia={ia} requerido
+                  onElegir={(m, texto) => { cambiar('ciudad', m?.municipio ?? texto); setCiudadCodigo(m?.codigo ?? null) }} />
+                {ia && <span className="postular-nota-ia"><Chispa />Leído de tu hoja de vida</span>}
+              </label>
+            )
+          }
           return (
             <label key={c} className="postular-campo" style={v(i)}>
               {etiquetas[c]}
@@ -228,6 +227,8 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
                 inputMode={c === 'documento' || c === 'celular' ? 'numeric' : c === 'correo' ? 'email' : undefined}
                 autoComplete={c === 'nombre' ? 'name' : c === 'correo' ? 'email' : c === 'celular' ? 'tel' : undefined}
                 required={c !== 'correo'}
+                // El correo y la identificación son los de la cuenta del portal: con ellos se une la postulación
+                readOnly={c === 'correo' || c === 'documento'}
               />
               {ia && <span className="postular-nota-ia"><Chispa />Leído de tu hoja de vida</span>}
               {editados[c] && leidos?.[c] && <span className="postular-nota-ok"><IconoCheck />Corregido por ti</span>}
@@ -260,13 +261,20 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
           {borrador.preguntasFiltro.map((p, i) => (
             <div key={p} className="postular-pregunta" style={v(i)}>
               <span>{p}</span>
-              <div className="postular-sino" role="group" aria-label={p}>
-                {[true, false].map((valor) => (
-                  <button key={String(valor)} type="button" aria-pressed={respuestas[i] === valor} onClick={() => setRespuestas((r) => r.map((x, j) => (j === i ? valor : x)))}>
-                    {valor ? 'Sí' : 'No'}
-                  </button>
-                ))}
-              </div>
+              {tiposPregunta[i] === 'SiNo' ? (
+                <div className="postular-sino" role="group" aria-label={p}>
+                  {[true, false].map((valor) => (
+                    <button key={String(valor)} type="button" aria-pressed={respuestas[i] === valor} onClick={() => setRespuestas((r) => r.map((x, j) => (j === i ? valor : x)))}>
+                      {valor ? 'Sí' : 'No'}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <input className="entrada mono" inputMode="numeric" aria-label={p}
+                  placeholder={tiposPregunta[i] === 'Pesos' ? '$ 0' : 'Escribe un número'}
+                  value={tiposPregunta[i] === 'Pesos' && cifras[i] ? `$ ${miles.format(Number(cifras[i]))}` : cifras[i]}
+                  onChange={(e) => { const d = e.target.value.replace(/\D/g, '').slice(0, 12); setCifras((c) => c.map((x, j) => (j === i ? d : x))) }} />
+              )}
             </div>
           ))}
         </fieldset>
@@ -279,11 +287,11 @@ function Confirmar({ borrador, canal, linkedInDado, onEnviada }: { borrador: Bor
 
       {enviar.error && <p role="alert" className="aviso aviso-alerta postular-error"><IconoAlerta />{enviar.error.message}</p>}
       <div className="postular-enviar-barra">
-        <Boton type="submit" variante="primario" cargando={enviar.isPending} textoCargando="Enviando…" disabled={!acepta || !completas || linkedInMal} className="postular-enviar">
+        <Boton type="submit" variante="primario" cargando={enviar.isPending} textoCargando="Enviando…" disabled={!acepta || !completas || linkedInMal || !ciudadCodigo} className="postular-enviar">
           Enviar postulación <IconoFlecha />
         </Boton>
         <span className="postular-ayuda">
-          {!completas ? 'Responde las preguntas de la empresa.' : !acepta ? 'Acepta la autorización de datos para enviar.' : 'Todo listo. Puedes corregir cualquier dato antes de enviar.'}
+          {!ciudadCodigo ? 'Elige tu ciudad de la lista.' : !completas ? 'Responde las preguntas de la empresa.' : !acepta ? 'Acepta la autorización de datos para enviar.' : 'Todo listo. Puedes corregir cualquier dato antes de enviar.'}
         </span>
       </div>
     </form>
@@ -315,6 +323,7 @@ function Enviada({ numero, empresa }: { numero: string; empresa?: string }) {
         <li style={v(1)}><b>Si sigues en el proceso, te contactan</b><span>Al celular o WhatsApp que confirmaste.</span></li>
         <li style={v(2)}><b>Puedes postularte a más vacantes</b><span>Con la misma hoja de vida, sin volver a llenar nada.</span></li>
       </ol>
+      <Link to="/mi-portal/registro" className="boton boton-primario">Sigue tu proceso en tu portal</Link>
       <Link to="/empleos" className="boton boton-secundario">Ver más vacantes</Link>
     </section>
   )

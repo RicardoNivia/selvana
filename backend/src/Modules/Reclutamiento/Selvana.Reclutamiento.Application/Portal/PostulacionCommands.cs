@@ -4,6 +4,7 @@ using Selvana.Reclutamiento.Application.Abstracciones;
 using Selvana.Reclutamiento.Application.Ranking;
 using Selvana.Reclutamiento.Contracts;
 using Selvana.Reclutamiento.Domain.Candidatos;
+using Selvana.Reclutamiento.Domain.Portal;
 using Selvana.Reclutamiento.Domain.Postulaciones;
 using Selvana.Reclutamiento.Domain.Vacantes;
 using Selvana.SharedKernel.Messaging;
@@ -17,7 +18,8 @@ public sealed record IniciarPostulacionCommand(string CodigoVacante, string Nomb
 /// <summary>El candidato confirmó sus datos, respondió las preguntas y aceptó la autorización: la postulación llega a la vacante.</summary>
 public sealed record EnviarPostulacionCommand(
     Guid BorradorId, string Nombre, string Documento, string Celular, string Correo, string Ciudad,
-    IReadOnlyList<bool> Respuestas, bool AceptaAutorizacion, string? Canal, string Ip, string Navegador, string? LinkedIn = null) : ICommand<string>;
+    IReadOnlyList<bool> Respuestas, bool AceptaAutorizacion, string? Canal, string Ip, string Navegador, string? LinkedIn = null,
+    IReadOnlyList<decimal?>? Valores = null) : ICommand<string>;
 
 internal sealed class IniciarPostulacionValidator : AbstractValidator<IniciarPostulacionCommand>
 {
@@ -84,14 +86,21 @@ internal sealed class IniciarPostulacionHandler(
 }
 
 internal sealed class EnviarPostulacionHandler(
-    IBorradoresPostulacion borradores, IVacantes vacantes, ICandidatos candidatos, ICalibracionRanking calibracion, IBitacora bitacora, IEventosReclutamiento eventos,
+    IPersonaActual persona, ICuentasCandidato cuentas, IBorradoresPostulacion borradores, IVacantes vacantes, ICandidatos candidatos, ICalibracionRanking calibracion, IBitacora bitacora, IEventosReclutamiento eventos,
     IUnidadReclutamiento unidad, TimeProvider reloj) : ICommandHandler<EnviarPostulacionCommand, string>
 {
     public async Task<Result<string>> Handle(EnviarPostulacionCommand c, CancellationToken cancellationToken)
     {
+        // Solo se postula quien tiene cuenta en el portal (ADR 0013), y con su correo y su identificación: nunca a nombre de otra persona
+        var cuenta = persona.CuentaId is { } cuentaId ? await cuentas.ObtenerAsync(cuentaId, cancellationToken) : null;
+        if (cuenta is null)
+        {
+            return CuentaErrors.NoExiste;
+        }
+
         var ahora = reloj.GetUtcNow();
         var borrador = await borradores.ObtenerAsync(c.BorradorId, cancellationToken);
-        if (borrador is null || borrador.Vencido(ahora))
+        if (borrador is null || borrador.Vencido(ahora) || borrador.DatosLeidos?.Documento != cuenta.Documento)
         {
             return BorradorErrors.NoExiste;
         }
@@ -111,9 +120,9 @@ internal sealed class EnviarPostulacionHandler(
         var datos = new DatosCandidato
         {
             Nombre = c.Nombre.Trim(),
-            Documento = Candidato.NormalizarDocumento(c.Documento),
+            Documento = cuenta.Documento,
             Celular = new string([.. c.Celular.Where(char.IsDigit)]),
-            Correo = (c.Correo ?? "").Trim().ToLowerInvariant(),
+            Correo = cuenta.Correo,
             Ciudad = (c.Ciudad ?? "").Trim(),
             Experiencia = leidos.Experiencia,
             Formacion = leidos.Formacion,
@@ -134,16 +143,23 @@ internal sealed class EnviarPostulacionHandler(
             candidato.ActualizarDatos(datos, ahora);
         }
 
-        var respuestas = vacante.PreguntasFiltro.Select((p, i) => new RespuestaFiltro { Pregunta = p, Respuesta = i < c.Respuestas.Count && c.Respuestas[i] });
+        // Sí o no en Respuestas; las preguntas de número o de pesos traen su cifra en Valores (misma posición)
+        var respuestas = vacante.PreguntasFiltro.Select((p, i) =>
+        {
+            var valor = PreguntasFiltro.Tipo(p) == TipoPreguntaFiltro.SiNo ? null : c.Valores is { } vs && i < vs.Count ? vs[i] : null;
+            return valor is { } v
+                ? new RespuestaFiltro { Pregunta = p, Respuesta = true, Valor = Math.Max(0, v) }
+                : new RespuestaFiltro { Pregunta = p, Respuesta = i < c.Respuestas.Count && c.Respuestas[i] };
+        });
         var autorizacion = c.AceptaAutorizacion
             ? new AutorizacionDatos
             {
                 Version = PoliticaDatos.Version,
-                Texto = PoliticaDatos.Texto(vacante.EmpresaVisible),
+                Texto = PoliticaDatos.Texto(vacante.ResponsableDatos),
                 AceptadaEn = ahora,
                 Ip = c.Ip,
                 Navegador = c.Navegador.Length <= 300 ? c.Navegador : c.Navegador[..300],
-                Huella = AutorizacionDatos.CalcularHuella(PoliticaDatos.Version, PoliticaDatos.Texto(vacante.EmpresaVisible), ahora, c.Ip,
+                Huella = AutorizacionDatos.CalcularHuella(PoliticaDatos.Version, PoliticaDatos.Texto(vacante.ResponsableDatos), ahora, c.Ip,
                     c.Navegador.Length <= 300 ? c.Navegador : c.Navegador[..300], datos.Documento),
             }
             : null;

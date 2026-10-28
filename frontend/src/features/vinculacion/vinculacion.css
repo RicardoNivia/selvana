@@ -95,14 +95,40 @@
 .vin-firma p { margin: 0; font-size: 14px; }
 .vin-firma .ayuda svg { width: 13px; height: 13px; vertical-align: -2px; }
 
-.vin-docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--espacio-3); align-items: start; }
+.vin-docs-avance { display: flex; align-items: center; gap: var(--espacio-2); font-size: 13px; color: var(--color-texto-suave); }
+.vin-docs-barra { flex: 1; max-width: 240px; height: 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; }
+.vin-docs-barra > span { display: block; height: 100%; background: var(--color-primario); border-radius: inherit; transition: width var(--duracion-media) var(--curva-salida); }
+.vin-docs-grupo { display: flex; align-items: center; gap: 8px; margin: var(--espacio-2) 0 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--color-texto-suave); }
+.vin-docs-grupo .mono { font-size: 11px; padding: 0 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); }
+.vin-docs { list-style: none; margin: 0; padding: 0; border: 1px solid var(--color-borde); border-radius: var(--radio-m); overflow: hidden; }
 .vin-doc p svg, .vin-sub svg { width: 14px; height: 14px; vertical-align: -2px; }
-.vin-doc { border: 1px solid var(--color-borde); border-radius: var(--radio-m); padding: var(--espacio-3) var(--espacio-4); display: flex; flex-direction: column; gap: var(--espacio-2); }
-.vin-doc.vin-doc-ia { border-color: var(--color-ia-borde); }
-.vin-doc > header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.vin-doc > header svg { width: 16px; height: 16px; color: var(--color-texto-suave); }
-.vin-doc > header .pill { margin-left: auto; }
+.vin-doc { display: flex; flex-direction: column; gap: var(--espacio-2); padding: var(--espacio-3) var(--espacio-4); border-top: 1px solid var(--color-borde); transition: background var(--duracion-corta); }
+.vin-doc:first-child { border-top: 0; }
+.vin-doc:hover { background: var(--color-superficie-2); }
+.vin-doc.vin-doc-ia { box-shadow: inset 3px 0 0 var(--color-ia); }
 .vin-doc p { margin: 0; }
+.vin-doc-fila { display: grid; grid-template-columns: 32px minmax(0, 1fr) 132px minmax(200px, auto); align-items: center; gap: var(--espacio-3); }
+.vin-doc-icono { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radio-s); background: var(--color-superficie-2); color: var(--color-texto-suave); }
+.vin-doc-icono svg { width: 16px; height: 16px; }
+.vin-doc-listo .vin-doc-icono { background: var(--color-primario-suave); color: var(--color-primario); }
+.vin-doc-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vin-doc-nombre { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.vin-doc-opcional { font-size: 11px; color: var(--color-texto-tenue); border: 1px solid var(--color-borde); border-radius: var(--radio-full); padding: 0 6px; }
+.vin-doc-meta { font-size: 12px; color: var(--color-texto-tenue); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vin-doc-meta .enlace-boton { font-size: 12px; }
+.vin-doc-fila > .pill { justify-self: start; }
+.vin-doc-acciones { display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; }
+.vin-doc-detalle { margin-left: calc(32px + var(--espacio-3)); }
+.vin-archivo { display: inline-flex; align-items: center; gap: 8px; flex: 1 1 220px; min-width: 0; height: 32px; padding: 0 var(--espacio-3); border: 1px dashed var(--color-borde); border-radius: var(--radio-s); font-size: 13px; color: var(--color-texto-suave); cursor: pointer; transition: border-color var(--duracion-corta), color var(--duracion-corta); }
+.vin-archivo:hover, .vin-archivo:focus-within { border-color: var(--color-primario); color: var(--color-primario); }
+.vin-archivo.elegido { border-style: solid; color: var(--color-texto); }
+.vin-archivo svg { width: 14px; height: 14px; flex: none; }
+.vin-archivo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 720px) {
+  .vin-doc-fila { grid-template-columns: 32px minmax(0, 1fr) auto; }
+  .vin-doc-acciones { grid-column: 2 / -1; justify-content: flex-start; }
+  .vin-doc-detalle { margin-left: 0; }
+}
 .vin-lectura { background: var(--color-ia-suave); border-radius: var(--radio-s); padding: var(--espacio-2) var(--espacio-3); display: flex; flex-direction: column; gap: 6px; }
 .vin-lectura .vin-etiqueta { color: var(--color-ia); display: inline-flex; align-items: center; gap: 4px; }
 .vin-chequeos { list-style: none; margin: 0; padding: 0; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
@@ -112,6 +138,7 @@
 .vin-rechazo, .vin-empresa { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .vin-rechazo .entrada, .vin-empresa .entrada { flex: 1 1 200px; }
 .vin-empresa .selector { width: auto; }
+.vin-empresa .selector, .vin-rechazo .entrada { height: 32px; padding-block: 0; font-size: 13px; line-height: 30px; }
 .vin-subir { cursor: pointer; }
 .vin-error { display: block; font-size: 12px; color: var(--color-error); }
 .vin-alerta-texto { display: block; font-size: 13px; color: var(--color-alerta); }
@@ -128,3 +155,84 @@
 .vin-campo-ia .entrada { border-color: var(--color-ia-borde); background: var(--color-ia-suave); }
 .vin-confirmar { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
 .vin-confirmar input { margin-top: 3px; accent-color: var(--color-primario); }
+/* Pasos en la tabla de procesos: los mismos del detalle, en pequeño */
+.vin-pasos-tabla { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; align-items: center; }
+.vin-pasos-tabla li { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-texto-tenue); white-space: nowrap; }
+.vin-pasos-tabla li + li::before { content: ''; width: 10px; height: 1px; background: var(--color-borde); }
+.vin-pasos-tabla .vin-paso-num { width: 20px; height: 20px; }
+.vin-pasos-tabla li.hecho { color: var(--color-exito); }
+.vin-pasos-tabla li.actual { color: var(--color-texto); font-weight: 600; }
+.vin-pasos-tabla li.actual .vin-paso-num { background: var(--color-primario); color: var(--color-sobre-primario); }
+/* En la tabla solo se lee el nombre del paso actual; los demás quedan como número con su nombre al pasar el cursor */
+.vin-pasos-tabla li:not(.actual) .vin-pasos-tabla-texto { display: none; }
+
+/* Tipos de contrato: cómo se trabaja cada uno (lo sigue la IA) y su plantilla */
+.vin-tipos-encabezado { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--espacio-4); flex-wrap: wrap; }
+.vin-tipos-encabezado > div { flex: 1 1 420px; }
+.vin-tipos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: var(--espacio-4); }
+.vin-tipos-vacio { display: flex; flex-direction: column; align-items: flex-start; gap: var(--espacio-3); padding: var(--espacio-6); }
+.vin-tipos-vacio p { margin: 0; max-width: 64ch; color: var(--color-texto-suave); }
+.vin-tipo { display: flex; flex-direction: column; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-6); margin-bottom: 0; }
+.vin-tipo.inactivo { opacity: 0.75; }
+.vin-tipo > header, .vin-tipo > footer { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--espacio-3); }
+.vin-tipo > footer { align-items: center; margin-top: auto; padding-top: var(--espacio-3); border-top: 1px solid var(--color-borde); }
+.vin-tipo h2 { margin: 0; font-size: 17px; }
+.vin-tipo-meta { font-size: 12px; color: var(--color-texto-suave); }
+.vin-tipo-descripcion { margin: 0; font-size: 14px; color: var(--color-texto); display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.vin-plantilla { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2) var(--espacio-3); padding: var(--espacio-3); border: 1px dashed var(--color-borde); border-radius: var(--radio-m); background: var(--color-fondo); }
+.vin-plantilla-icono { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: var(--radio-s); background: var(--color-primario-suave); color: var(--color-primario); }
+.vin-plantilla-icono svg { width: 16px; height: 16px; }
+.vin-plantilla-texto { flex: 1 1 180px; display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 13px; overflow-wrap: anywhere; }
+.vin-plantilla-texto > span { font-size: 12px; color: var(--color-texto-suave); }
+.vin-plantilla-error { flex-basis: 100%; margin: 0; }
+.vin-tipo-editor { gap: var(--espacio-4); margin-bottom: var(--espacio-4); }
+.vin-tipo-editor label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.vin-tipo-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--espacio-3); }
+.vin-tipo-editor label.vin-tipo-activo { flex-direction: row; align-items: center; gap: var(--espacio-2); font-weight: 500; }
+.vin-tipo-activo input { width: 18px; height: 18px; accent-color: var(--color-primario); }
+.vin-tipo-acciones { display: flex; gap: var(--espacio-2); justify-content: flex-end; }
+.vin-tipo-como { display: flex; flex-direction: column; gap: 6px; padding: var(--espacio-3) var(--espacio-4); border-radius: var(--radio-m); background: var(--color-superficie-2); }
+.vin-tipo-como-titulo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); font-size: 13px; font-weight: 600; }
+.vin-tipo-como-titulo a { margin-left: auto; font-size: 12px; }
+.vin-tipo-como p { margin: 0; font-size: 13px; font-weight: 400; color: var(--color-texto); white-space: pre-wrap; }
+
+/* Onboarding: plan de inducción por momentos, con seguimiento */
+.vin-plan-sub { margin: 4px 0 0; font-size: 13px; color: var(--color-texto-suave); }
+.vin-plan-avance { display: flex; align-items: center; gap: var(--espacio-3); font-size: 12px; color: var(--color-texto-suave); }
+.vin-plan-barra { flex: 1; height: 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; }
+.vin-plan-barra span { display: block; height: 100%; border-radius: inherit; background: var(--color-exito); transition: width var(--duracion-media) var(--curva-salida); }
+.vin-plan-vacio, .vin-plan-generando { display: flex; flex-direction: column; gap: var(--espacio-3); }
+.vin-plan-vacio p:not(.aviso) { margin: 0; color: var(--color-texto-suave); }
+.vin-plan-alerta { width: 14px; height: 14px; flex: none; margin-top: 2px; color: var(--color-alerta); }
+.vin-plan-grupos { display: flex; flex-direction: column; gap: var(--espacio-4); }
+.vin-plan-grupo h3 { display: flex; align-items: center; gap: var(--espacio-2); margin: 0 0 var(--espacio-2); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-texto-suave); }
+.vin-plan-grupo h3 .mono { letter-spacing: 0; color: var(--color-texto-tenue); }
+.vin-plan-grupo ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.vin-tarea { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto 120px; align-items: center; gap: var(--espacio-3); padding: 10px var(--espacio-3);
+  border: 1px solid var(--color-borde); border-radius: var(--radio-m); background: var(--color-superficie); transition: background var(--duracion-corta), border-color var(--duracion-corta); }
+.vin-tarea.de-ia { background: var(--color-ia-suave); border-color: var(--color-ia-borde); }
+.vin-tarea.hecha { background: color-mix(in srgb, var(--color-exito-suave) 55%, var(--color-superficie)); }
+.vin-tarea.hecha .vin-tarea-texto b { text-decoration: line-through; text-decoration-color: var(--color-texto-tenue); color: var(--color-texto-suave); }
+.vin-tarea-marca { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 2px solid var(--color-borde); border-radius: var(--radio-s); background: var(--color-superficie);
+  color: var(--color-sobre-primario); cursor: pointer; transition: background var(--duracion-corta), border-color var(--duracion-corta); }
+.vin-tarea-marca:hover { border-color: var(--color-primario); }
+.vin-tarea-marca[aria-checked="true"] { background: var(--color-exito); border-color: var(--color-exito); }
+.vin-tarea-marca svg { width: 16px; height: 16px; }
+.vin-tarea-marca .indicador { width: 12px; height: 12px; }
+.vin-tarea-punto { display: grid; place-items: center; width: 10px; height: 10px; margin-left: 8px; border-radius: var(--radio-full); background: var(--color-borde); }
+.vin-tarea.de-ia .vin-tarea-punto { width: 18px; height: 18px; margin-left: 4px; background: none; color: var(--color-ia); }
+.vin-tarea-punto svg { width: 14px; height: 14px; }
+.vin-tarea-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 14px; }
+.vin-tarea-texto > span { font-size: 13px; color: var(--color-texto-suave); }
+.vin-tarea-texto .vin-tarea-hecha { font-size: 12px; color: var(--color-exito); }
+.vin-tarea-quien { padding: 2px 10px; border-radius: var(--radio-full); background: var(--color-superficie-2); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.vin-tarea-cuando { display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; }
+.vin-tarea-cuando small { font-size: 11px; color: var(--color-texto-tenue); }
+@media (max-width: 720px) { .vin-tarea { grid-template-columns: 28px minmax(0, 1fr); } .vin-tarea-quien, .vin-tarea-cuando { grid-column: 2; justify-self: start; align-items: flex-start; } }
+.vin-plan-editor { display: flex; flex-direction: column; gap: var(--espacio-2); }
+.vin-plan-editor > .enlace-boton { align-self: flex-start; }
+.vin-plan-fila { display: grid; grid-template-columns: minmax(0, 2fr) 150px 160px 90px auto; gap: var(--espacio-2); align-items: center; padding: var(--espacio-2); border: 1px solid var(--color-borde); border-radius: var(--radio-m); }
+.vin-plan-detalle { grid-column: 1 / -1; }
+.vin-plan-dia { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-texto-suave); }
+.vin-plan-dia .entrada { width: 64px; }
+@media (max-width: 860px) { .vin-plan-fila { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .vin-plan-fila > .entrada:first-child { grid-column: 1 / -1; } }

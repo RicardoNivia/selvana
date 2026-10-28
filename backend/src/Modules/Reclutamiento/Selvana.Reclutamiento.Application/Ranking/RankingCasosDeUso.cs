@@ -27,7 +27,7 @@ public static class PerfilParaRanking
         return new PerfilAnonimo(d.Ciudad,
             [.. d.Experiencia.Select(e => new ExperienciaAnonima(e.Cargo, e.Empresa, e.Desde, e.Hasta))],
             [.. d.Formacion.Select(f => string.IsNullOrWhiteSpace(f.Institucion) ? f.Titulo : $"{f.Titulo} · {f.Institucion}")],
-            d.Cursos, d.Habilidades, [.. p.Respuestas.Select(r => new RespuestaFiltroAnonima(r.Pregunta, r.Respuesta))]);
+            d.Cursos, d.Habilidades, [.. p.Respuestas.Select(r => new RespuestaFiltroAnonima(r.Pregunta, r.Respuesta, r.Valor))]);
     }
 
     public static AfinidadSolicitada Solicitud(Vacante v, Candidato c, Postulacion p, DateTimeOffset ahora, IReadOnlyList<CriterioEmpresa>? calibracion = null) =>

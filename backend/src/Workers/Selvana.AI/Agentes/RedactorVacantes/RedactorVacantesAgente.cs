@@ -38,8 +38,21 @@ internal sealed class RedactorVacantesAgente(
         - Nunca pidas ni sugieras requisitos de edad, género, estado civil, hijos, apariencia, foto, religión, barrio, estrato ni dirección exacta.
         - El rango salarial es mensual en pesos colombianos (COP), coherente con el cargo y la ciudad; no puede ser inferior al salario mínimo vigente.
         - Entre 3 y 5 razones que expliquen las decisiones principales. Cada razón cita su evidencia: el fragmento literal de la frase entre comillas, o "Supuesto" si no sale de la frase.
-        - Entre 3 y 5 preguntas filtro cortas, para hacer por WhatsApp, que se respondan con sí o no o con un dato corto.
+        - Entre 3 y 5 preguntas filtro cortas, para hacer por WhatsApp, tuteando al candidato. Cada pregunta se entiende sola,
+          sin contexto: nunca digas "la empresa", "el cargo" o "aquí" sin nombrarlos (mal: "¿Cuántos años tienes en la empresa?";
+          bien: "¿Cuántos años de experiencia tienes como operario de montacargas?"). Solo tres formas, según la respuesta:
+          · Sí o no: empieza con "¿Tienes…?", "¿Cuentas con…?", "¿Puedes…?" o "¿Estás…?" ("¿Tienes curso de montacargas vigente?").
+          · Un número: empieza con "¿Cuántos…?" o "¿Cuántas…?" y di la unidad ("¿Cuántos años de experiencia tienes como…?").
+          · Pesos: solo para la aspiración salarial, exactamente "¿Cuál es tu aspiración salarial mensual en pesos?".
+          Nunca preguntes por edad, estado civil, hijos ni otras variables protegidas.
         - Requisitos y competencias concretos y verificables.
+        - Una vacante es de UN solo cargo; "cupos" son las posiciones disponibles de ese cargo (si la frase dice "25 auxiliares", cupos = 25).
+        - Antes de redactar, revisa si puedes. Si la frase pide dos o más cargos distintos (por ejemplo "un contador y dos mensajeros"),
+          o le falta algo imprescindible que no se puede suponer con sensatez (qué cargo es, en qué ciudad), NO redactes: devuelve en
+          "aclaraciones" entre 1 y 3 preguntas cortas para la persona y deja los demás campos vacíos. Cada aclaración trae "pregunta"
+          y "opciones": entre 2 y 4 respuestas cortas que la persona pueda elegir con un clic (por ejemplo, para "quiero dos montacargas":
+          pregunta "¿Qué cargo necesita?", opciones ["Operario de montacargas", "Auxiliar de bodega con montacargas"]; para la ciudad,
+          ciudades colombianas probables). Si puedes redactar, "aclaraciones" va vacío y lo que supongas va en "supuestos".
         """;
 
     public async Task<Result<ResultadoBorradorVacante>> RedactarAsync(SolicitudBorradorVacante solicitud, CancellationToken cancellationToken)
@@ -71,7 +84,26 @@ internal sealed class RedactorVacantesAgente(
             return RedactorVacantesErrors.SinModelos;
         }
 
-        if (!respuesta.TryGetResult(out var borrador) || string.IsNullOrWhiteSpace(borrador?.Titulo))
+        if (!respuesta.TryGetResult(out var borrador) || borrador is null)
+        {
+            return RedactorVacantesErrors.RespuestaInvalida;
+        }
+
+        var propiedades = respuesta.AdditionalProperties;
+        var proveedor = propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadProveedor, out var p) == true ? p?.ToString() ?? "" : "";
+        var costoUsd = propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadCostoUsd, out var c) == true && c is decimal costo ? costo : 0m;
+
+        // La IA pregunta antes de redactar (por ejemplo, la frase pide dos cargos): vuelve solo con las aclaraciones
+        var aclaraciones = (borrador.Aclaraciones ?? []).Where(a => !string.IsNullOrWhiteSpace(a?.Pregunta)).Take(3)
+            .Select(a => a with { Opciones = [.. (a.Opciones ?? []).Where(o => !string.IsNullOrWhiteSpace(o)).Select(o => o.Trim()).Distinct().Take(4)] })
+            .ToList();
+        if (aclaraciones.Count > 0)
+        {
+            var vacio = new BorradorVacante("", "", "", 0, "", "", [], [], [], new RangoSalarialSugerido(0, 0, ""), [], [], aclaraciones);
+            return new ResultadoBorradorVacante(vacio, [], proveedor, respuesta.ModelId ?? "", costoUsd);
+        }
+
+        if (string.IsNullOrWhiteSpace(borrador.Titulo))
         {
             return RedactorVacantesErrors.RespuestaInvalida;
         }
@@ -83,13 +115,7 @@ internal sealed class RedactorVacantesAgente(
             PreguntasFiltro = [.. borrador.PreguntasFiltro.Where(p => !filtro.EsDiscriminatorio(p))],
         }, minimo);
 
-        var propiedades = respuesta.AdditionalProperties;
-        return new ResultadoBorradorVacante(
-            limpio,
-            retirados,
-            propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadProveedor, out var p) == true ? p?.ToString() ?? "" : "",
-            respuesta.ModelId ?? "",
-            propiedades?.TryGetValue(CadenaModelosChatClient.PropiedadCostoUsd, out var c) == true && c is decimal costo ? costo : 0m);
+        return new ResultadoBorradorVacante(limpio, retirados, proveedor, respuesta.ModelId ?? "", costoUsd);
     }
 
     /// <summary>

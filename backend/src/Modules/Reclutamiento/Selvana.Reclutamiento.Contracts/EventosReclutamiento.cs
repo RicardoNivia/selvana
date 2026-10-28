@@ -24,7 +24,8 @@ public sealed record RequisitosVacante(
 
 public sealed record ExperienciaAnonima(string Cargo, string Empresa, string Desde, string Hasta);
 
-public sealed record RespuestaFiltroAnonima(string Pregunta, bool Respuesta);
+/// <summary><paramref name="Valor"/>: la cifra en preguntas de número o de pesos (años de experiencia, aspiración salarial).</summary>
+public sealed record RespuestaFiltroAnonima(string Pregunta, bool Respuesta, decimal? Valor = null);
 
 /// <summary>
 /// El candidato sin nada que lo identifique ni variables protegidas: sin nombre, documento, contacto, LinkedIn,

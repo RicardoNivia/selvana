@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Esqueleto, EsqueletoPanel } from '../../shared/ui/Esqueleto'
 import { IconoAlerta, IconoEscudo } from '../../shared/ui/Iconos'
@@ -87,7 +87,9 @@ function Dato({ etiqueta, valor, mono }: { etiqueta: string; valor: string; mono
   )
 }
 
+/** Cada postulación es una fila; su preselección se abre debajo al pedirla, para que con varias postulaciones se lea fácil. */
 function Postulaciones({ c }: { c: CandidatoDetalle }) {
+  const [abierta, setAbierta] = useState<string>()
   if (c.postulaciones.length === 0) return <div className="vacio"><p>No tiene postulaciones en vacantes que usted ve.</p></div>
   return (
     <div className="tabla-envoltura">
@@ -96,30 +98,33 @@ function Postulaciones({ c }: { c: CandidatoDetalle }) {
         <tbody>
           {c.postulaciones.map((p) => {
             const e = estadoVacante[p.estadoVacante as EstadoVacante]
+            const abiertaEsta = abierta === p.postulacionId
             return (
-              <tr key={p.postulacionId}>
-                <td>
-                  <Link to={`/consola/vacantes/${p.vacanteId}`} style={{ fontWeight: 600 }}>{p.vacanteTitulo}</Link>
-                  <span className="mono banco-sub">{p.vacanteCodigo} · {p.numero}{p.respuestasNegativas > 0 ? ` · ${p.respuestasNegativas} respuesta(s) negativa(s)` : ''}</span>
-                </td>
-                <td>{e ? <span className={`pill ${e.clase}`}>{e.texto}</span> : p.estadoVacante}</td>
-                <td><span className="pill pill-neutra">{p.canal}</span></td>
-                <td className="mono" style={{ fontSize: 13 }}>{fecha.format(new Date(p.recibidaEn))}</td>
-                <td><AbrirHojaDeVida postulacionId={p.postulacionId} /></td>
-              </tr>
+              <Fragment key={p.postulacionId}>
+                <tr>
+                  <td>
+                    <Link to={`/consola/vacantes/${p.vacanteId}`} style={{ fontWeight: 600 }}>{p.vacanteTitulo}</Link>
+                    <span className="mono banco-sub">{p.vacanteCodigo} · {p.numero}{p.respuestasNegativas > 0 ? ` · ${p.respuestasNegativas} respuesta(s) negativa(s)` : ''}</span>
+                    <button type="button" className="enlace-boton fila-detalle" aria-expanded={abiertaEsta}
+                      onClick={() => setAbierta((x) => (x === p.postulacionId ? undefined : p.postulacionId))}>
+                      {abiertaEsta ? 'Ocultar preselección' : 'Ver preselección'}
+                    </button>
+                  </td>
+                  <td>{e ? <span className={`pill ${e.clase}`}>{e.texto}</span> : p.estadoVacante}</td>
+                  <td><span className="pill pill-neutra">{p.canal}</span></td>
+                  <td className="mono" style={{ fontSize: 13 }}>{fecha.format(new Date(p.recibidaEn))}</td>
+                  <td><AbrirHojaDeVida postulacionId={p.postulacionId} /></td>
+                </tr>
+                {abiertaEsta && (
+                  <tr className="fila-explicacion"><td colSpan={5}>
+                    <div className="fila-explicacion-cuerpo"><PreseleccionPostulante postulacionId={p.postulacionId} /></div>
+                  </td></tr>
+                )}
+              </Fragment>
             )
           })}
         </tbody>
       </table>
-      {/* Resumen de la preselección conversacional de cada postulación */}
-      <div className="ficha-preseleccion">
-        {c.postulaciones.map((p) => (
-          <section key={p.postulacionId}>
-            <h3>{p.vacanteTitulo} <span className="mono">{p.vacanteCodigo}</span></h3>
-            <PreseleccionPostulante postulacionId={p.postulacionId} />
-          </section>
-        ))}
-      </div>
     </div>
   )
 }

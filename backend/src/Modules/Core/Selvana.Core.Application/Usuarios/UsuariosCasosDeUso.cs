@@ -65,6 +65,7 @@ internal sealed class ObtenerMatrizPermisosHandler : IQueryHandler<ObtenerMatriz
         [Accion.GestionarUsuarios] = ("Invitar personas y asignar roles", null),
         [Accion.ConfigurarAgentes] = ("Configurar agentes y autonomía", null),
         [Accion.VerBitacora] = ("Ver bitácora de auditoría", null),
+        [Accion.GestionarEmpleados] = ("Gestionar el expediente de los empleados", null),
         [Accion.ConsultarSusDatos] = ("Consultar sus vacaciones, certificados y documentos", null),
     };
 

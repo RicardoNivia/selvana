@@ -3,14 +3,20 @@ using Selvana.SharedKernel.Messaging;
 
 namespace Selvana.AI.Contracts.Reclutamiento;
 
-/// <summary>Borrador de vacante del agente redactor. Si falló, trae <see cref="Error"/> y los demás campos vacíos.</summary>
+/// <summary>
+/// Borrador de vacante del agente redactor. Si falló, trae <see cref="Error"/> y los demás campos vacíos.
+/// Si la IA necesita aclarar algo antes de redactar, trae <see cref="Aclaraciones"/> y los demás campos vacíos.
+/// </summary>
 public sealed record BorradorVacanteRedactado(
     Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid VacanteId,
     string Titulo, string Cargo, string Ciudad, int Cupos, string Jornada, string Descripcion,
     IReadOnlyList<string> Requisitos, IReadOnlyList<string> Competencias, IReadOnlyList<string> PreguntasFiltro,
     decimal SalarioMinimo, decimal SalarioMaximo, string JustificacionSalario,
     IReadOnlyList<RazonIa> Razones, IReadOnlyList<string> Supuestos, IReadOnlyList<string> RetiradosPorSesgo,
-    string Modelo, string? Error) : IIntegrationEvent;
+    string Modelo, string? Error, IReadOnlyList<AclaracionIa>? Aclaraciones = null) : IIntegrationEvent;
+
+/// <summary>Pregunta de la IA antes de redactar, con opciones cortas para elegir (la persona también puede responder otra cosa).</summary>
+public sealed record AclaracionIa(string Pregunta, IReadOnlyList<string> Opciones);
 
 public sealed record ExperienciaHv(string Cargo, string Empresa, string Desde, string Hasta);
 

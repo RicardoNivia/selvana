@@ -70,6 +70,10 @@ internal sealed class DirectorioEmpresas(CoreDbContext db) : IDirectorioEmpresas
         return empresa is null ? null : new EmpresaResumen(empresa.Id, empresa.Nombre, empresa.EsTemporal,
             [.. empresa.EmpresasUsuarias.OrderBy(u => u.Nombre).Select(u => new EmpresaUsuariaResumen(u.Id, u.Nombre, u.Ciudad, u.Activa))]);
     }
+
+    public async Task<IReadOnlyList<(Guid Id, bool EsTemporal)>> TodasAsync(CancellationToken cancellationToken) =>
+        (await db.Set<Empresa>().AsNoTracking().Select(e => new { e.Id, e.EsTemporal }).ToListAsync(cancellationToken))
+            .Select(e => (e.Id, e.EsTemporal)).ToList();
 }
 
 /// <summary>

@@ -6,6 +6,8 @@ import { IconoBuscar, IconoCheck, IconoCupos, IconoDinero, IconoDocumento, Icono
 import { useContador, useMovimientoReducido } from '../../shared/ui/animaciones'
 import { Paginacion } from '../../shared/ui/Paginacion'
 import { TAMANO_PAGINA } from '../../shared/ui/paginado'
+import { useMiCuenta, useMiPortal } from '../portal-persona/api'
+import { faltantesPerfil, totalPasosPerfil } from '../portal-persona/perfil'
 import { type Conteo, type VacantePublica, rangoSalario, usePortal } from './api'
 
 const relativo = new Intl.RelativeTimeFormat('es-CO', { numeric: 'auto' })
@@ -124,6 +126,7 @@ function Hero({ total, empresas, buscar, onBuscar }: { total?: number; empresas?
       <HojasCayendo cantidad={6} className="hojas-claras" />
       <div className="portal-hero-brillo" aria-hidden="true" />
       <div className="portal-ancho portal-hero-contenido">
+        <TarjetaSesion />
         <div className="portal-hero-titulo">
           <h1>
             Encuentra trabajo como{' '}
@@ -152,6 +155,46 @@ function Hero({ total, empresas, buscar, onBuscar }: { total?: number; empresas?
         </div>
       </div>
     </section>
+  )
+}
+
+/** Arriba del buscador: con sesión, quién está y qué tiene pendiente; sin sesión, la invitación a entrar. */
+function TarjetaSesion() {
+  const cuenta = useMiCuenta()
+  const portal = useMiPortal(cuenta.isSuccess)
+  if (cuenta.isPending) return <Esqueleto alto={56} ancho={360} redondo style={{ opacity: 0.25 }} />
+
+  if (!cuenta.data) {
+    return (
+      <div className="portal-hola portal-hola-invitado">
+        <span className="portal-hola-icono"><IconoDocumento /></span>
+        <span className="portal-hola-texto"><b>¿Ya tienes cuenta?</b><span>Entra para postularte con un clic y seguir tus procesos.</span></span>
+        <Link to="/mi-portal/ingresar?volver=%2Fempleos" className="portal-hola-entrar">Ingresar</Link>
+        <Link to="/mi-portal/registro?volver=%2Fempleos" className="portal-hola-crear">Crear cuenta</Link>
+      </div>
+    )
+  }
+
+  const c = cuenta.data
+  const nombre = c.datos.nombre.split(' ')[0]
+  const iniciales = c.datos.nombre.split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]?.toUpperCase()).join('')
+  const perfil = Math.round(((totalPasosPerfil - faltantesPerfil(c).length) / totalPasosPerfil) * 100)
+  const pendientes = portal.data?.pendientes.length ?? 0
+  const procesos = portal.data?.postulaciones.length ?? 0
+  return (
+    <Link to="/mi-portal" className="portal-hola">
+      <span className="portal-hola-avatar" aria-hidden="true">{iniciales}<span className="portal-hola-punto" /></span>
+      <span className="portal-hola-texto">
+        <b>Hola, {nombre}</b>
+        <span><span className="portal-hola-conectado">Sesión iniciada</span> · {c.correo}</span>
+      </span>
+      <span className="portal-hola-datos">
+        {pendientes > 0 && <span className="portal-hola-dato alerta"><b className="mono">{pendientes}</b> {pendientes === 1 ? 'pendiente' : 'pendientes'}</span>}
+        <span className="portal-hola-dato"><b className="mono">{procesos}</b> {procesos === 1 ? 'proceso' : 'procesos'}</span>
+        <span className="portal-hola-dato"><b className="mono">{perfil}%</b> perfil</span>
+      </span>
+      <span className="portal-hola-ir">Mi portal <IconoFlecha /></span>
+    </Link>
   )
 }
 

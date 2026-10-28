@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Selvana.AI.Agentes.Reclutamiento;
 using Selvana.AI.Agentes.RedactorVacantes;
 using Selvana.AI.Contracts.Vinculacion;
@@ -17,9 +19,13 @@ public sealed record BorradorOferta(string Carta, IReadOnlyList<ClausulaRedactad
 
 public sealed record ResultadoOferta(BorradorOferta Borrador, string Modelo, decimal CostoUsd);
 
+/// <summary>Contrato de ejemplo o plantilla del tipo de contrato (PDF o Word) que la IA sigue al redactar.</summary>
+public sealed record PlantillaContrato(byte[] Contenido, string TipoContenido);
+
 public interface IRedactorOferta
 {
-    Task<Result<ResultadoOferta>> RedactarAsync(Guid empresaId, CondicionesOferta condiciones, CancellationToken cancellationToken);
+    Task<Result<ResultadoOferta>> RedactarAsync(Guid empresaId, CondicionesOferta condiciones, CancellationToken cancellationToken,
+        PlantillaContrato? plantilla = null);
 }
 
 /// <summary>
@@ -50,19 +56,25 @@ internal sealed class RedactorOfertaAgente(IChatClient ia, IFiltroVariablesProte
         Reglas:
         - Usa EXACTAMENTE las cifras y fechas de las condiciones (pesos con punto de miles: $1.750.905; fechas dd/mm/aaaa). No inventes bonos,
           beneficios, comisiones ni cláusulas de exclusividad o permanencia que las condiciones no digan.
+        - Si las condiciones traen "Cómo trabaja la empresa este tipo de contrato", síguelo en la carta y en las cláusulas de objeto, duración
+          y periodo de prueba (qué fechas se especifican, cómo termina, preaviso). Si contradice las cifras o fechas aprobadas o la ley,
+          manda lo aprobado y la ley, y explícalo en "alertas".
         - Nunca escribas un nombre ni un número de documento: usa solo [TRABAJADOR] y [DOCUMENTO].
         - Nunca menciones edad, género, estado civil, embarazo, hijos, religión, origen ni salud.
         - "razones": 3 a 5 decisiones de redacción, cada una con "signo" ("+" o "−"), "texto" corto y "fuente" ("Condiciones", "Vacante", "Art. 46 CST", etc.).
         - "alertas": lo que RRHH debe revisar antes de aprobar (por ejemplo, una condición ambigua). Lista vacía si no hay nada.
         """;
 
-    public async Task<Result<ResultadoOferta>> RedactarAsync(Guid empresaId, CondicionesOferta condiciones, CancellationToken cancellationToken)
+    public async Task<Result<ResultadoOferta>> RedactarAsync(Guid empresaId, CondicionesOferta condiciones, CancellationToken cancellationToken,
+        PlantillaContrato? plantilla = null)
     {
         ArgumentNullException.ThrowIfNull(condiciones);
+        var contenido = new List<AIContent> { new TextContent(Pregunta(condiciones, DateOnly.FromDateTime(reloj.GetUtcNow().UtcDateTime))) };
+        contenido.AddRange(ContenidoPlantilla(plantilla));
         var mensajes = new List<ChatMessage>
         {
             new(ChatRole.System, Instrucciones),
-            new(ChatRole.User, Pregunta(condiciones, DateOnly.FromDateTime(reloj.GetUtcNow().UtcDateTime))),
+            new(ChatRole.User, contenido),
         };
         // Sin nombre ni documento, pero el salario y las condiciones son de una persona: nunca a modelos gratis
         var opciones = new ContextoIa(empresaId, Nombre, ContieneDatosPersonales: true).AplicarA(new ChatOptions { MaxOutputTokens = 6_000 });
@@ -88,6 +100,37 @@ internal sealed class RedactorOfertaAgente(IChatClient ia, IFiltroVariablesProte
 
     internal static string Pesos(decimal valor) => valor.ToString("$#,##0", Colombia);
 
+    public const int TextoPlantillaMaximo = 40_000;
+
+    private const string AvisoPlantilla = """
+        PLANTILLA DEL CONTRATO DE LA EMPRESA (la que sigue). Redacta las cláusulas siguiendo su estructura: mismos títulos, mismo orden,
+        mismo estilo y las cláusulas propias de la empresa que traiga. Reemplaza todo dato de ejemplo (nombres, cédulas, cargos, salarios,
+        fechas, direcciones) por las CONDICIONES aprobadas o por [TRABAJADOR] y [DOCUMENTO]; nunca copies datos de personas de la plantilla.
+        Si la plantilla contradice las condiciones aprobadas o la ley, manda lo aprobado y la ley, y explícalo en "alertas".
+        """;
+
+    /// <summary>La plantilla para el modelo: el PDF va como archivo; del Word se envía el texto.</summary>
+    internal static IEnumerable<AIContent> ContenidoPlantilla(PlantillaContrato? plantilla)
+    {
+        if (plantilla is null || plantilla.Contenido.Length == 0)
+        {
+            yield break;
+        }
+
+        if (plantilla.TipoContenido == "application/pdf")
+        {
+            yield return new TextContent(AvisoPlantilla);
+            yield return new DataContent(plantilla.Contenido, plantilla.TipoContenido);
+            yield break;
+        }
+
+        var texto = LectorHojasDeVidaAgente.TextoDeWord(plantilla.Contenido);
+        if (!string.IsNullOrWhiteSpace(texto))
+        {
+            yield return new TextContent(AvisoPlantilla + Environment.NewLine + (texto.Length > TextoPlantillaMaximo ? texto[..TextoPlantillaMaximo] : texto));
+        }
+    }
+
     internal static string Pregunta(CondicionesOferta c, DateOnly? hoy = null)
     {
         var sb = new StringBuilder();
@@ -112,11 +155,20 @@ internal sealed class RedactorOfertaAgente(IChatClient ia, IFiltroVariablesProte
         sb.AppendLine(CultureInfo.InvariantCulture, $"- Ciudad / lugar de trabajo: {c.Ciudad}");
         sb.AppendLine(CultureInfo.InvariantCulture, $"- Jornada: {c.Jornada}");
         sb.AppendLine(CultureInfo.InvariantCulture, $"- Tipo de contrato: {c.TipoContrato}");
+        if (!string.IsNullOrWhiteSpace(c.Modalidad) && !c.Modalidad.Equals(c.TipoContrato, StringComparison.OrdinalIgnoreCase))
+        {
+            sb.AppendLine(CultureInfo.InvariantCulture, $"- Modalidad legal: {c.Modalidad}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(c.ComoSeTrabaja))
+        {
+            sb.AppendLine(CultureInfo.InvariantCulture, $"- Cómo trabaja la empresa este tipo de contrato: {c.ComoSeTrabaja}");
+        }
         sb.AppendLine(CultureInfo.InvariantCulture, $"- Salario mensual: {Pesos(c.SalarioCop)}");
         sb.AppendLine(CultureInfo.InvariantCulture, $"- Auxilio de transporte: {(c.AuxilioTransporte ? "sí, el legal vigente" : "no aplica")} (ya lo calculó Selvana con el salario mínimo vigente; no lo pongas en duda)");
         sb.AppendLine(CultureInfo.InvariantCulture, $"- Fecha de ingreso: {c.FechaIngreso:dd/MM/yyyy}");
         var fin = c.FechaFin is { } f ? f.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
-            : c.TipoContrato.Contains("indefinido", StringComparison.OrdinalIgnoreCase) ? "no tiene: es a término indefinido"
+            : (c.Modalidad ?? c.TipoContrato).Contains("indefinido", StringComparison.OrdinalIgnoreCase) ? "no tiene: es a término indefinido"
             : "no tiene fecha: termina cuando se acabe la obra o labor";
         sb.AppendLine(CultureInfo.InvariantCulture, $"- Fecha de terminación: {fin}");
         sb.AppendLine(CultureInfo.InvariantCulture, $"- Periodo de prueba: {(c.PeriodoPruebaDias > 0 ? $"{c.PeriodoPruebaDias} días" : "no tiene")}");
@@ -170,12 +222,26 @@ internal sealed class RedactorOfertaAgente(IChatClient ia, IFiltroVariablesProte
 }
 
 /// <summary>RRHH aprobó la contratación: el agente redacta y el borrador vuelve a Vinculación por el outbox.</summary>
-internal sealed class OfertaSolicitadaConsumer(IRedactorOferta agente, Persistence.IaDbContext db, TimeProvider reloj)
-    : Selvana.SharedKernel.Messaging.IIntegrationEventConsumer<OfertaSolicitada>
+/// <summary>RRHH aprobó la contratación: si el tipo de contrato tiene plantilla, el worker la descarga con la clave interna y la IA la sigue.</summary>
+internal sealed class OfertaSolicitadaConsumer(IRedactorOferta agente, IHttpClientFactory http, IConfiguration configuracion, IOptions<MensajeriaOptions> mensajeria,
+    Persistence.IaDbContext db, TimeProvider reloj) : Selvana.SharedKernel.Messaging.IIntegrationEventConsumer<OfertaSolicitada>
 {
     public async Task Handle(OfertaSolicitada e, CancellationToken cancellationToken)
     {
-        var r = await agente.RedactarAsync(e.EmpresaId, e.Condiciones, cancellationToken);
+        PlantillaContrato? plantilla = null;
+        if (e.Condiciones.PlantillaArchivoId is { } archivo)
+        {
+            var url = (configuracion["Vinculacion:UrlArchivos"] ?? "http://localhost:5000/internal/archivos/vinculacion/") + archivo;
+            using var cliente = http.CreateClient("archivos-reclutamiento");
+            using var peticion = new HttpRequestMessage(HttpMethod.Get, url);
+            peticion.Headers.Add(MensajeriaOptions.EncabezadoClave, mensajeria.Value.ClaveInterna);
+            using var respuesta = await cliente.SendAsync(peticion, cancellationToken);
+            respuesta.EnsureSuccessStatusCode();
+            plantilla = new PlantillaContrato(await respuesta.Content.ReadAsByteArrayAsync(cancellationToken),
+                e.Condiciones.PlantillaTipoContenido ?? respuesta.Content.Headers.ContentType?.MediaType ?? "application/pdf");
+        }
+
+        var r = await agente.RedactarAsync(e.EmpresaId, e.Condiciones, cancellationToken, plantilla);
         var ahora = reloj.GetUtcNow();
         db.AddIntegrationEvent(r.IsSuccess
             ? new OfertaRedactada(Guid.CreateVersion7(), ahora, e.EmpresaId, e.ProcesoId, r.Value.Borrador.Carta, r.Value.Borrador.Clausulas, r.Value.Borrador.Razones,

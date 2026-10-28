@@ -59,6 +59,12 @@ export interface CargoCatalogo {
   vinculado: boolean
 }
 
+/** Pregunta de la IA antes de redactar, con respuestas cortas para elegir. */
+export interface Aclaracion {
+  pregunta: string
+  opciones: string[]
+}
+
 export interface Vacante {
   aprobacion: AprobacionRequisicion
   cargoId: string | null
@@ -92,6 +98,12 @@ export interface Vacante {
   publicadaEn: string | null
   postulantes: number
   canales: Conteo[]
+  /** Código DANE del municipio; null si la ciudad aún no se eligió del catálogo. */
+  codigoMunicipio: string | null
+  /** Preguntas de la IA antes de redactar (por ejemplo, si la frase pide dos cargos). */
+  aclaraciones: Aclaracion[] | null
+  empresaConfidencial: boolean
+  salarioOculto: boolean
 }
 
 /** Afinidad con la vacante: sugerencia del agente de ranking y, si existe, el ajuste de una persona. */
@@ -111,7 +123,11 @@ export interface Afinidad {
   razonesRetiradas: number
 }
 
+/** Cómo va la preselección con el agente; null si no se ha invitado. */
+export type EstadoPreseleccion = 'Invitada' | 'EsperaCandidato' | 'IaRespondiendo' | 'NecesitaPersona' | 'Completada'
+
 export interface Postulante {
+  preseleccion: EstadoPreseleccion | null
   afinidad: Afinidad | null
   retroalimentacion: 'Bueno' | 'NoEncaja' | null
   notaRetroalimentacion: string | null
@@ -150,6 +166,11 @@ export interface ContenidoVacante {
   salarioMaximo: number
   requisitos: string[]
   preguntasFiltro: string[]
+  codigoMunicipio?: string | null
+  /** En el portal la oferta sale como «Empresa confidencial». */
+  empresaConfidencial?: boolean
+  /** El portal muestra «A convenir» en lugar del rango salarial. */
+  salarioOculto?: boolean
 }
 
 function query(params: Record<string, string | number | undefined>) {
@@ -172,8 +193,9 @@ export function useVacantes(filtro: { pagina: number; tamano?: number; buscar: s
   })
 }
 
-export function useVacante(id: string) {
+export function useVacante(id: string, activo = true) {
   return useQuery({
+    enabled: activo && Boolean(id),
     queryKey: ['vacantes', 'detalle', id],
     queryFn: ({ signal }) => apiGet<Vacante>(`/api/v1/reclutamiento/vacantes/${id}`, signal),
     // Mientras el agente redacta, se consulta seguido para mostrar el borrador apenas llegue
@@ -331,8 +353,20 @@ function useMutacionVacantes<V, R = unknown>(fn: (v: V) => Promise<R>) {
 export const useSolicitarVacante = () =>
   useMutacionVacantes((v: { frase: string; empresaUsuariaId: string | null; cargoId: string | null }) => apiSend<{ id: string }>('POST', '/api/v1/reclutamiento/vacantes', v))
 
+export const useCrearVacante = () =>
+  useMutacionVacantes((v: ContenidoVacante & { empresaUsuariaId: string | null; cargoId: string | null }) =>
+    apiSend<{ id: string }>('POST', '/api/v1/reclutamiento/vacantes/manual', v))
+
+/** Otro borrador de la IA con una frase nueva (por ejemplo, la respuesta a lo que preguntó). */
+export const useRedactarVacante = () =>
+  useMutacionVacantes((v: { id: string; frase: string }) => apiSend('POST', `/api/v1/reclutamiento/vacantes/${v.id}/redactar`, { frase: v.frase }))
+
 export const useEditarVacante = (id: string) =>
   useMutacionVacantes((v: ContenidoVacante) => apiSend('PUT', `/api/v1/reclutamiento/vacantes/${id}`, v))
+
+/** Igual que useSolicitarAprobacion, para cuando la vacante se acaba de crear y su id llega al guardar. */
+export const useEnviarAAprobacion = () =>
+  useMutacionVacantes((id: string) => apiSend('POST', `/api/v1/reclutamiento/vacantes/${id}/solicitar-aprobacion`))
 
 /** Envía la requisición a aprobación (RRHH → gerencia); la última aprobación la publica. */
 export const useSolicitarAprobacion = (id: string) => useMutacionVacantes(() => apiSend('POST', `/api/v1/reclutamiento/vacantes/${id}/solicitar-aprobacion`))

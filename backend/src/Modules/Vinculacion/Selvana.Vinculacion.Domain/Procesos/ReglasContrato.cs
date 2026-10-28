@@ -50,6 +50,9 @@ public static class ReglasContrato
         _ => tipo.ToString(),
     };
 
+    /// <summary>El nombre que usa la empresa para el tipo elegido; si no hay, el de la modalidad legal.</summary>
+    public static string Nombre(CondicionesContratacion c) => string.IsNullOrWhiteSpace(c.TipoContratoNombre) ? Nombre(c.Tipo) : c.TipoContratoNombre;
+
     public static bool TieneAuxilioTransporte(CondicionesContratacion c, ParametrosLegales p) =>
         c.Tipo != TipoContrato.Aprendizaje && c.SalarioCop <= 2 * p.SalarioMinimoCop;
 

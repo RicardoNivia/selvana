@@ -163,6 +163,16 @@ export function useCargos(filtro: { pagina: number; tamano?: number; buscar: str
   })
 }
 
+export function useCargo(id: string, activo = true) {
+  return useQuery({
+    queryKey: ['estructura', 'cargo', id],
+    queryFn: ({ signal }) => apiGet<Cargo>(`/api/v1/core/estructura/cargos/${id}`, signal),
+    enabled: activo && Boolean(id),
+    // Mientras la IA redacta el perfil, se consulta seguido para mostrarlo apenas llegue
+    refetchInterval: (q) => (q.state.data?.redactandoPerfil ? 3000 : false),
+  })
+}
+
 export function useMaestros<T extends Maestro | CentroCosto>(tipo: TipoMaestro, filtro: { pagina: number; tamano?: number; buscar: string }) {
   return useQuery({
     queryKey: ['estructura', tipo, filtro],
@@ -177,7 +187,8 @@ function useMutacionEstructura<V, R = unknown>(fn: (v: V) => Promise<R>) {
 }
 
 export const useCrearCargo = () =>
-  useMutacionEstructura((v: { nombre: string; area: string }) => apiSend<{ id: string }>('POST', '/api/v1/core/estructura/cargos', v))
+  useMutacionEstructura((v: { nombre: string; area: string; descripcion?: string; perfil?: Perfil }) =>
+    apiSend<{ id: string }>('POST', '/api/v1/core/estructura/cargos', v))
 
 export const useEditarCargo = () =>
   useMutacionEstructura((v: { id: string; nombre: string; area: string; activo: boolean; perfil: Perfil | null }) =>
@@ -188,6 +199,10 @@ export const useAprobarPerfil = () =>
 
 export const useSolicitarPerfil = () =>
   useMutacionEstructura((cargoId: string) => apiSend('POST', `/api/v1/core/estructura/cargos/${cargoId}/solicitar-perfil`))
+
+export const useCrearMaestro = (tipo: TipoMaestro) =>
+  useMutacionEstructura((v: { nombre: string; codigo?: string; sede?: string }) =>
+    apiSend<{ id: string }>('POST', `/api/v1/core/estructura/${tipo}`, tipo === 'centros-costo' ? { codigo: v.codigo ?? '', nombre: v.nombre, sede: v.sede ?? '' } : { nombre: v.nombre }))
 
 export const useEditarMaestro = (tipo: TipoMaestro) =>
   useMutacionEstructura((v: { id: string; nombre: string; activo: boolean; sede?: string }) =>

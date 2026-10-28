@@ -105,9 +105,9 @@ internal sealed class OfertaRedactadaConsumer(IProcesos procesos, IEventosVincul
 
         var c = p.Condiciones;
         eventos.Publicar(new PropuestaPublicada(Guid.CreateVersion7(), ahora, p.EmpresaId, p.EmpresaUsuariaId, "Vinculacion", Ofertas.TipoBandeja, p.Id,
-            $"Oferta por aprobar · {p.Persona.Nombre}", $"La IA redactó la carta oferta y el contrato de {ReglasContrato.Nombre(c.Tipo).ToLowerInvariant()} para «{p.Vacante.Cargo}». Revíselos y apruébelos.",
+            $"Oferta por aprobar · {p.Persona.Nombre}", $"La IA redactó la carta oferta y el contrato de {ReglasContrato.Nombre(c).ToLowerInvariant()} para «{p.Vacante.Cargo}». Revíselos y apruébelos.",
             "Redactor de ofertas", e.Modelo, [.. e.Razones.Select(r => new RazonPropuesta(r.Signo, r.Texto, r.Fuente))],
-            [new CampoPropuesta("Contrato", ReglasContrato.Nombre(c.Tipo)), new CampoPropuesta("Salario", ReglasContrato.Pesos(c.SalarioCop)),
+            [new CampoPropuesta("Contrato", ReglasContrato.Nombre(c)), new CampoPropuesta("Salario", ReglasContrato.Pesos(c.SalarioCop)),
              new CampoPropuesta("Ingreso", c.FechaIngreso.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture))],
             null, $"/consola/vinculacion/{p.Id}", true, c.FechaIngreso));
         bitacora.Registrar(p.EmpresaId, TipoActor.Ia, "Redactor de ofertas", "Redactó la carta oferta y el contrato", $"{p.Codigo} · {e.Clausulas.Count} cláusulas",
@@ -116,8 +116,8 @@ internal sealed class OfertaRedactadaConsumer(IProcesos procesos, IEventosVincul
     }
 }
 
-internal sealed class CambiarCondicionesHandler(IUsuarioActual usuario, IProcesos procesos, IParametrosLegales parametros, IEventosVinculacion eventos, IBitacora bitacora,
-    IUnidadVinculacion unidad, TimeProvider reloj) : ICommandHandler<CambiarCondicionesCommand>
+internal sealed class CambiarCondicionesHandler(IUsuarioActual usuario, IProcesos procesos, IParametrosLegales parametros, IEventosVinculacion eventos,
+    ITiposContrato tipos, IBitacora bitacora, IUnidadVinculacion unidad, TimeProvider reloj) : ICommandHandler<CambiarCondicionesCommand>
 {
     public async Task<Result> Handle(CambiarCondicionesCommand c, CancellationToken cancellationToken)
     {
@@ -128,7 +128,7 @@ internal sealed class CambiarCondicionesHandler(IUsuarioActual usuario, IProceso
         }
 
         var p = r.Value;
-        var condiciones = Contratacion.Condiciones(c.Condiciones, p.Condiciones.Jornada, p.Condiciones.Ciudad);
+        var condiciones = await Contratacion.CondicionesAsync(c.Condiciones, p.Condiciones.Jornada, p.Condiciones.Ciudad, p.EmpresaId, tipos, cancellationToken);
         if (condiciones.IsFailure)
         {
             return condiciones;
@@ -144,7 +144,7 @@ internal sealed class CambiarCondicionesHandler(IUsuarioActual usuario, IProceso
         eventos.Publicar(Contratacion.Solicitud(p, parametros.Actuales, ahora));
         eventos.Publicar(new PropuestaResuelta(Guid.CreateVersion7(), ahora, p.EmpresaId, Ofertas.TipoBandeja, p.Id, "Cambiaron las condiciones", usuario.Nombre));
         bitacora.Registrar(p.EmpresaId, TipoActor.Persona, usuario.Nombre, "Cambió las condiciones de la contratación",
-            $"{p.Codigo} · {ReglasContrato.Nombre(p.Condiciones.Tipo)} · {ReglasContrato.Pesos(p.Condiciones.SalarioCop)}", "La IA redacta de nuevo la oferta",
+            $"{p.Codigo} · {ReglasContrato.Nombre(p.Condiciones)} · {ReglasContrato.Pesos(p.Condiciones.SalarioCop)}", "La IA redacta de nuevo la oferta",
             "ProcesoVinculacion", p.Id);
         await unidad.SaveChangesAsync(cancellationToken);
         return Result.Success();

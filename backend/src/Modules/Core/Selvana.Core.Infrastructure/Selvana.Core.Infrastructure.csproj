@@ -5,6 +5,10 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\Selvana.Infrastructure.Common\Selvana.Infrastructure.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <!-- DIVIPOLA del DANE: semilla de municipios (ver Geografia/CatalogoMunicipios.cs) -->
+    <EmbeddedResource Include="Geografia\municipios.json" LogicalName="Selvana.Core.Infrastructure.Geografia.municipios.json" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

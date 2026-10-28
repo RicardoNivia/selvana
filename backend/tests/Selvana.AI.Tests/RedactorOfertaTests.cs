@@ -20,6 +20,32 @@ public sealed class RedactorOfertaTests
     }
 
     [Fact]
+    public void LaPreguntaTraeComoSeTrabajaElTipoDeContratoYSuModalidad()
+    {
+        var c = Condiciones with { TipoContrato = "Fijo a 6 meses", Modalidad = "Término fijo", ComoSeTrabaja = "Se especifican fecha de inicio y fin; preaviso de 30 días." };
+        RedactorOfertaAgente.Pregunta(c).Should().Contain("Modalidad legal: Término fijo").And.Contain("preaviso de 30 días");
+    }
+
+    [Fact]
+    public void LaPlantillaPdfVaComoArchivoYLaDeWordComoTexto()
+    {
+        RedactorOfertaAgente.ContenidoPlantilla(null).Should().BeEmpty();
+        RedactorOfertaAgente.ContenidoPlantilla(new PlantillaContrato([1, 2, 3], "application/pdf"))
+            .Should().HaveCount(2).And.ContainItemsAssignableTo<Microsoft.Extensions.AI.DataContent>();
+
+        using var memoria = new MemoryStream();
+        using (var zip = new System.IO.Compression.ZipArchive(memoria, System.IO.Compression.ZipArchiveMode.Create, leaveOpen: true))
+        using (var escritor = new StreamWriter(zip.CreateEntry("word/document.xml").Open()))
+        {
+            escritor.Write("""<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>PRIMERA. Objeto</w:t></w:r></w:p></w:body></w:document>""");
+        }
+
+        var word = RedactorOfertaAgente.ContenidoPlantilla(new PlantillaContrato(memoria.ToArray(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document")).ToList();
+        word.Should().ContainSingle().Which.Should().BeOfType<Microsoft.Extensions.AI.TextContent>()
+            .Which.Text.Should().Contain("PLANTILLA DEL CONTRATO").And.Contain("PRIMERA. Objeto");
+    }
+
+    [Fact]
     public void AlertaSiElTextoNoTraeElSalarioNiLaFechaYRetiraRazonesDiscriminatorias()
     {
         var crudo = new BorradorOferta("Hola [TRABAJADOR]: bienvenido.",
@@ -40,5 +66,38 @@ public sealed class RedactorOfertaTests
         var crudo = new BorradorOferta("Hola [TRABAJADOR]: ingresas el 02/11/2026 con salario de $1.950.000.",
             [new ClausulaRedactada("PRIMERA. Partes", "[TRABAJADOR], cédula [DOCUMENTO]")], [], []);
         RedactorOfertaAgente.Validar(crudo, Condiciones, new FiltroVariablesProtegidas()).Alertas.Should().BeEmpty();
+    }
+}
+
+public sealed class PlanificadorInduccionTests
+{
+    private static readonly Selvana.Vinculacion.Contracts.Ia.OnboardingSolicitado Solicitud = new(Guid.NewGuid(), DateTimeOffset.UnixEpoch, Guid.NewGuid(), Guid.NewGuid(),
+        "Servicios Andinos", null, "Montacarguista", "Opera montacargas en el CEDI", ["Licencia de montacargas"], "Término indefinido", null,
+        new DateOnly(2026, 11, 2), 60, "Tiempo completo", "Funza");
+
+    [Fact]
+    public void LaPreguntaNoLlevaDatosDeLaPersona()
+    {
+        PlanificadorInduccionAgente.Pregunta(Solicitud).Should().Contain("Montacarguista").And.Contain("02/11/2026").And.Contain("Vinculación directa");
+    }
+
+    [Fact]
+    public void NormalizaResponsablesYDiasYAvisaSiFaltaSgSst()
+    {
+        var crudo = new BorradorPlanInduccion(
+            [
+                new TareaInduccionPropuesta("Presentar al equipo", "", "jefe", "PrimerDia", 0),
+                new TareaInduccionPropuesta("Visitar la empresa usuaria", "", "Empresa usuaria", "PrimerDia", 0),
+                new TareaInduccionPropuesta("Revisión", "", "Líder", "PrimerMes", 500),
+                new TareaInduccionPropuesta("Sin momento", "", "RRHH", "Mañana", 1),
+                new TareaInduccionPropuesta("Confirmar la edad y el estado civil", "", "RRHH", "PrimerDia", 0),
+            ], [], []);
+
+        var v = PlanificadorInduccionAgente.Validar(crudo, Solicitud, new FiltroVariablesProtegidas());
+
+        v.Tareas.Should().HaveCount(3);
+        v.Tareas.Should().OnlyContain(t => t.Responsable == "RRHH" || t.Responsable == "Líder");
+        v.Tareas.Single(t => t.Titulo == "Revisión").Dia.Should().Be(60);
+        v.Alertas.Should().Contain(a => a.Contains("SG-SST", StringComparison.Ordinal));
     }
 }

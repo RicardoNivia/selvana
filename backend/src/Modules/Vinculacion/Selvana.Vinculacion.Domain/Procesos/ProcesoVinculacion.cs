@@ -66,6 +66,17 @@ public sealed class CondicionesContratacion
     public string? Labor { get; init; }
     public string Jornada { get; init; } = "";
     public string Ciudad { get; init; } = "";
+
+    /// <summary>Tipo del maestro de la empresa que se eligió (copia del momento: si luego se edita el maestro, este contrato no cambia).</summary>
+    public Guid? TipoContratoId { get; init; }
+    public string? TipoContratoNombre { get; init; }
+
+    /// <summary>Cómo se trabaja ese contrato en la empresa; la IA lo sigue al redactar.</summary>
+    public string? TipoContratoDescripcion { get; init; }
+
+    /// <summary>Plantilla del tipo de contrato que la IA sigue al redactar (copia del momento).</summary>
+    public Guid? PlantillaArchivoId { get; init; }
+    public string? PlantillaTipoContenido { get; init; }
 }
 
 public sealed class Clausula
@@ -142,7 +153,7 @@ public static class ProcesoErrors
 /// Proceso de vinculación de una persona: nace cuando alguien aprueba contratar al candidato de la terna y termina con el empleado creado.
 /// La IA redacta la oferta; RRHH la aprueba; el candidato la acepta por su enlace con evidencia.
 /// </summary>
-public sealed class ProcesoVinculacion : AggregateRoot<Guid>
+public sealed partial class ProcesoVinculacion : AggregateRoot<Guid>
 {
     public const string MarcaTrabajador = "[TRABAJADOR]";
     public const string MarcaDocumento = "[DOCUMENTO]";
@@ -331,6 +342,28 @@ public sealed class ProcesoVinculacion : AggregateRoot<Guid>
 
         Oferta.TokenHash = tokenHash;
         Oferta.EnviadaEn = ahora;
+        ActualizadoEn = ahora;
+        return Result.Success();
+    }
+
+    /// <summary>Qué le toca hacer al candidato: aceptar y firmar la oferta, o subir sus documentos de ingreso; null si nada.</summary>
+    public string? PendienteDelCandidato => !Abierto ? null
+        : Oferta.Estado == EstadoOferta.Enviada ? "Revisar y aceptar la oferta, y firmar el contrato"
+        : Etapa == EtapaVinculacion.Documentos && Oferta.Estado == EstadoOferta.Aceptada && !CandidatoCompleto ? "Subir tus documentos de ingreso"
+        : null;
+
+    /// <summary>
+    /// La persona abre su pendiente desde el portal (ADR 0013): un enlace nuevo que invalida el anterior,
+    /// solo si tiene algo por hacer.
+    /// </summary>
+    public Result AbrirDesdePortal(string tokenHash, DateTimeOffset ahora)
+    {
+        if (PendienteDelCandidato is null)
+        {
+            return Result.Failure(ProcesoErrors.NoEnviada);
+        }
+
+        Oferta.TokenHash = tokenHash;
         ActualizadoEn = ahora;
         return Result.Success();
     }
@@ -709,6 +742,7 @@ public sealed class ProcesoVinculacion : AggregateRoot<Guid>
         Etapa = EtapaVinculacion.Onboarding;
         EmpleadoCreadoPor = por;
         EmpleadoCreadoEn = ahora;
+        Induccion = new PlanInduccion { Estado = EstadoPlanInduccion.Generando, PedidoEn = ahora };
         ActualizadoEn = ahora;
         return Result.Success();
     }

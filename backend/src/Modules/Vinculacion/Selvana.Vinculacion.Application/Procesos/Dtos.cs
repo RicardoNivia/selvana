@@ -3,11 +3,13 @@ using Selvana.Vinculacion.Domain.Procesos;
 namespace Selvana.Vinculacion.Application.Procesos;
 
 /// <summary>Condiciones que RRHH define (o ajusta) al aprobar la contratación.</summary>
-public sealed record CondicionesRequest(string Tipo, decimal SalarioCop, DateOnly FechaIngreso, DateOnly? FechaFin, int PeriodoPruebaDias, string? Labor);
+/// <summary>Condiciones que envía RRHH. <paramref name="TipoContratoId"/> es el tipo del maestro de la empresa; si falta, se usa la modalidad <paramref name="Tipo"/>.</summary>
+public sealed record CondicionesRequest(string Tipo, decimal SalarioCop, DateOnly FechaIngreso, DateOnly? FechaFin, int PeriodoPruebaDias, string? Labor,
+    Guid? TipoContratoId = null);
 
 public sealed record CondicionesDto(
     string Tipo, string TipoNombre, decimal SalarioCop, DateOnly FechaIngreso, DateOnly? FechaFin, int PeriodoPruebaDias, string? Labor, string Jornada,
-    string Ciudad, bool AuxilioTransporte, decimal AuxilioTransporteCop);
+    string Ciudad, bool AuxilioTransporte, decimal AuxilioTransporteCop, Guid? TipoContratoId, string? TipoContratoDescripcion, bool ConPlantilla);
 
 public sealed record AlertaDto(string Nivel, string Texto, string Fuente);
 
@@ -55,7 +57,14 @@ public sealed record ProcesoDto(
     Guid Id, string Codigo, string Etapa, PersonaDto Persona, Guid VacanteId, string CodigoVacante, string Vacante, string Cargo, Guid PostulacionId,
     Guid CandidatoId, string Empresa, string? EmpresaUsuaria, decimal SalarioMinimoVacante, decimal SalarioMaximoVacante, CondicionesDto Condiciones,
     IReadOnlyList<AlertaDto> Alertas, OfertaDto Oferta, string AprobadaPor, string? MotivoCancelacion, DateTimeOffset CreadoEn, DateTimeOffset ActualizadoEn,
-    IReadOnlyList<DocumentoDto> Documentos, IReadOnlyList<AfiliacionDto> Afiliaciones, AltaDto Alta);
+    IReadOnlyList<DocumentoDto> Documentos, IReadOnlyList<AfiliacionDto> Afiliaciones, AltaDto Alta, InduccionDto Induccion);
+
+public sealed record TareaInduccionDto(
+    Guid Id, string Titulo, string Detalle, string Responsable, string Momento, int Dia, DateOnly Fecha, bool Hecha, string? HechaPor, DateTimeOffset? HechaEn, bool DeIa);
+
+public sealed record InduccionDto(
+    string Estado, string? Origen, IReadOnlyList<TareaInduccionDto> Tareas, IReadOnlyList<RazonDto> Razones, IReadOnlyList<string> AlertasIa, string? Modelo,
+    decimal CostoUsd, string? ErrorIa, string? AprobadoPor, DateTimeOffset? AprobadoEn, string? CerradoPor, DateTimeOffset? CerradoEn, int Avance);
 
 /// <summary>Lo que ve el candidato en su enlace: la oferta con su nombre, sin datos internos.</summary>
 public sealed record OfertaPublicaDto(
@@ -67,10 +76,16 @@ public sealed record EnlaceOfertaDto(Guid ProcesoId, string Token);
 internal static class Mapeo
 {
     public static CondicionesDto Dto(CondicionesContratacion c, ParametrosLegales p) =>
-        new(c.Tipo.ToString(), ReglasContrato.Nombre(c.Tipo), c.SalarioCop, c.FechaIngreso, c.FechaFin, c.PeriodoPruebaDias, c.Labor, c.Jornada, c.Ciudad,
-            ReglasContrato.TieneAuxilioTransporte(c, p), p.AuxilioTransporteCop);
+        new(c.Tipo.ToString(), ReglasContrato.Nombre(c), c.SalarioCop, c.FechaIngreso, c.FechaFin, c.PeriodoPruebaDias, c.Labor, c.Jornada, c.Ciudad,
+            ReglasContrato.TieneAuxilioTransporte(c, p), p.AuxilioTransporteCop, c.TipoContratoId, c.TipoContratoDescripcion, c.PlantillaArchivoId is not null);
 
     public static AlertaDto Dto(AlertaContrato a) => new(a.Nivel.ToString(), a.Texto, a.Fuente);
+
+    public static InduccionDto Dto(PlanInduccion i) =>
+        new(i.Estado.ToString(), i.Origen,
+            [.. i.Tareas.OrderBy(t => t.Dia).Select(t => new TareaInduccionDto(t.Id, t.Titulo, t.Detalle, t.Responsable, t.Momento.ToString(), t.Dia, t.Fecha, t.Hecha,
+                t.HechaPor, t.HechaEn, t.DeIa))],
+            [.. i.Razones.Select(Dto)], i.AlertasIa, i.Modelo, i.CostoUsd, i.ErrorIa, i.AprobadoPor, i.AprobadoEn, i.CerradoPor, i.CerradoEn, i.Avance);
 
     public static RazonDto Dto(RazonOferta r) => new(r.Signo, r.Texto, r.Fuente);
 
@@ -93,7 +108,8 @@ internal static class Mapeo
                 a.ClaseRiesgo, a.Por, a.En))],
             new AltaDto(p.Alta.Area, p.Alta.CentroCosto, p.Alta.Sede, p.Alta.Banco, p.Alta.TipoCuenta, p.Alta.NumeroCuenta, p.Alta.SugeridosPorIa, p.Alta.EditadoPor,
                 p.Afiliaciones.Count == 0 ? [] : [.. ReglasAlta.Revisar(p, hoy).Select(a => new AlertaDto(a.Nivel.ToString(), a.Texto, a.Fuente))], p.ListoParaCrearEmpleado(hoy),
-                ReglasAlta.RequiereConfirmarAlertas(p), ReglasAlta.ClaseSugerida(p.Vacante.Cargo).Razon, p.EmpleadoCreadoPor, p.EmpleadoCreadoEn));
+                ReglasAlta.RequiereConfirmarAlertas(p), ReglasAlta.ClaseSugerida(p.Vacante.Cargo).Razon, p.EmpleadoCreadoPor, p.EmpleadoCreadoEn),
+            Dto(p.Induccion));
     }
 
     /// <summary>Si aceptó antes de existir la lista, se muestra la que le corresponde (se guarda al primer cambio).</summary>

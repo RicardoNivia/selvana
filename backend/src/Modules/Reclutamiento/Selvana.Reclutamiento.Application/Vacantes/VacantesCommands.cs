@@ -19,7 +19,8 @@ public sealed record SolicitarVacanteCommand(string Frase, Guid? EmpresaUsuariaI
 
 public sealed record EditarVacanteCommand(
     Guid VacanteId, string Titulo, string Cargo, string Ciudad, int Cupos, string Jornada, string Descripcion,
-    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro) : ICommand;
+    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
+    string? CodigoMunicipio = null, bool EmpresaConfidencial = false, bool SalarioOculto = false) : ICommand;
 
 /// <summary>Envía la requisición a aprobación (RRHH → gerencia); la última aprobación la publica en el portal.</summary>
 public sealed record SolicitarAprobacionVacanteCommand(Guid VacanteId) : ICommand;
@@ -53,9 +54,6 @@ internal sealed class SolicitarVacanteHandler(
     IUsuarioActual usuario, IDirectorioEmpresas empresas, ICatalogoCargos catalogo, IVacantes vacantes, IEventosReclutamiento eventos, IBitacora bitacora,
     IUnidadReclutamiento unidad, TimeProvider reloj) : ICommandHandler<SolicitarVacanteCommand, Guid>
 {
-    private static readonly Error EmpresaUsuariaInvalida = Error.Validation("Vacante.EmpresaUsuaria", "Esa empresa usuaria no es de su empresa o está inactiva.");
-    private static readonly Error CargoInvalido = Error.Validation("Vacante.Cargo", "Ese cargo no está en el catálogo o está inactivo.");
-
     public async Task<Result<Guid>> Handle(SolicitarVacanteCommand command, CancellationToken cancellationToken)
     {
         var empresa = await empresas.ObtenerAsync(usuario.EmpresaId, cancellationToken);
@@ -70,14 +68,14 @@ internal sealed class SolicitarVacanteHandler(
             usuaria = usuario.Ve(id) ? empresa.EmpresasUsuarias.FirstOrDefault(e => e.Id == id && e.Activa) : null;
             if (usuaria is null)
             {
-                return EmpresaUsuariaInvalida;
+                return OrigenVacante.EmpresaUsuariaInvalida;
             }
         }
 
         CargoCatalogo? cargo = null;
         if (command.CargoId is { } cargoId && (cargo = await catalogo.ObtenerAsync(empresa.Id, cargoId, cancellationToken)) is null)
         {
-            return CargoInvalido;
+            return OrigenVacante.CargoInvalido;
         }
 
         var ahora = reloj.GetUtcNow();
@@ -89,17 +87,13 @@ internal sealed class SolicitarVacanteHandler(
 
         var vacante = resultado.Value;
         vacantes.Agregar(vacante);
-        eventos.Publicar(new VacanteSolicitada(Guid.CreateVersion7(), ahora, empresa.Id, vacante.Id, vacante.Frase, usuaria?.Nombre, Perfil(cargo)));
+        eventos.Publicar(new VacanteSolicitada(Guid.CreateVersion7(), ahora, empresa.Id, vacante.Id, vacante.Frase, usuaria?.Nombre, OrigenVacante.Perfil(cargo)));
         bitacora.Registrar(empresa.Id, TipoActor.Persona, usuario.Nombre, $"Pidió la vacante {vacante.Codigo} a la IA", $"«{vacante.Frase}»{(usuaria is null ? "" : $" · {usuaria.Nombre}")}",
             cargo is null ? "Desde cero" : $"Desde el cargo {cargo.Nombre} del catálogo ({(cargo.EstadoPerfil == "Aprobado" ? "perfil aprobado" : cargo.EstadoPerfil == "BorradorIa" ? "perfil en borrador" : "sin perfil")})",
             "Vacante", vacante.Id);
         await unidad.SaveChangesAsync(cancellationToken);
         return vacante.Id;
     }
-
-    /// <summary>Lo que el redactor recibe del cargo: el perfil si existe; si el cargo no tiene perfil, solo su nombre y área.</summary>
-    private static PerfilCargoVacante? Perfil(CargoCatalogo? c) => c is null ? null
-        : new PerfilCargoVacante(c.Nombre, c.Area, c.EstadoPerfil == "Aprobado", c.Mision, c.Funciones, c.Requisitos, c.RiesgoArl);
 }
 
 internal sealed class EditarVacanteHandler(IUsuarioActual usuario, IVacantes vacantes, IBitacora bitacora, IUnidadReclutamiento unidad) : ICommandHandler<EditarVacanteCommand>
@@ -113,7 +107,7 @@ internal sealed class EditarVacanteHandler(IUsuarioActual usuario, IVacantes vac
         }
 
         var resultado = vacante.Editar(new ContenidoVacante(c.Titulo, c.Cargo, c.Ciudad, c.Cupos, c.Jornada, c.Descripcion,
-            c.SalarioMinimo, c.SalarioMaximo, c.Requisitos, c.PreguntasFiltro));
+            c.SalarioMinimo, c.SalarioMaximo, c.Requisitos, c.PreguntasFiltro, c.CodigoMunicipio, c.EmpresaConfidencial, c.SalarioOculto));
         if (resultado.IsSuccess)
         {
             bitacora.Registrar(vacante.EmpresaId, TipoActor.Persona, usuario.Nombre, $"Editó la vacante {vacante.Codigo}", vacante.Titulo,

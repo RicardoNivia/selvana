@@ -22,7 +22,15 @@ public sealed record SolicitarVacanteRequest(string Frase, Guid? EmpresaUsuariaI
 
 public sealed record EditarVacanteRequest(
     string Titulo, string Cargo, string Ciudad, int Cupos, string Jornada, string Descripcion,
-    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro);
+    decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
+    string? CodigoMunicipio = null, bool EmpresaConfidencial = false, bool SalarioOculto = false);
+
+public sealed record CrearVacanteRequest(
+    Guid? EmpresaUsuariaId, Guid? CargoId, string Titulo, string Cargo, string Ciudad, string? CodigoMunicipio, int Cupos, string Jornada,
+    string Descripcion, decimal SalarioMinimo, decimal SalarioMaximo, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro,
+    bool EmpresaConfidencial = false, bool SalarioOculto = false);
+
+public sealed record RedactarVacanteRequest(string Frase);
 
 public sealed record CreadoResponse(Guid Id);
 
@@ -66,7 +74,7 @@ public sealed record TerminarPruebaRequest(IReadOnlyList<RespuestaDto>? Respuest
 
 public sealed record EnviarPostulacionRequest(
     string Nombre, string Documento, string Celular, string Correo, string Ciudad, IReadOnlyList<bool> Respuestas, bool AceptaAutorizacion, string? Canal,
-    string? LinkedIn = null);
+    string? LinkedIn = null, IReadOnlyList<decimal?>? Valores = null);
 
 public sealed record PostulacionEnviadaResponse(string Numero);
 
@@ -83,6 +91,9 @@ public static class ReclutamientoEndpoints
         MapPreseleccionCandidato(app.MapGroup("/portal/preseleccion").WithTags("Preselección conversacional (candidato)").AllowAnonymous()
             .RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         MapPortal(app.MapGroup("/portal").WithTags("Portal de empleo público").AllowAnonymous().RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
+        MapPostularse(app.MapGroup("/portal").WithTags("Postularse (con cuenta del portal)").RequireAuthorization(SesionesPortal.Politica)
+            .RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
+        app.MapPortalPersona();
         return app;
     }
 
@@ -220,6 +231,20 @@ public static class ReclutamientoEndpoints
             })
             .WithName("SolicitarVacante").Produces<CreadoResponse>(StatusCodes.Status201Created);
 
+        // La persona llena el formulario sin la IA: nace como borrador confirmado por ella
+        g.MapPost("/vacantes/manual", async (CrearVacanteRequest b, ICommandHandler<CrearVacanteCommand, Guid> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new CrearVacanteCommand(b.EmpresaUsuariaId, b.CargoId, b.Titulo, b.Cargo, b.Ciudad, b.CodigoMunicipio, b.Cupos, b.Jornada,
+                    b.Descripcion, b.SalarioMinimo, b.SalarioMaximo, b.Requisitos, b.PreguntasFiltro, b.EmpresaConfidencial, b.SalarioOculto), ct);
+                return r.IsSuccess ? Results.Created($"/api/v1/reclutamiento/vacantes/{r.Value}", new CreadoResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("CrearVacante").Produces<CreadoResponse>(StatusCodes.Status201Created);
+
+        // Otro borrador de la IA con una frase nueva (por ejemplo, la respuesta a lo que preguntó)
+        g.MapPost("/vacantes/{id:guid}/redactar", async (Guid id, RedactarVacanteRequest b, ICommandHandler<RedactarVacanteCommand> h, CancellationToken ct) =>
+                (await h.Handle(new RedactarVacanteCommand(id, b.Frase), ct)).ToHttp())
+            .WithName("RedactarVacante");
+
         // Catálogo de cargos para elegir de cuál parte la vacante (sin pedir permiso de configurar la estructura)
         g.MapGet("/cargos", async (string? buscar, IQueryHandler<BuscarCargosCatalogoQuery, IReadOnlyList<CargoCatalogoDto>> h, CancellationToken ct) =>
                 (await h.Handle(new BuscarCargosCatalogoQuery(buscar), ct)).ToHttp())
@@ -231,7 +256,7 @@ public static class ReclutamientoEndpoints
 
         g.MapPut("/vacantes/{id:guid}", async (Guid id, EditarVacanteRequest b, ICommandHandler<EditarVacanteCommand> h, CancellationToken ct) =>
                 (await h.Handle(new EditarVacanteCommand(id, b.Titulo, b.Cargo, b.Ciudad, b.Cupos, b.Jornada, b.Descripcion,
-                    b.SalarioMinimo, b.SalarioMaximo, b.Requisitos, b.PreguntasFiltro), ct)).ToHttp())
+                    b.SalarioMinimo, b.SalarioMaximo, b.Requisitos, b.PreguntasFiltro, b.CodigoMunicipio, b.EmpresaConfidencial, b.SalarioOculto), ct)).ToHttp())
             .WithName("EditarVacante");
 
         // Requisición: líder → RRHH → gerencia; la última aprobación la publica en el portal y busca en el banco de talento
@@ -397,7 +422,12 @@ public static class ReclutamientoEndpoints
                 (await h.Handle(new ObtenerVacantePublicaQuery(codigo), ct)).ToHttp())
             .WithName("PortalVacante").Produces<VacantePublicaDetalleDto>();
 
-        g.MapPost("/vacantes/{codigo}/postulaciones", async (string codigo, IFormFile hojaDeVida,
+    }
+
+    /// <summary>Postularse exige la cuenta del portal (ADR 0013): la postulación sale con el correo y la identificación de la persona.</summary>
+    private static void MapPostularse(RouteGroupBuilder conCuenta)
+    {
+        conCuenta.MapPost("/vacantes/{codigo}/postulaciones", async (string codigo, IFormFile hojaDeVida,
                 ICommandHandler<IniciarPostulacionCommand, Guid> h, CancellationToken ct) =>
             {
                 await using var flujo = hojaDeVida.OpenReadStream();
@@ -408,16 +438,16 @@ public static class ReclutamientoEndpoints
             })
             .WithName("IniciarPostulacion").DisableAntiforgery().Produces<CreadoResponse>(StatusCodes.Status201Created);
 
-        g.MapGet("/postulaciones/{borradorId:guid}", async (Guid borradorId, IQueryHandler<ObtenerBorradorPostulacionQuery, BorradorPostulacionDto> h, CancellationToken ct) =>
+        conCuenta.MapGet("/postulaciones/{borradorId:guid}", async (Guid borradorId, IQueryHandler<ObtenerBorradorPostulacionQuery, BorradorPostulacionDto> h, CancellationToken ct) =>
                 (await h.Handle(new ObtenerBorradorPostulacionQuery(borradorId), ct)).ToHttp())
             .WithName("PortalBorradorPostulacion").Produces<BorradorPostulacionDto>();
 
-        g.MapPost("/postulaciones/{borradorId:guid}/enviar", async (Guid borradorId, EnviarPostulacionRequest b, HttpContext http,
+        conCuenta.MapPost("/postulaciones/{borradorId:guid}/enviar", async (Guid borradorId, EnviarPostulacionRequest b, HttpContext http,
                 ICommandHandler<EnviarPostulacionCommand, string> h, CancellationToken ct) =>
             {
                 var r = await h.Handle(new EnviarPostulacionCommand(borradorId, b.Nombre, b.Documento, b.Celular, b.Correo, b.Ciudad,
                     b.Respuestas ?? [], b.AceptaAutorizacion, b.Canal, http.Connection.RemoteIpAddress?.ToString() ?? "",
-                    http.Request.Headers.UserAgent.ToString(), b.LinkedIn), ct);
+                    http.Request.Headers.UserAgent.ToString(), b.LinkedIn, b.Valores), ct);
                 return r.IsSuccess ? Results.Ok(new PostulacionEnviadaResponse(r.Value)) : r.ToHttp();
             })
             .WithName("EnviarPostulacion").Produces<PostulacionEnviadaResponse>();

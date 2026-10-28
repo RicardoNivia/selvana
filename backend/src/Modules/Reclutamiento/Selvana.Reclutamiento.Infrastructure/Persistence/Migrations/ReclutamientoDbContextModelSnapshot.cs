@@ -241,6 +241,85 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                     b.ToTable("postulaciones", "reclutamiento");
                 });
 
+            modelBuilder.Entity("Selvana.Reclutamiento.Domain.Portal.CuentaCandidato", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("ArchivoHojaDeVidaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("archivo_hoja_de_vida_id");
+
+                    b.Property<DateTimeOffset?>("BloqueadaHasta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bloqueada_hasta");
+
+                    b.Property<string>("ContrasenaHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("contrasena_hash");
+
+                    b.Property<string>("Correo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("correo");
+
+                    b.Property<DateTimeOffset>("CreadaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("creada_en");
+
+                    b.Property<string>("Documento")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("documento");
+
+                    b.Property<DateTimeOffset?>("HojaDeVidaActualizadaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("hoja_de_vida_actualizada_en");
+
+                    b.Property<int>("IntentosFallidos")
+                        .HasColumnType("integer")
+                        .HasColumnName("intentos_fallidos");
+
+                    b.Property<string>("NombreArchivoHojaDeVida")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)")
+                        .HasColumnName("nombre_archivo_hoja_de_vida");
+
+                    b.Property<string>("TipoDocumento")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(4)
+                        .HasColumnType("character varying(4)")
+                        .HasDefaultValue("CC")
+                        .HasColumnName("tipo_documento");
+
+                    b.Property<DateTimeOffset?>("UltimoIngreso")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ultimo_ingreso");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cuentas_candidato");
+
+                    b.HasIndex("Correo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cuentas_candidato_correo");
+
+                    b.HasIndex("Documento")
+                        .HasDatabaseName("ix_cuentas_candidato_documento");
+
+                    b.HasIndex("TipoDocumento", "Documento")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cuentas_candidato_tipo_documento_documento");
+
+                    b.ToTable("cuentas_candidato", "reclutamiento");
+                });
+
             modelBuilder.Entity("Selvana.Reclutamiento.Domain.Postulaciones.BorradorPostulacion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -593,6 +672,11 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("codigo");
 
+                    b.Property<string>("CodigoMunicipio")
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)")
+                        .HasColumnName("codigo_municipio");
+
                     b.PrimitiveCollection<List<string>>("Competencias")
                         .IsRequired()
                         .HasColumnType("text[]")
@@ -621,6 +705,10 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                     b.Property<bool>("EditadaPorPersona")
                         .HasColumnType("boolean")
                         .HasColumnName("editada_por_persona");
+
+                    b.Property<bool>("EmpresaConfidencial")
+                        .HasColumnType("boolean")
+                        .HasColumnName("empresa_confidencial");
 
                     b.Property<Guid>("EmpresaId")
                         .HasColumnType("uuid")
@@ -708,6 +796,10 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasPrecision(14, 2)
                         .HasColumnType("numeric(14,2)")
                         .HasColumnName("salario_minimo");
+
+                    b.Property<bool>("SalarioOculto")
+                        .HasColumnType("boolean")
+                        .HasColumnName("salario_oculto");
 
                     b.PrimitiveCollection<List<string>>("Supuestos")
                         .IsRequired()
@@ -890,40 +982,6 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_postulaciones_candidatos_candidato_id");
 
-                    b.OwnsOne("Selvana.Reclutamiento.Domain.Candidatos.AutorizacionDatos", "Autorizacion", b1 =>
-                        {
-                            b1.Property<Guid>("PostulacionId");
-
-                            b1.Property<DateTimeOffset>("AceptadaEn");
-
-                            b1.Property<string>("Huella")
-                                .IsRequired();
-
-                            b1.Property<string>("Ip")
-                                .IsRequired();
-
-                            b1.Property<string>("Navegador")
-                                .IsRequired();
-
-                            b1.Property<string>("Texto")
-                                .IsRequired();
-
-                            b1.Property<string>("Version")
-                                .IsRequired();
-
-                            b1.HasKey("PostulacionId");
-
-                            b1.ToTable("postulaciones", "reclutamiento");
-
-                            b1
-                                .ToJson("autorizacion")
-                                .HasColumnType("jsonb");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PostulacionId")
-                                .HasConstraintName("fk_postulaciones_postulaciones_id");
-                        });
-
                     b.OwnsMany("Selvana.Reclutamiento.Domain.Candidatos.CambioEtapa", "Historial", b1 =>
                         {
                             b1.Property<Guid>("PostulacionId");
@@ -1030,6 +1088,41 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                             b1.Navigation("Razones");
                         });
 
+                    b.OwnsOne("Selvana.Reclutamiento.Domain.Candidatos.AutorizacionDatos", "Autorizacion", b1 =>
+                        {
+                            b1.Property<Guid>("PostulacionId");
+
+                            b1.Property<DateTimeOffset>("AceptadaEn");
+
+                            b1.Property<string>("Huella")
+                                .IsRequired();
+
+                            b1.Property<string>("Ip")
+                                .IsRequired();
+
+                            b1.Property<string>("Navegador")
+                                .IsRequired();
+
+                            b1.Property<string>("Texto")
+                                .IsRequired();
+
+                            b1.Property<string>("Version")
+                                .IsRequired();
+
+                            b1.HasKey("PostulacionId")
+                                .HasName("pk_postulaciones");
+
+                            b1.ToTable("postulaciones", "reclutamiento");
+
+                            b1
+                                .ToJson("autorizacion")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PostulacionId")
+                                .HasConstraintName("fk_postulaciones_postulaciones_postulacion_id");
+                        });
+
                     b.OwnsMany("Selvana.Reclutamiento.Domain.Candidatos.RespuestaFiltro", "Respuestas", b1 =>
                         {
                             b1.Property<Guid>("PostulacionId");
@@ -1041,6 +1134,8 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                                 .IsRequired();
 
                             b1.Property<bool>("Respuesta");
+
+                            b1.Property<decimal?>("Valor");
 
                             b1.HasKey("PostulacionId", "__synthesizedOrdinal");
 
@@ -1092,6 +1187,148 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                     b.Navigation("Respuestas");
 
                     b.Navigation("Retroalimentacion");
+                });
+
+            modelBuilder.Entity("Selvana.Reclutamiento.Domain.Portal.CuentaCandidato", b =>
+                {
+                    b.OwnsOne("Selvana.Reclutamiento.Domain.Candidatos.AutorizacionDatos", "Autorizacion", b1 =>
+                        {
+                            b1.Property<Guid>("CuentaCandidatoId");
+
+                            b1.Property<DateTimeOffset>("AceptadaEn");
+
+                            b1.Property<string>("Huella")
+                                .IsRequired();
+
+                            b1.Property<string>("Ip")
+                                .IsRequired();
+
+                            b1.Property<string>("Navegador")
+                                .IsRequired();
+
+                            b1.Property<string>("Texto")
+                                .IsRequired();
+
+                            b1.Property<string>("Version")
+                                .IsRequired();
+
+                            b1.HasKey("CuentaCandidatoId");
+
+                            b1.ToTable("cuentas_candidato", "reclutamiento");
+
+                            b1
+                                .ToJson("autorizacion")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CuentaCandidatoId")
+                                .HasConstraintName("fk_cuentas_candidato_cuentas_candidato_id");
+                        });
+
+                    b.OwnsOne("Selvana.Reclutamiento.Domain.Candidatos.DatosCandidato", "Datos", b1 =>
+                        {
+                            b1.Property<Guid>("CuentaCandidatoId");
+
+                            b1.Property<string>("Celular")
+                                .IsRequired();
+
+                            b1.Property<string>("Ciudad")
+                                .IsRequired();
+
+                            b1.Property<string>("Correo")
+                                .IsRequired();
+
+                            b1.PrimitiveCollection<string>("Cursos")
+                                .IsRequired();
+
+                            b1.Property<string>("Documento")
+                                .IsRequired();
+
+                            b1.PrimitiveCollection<string>("Habilidades")
+                                .IsRequired();
+
+                            b1.Property<string>("LinkedIn")
+                                .IsRequired();
+
+                            b1.Property<string>("Nombre")
+                                .IsRequired();
+
+                            b1.HasKey("CuentaCandidatoId");
+
+                            b1.ToTable("cuentas_candidato", "reclutamiento");
+
+                            b1
+                                .ToJson("datos")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CuentaCandidatoId")
+                                .HasConstraintName("fk_cuentas_candidato_cuentas_candidato_id");
+
+                            b1.OwnsMany("Selvana.Reclutamiento.Domain.Candidatos.ExperienciaLaboral", "Experiencia", b2 =>
+                                {
+                                    b2.Property<Guid>("DatosCandidatoCuentaCandidatoId");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAdd();
+
+                                    b2.Property<string>("Cargo")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Desde")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Empresa")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Hasta")
+                                        .IsRequired();
+
+                                    b2.HasKey("DatosCandidatoCuentaCandidatoId", "__synthesizedOrdinal");
+
+                                    b2.ToTable("cuentas_candidato", "reclutamiento");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("DatosCandidatoCuentaCandidatoId")
+                                        .HasConstraintName("fk_cuentas_candidato_cuentas_candidato_datos_candidato_cuenta_can");
+                                });
+
+                            b1.OwnsMany("Selvana.Reclutamiento.Domain.Candidatos.EstudioRealizado", "Formacion", b2 =>
+                                {
+                                    b2.Property<Guid>("DatosCandidatoCuentaCandidatoId");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAdd();
+
+                                    b2.Property<string>("Anio")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Institucion")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Titulo")
+                                        .IsRequired();
+
+                                    b2.HasKey("DatosCandidatoCuentaCandidatoId", "__synthesizedOrdinal")
+                                        .HasName("pk_cuentas_candidato");
+
+                                    b2.ToTable("cuentas_candidato", "reclutamiento");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("DatosCandidatoCuentaCandidatoId")
+                                        .HasConstraintName("fk_cuentas_candidato_cuentas_candidato_datos_candidato_cuenta_can");
+                                });
+
+                            b1.Navigation("Experiencia");
+
+                            b1.Navigation("Formacion");
+                        });
+
+                    b.Navigation("Autorizacion")
+                        .IsRequired();
+
+                    b.Navigation("Datos")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Selvana.Reclutamiento.Domain.Postulaciones.BorradorPostulacion", b =>
@@ -1542,6 +1779,32 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Selvana.Reclutamiento.Domain.Vacantes.Vacante", b =>
                 {
+                    b.OwnsMany("Selvana.Reclutamiento.Domain.Vacantes.AclaracionVacante", "Aclaraciones", b1 =>
+                        {
+                            b1.Property<Guid>("VacanteId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.PrimitiveCollection<string>("Opciones")
+                                .IsRequired();
+
+                            b1.Property<string>("Pregunta")
+                                .IsRequired();
+
+                            b1.HasKey("VacanteId", "__synthesizedOrdinal");
+
+                            b1.ToTable("vacantes", "reclutamiento");
+
+                            b1
+                                .ToJson("aclaraciones")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("VacanteId")
+                                .HasConstraintName("fk_vacantes_vacantes_vacante_id");
+                        });
+
                     b.OwnsMany("Selvana.Reclutamiento.Domain.Vacantes.AprobacionVacante", "Aprobaciones", b1 =>
                         {
                             b1.Property<Guid>("VacanteId");
@@ -1668,6 +1931,8 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                                 .HasForeignKey("VacanteId")
                                 .HasConstraintName("fk_vacantes_vacantes_vacante_id");
                         });
+
+                    b.Navigation("Aclaraciones");
 
                     b.Navigation("Aprobaciones");
 

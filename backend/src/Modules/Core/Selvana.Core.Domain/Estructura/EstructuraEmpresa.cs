@@ -17,6 +17,10 @@ public static class EstructuraErrors
     public static readonly Error SedeNoExiste = Error.NotFound("Sede.NoExiste", "Esa sede no existe.");
     public static readonly Error AreaNoExiste = Error.NotFound("Area.NoExiste", "Esa área no existe.");
     public static readonly Error CentroCostoNoExiste = Error.NotFound("CentroCosto.NoExiste", "Ese centro de costo no existe.");
+    public static readonly Error SedeDuplicada = Error.Conflict("Sede.Duplicada", "Ya existe una sede con ese nombre.");
+    public static readonly Error AreaDuplicada = Error.Conflict("Area.Duplicada", "Ya existe un área con ese nombre.");
+    public static readonly Error CentroCostoDuplicado = Error.Conflict("CentroCosto.Duplicado", "Ya existe un centro de costo con ese código.");
+    public static readonly Error AreaNoValida = Error.Validation("Cargo.AreaNoValida", "Elija un área activa de la lista. Si no existe, créela primero en la pestaña Áreas.");
 }
 
 /// <summary>
@@ -236,16 +240,35 @@ public sealed class EstructuraEmpresa : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    /// <summary>Crea a mano un cargo que todavía no está en la nómina (por ejemplo, para abrir una vacante nueva).</summary>
-    public Result<Cargo> CrearCargo(string nombre, string area, DateTimeOffset ahora)
+    /// <summary>
+    /// Crea a mano un cargo que todavía no está en la nómina (por ejemplo, para abrir una vacante nueva).
+    /// Sin perfil, queda pendiente de que la IA lo redacte; con perfil escrito por una persona, queda aprobado por ella.
+    /// </summary>
+    public Result<Cargo> CrearCargo(string nombre, string area, PerfilCargo? perfil, string usuario, DateTimeOffset ahora)
     {
         if (ExisteCargo(nombre, excepto: null))
         {
             return EstructuraErrors.CargoDuplicado;
         }
 
+        // El área es un dato maestro: se elige entre las áreas activas, con el nombre tal como está guardado.
+        var areaMaestra = _areas.Find(a => a.Activo && string.Equals(a.Nombre, area.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (areaMaestra is null)
+        {
+            return EstructuraErrors.AreaNoValida;
+        }
+
+        area = areaMaestra.Nombre;
         var cargo = Cargo.CrearManual(nombre, area);
-        cargo.MarcarPerfilSolicitado(ahora);
+        if (perfil is null)
+        {
+            cargo.MarcarPerfilSolicitado(ahora);
+        }
+        else
+        {
+            cargo.Editar(nombre, area, activo: true, perfil, usuario, ahora);
+        }
+
         _cargos.Add(cargo);
         return cargo;
     }
@@ -285,6 +308,27 @@ public sealed class EstructuraEmpresa : AggregateRoot<Guid>
         return cargo;
     }
 
+    /// <summary>Crea a mano una sede que no llegó de la nómina; si después llega con el mismo nombre, se reconoce como la misma.</summary>
+    public Result<Sede> CrearSede(string nombre) =>
+        CrearMaestro(_sedes, nombre, EstructuraErrors.SedeDuplicada, () => Sede.Crear(nombre.Trim()), s => s.Editar(nombre, activo: true));
+
+    /// <summary>Crea a mano un área; los cargos nuevos se asocian a una de las áreas creadas.</summary>
+    public Result<Area> CrearArea(string nombre) =>
+        CrearMaestro(_areas, nombre, EstructuraErrors.AreaDuplicada, () => Area.Crear(nombre.Trim()), a => a.Editar(nombre, activo: true));
+
+    public Result<CentroCosto> CrearCentroCosto(string codigo, string nombre, string sede)
+    {
+        if (_centrosCosto.Exists(c => string.Equals(c.Codigo, codigo.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            return EstructuraErrors.CentroCostoDuplicado;
+        }
+
+        var centro = CentroCosto.Crear(codigo.Trim(), nombre.Trim());
+        centro.Editar(nombre, sede, activo: true);
+        _centrosCosto.Add(centro);
+        return centro;
+    }
+
     public Result EditarSede(Guid sedeId, string nombre, bool activo) =>
         EditarMaestro(_sedes, sedeId, EstructuraErrors.SedeNoExiste, m => m.Editar(nombre, activo));
 
@@ -296,6 +340,21 @@ public sealed class EstructuraEmpresa : AggregateRoot<Guid>
 
     private bool ExisteCargo(string nombre, Guid? excepto) =>
         _cargos.Any(c => c.Id != excepto && string.Equals(c.Nombre.Trim(), nombre.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    private static Result<T> CrearMaestro<T>(List<T> maestros, string nombre, Error duplicado, Func<T> crear, Action<T> marcarManual)
+        where T : Maestro
+    {
+        if (maestros.Exists(m => string.Equals(m.Nombre, nombre.Trim(), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(m.NombreNomina, nombre.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            return duplicado;
+        }
+
+        var maestro = crear();
+        marcarManual(maestro);
+        maestros.Add(maestro);
+        return maestro;
+    }
 
     private static Result EditarMaestro<T>(List<T> maestros, Guid id, Error noExiste, Action<T> editar)
         where T : Maestro

@@ -7,7 +7,7 @@ namespace Selvana.ArchitectureTests;
 /// <summary>Convenciones CQRS: nombres, un handler sellado por caso de uso y DTOs inmutables.</summary>
 public class CqrsTests
 {
-    public static TheoryData<string> Modulos => new() { "Core", "Reclutamiento", "Vinculacion" };
+    public static TheoryData<string> Modulos => new() { "Core", "Reclutamiento", "Vinculacion", "Expediente" };
 
     [Theory]
     [MemberData(nameof(Modulos))]

@@ -47,6 +47,7 @@ Antes de producir cualquier cosa visual de Selvana, lee estas fuentes y aplícal
 2. **Nada sin explicación.**
 3. **Prellenado, nunca en blanco:** ningún formulario vacío si la IA puede llenarlo.
 4. **Celular primero para el operativo:** WhatsApp y web móvil liviana.
+5. **Todo lo de la IA también se hace a mano:** cada propuesta de la IA se edita, se crea desde cero o parte de una plantilla o regla de base, y lo que la IA usa para trabajar se configura en la pantalla. Si la IA falla o está apagada, el flujo sigue a mano: nunca un botón violeta como único camino.
 
 ## Tono de voz
 

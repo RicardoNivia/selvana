@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from 'react'
+import { AutocompletarMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { IconoCheck, IconoUsuarios } from '../../shared/ui/Iconos'
@@ -64,6 +65,8 @@ function FormularioEmpresa({ empresa, onCerrar }: { empresa?: EmpresaUsuaria; on
   const [nit, setNit] = useState(empresa ? formatoNit(empresa.nit) : '')
   const [sector, setSector] = useState(empresa?.sector ?? '')
   const [ciudad, setCiudad] = useState(empresa?.ciudad ?? '')
+  // La ciudad se elige de la DIVIPOLA; la que ya estaba guardada cuenta como elegida
+  const [ciudadElegida, setCiudadElegida] = useState(Boolean(empresa?.ciudad))
   const [activa, setActiva] = useState(empresa?.activa ?? true)
   const nitValido = normalizarNit(nit)
   const nitEscrito = nit.replace(/\D/g, '').length >= 9
@@ -71,6 +74,7 @@ function FormularioEmpresa({ empresa, onCerrar }: { empresa?: EmpresaUsuaria; on
 
   const guardar = (ev: FormEvent) => {
     ev.preventDefault()
+    if (ciudad.trim() && !ciudadElegida) return
     if (empresa) editar.mutate({ nombre, sector, ciudad, activa }, { onSuccess: onCerrar })
     else agregar.mutate({ nombre, nit: nitValido ?? nit, sector, ciudad }, { onSuccess: onCerrar })
   }
@@ -88,7 +92,11 @@ function FormularioEmpresa({ empresa, onCerrar }: { empresa?: EmpresaUsuaria; on
       </label>
       <div className="dos-campos">
         <label>Sector<input className="entrada" value={sector} onChange={(e) => setSector(e.target.value)} placeholder="BPO y contact center" /></label>
-        <label>Ciudad<input className="entrada" value={ciudad} onChange={(e) => setCiudad(e.target.value)} placeholder="Bogotá" /></label>
+        <label>
+          Ciudad o municipio
+          <AutocompletarMunicipio valor={{ codigo: ciudadElegida ? 'elegida' : null, ciudad }}
+            onElegir={(m, texto) => { setCiudad(m?.municipio ?? texto); setCiudadElegida(Boolean(m)) }} />
+        </label>
       </div>
       {empresa && <label className="interruptor"><input type="checkbox" checked={activa} onChange={(e) => setActiva(e.target.checked)} />Activa (si se desactiva, nadie la ve en la consola)</label>}
       {mutacion.error && <span role="alert" className="error-formulario">{mutacion.error.message}</span>}

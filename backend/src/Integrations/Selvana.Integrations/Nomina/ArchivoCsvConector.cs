@@ -82,14 +82,14 @@ public sealed class ArchivoCsvConector : IConectorNomina
         return new LecturaNomina(empleados, errores);
     }
 
-    private static string Normalizar(string nombre)
+    internal static string Normalizar(string nombre)
     {
         var sinTildes = new string(nombre.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD)
             .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray());
         return sinTildes.Replace(' ', '_').Replace('-', '_');
     }
 
-    private static List<string> Dividir(string linea, char separador)
+    internal static List<string> Dividir(string linea, char separador)
     {
         var campos = new List<string>();
         var actual = new StringBuilder();

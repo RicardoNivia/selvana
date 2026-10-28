@@ -42,7 +42,8 @@ internal sealed class LectorDocumentosAgente(IChatClient ia, IFiltroVariablesPro
         - "legible": false si está borroso, cortado, al revés o le falta una cara (la cédula tiene dos caras).
         - "campos": los datos que aparecen, con "campo" y "valor" tal cual: "nombre del titular", "número de documento" (solo dígitos),
           y según el tipo: "banco", "tipo de cuenta", "número de cuenta", "entidad" (EPS o fondo), "estado de la afiliación", "fecha de expedición",
-          "institución", "título", "empresa", "cargo", "desde", "hasta". No inventes: si no aparece, no lo pongas.
+          "institución", "título", "empresa", "cargo", "desde", "hasta",
+          "fecha de vencimiento" (licencias, cursos y certificados con vigencia; dd/mm/aaaa). No inventes: si no aparece, no lo pongas.
         - "observaciones": lo que RRHH debe revisar (fecha de expedición de más de 30 días en certificados, afiliación inactiva, falta una cara, tachones).
           Lista vacía si está bien.
         - "razones": 2 a 4, con "signo" ("+" o "−"), "texto" corto y "fuente" ("Documento").

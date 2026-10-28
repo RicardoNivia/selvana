@@ -8,13 +8,15 @@ import { type PruebaEnBateria, useSuite } from './api'
  * Elegir qué pruebas aplica un cargo o una vacante, con su peso y su puntaje de corte. Si la batería es sugerida
  * se muestra en violeta hasta que una persona la guarda.
  */
-export function EditorBateria({ inicial, sugerida, razon, guardando, error, onGuardar, etiquetaGuardar = 'Guardar pruebas' }: {
+export function EditorBateria({ inicial, sugerida, razon, guardando = false, error, onGuardar, onCambiar, etiquetaGuardar = 'Guardar pruebas' }: {
   inicial: PruebaEnBateria[]
   sugerida?: boolean
   razon?: string | null
-  guardando: boolean
+  guardando?: boolean
   error?: string
-  onGuardar: (pruebas: PruebaEnBateria[]) => void
+  /** Sin onGuardar el editor va dentro de un formulario: avisa cada cambio con onCambiar y no muestra su propio botón. */
+  onGuardar?: (pruebas: PruebaEnBateria[]) => void
+  onCambiar?: (pruebas: PruebaEnBateria[]) => void
   etiquetaGuardar?: string
 }) {
   const suite = useSuite()
@@ -24,18 +26,19 @@ export function EditorBateria({ inicial, sugerida, razon, guardando, error, onGu
 
   const cambiar = (codigo: string, cambio: Partial<PruebaEnBateria> | null) => {
     setTocada(true)
-    setPruebas((ps) => {
-      if (cambio === null) return ps.filter((p) => p.codigo !== codigo)
-      const existe = ps.some((p) => p.codigo === codigo)
-      return existe ? ps.map((p) => (p.codigo === codigo ? { ...p, ...cambio } : p)) : [...ps, { codigo, peso: 1, corte: null, ...cambio }]
-    })
+    const existe = pruebas.some((p) => p.codigo === codigo)
+    const nuevas = cambio === null
+      ? pruebas.filter((p) => p.codigo !== codigo)
+      : existe ? pruebas.map((p) => (p.codigo === codigo ? { ...p, ...cambio } : p)) : [...pruebas, { codigo, peso: 1, corte: null, ...cambio }]
+    setPruebas(nuevas)
+    onCambiar?.(nuevas)
   }
 
   if (suite.isPending) return <div className="bateria"><Esqueleto alto={44} /><Esqueleto alto={44} /><Esqueleto alto={44} /></div>
 
   return (
     <div className={`bateria ${ia ? 'bateria-ia' : ''}`}>
-      {ia && razon && <p className="bateria-sugerencia"><Chispa />Sugerida por Selvana: {razon} Ajústela y guárdela para confirmarla.</p>}
+      {ia && razon && <p className="bateria-sugerencia"><Chispa />Sugerida por Selvana: {razon} {onGuardar ? 'Ajústela y guárdela para confirmarla.' : 'Ajústela si quiere; se guarda con el cargo.'}</p>}
       <ul className="bateria-lista">
         {suite.data?.map((s) => {
           const p = pruebas.find((x) => x.codigo === s.codigo)
@@ -72,12 +75,14 @@ export function EditorBateria({ inicial, sugerida, razon, guardando, error, onGu
       </ul>
       <p className="ayuda-suave">Las pruebas en validación se aplican y se muestran, pero su puntaje es provisional hasta que el psicólogo las valide (ADR 0011). Nadie se descarta solo por una prueba.</p>
       {error && <span role="alert" className="error-formulario">{error}</span>}
-      <span className="enlace-acciones">
-        <Boton variante="primario" pequeno icono={<IconoCheck />} cargando={guardando} textoCargando="Guardando…" disabled={pruebas.length === 0}
-          onClick={() => onGuardar(pruebas)}>
-          {etiquetaGuardar}
-        </Boton>
-      </span>
+      {onGuardar && (
+        <span className="enlace-acciones">
+          <Boton variante="primario" pequeno icono={<IconoCheck />} cargando={guardando} textoCargando="Guardando…" disabled={pruebas.length === 0}
+            onClick={() => onGuardar(pruebas)}>
+            {etiquetaGuardar}
+          </Boton>
+        </span>
+      )}
     </div>
   )
 }

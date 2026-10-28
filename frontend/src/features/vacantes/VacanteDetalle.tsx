@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { AutocompletarMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto, EsqueletoPanel } from '../../shared/ui/Esqueleto'
 import { Chispa, IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Iconos'
@@ -11,12 +12,15 @@ import { AbrirHojaDeVida } from './AbrirHojaDeVida'
 import { ExplicacionAfinidad, PuntajeAfinidad } from './AfinidadPostulante'
 import { AprobacionRequisicion } from './AprobacionRequisicion'
 import { CargoDeLaVacante } from './CargoDelCatalogo'
+import { OpcionesPublicacion } from './OpcionesPublicacion'
 import { DelBanco } from './DelBanco'
 import { ComparativoFinalistas } from './ComparativoFinalistas'
 import { FiltrosAts } from './FiltrosAts'
 import { ReporteSesgo } from './ReporteSesgo'
 import { TableroVacante } from './TableroVacante'
-import { estadoVacante, type Vacante, useCalcularAfinidad, useCerrarVacante, useEditarVacante, usePostulantes, useSolicitarAprobacion, useVacante } from './api'
+import { type EstadoPreseleccion, estadoVacante, type Vacante, useCalcularAfinidad, useCerrarVacante, useEditarVacante, usePostulantes, useAprobarRequisicion, useSolicitarAprobacion, useVacante } from './api'
+import { textoAprobar } from './AprobacionRequisicion'
+import { useSesion } from '../sesion/api'
 
 const pesos = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
@@ -93,9 +97,15 @@ const lineas = (t: string) => t.split('\n').map((l) => l.trim()).filter(Boolean)
 function Contenido({ vacante: v }: { vacante: Vacante }) {
   const editar = useEditarVacante(v.id)
   const solicitar = useSolicitarAprobacion(v.id)
+  const aprobar = useAprobarRequisicion(v.id)
+  const rol = useSesion().data?.rol ?? ''
   const cerrar = useCerrarVacante(v.id)
   const deIa = !v.editadaPorPersona && v.modeloIa !== null
-  const bloqueada = v.estado === 'Cerrada' || v.estado === 'EnAprobacion'
+  // Solo el borrador se edita: en aprobación la devuelve quien aprueba; publicada o cerrada ya no cambia
+  const bloqueada = v.estado !== 'Borrador'
+  const [municipio, setMunicipio] = useState(v.codigoMunicipio)
+  const [ciudadTocada, setCiudadTocada] = useState(false)
+  const [publicacion, setPublicacion] = useState({ empresaConfidencial: v.empresaConfidencial, salarioOculto: v.salarioOculto })
   const [f, setF] = useState({
     titulo: v.titulo, cargo: v.cargo, ciudad: v.ciudad, cupos: String(v.cupos || ''), jornada: v.jornada, descripcion: v.descripcion,
     salarioMinimo: String(v.salarioMinimo || ''), salarioMaximo: String(v.salarioMaximo || ''), requisitos: v.requisitos.join('\n'), preguntas: v.preguntasFiltro.join('\n'),
@@ -110,9 +120,10 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
   const contenido = () => ({
     titulo: f.titulo, cargo: f.cargo, ciudad: f.ciudad, cupos: Number(f.cupos) || 0, jornada: f.jornada, descripcion: f.descripcion,
     salarioMinimo: Number(f.salarioMinimo) || 0, salarioMaximo: Number(f.salarioMaximo) || 0, requisitos: lineas(f.requisitos), preguntasFiltro: lineas(f.preguntas),
+    codigoMunicipio: municipio, ...publicacion,
   })
   const guardarYEnviar = () => (tocado ? editar.mutate(contenido(), { onSuccess: () => solicitar.mutate() }) : solicitar.mutate())
-  const error = editar.error ?? solicitar.error ?? cerrar.error
+  const error = editar.error ?? solicitar.error ?? aprobar.error ?? cerrar.error
 
   return (
     <div className="dos-columnas">
@@ -122,12 +133,24 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
           <p className="aviso aviso-alerta"><IconoAlerta />La devolvieron: «{v.aprobacion.motivoDevolucion}». Ajuste la vacante y vuelva a enviarla.</p>
         )}
         {v.estado === 'EnAprobacion' && <p className="aviso aviso-neutro"><IconoEscudo />La requisición está en aprobación: para cambiarla, quien aprueba debe devolverla.</p>}
+        {v.estado === 'Publicada' && <p className="aviso aviso-neutro"><IconoEscudo />Está aprobada y publicada: no se puede modificar. Si necesita cambiarla, ciérrela y cree otra.</p>}
         {v.mensajeIa && <p className="aviso aviso-alerta"><IconoAlerta />{v.mensajeIa} Complete la vacante a mano.</p>}
+        {(v.aclaraciones?.length ?? 0) > 0 && (
+          <div className="aviso aviso-alerta" style={{ flexDirection: 'column', gap: 6 }}>
+            <b>La IA no redactó esta vacante porque necesita que aclare:</b>
+            <ul style={{ margin: 0, paddingLeft: 20 }}>{v.aclaraciones?.map((a) => <li key={a.pregunta}>{a.pregunta}</li>)}</ul>
+            <span>Llénela a mano aquí o cree otra con una frase de un solo cargo.</span>
+          </div>
+        )}
         <label>Título del aviso<input {...campo('titulo')} required /></label>
         <div className="dos-campos">
           <label>Cargo<input {...campo('cargo')} /></label>
-          <label>Ciudad<input {...campo('ciudad')} required /></label>
-          <label>Cupos<input {...campo('cupos')} type="number" min={1} /></label>
+          <label>
+            Ciudad o municipio
+            <AutocompletarMunicipio valor={{ codigo: municipio, ciudad: f.ciudad }} ia={deIa && !tocado && !ciudadTocada} disabled={bloqueada} requerido
+              onElegir={(m, texto) => { setF((x) => ({ ...x, ciudad: m?.municipio ?? texto })); setMunicipio(m?.codigo ?? null); setCiudadTocada(true); setTocado(true) }} />
+          </label>
+          <label>Posiciones disponibles<input {...campo('cupos')} type="number" min={1} /></label>
           <label>Jornada<input {...campo('jornada')} /></label>
           <label>Salario mínimo (COP)<input {...campo('salarioMinimo')} type="number" min={0} /></label>
           <label>Salario máximo (COP)<input {...campo('salarioMaximo')} type="number" min={0} /></label>
@@ -136,16 +159,24 @@ function Contenido({ vacante: v }: { vacante: Vacante }) {
         <label>Descripción<textarea {...campo('descripcion')} rows={5} /></label>
         <div className="dos-campos">
           <label>Requisitos <span className="ayuda">Uno por línea</span><textarea {...campo('requisitos')} rows={6} /></label>
-          <label>Preguntas filtro <span className="ayuda">Una por línea; el candidato responde sí o no</span><textarea {...campo('preguntas')} rows={6} /></label>
+          <label>Preguntas filtro <span className="ayuda">Una por línea. «¿Tienes…?» se responde sí o no; «¿Cuántos…?», con un número; la aspiración salarial, en pesos</span><textarea {...campo('preguntas')} rows={6} /></label>
         </div>
+        <OpcionesPublicacion {...publicacion} disabled={bloqueada} onCambiar={(p) => { setPublicacion(p); setTocado(true) }} />
         {error && <span role="alert" className="error-formulario">{error.message}</span>}
         <div className="decision" style={{ padding: '8px 0 0', borderTop: 0 }}>
+          {/* Un paso a la vez: borrador → enviar a aprobación → aprobar (la última aprobación la publica) → cerrar */}
           {v.estado === 'Borrador' && (
-            <Boton variante="primario" icono={<IconoCheck />} cargando={solicitar.isPending || (editar.isPending && !tocado)} textoCargando="Enviando…" onClick={guardarYEnviar}>
-              Enviar a aprobación
+            <Boton variante="primario" icono={<IconoCheck />} cargando={solicitar.isPending} textoCargando="Enviando…" disabled={editar.isPending} onClick={guardarYEnviar}>
+              {tocado ? 'Guardar y enviar a aprobación' : 'Enviar a aprobación'}
             </Boton>
           )}
-          {!bloqueada && <Boton type="submit" disabled={!tocado} cargando={editar.isPending} textoCargando="Guardando…">Guardar cambios</Boton>}
+          {v.estado === 'Borrador' && <Boton type="submit" disabled={!tocado} cargando={editar.isPending && !solicitar.isPending} textoCargando="Guardando…">Guardar borrador</Boton>}
+          {v.estado === 'EnAprobacion' && v.aprobacion.puedeDecidir && (
+            <Boton variante="primario" icono={<IconoCheck />} cargando={aprobar.isPending} textoCargando="Aprobando…" onClick={() => aprobar.mutate()}>
+              {textoAprobar(v, rol)}
+            </Boton>
+          )}
+          {v.estado === 'EnAprobacion' && !v.aprobacion.puedeDecidir && <span className="ayuda">En aprobación: espera a {v.aprobacion.etapaPendiente}.</span>}
           {v.estado === 'Publicada' && <Boton cargando={cerrar.isPending} textoCargando="Cerrando…" onClick={() => cerrar.mutate()}>Cerrar vacante</Boton>}
           <span className="registro">Se registran la sugerencia y tu decisión</span>
         </div>
@@ -218,10 +249,10 @@ function Postulantes({ vacante }: { vacante: Vacante }) {
         </div>
         <div className="tabla-envoltura">
           <table className="tabla">
-            <thead><tr><th>Afinidad</th><th>Postulante</th><th>Canal</th><th>Preguntas filtro</th><th>Ley 1581</th><th>Llegó</th><th>Hoja de vida</th></tr></thead>
+            <thead><tr><th>Afinidad</th><th>Postulante</th><th>Canal</th><th>Preselección</th><th>Preguntas filtro</th><th>Ley 1581</th><th>Llegó</th><th>Hoja de vida</th></tr></thead>
             <tbody>
               {datos.isPending
-                ? Array.from({ length: 5 }, (_, i) => <tr key={i}>{[20, 50, 20, 30, 25, 25, 30].map((a, j) => <td key={j}><Esqueleto ancho={`${a}%`} /></td>)}</tr>)
+                ? Array.from({ length: 5 }, (_, i) => <tr key={i}>{[20, 50, 20, 30, 30, 25, 25, 30].map((a, j) => <td key={j}><Esqueleto ancho={`${a}%`} /></td>)}</tr>)
                 : datos.data?.items.map((p) => (
                     <Fragment key={p.postulacionId}>
                     <tr>
@@ -237,13 +268,14 @@ function Postulantes({ vacante }: { vacante: Vacante }) {
                         {p.camposCorregidos.length > 0 && <span style={{ fontSize: 12, color: 'var(--color-texto-tenue)' }}>Corrigió lo leído por la IA: {p.camposCorregidos.join(', ')}</span>}
                       </td>
                       <td><span className="pill pill-neutra">{p.canal}</span></td>
+                      <td><EstadoPreseleccionCelda estado={p.preseleccion} onAbrir={() => setAbierta(p.postulacionId)} /></td>
                       <td className="mono" style={{ color: p.respuestasNegativas > 0 ? 'var(--color-alerta)' : 'var(--color-exito)' }}>{p.respuestas || '—'}</td>
                       <td style={{ fontSize: 13, color: 'var(--color-texto-suave)' }}>{p.autorizacion}</td>
                       <td className="mono" style={{ fontSize: 13 }}>{fecha.format(new Date(p.recibidaEn))}</td>
                       <td><AbrirHojaDeVida postulacionId={p.postulacionId} /></td>
                     </tr>
                     {abierta === p.postulacionId && (
-                      <tr className="fila-explicacion"><td colSpan={7}>
+                      <tr className="fila-explicacion"><td colSpan={8}>
                         <div className="fila-explicacion-cuerpo">
                           {p.afinidad?.estado === 'Lista' && <ExplicacionAfinidad postulante={p} afinidad={p.afinidad} />}
                           <PreseleccionPostulante postulacionId={p.postulacionId} />
@@ -264,5 +296,25 @@ function Postulantes({ vacante }: { vacante: Vacante }) {
         {datos.data && <Paginacion pagina={datos.data} cargando={datos.isPlaceholderData} onCambiar={setPagina} onCambiarTamano={setTamano} />}
       </section>
     </>
+  )
+}
+
+const preseleccion: Record<EstadoPreseleccion, { texto: string; clase: string }> = {
+  NecesitaPersona: { texto: 'Pendiente: responder', clase: 'pill-alerta' },
+  IaRespondiendo: { texto: 'La IA está respondiendo', clase: 'pill-ia' },
+  EsperaCandidato: { texto: 'Espera al candidato', clase: 'pill-neutra' },
+  Invitada: { texto: 'Invitado, sin responder', clase: 'pill-neutra' },
+  Completada: { texto: 'Completa', clase: 'pill-ok' },
+}
+
+/** En la tabla: cómo va la conversación de preselección; si una persona debe responder, se destaca y abre la conversación. */
+function EstadoPreseleccionCelda({ estado, onAbrir }: { estado: EstadoPreseleccion | null; onAbrir: () => void }) {
+  if (!estado) return <span style={{ color: 'var(--color-texto-tenue)' }}>—</span>
+  const e = preseleccion[estado]
+  return (
+    <button type="button" className={'pill ' + e.clase} style={{ border: 0, cursor: 'pointer', fontWeight: estado === 'NecesitaPersona' ? 700 : undefined }}
+      onClick={onAbrir} title="Ver la conversación">
+      {e.texto}
+    </button>
   )
 }

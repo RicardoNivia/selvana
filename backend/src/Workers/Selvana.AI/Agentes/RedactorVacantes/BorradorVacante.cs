@@ -18,7 +18,11 @@ public sealed record BorradorVacante(
     IReadOnlyList<string> PreguntasFiltro,
     RangoSalarialSugerido RangoSalarial,
     IReadOnlyList<RazonSugerencia> Razones,
-    IReadOnlyList<string> Supuestos);
+    IReadOnlyList<string> Supuestos,
+    IReadOnlyList<AclaracionSugerida>? Aclaraciones = null);
+
+/// <summary>Lo que la IA necesita saber antes de redactar: la pregunta y entre 2 y 4 respuestas posibles.</summary>
+public sealed record AclaracionSugerida(string Pregunta, IReadOnlyList<string> Opciones);
 
 public sealed record RangoSalarialSugerido(decimal MinimoCop, decimal MaximoCop, string Justificacion);
 

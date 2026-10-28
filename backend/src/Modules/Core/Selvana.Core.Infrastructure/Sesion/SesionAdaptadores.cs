@@ -8,6 +8,7 @@ using Selvana.Core.Application.Usuarios;
 using Selvana.Core.Domain.Empresas;
 using Selvana.Core.Domain.Usuarios;
 using Selvana.Core.Infrastructure.Persistence;
+using Selvana.Infrastructure.Common.Seguridad;
 
 namespace Selvana.Core.Infrastructure.Sesion;
 
@@ -51,38 +52,12 @@ internal sealed class GeneradorTokens : IGeneradorTokens
     public string Huella(string token) => Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(token ?? "")));
 }
 
-/// <summary>PBKDF2-SHA256 con 600.000 iteraciones y sal de 16 bytes (recomendación OWASP). Formato: pbkdf2-sha256$iteraciones$sal$hash.</summary>
+/// <summary>PBKDF2-SHA256 compartido con el portal de la persona (ver ContrasenasPbkdf2).</summary>
 internal sealed class HasherPbkdf2 : IHasherContrasenas
 {
-    private const string Prefijo = "pbkdf2-sha256";
-    private const int Iteraciones = 600_000;
-    private const int TamanoSal = 16;
-    private const int TamanoHash = 32;
-    private static readonly byte[] SalFicticia = new byte[TamanoSal];
+    public string Calcular(string contrasena) => ContrasenasPbkdf2.Calcular(contrasena);
 
-    public string Calcular(string contrasena)
-    {
-        var sal = RandomNumberGenerator.GetBytes(TamanoSal);
-        var hash = Derivar(contrasena, sal, Iteraciones);
-        return string.Join('$', Prefijo, Iteraciones.ToString(CultureInfo.InvariantCulture), Convert.ToBase64String(sal), Convert.ToBase64String(hash));
-    }
-
-    public bool Verificar(string? hash, string contrasena)
-    {
-        var partes = (hash ?? "").Split('$');
-        if (partes.Length != 4 || partes[0] != Prefijo || !int.TryParse(partes[1], CultureInfo.InvariantCulture, out var iteraciones))
-        {
-            Derivar(contrasena, SalFicticia, Iteraciones);
-            return false;
-        }
-
-        var esperado = Convert.FromBase64String(partes[3]);
-        var calculado = Derivar(contrasena, Convert.FromBase64String(partes[2]), iteraciones);
-        return CryptographicOperations.FixedTimeEquals(esperado, calculado);
-    }
-
-    private static byte[] Derivar(string contrasena, byte[] sal, int iteraciones) =>
-        Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(contrasena), sal, iteraciones, HashAlgorithmName.SHA256, TamanoHash);
+    public bool Verificar(string? hash, string contrasena) => ContrasenasPbkdf2.Verificar(hash, contrasena);
 }
 
 internal sealed class LecturaSesion(CoreDbContext db) : ILecturaSesion

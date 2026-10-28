@@ -32,12 +32,15 @@ services:
       Mensajeria__Destinos__0__Prefijos__0: Selvana.Core.Contracts.Estructura.
       Mensajeria__Destinos__0__Prefijos__1: Selvana.Reclutamiento.Contracts.
       Mensajeria__Destinos__0__Prefijos__2: Selvana.Vinculacion.Contracts.Ia.
+      Mensajeria__Destinos__0__Prefijos__3: Selvana.Expediente.Contracts.Ia.
       Mensajeria__Destinos__1__Url: http://localhost:8080/internal/eventos/core
       Mensajeria__Destinos__1__Prefijos__0: Selvana.Core.Contracts.Auditoria.
       Mensajeria__Destinos__1__Prefijos__1: Selvana.Core.Contracts.Bandeja.
       Mensajeria__Destinos__2__Url: http://localhost:8080/internal/eventos/reclutamiento
       Mensajeria__Destinos__2__Prefijos__0: Selvana.Core.Contracts.Privacidad.
       Mensajeria__Destinos__2__Prefijos__1: Selvana.Vinculacion.Contracts.Eventos.
+      Mensajeria__Destinos__3__Url: http://localhost:8080/internal/eventos/expediente
+      Mensajeria__Destinos__3__Prefijos__0: Selvana.Vinculacion.Contracts.Empleados.
     ports:
       - "${API_PORT:-5000}:8080"
     depends_on:
@@ -58,8 +61,11 @@ services:
       Mensajeria__Destinos__1__Prefijos__0: Selvana.AI.Contracts.Reclutamiento.
       Mensajeria__Destinos__2__Url: http://api:8080/internal/eventos/vinculacion
       Mensajeria__Destinos__2__Prefijos__0: Selvana.AI.Contracts.Vinculacion.
+      Mensajeria__Destinos__3__Url: http://api:8080/internal/eventos/expediente
+      Mensajeria__Destinos__3__Prefijos__0: Selvana.AI.Contracts.Expediente.
       Reclutamiento__UrlArchivos: http://api:8080/internal/archivos/
       Vinculacion__UrlArchivos: http://api:8080/internal/archivos/vinculacion/
+      Expediente__UrlArchivos: http://api:8080/internal/archivos/expediente/
       ConnectionStrings__Selvana: Host=postgres;Port=5432;Database=${POSTGRES_DB:-selvana};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       Ia__Proveedores__Gemini__ApiKey: ${GEMINI_API_KEY}
       Ia__Proveedores__Anthropic__ApiKey: ${ANTHROPIC_API_KEY}

@@ -8,4 +8,7 @@ public sealed record EmpresaResumen(Guid Id, string Nombre, bool EsTemporal, IRe
 public interface IDirectorioEmpresas
 {
     Task<EmpresaResumen?> ObtenerAsync(Guid empresaId, CancellationToken cancellationToken);
+
+    /// <summary>Todas las empresas (id y si es de servicios temporales), para sembrar los datos maestros de otros módulos al arrancar.</summary>
+    Task<IReadOnlyList<(Guid Id, bool EsTemporal)>> TodasAsync(CancellationToken cancellationToken);
 }

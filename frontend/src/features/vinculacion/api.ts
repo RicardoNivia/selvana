@@ -48,6 +48,10 @@ export interface Condiciones {
   ciudad: string
   auxilioTransporte: boolean
   auxilioTransporteCop: number
+  /** Tipo del maestro de la empresa (copia del momento) y cómo se trabaja; la IA lo sigue al redactar. */
+  tipoContratoId: string | null
+  tipoContratoDescripcion: string | null
+  conPlantilla: boolean
 }
 
 export interface CondicionesRequest {
@@ -57,6 +61,7 @@ export interface CondicionesRequest {
   fechaFin: string | null
   periodoPruebaDias: number
   labor: string | null
+  tipoContratoId: string | null
 }
 
 export interface Alerta { nivel: 'Bloquea' | 'Revisar' | 'Info'; texto: string; fuente: string }
@@ -120,7 +125,55 @@ export interface Proceso {
   documentos: Documento[]
   afiliaciones: Afiliacion[]
   alta: DatosAlta
+  induccion: PlanInduccion
 }
+
+/* ---------- Onboarding: plan de inducción ---------- */
+
+export type MomentoInduccion = 'AntesDelIngreso' | 'PrimerDia' | 'PrimeraSemana' | 'PrimerMes' | 'PeriodoPrueba'
+export type EstadoPlanInduccion = 'SinPlan' | 'Generando' | 'FallaIa' | 'PorAprobar' | 'EnCurso' | 'Terminado'
+
+export const momentosInduccion: [MomentoInduccion, string][] = [
+  ['AntesDelIngreso', 'Antes del ingreso'],
+  ['PrimerDia', 'Primer día'],
+  ['PrimeraSemana', 'Primera semana'],
+  ['PrimerMes', 'Primer mes'],
+  ['PeriodoPrueba', 'Periodo de prueba'],
+]
+
+export const responsablesInduccion = ['RRHH', 'Líder', 'Empleado', 'SST', 'TI', 'Empresa usuaria']
+
+export interface TareaInduccion {
+  id: string
+  titulo: string
+  detalle: string
+  responsable: string
+  momento: MomentoInduccion
+  dia: number
+  fecha: string
+  hecha: boolean
+  hechaPor: string | null
+  hechaEn: string | null
+  deIa: boolean
+}
+
+export interface PlanInduccion {
+  estado: EstadoPlanInduccion
+  origen: string | null
+  tareas: TareaInduccion[]
+  razones: Razon[]
+  alertasIa: string[]
+  modelo: string | null
+  costoUsd: number
+  errorIa: string | null
+  aprobadoPor: string | null
+  aprobadoEn: string | null
+  cerradoPor: string | null
+  cerradoEn: string | null
+  avance: number
+}
+
+export interface TareaInduccionRequest { id: string | null; titulo: string; detalle: string; responsable: string; momento: MomentoInduccion; dia: number }
 
 export type EstadoAfiliacion = 'Pendiente' | 'Solicitada' | 'Confirmada' | 'NoAplica'
 
@@ -229,7 +282,57 @@ export interface OfertaPublica {
 
 export const aRequest = (c: Condiciones): CondicionesRequest => ({
   tipo: c.tipo, salarioCop: c.salarioCop, fechaIngreso: c.fechaIngreso, fechaFin: c.fechaFin, periodoPruebaDias: c.periodoPruebaDias, labor: c.labor,
+  tipoContratoId: c.tipoContratoId,
 })
+
+/* ---------- Maestro de tipos de contrato ---------- */
+
+export interface TipoContratoEmpresa {
+  id: string
+  nombre: string
+  modalidad: TipoContrato
+  modalidadNombre: string
+  descripcion: string
+  activo: boolean
+  porDefecto: boolean
+  plantillaNombre: string | null
+  actualizadoEn: string
+  actualizadoPor: string
+}
+
+export interface TipoContratoRequest { nombre: string; modalidad: TipoContrato; descripcion: string; activo: boolean }
+
+const claveTipos = ['vinculacion', 'tipos-contrato'] as const
+
+export function useTiposContrato(soloActivos = false) {
+  return useQuery({
+    queryKey: [...claveTipos, soloActivos],
+    queryFn: ({ signal }) => apiGet<TipoContratoEmpresa[]>(`/api/v1/vinculacion/tipos-contrato?soloActivos=${soloActivos}`, signal),
+  })
+}
+
+function useMutacionTipos<V, R = unknown>(fn: (v: V) => Promise<R>) {
+  const cliente = useQueryClient()
+  return useMutation({ mutationFn: fn, onSuccess: () => cliente.invalidateQueries({ queryKey: claveTipos }) })
+}
+
+export const useCrearTipoContrato = () => useMutacionTipos((v: TipoContratoRequest) => apiSend<{ id: string }>('POST', '/api/v1/vinculacion/tipos-contrato', v))
+export const useEditarTipoContrato = () =>
+  useMutacionTipos((v: TipoContratoRequest & { id: string }) => apiSend('PUT', `/api/v1/vinculacion/tipos-contrato/${v.id}`, v))
+export const useCargarTiposPorDefecto = () => useMutacionTipos(() => apiSend<{ creados: number }>('POST', '/api/v1/vinculacion/tipos-contrato/por-defecto'))
+export const useSubirPlantillaContrato = () =>
+  useMutacionTipos((v: { id: string; archivo: File }) => {
+    const f = new FormData()
+    f.append('archivo', v.archivo)
+    return apiUpload(`/api/v1/vinculacion/tipos-contrato/${v.id}/plantilla`, f)
+  })
+export const useQuitarPlantillaContrato = () => useMutacionTipos((id: string) => apiSend('DELETE', `/api/v1/vinculacion/tipos-contrato/${id}/plantilla`))
+
+/** Abre la plantilla en otra pestaña (o la descarga si es Word). */
+export async function abrirPlantilla(id: string) {
+  const archivo = await apiArchivo(`/api/v1/vinculacion/tipos-contrato/${id}/plantilla/archivo`, {})
+  window.open(URL.createObjectURL(archivo), '_blank', 'noopener')
+}
 
 export function useContratacionSugerida(postulacionId: string | null) {
   return useQuery({
@@ -277,7 +380,8 @@ export function useProceso(id: string) {
   return useQuery({
     queryKey: ['vinculacion', 'proceso', id],
     queryFn: ({ signal }) => apiGet<Proceso>(`/api/v1/vinculacion/procesos/${id}`, signal),
-    refetchInterval: (x) => (x.state.data?.oferta.estado === 'Redactando' || x.state.data?.documentos.some((d) => d.estado === 'Leyendo') ? 2500
+    refetchInterval: (x) => (x.state.data?.oferta.estado === 'Redactando' || x.state.data?.documentos.some((d) => d.estado === 'Leyendo')
+      || x.state.data?.induccion?.estado === 'Generando' ? 2500
       : x.state.data?.oferta.estado === 'Enviada' ? 15_000 : false),
   })
 }
@@ -376,3 +480,12 @@ export async function descargarAlta(id: string, codigo: string) {
   a.download = `alta-${codigo}.csv`
   a.click()
 }
+
+const rutaOnboarding = (id: string) => `/api/v1/vinculacion/procesos/${id}/onboarding`
+export const usePedirPlanInduccion = (id: string) => useAccionProceso(() => apiSend('POST', `${rutaOnboarding(id)}/pedir-plan`))
+export const useUsarPlanBase = (id: string) => useAccionProceso(() => apiSend('POST', `${rutaOnboarding(id)}/plan-base`))
+export const useEditarPlanInduccion = (id: string) => useAccionProceso((tareas: TareaInduccionRequest[]) => apiSend('PUT', `${rutaOnboarding(id)}/plan`, { tareas }))
+export const useAprobarPlanInduccion = (id: string) => useAccionProceso(() => apiSend('POST', `${rutaOnboarding(id)}/aprobar`))
+export const useMarcarTareaInduccion = (id: string) =>
+  useAccionProceso((v: { tareaId: string; hecha: boolean }) => apiSend('PUT', `${rutaOnboarding(id)}/tareas/${v.tareaId}`, { hecha: v.hecha }))
+export const useCerrarOnboarding = (id: string) => useAccionProceso(() => apiSend('POST', `${rutaOnboarding(id)}/cerrar`))

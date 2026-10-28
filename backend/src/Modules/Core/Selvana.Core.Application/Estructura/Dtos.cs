@@ -41,6 +41,8 @@ public interface ILecturaEstructura
 
     Task<Pagina<CargoDto>> CargosAsync(Guid empresaId, FiltroListado filtro, string? estadoPerfil, CancellationToken cancellationToken);
 
+    Task<CargoDto?> CargoAsync(Guid empresaId, Guid cargoId, CancellationToken cancellationToken);
+
     Task<Pagina<MaestroDto>> SedesAsync(Guid empresaId, FiltroListado filtro, CancellationToken cancellationToken);
 
     Task<Pagina<MaestroDto>> AreasAsync(Guid empresaId, FiltroListado filtro, CancellationToken cancellationToken);

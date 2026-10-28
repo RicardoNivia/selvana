@@ -4,12 +4,15 @@ namespace Selvana.Vinculacion.Contracts.Ia;
 
 /// <summary>
 /// Condiciones de la contratación, sin nombre ni documento del trabajador: la IA escribe «[TRABAJADOR]» y «[DOCUMENTO]»
-/// y Selvana los reemplaza al mostrar la oferta.
+/// y Selvana los reemplaza al mostrar la oferta. <paramref name="TipoContrato"/> es el nombre que usa la empresa,
+/// <paramref name="Modalidad"/> la modalidad legal y <paramref name="ComoSeTrabaja"/> la descripción del maestro de tipos de contrato.
+/// Si el tipo tiene plantilla, el worker la descarga con <paramref name="PlantillaArchivoId"/> (clave interna) y la IA sigue su estructura.
 /// </summary>
 public sealed record CondicionesOferta(
     string Empresa, string? EmpresaUsuaria, string Cargo, string Ciudad, string Jornada, string TipoContrato, decimal SalarioCop,
     bool AuxilioTransporte, DateOnly FechaIngreso, DateOnly? FechaFin, int PeriodoPruebaDias, string? Labor, string Descripcion,
-    IReadOnlyList<string> Requisitos);
+    IReadOnlyList<string> Requisitos, string? Modalidad = null, string? ComoSeTrabaja = null, Guid? PlantillaArchivoId = null,
+    string? PlantillaTipoContenido = null);
 
 /// <summary>RRHH aprobó la contratación (o cambió las condiciones): el agente redactor prepara la carta oferta y el contrato.</summary>
 public sealed record OfertaSolicitada(
@@ -22,3 +25,12 @@ public sealed record OfertaSolicitada(
 public sealed record DocumentoIngresoRecibido(
     Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid ProcesoId, string Tipo, string TipoEsperado, Guid ArchivoId, string NombreArchivo,
     string TipoContenido) : IIntegrationEvent;
+
+/// <summary>
+/// El empleado quedó creado: el planificador de la IA prepara el plan de inducción. Solo viajan el cargo, la vacante y las condiciones,
+/// nunca datos de la persona.
+/// </summary>
+public sealed record OnboardingSolicitado(
+    Guid Id, DateTimeOffset OccurredOn, Guid EmpresaId, Guid ProcesoId, string Empresa, string? EmpresaUsuaria, string Cargo, string DescripcionVacante,
+    IReadOnlyList<string> Requisitos, string TipoContrato, string? ComoSeTrabaja, DateOnly FechaIngreso, int PeriodoPruebaDias, string Jornada, string Ciudad)
+    : IIntegrationEvent;

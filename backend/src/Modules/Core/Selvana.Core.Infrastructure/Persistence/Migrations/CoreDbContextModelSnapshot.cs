@@ -889,6 +889,51 @@ namespace Selvana.Core.Infrastructure.Persistence.Migrations
                     b.ToTable("usuarios", "core");
                 });
 
+            modelBuilder.Entity("Selvana.Core.Infrastructure.Geografia.Municipio", b =>
+                {
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)")
+                        .HasColumnName("codigo");
+
+                    b.Property<string>("Busqueda")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)")
+                        .HasColumnName("busqueda");
+
+                    b.Property<string>("CodigoDepartamento")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasColumnName("codigo_departamento");
+
+                    b.Property<string>("Departamento")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("departamento");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("nombre");
+
+                    b.Property<string>("Subregion")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("subregion");
+
+                    b.HasKey("Codigo")
+                        .HasName("pk_municipios");
+
+                    b.HasIndex("Busqueda")
+                        .HasDatabaseName("ix_municipios_busqueda");
+
+                    b.ToTable("municipios", "core");
+                });
+
             modelBuilder.Entity("Selvana.Infrastructure.Common.Inbox.InboxMessage", b =>
                 {
                     b.Property<Guid>("Id")

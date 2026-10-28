@@ -59,6 +59,7 @@ export function Inicio() {
             <a href="#para-quien">Para quién</a>
             <a href="#modulos">Módulos</a>
             <Link to="/empleos">Empleos</Link>
+            <Link to="/mi-portal">Portal del candidato</Link>
           </nav>
           <Link to="/ingresar" className="boton boton-primario boton-pequeno">Ingresar</Link>
         </div>

@@ -17,7 +17,11 @@ public sealed record VacanteDto(
     IReadOnlyList<string> Requisitos, IReadOnlyList<string> Competencias, IReadOnlyList<string> PreguntasFiltro, IReadOnlyList<string> Supuestos,
     IReadOnlyList<RazonDto> Razones, string? ModeloIa, string? MensajeIa, bool EditadaPorPersona,
     DateTimeOffset CreadaEn, string CreadaPor, DateTimeOffset? PublicadaEn, int Postulantes, IReadOnlyList<ConteoDto> Canales,
-    IReadOnlyList<Pruebas.PruebaEnBateriaDto> Pruebas, AprobacionRequisicionDto Aprobacion, Guid? CargoId = null, CargoCatalogoDto? CargoCatalogo = null);
+    IReadOnlyList<Pruebas.PruebaEnBateriaDto> Pruebas, AprobacionRequisicionDto Aprobacion, Guid? CargoId = null, CargoCatalogoDto? CargoCatalogo = null,
+    string? CodigoMunicipio = null, IReadOnlyList<AclaracionDto>? Aclaraciones = null, bool EmpresaConfidencial = false, bool SalarioOculto = false);
+
+/// <summary>Pregunta de la IA antes de redactar, con opciones para elegir.</summary>
+public sealed record AclaracionDto(string Pregunta, IReadOnlyList<string> Opciones);
 
 /// <summary>
 /// Cargo del catálogo de la empresa. En una vacante, <paramref name="Vinculado"/> dice si la vacante parte de él;
@@ -36,7 +40,25 @@ public sealed record AprobacionRequisicionDto(
 public sealed record PostulanteDto(
     Guid PostulacionId, Guid CandidatoId, string Numero, string Nombre, string Documento, string Celular, string Ciudad, string Canal,
     string Respuestas, int RespuestasNegativas, string Autorizacion, DateTimeOffset RecibidaEn, int OtrasPostulaciones, IReadOnlyList<string> CamposCorregidos,
-    string LinkedIn, AfinidadDto? Afinidad = null, string? Retroalimentacion = null, string? NotaRetroalimentacion = null);
+    string LinkedIn, AfinidadDto? Afinidad = null, string? Retroalimentacion = null, string? NotaRetroalimentacion = null, string? Preseleccion = null);
+
+/// <summary>Cómo va la preselección con el agente, para la tabla de postulantes.</summary>
+public static class EstadoPreseleccionPostulante
+{
+    /// <summary>Se envió el enlace y el candidato aún no escribe.</summary>
+    public const string Invitada = "Invitada";
+
+    /// <summary>El agente escribió y espera la respuesta del candidato.</summary>
+    public const string EsperaCandidato = "EsperaCandidato";
+
+    /// <summary>El candidato escribió y el agente está respondiendo.</summary>
+    public const string IaRespondiendo = "IaRespondiendo";
+
+    /// <summary>Se escaló: una persona debe responder.</summary>
+    public const string NecesitaPersona = "NecesitaPersona";
+
+    public const string Completada = "Completada";
+}
 
 /// <summary>
 /// Afinidad con la vacante: el puntaje que manda (el de la persona si lo ajustó), el de la IA, sus razones con evidencia,
@@ -48,13 +70,14 @@ public sealed record AfinidadDto(
 
 public sealed record VacantePublicaDto(
     string Codigo, string Titulo, string Empresa, string Ciudad, string Jornada, int Cupos, decimal SalarioMinimo, decimal SalarioMaximo,
-    string Resumen, DateTimeOffset PublicadaEn);
+    string Resumen, DateTimeOffset PublicadaEn, bool SalarioOculto = false);
 
 public sealed record PortalDto(Pagina<VacantePublicaDto> Vacantes, IReadOnlyList<ConteoDto> Ciudades, IReadOnlyList<ConteoDto> Jornadas, int Empresas);
 
 public sealed record VacantePublicaDetalleDto(
     string Codigo, string Titulo, string Empresa, string Ciudad, string Jornada, int Cupos, decimal SalarioMinimo, decimal SalarioMaximo,
-    string Descripcion, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro, DateTimeOffset PublicadaEn, bool RecibePostulaciones);
+    string Descripcion, IReadOnlyList<string> Requisitos, IReadOnlyList<string> PreguntasFiltro, DateTimeOffset PublicadaEn, bool RecibePostulaciones,
+    bool SalarioOculto = false);
 
 public sealed record ExperienciaDto(string Cargo, string Empresa, string Desde, string Hasta);
 
@@ -67,7 +90,7 @@ public sealed record DatosCandidatoDto(
 public sealed record BorradorPostulacionDto(
     Guid Id, string Estado, string? Mensaje, string NombreArchivo, DatosCandidatoDto? Datos,
     string VacanteCodigo, string VacanteTitulo, string Empresa, string Ciudad, IReadOnlyList<string> PreguntasFiltro,
-    string VersionAutorizacion, string TextoAutorizacion);
+    string VersionAutorizacion, string TextoAutorizacion, IReadOnlyList<string>? TiposPreguntasFiltro = null);
 
 /// <summary>Lado de lectura (CQRS) del módulo: consultas sin tracking y paginadas que implementa Infrastructure.</summary>
 public interface ILecturaReclutamiento

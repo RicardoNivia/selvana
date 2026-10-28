@@ -11,6 +11,7 @@ using Selvana.Core.Application.Estructura.CambiarPropuesta;
 using Selvana.Core.Application.Estructura.Cargos;
 using Selvana.Core.Application.Estructura.EditarMaestros;
 using Selvana.Core.Application.Estructura.ImportarNomina;
+using Selvana.Core.Application.Geografia;
 using Selvana.Core.Application.Sesion;
 using Selvana.Core.Contracts.Empresas;
 using Selvana.SharedKernel.Messaging;
@@ -23,13 +24,17 @@ public sealed record CambiarPropuestaRequest(bool Incluida);
 
 public sealed record ImportacionCreadaResponse(Guid Id);
 
-public sealed record CrearCargoRequest(string Nombre, string Area);
+public sealed record CrearCargoRequest(string Nombre, string Area, string? Descripcion = null, PerfilEditado? Perfil = null);
 
 public sealed record EditarCargoRequest(string Nombre, string Area, bool Activo, PerfilEditado? Perfil);
 
 public sealed record EditarMaestroRequest(string Nombre, bool Activo);
 
 public sealed record EditarCentroCostoRequest(string Nombre, string Sede, bool Activo);
+
+public sealed record CrearMaestroRequest(string Nombre);
+
+public sealed record CrearCentroCostoRequest(string Codigo, string Nombre, string Sede);
 
 public sealed record IngresarRequest(string Correo, string Contrasena)
 {
@@ -52,6 +57,14 @@ public static class CoreEndpoints
                 (await handler.Handle(new ObtenerEmpresaActualQuery(), ct)).ToHttp())
             .WithName("ObtenerEmpresaActual")
             .Produces<EmpresaResumen>();
+
+        // DIVIPOLA del DANE para autocompletar ciudad: es información pública, la usa también el portal de empleo
+        core.MapGet("/municipios", async (string? buscar, int? tamano, IQueryHandler<BuscarMunicipiosQuery, IReadOnlyList<MunicipioDto>> handler, CancellationToken ct) =>
+                (await handler.Handle(new BuscarMunicipiosQuery(buscar, tamano), ct)).ToHttp())
+            .WithName("BuscarMunicipios")
+            .WithTags("Geografía")
+            .Produces<IReadOnlyList<MunicipioDto>>()
+            .AllowAnonymous();
 
         MapSesion(app.MapGroup("/sesion").WithTags("Sesión"));
         MapNomina(core.MapGroup("/nomina").WithTags("Conectar nómina"));
@@ -152,7 +165,7 @@ public static class CoreEndpoints
 
         estructura.MapPost("/cargos", async (CrearCargoRequest body, ICommandHandler<CrearCargoCommand, Guid> handler, CancellationToken ct) =>
             {
-                var resultado = await handler.Handle(new CrearCargoCommand(body.Nombre, body.Area), ct);
+                var resultado = await handler.Handle(new CrearCargoCommand(body.Nombre, body.Area, body.Descripcion, body.Perfil), ct);
                 return resultado.IsSuccess
                     ? Results.Created($"/api/v1/core/estructura/cargos/{resultado.Value}", new ImportacionCreadaResponse(resultado.Value))
                     : resultado.ToHttp();
@@ -160,7 +173,12 @@ public static class CoreEndpoints
             .WithName("CrearCargo")
             .Produces<ImportacionCreadaResponse>(StatusCodes.Status201Created);
 
-        estructura.MapPut("/cargos/{cargoId:guid}", async (Guid cargoId, EditarCargoRequest body, ICommandHandler<EditarCargoCommand> handler, CancellationToken ct) =>
+        estructura.MapGet("/cargos/{cargoId:guid}", async (Guid cargoId, IQueryHandler<ObtenerCargoQuery, CargoDto> handler, CancellationToken ct) =>
+                (await handler.Handle(new ObtenerCargoQuery(cargoId), ct)).ToHttp())
+            .WithName("ObtenerCargo")
+            .Produces<CargoDto>();
+
+        estructura.MapPut("/cargos/{cargoId:guid}",async (Guid cargoId, EditarCargoRequest body, ICommandHandler<EditarCargoCommand> handler, CancellationToken ct) =>
                 (await handler.Handle(new EditarCargoCommand(cargoId, body.Nombre, body.Area, body.Activo, body.Perfil), ct)).ToHttp())
             .WithName("EditarCargo");
 
@@ -200,5 +218,25 @@ public static class CoreEndpoints
         estructura.MapPut("/centros-costo/{id:guid}", async (Guid id, EditarCentroCostoRequest body, ICommandHandler<EditarCentroCostoCommand> handler, CancellationToken ct) =>
                 (await handler.Handle(new EditarCentroCostoCommand(id, body.Nombre, body.Sede, body.Activo), ct)).ToHttp())
             .WithName("EditarCentroCosto");
+
+        estructura.MapPost("/sedes", async (CrearMaestroRequest body, ICommandHandler<CrearSedeCommand, Guid> handler, CancellationToken ct) =>
+                Creado(await handler.Handle(new CrearSedeCommand(body.Nombre), ct), "sedes"))
+            .WithName("CrearSede")
+            .Produces<ImportacionCreadaResponse>(StatusCodes.Status201Created);
+
+        estructura.MapPost("/areas", async (CrearMaestroRequest body, ICommandHandler<CrearAreaCommand, Guid> handler, CancellationToken ct) =>
+                Creado(await handler.Handle(new CrearAreaCommand(body.Nombre), ct), "areas"))
+            .WithName("CrearArea")
+            .Produces<ImportacionCreadaResponse>(StatusCodes.Status201Created);
+
+        estructura.MapPost("/centros-costo", async (CrearCentroCostoRequest body, ICommandHandler<CrearCentroCostoCommand, Guid> handler, CancellationToken ct) =>
+                Creado(await handler.Handle(new CrearCentroCostoCommand(body.Codigo, body.Nombre, body.Sede), ct), "centros-costo"))
+            .WithName("CrearCentroCosto")
+            .Produces<ImportacionCreadaResponse>(StatusCodes.Status201Created);
     }
+
+    private static IResult Creado(Result<Guid> resultado, string coleccion) =>
+        resultado.IsSuccess
+            ? Results.Created($"/api/v1/core/estructura/{coleccion}/{resultado.Value}", new ImportacionCreadaResponse(resultado.Value))
+            : resultado.ToHttp();
 }
