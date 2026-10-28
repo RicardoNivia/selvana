@@ -335,6 +335,28 @@ public sealed class ProcesoVinculacion : AggregateRoot<Guid>
         return Result.Success();
     }
 
+    /// <summary>Qué le toca hacer al candidato: aceptar y firmar la oferta, o subir sus documentos de ingreso; null si nada.</summary>
+    public string? PendienteDelCandidato => !Abierto ? null
+        : Oferta.Estado == EstadoOferta.Enviada ? "Revisar y aceptar la oferta, y firmar el contrato"
+        : Etapa == EtapaVinculacion.Documentos && Oferta.Estado == EstadoOferta.Aceptada && !CandidatoCompleto ? "Subir tus documentos de ingreso"
+        : null;
+
+    /// <summary>
+    /// La persona abre su pendiente desde el portal (ADR 0013): un enlace nuevo que invalida el anterior,
+    /// solo si tiene algo por hacer.
+    /// </summary>
+    public Result AbrirDesdePortal(string tokenHash, DateTimeOffset ahora)
+    {
+        if (PendienteDelCandidato is null)
+        {
+            return Result.Failure(ProcesoErrors.NoEnviada);
+        }
+
+        Oferta.TokenHash = tokenHash;
+        ActualizadoEn = ahora;
+        return Result.Success();
+    }
+
     /// <summary>Carta y contrato con el nombre y el documento del trabajador en lugar de las marcas.</summary>
     public string Personalizar(string texto) =>
         (texto ?? "").Replace(MarcaTrabajador, Persona.Nombre, StringComparison.Ordinal).Replace(MarcaDocumento, Persona.Documento, StringComparison.Ordinal);

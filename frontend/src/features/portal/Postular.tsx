@@ -15,7 +15,8 @@ const pasos = ['Hoja de vida', 'Tus datos', 'Enviada']
 export function Postular() {
   const { codigo = '' } = useParams()
   const [busqueda] = useSearchParams()
-  const [borradorId, setBorradorId] = useState<string>()
+  // Desde el portal de la persona llega con el borrador ya listo (su hoja de vida del perfil): empieza en «Tus datos»
+  const [borradorId, setBorradorId] = useState<string | undefined>(busqueda.get('borrador') ?? undefined)
   const [enviada, setEnviada] = useState<string>()
   const [linkedIn, setLinkedIn] = useState('')
   const vacante = useVacantePublica(codigo)
@@ -345,6 +346,7 @@ function Enviada({ numero, empresa }: { numero: string; empresa?: string }) {
         <li style={v(1)}><b>Si sigues en el proceso, te contactan</b><span>Al celular o WhatsApp que confirmaste.</span></li>
         <li style={v(2)}><b>Puedes postularte a más vacantes</b><span>Con la misma hoja de vida, sin volver a llenar nada.</span></li>
       </ol>
+      <Link to="/mi-portal/registro" className="boton boton-primario">Sigue tu proceso en tu portal</Link>
       <Link to="/empleos" className="boton boton-secundario">Ver más vacantes</Link>
     </section>
   )

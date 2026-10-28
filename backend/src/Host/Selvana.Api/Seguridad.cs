@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Selvana.Core.Application.Abstracciones;
 using Selvana.Core.Application.Usuarios;
 using Selvana.Reclutamiento.Application.Abstracciones;
+using Selvana.Reclutamiento.Application.Portal;
 using Selvana.Web.Common;
 
 namespace Selvana.Api;
@@ -41,6 +42,22 @@ public static class Seguridad
                 };
             });
 
+        // Portal de la persona (ADR 0013): su propia cookie y su propio esquema, nunca sirve para la consola
+        auth.AddCookie(SesionesPortal.Esquema, o =>
+        {
+            o.Cookie.Name = SesionesPortal.NombreCookie;
+            o.Cookie.HttpOnly = true;
+            o.Cookie.SameSite = SameSiteMode.Strict;
+            o.Cookie.SecurePolicy = environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+            o.ExpireTimeSpan = TimeSpan.FromDays(14);
+            o.SlidingExpiration = true;
+            o.Events = new CookieAuthenticationEvents
+            {
+                OnRedirectToLogin = c => { c.Response.StatusCode = StatusCodes.Status401Unauthorized; return Task.CompletedTask; },
+                OnRedirectToAccessDenied = c => { c.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; },
+            };
+        });
+
         if (conEmisor)
         {
             auth.AddJwtBearer(o =>
@@ -54,6 +71,7 @@ public static class Seguridad
         // Políticas por acción: los roles salen de la matriz de permisos del dominio
         services.AddAuthorization(o =>
         {
+            o.AddPolicy(SesionesPortal.Politica, p => p.AddAuthenticationSchemes(SesionesPortal.Esquema).RequireAuthenticatedUser());
             foreach (var (politica, roles) in PoliticasCore.Todas())
             {
                 o.AddPolicy(politica, p => p.RequireRole(roles));
@@ -64,6 +82,7 @@ public static class Seguridad
         services.AddScoped<IContextoUsuario>(sp => sp.GetRequiredService<ContextoUsuarioHttp>());
         services.AddScoped<IUsuarioActual>(sp => sp.GetRequiredService<ContextoUsuarioHttp>());
         services.AddScoped<Vinculacion.Application.Abstracciones.IUsuarioActual>(sp => sp.GetRequiredService<ContextoUsuarioHttp>());
+        services.AddScoped<IPersonaActual, PersonaActualHttp>();
         return services;
     }
 }
@@ -91,4 +110,10 @@ internal sealed class ContextoUsuarioHttp(IHttpContextAccessor accesor) : IConte
         null or "" => [],
         var ids => [.. ids.Split(',').Select(id => Guid.TryParse(id, out var g) ? g : Guid.Empty).Where(g => g != Guid.Empty)],
     };
+}
+
+/// <summary>La persona con sesión en el portal (cookie del esquema Portal).</summary>
+internal sealed class PersonaActualHttp(IHttpContextAccessor accesor) : IPersonaActual
+{
+    public Guid? CuentaId => Guid.TryParse(accesor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
 }

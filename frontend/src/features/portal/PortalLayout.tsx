@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { IconoEscudo } from '../../shared/ui/Iconos'
 import { LogoAnimado } from '../../shared/ui/LogoAnimado'
 import { useDesplazamiento } from '../../shared/ui/animaciones'
+import '../portal-persona/portal-persona.css'
 
 /** Marco del portal de empleo público: liviano, pensado primero para celular, con transición suave entre páginas. */
 export function PortalLayout() {
@@ -24,10 +25,19 @@ export function PortalLayout() {
           </Link>
           <nav aria-label="Portal" className="portal-nav">
             <NavLink to="/empleos" end>Vacantes</NavLink>
+            <NavLink to="/mi-portal">Mi portal</NavLink>
             <Link to="/" className="portal-nav-empresas">Para empresas</Link>
           </nav>
         </div>
       </header>
+
+      {/* Lo que llega por enlace (chat, pruebas, oferta) también está en el portal de la persona (ADR 0013) */}
+      {/^\/(preseleccion|pruebas|vinculacion)\//.test(ubicacion.pathname) && (
+        <div className="mp-aviso-enlace">
+          <span>Ahora todos tus procesos, chats, pruebas y tu contrato están en un solo lugar.</span>
+          <Link to="/mi-portal">Entra a tu portal o crea tu cuenta</Link>
+        </div>
+      )}
 
       <div key={ubicacion.pathname} className="portal-pagina">
         <Outlet />

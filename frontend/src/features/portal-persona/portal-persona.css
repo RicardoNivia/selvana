@@ -1,0 +1,30 @@
+/* Portal de la persona (ADR 0013): mismas piezas del portal de empleo, en tarjetas para leer en el celular */
+.mp-acceso { max-width: 560px; padding-top: var(--espacio-8); padding-bottom: var(--espacio-12); }
+.mp-acceso form, .mp-acceso section { display: flex; flex-direction: column; gap: var(--espacio-4); }
+.mp { padding-top: var(--espacio-8); padding-bottom: var(--espacio-12); display: flex; flex-direction: column; gap: var(--espacio-4); }
+.mp-cabeza { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--espacio-4); flex-wrap: wrap; }
+.mp-cabeza h1 { margin: 0; font-family: var(--fuente-display); font-size: 30px; }
+.mp-cabeza p { margin: 4px 0 0; }
+.mp-pestanas { overflow-x: auto; }
+.mp-lista { display: flex; flex-direction: column; gap: var(--espacio-3); }
+.mp-tarjeta { display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-4); padding: var(--espacio-4) var(--espacio-6); flex-wrap: wrap; }
+.mp-tarjeta > div { flex: 1 1 320px; min-width: 0; }
+.mp-tarjeta h3 { margin: 6px 0 2px; font-size: 16px; }
+.mp-tarjeta h3 a { color: var(--color-texto); }
+.mp-tarjeta p { margin: 0; font-size: 13px; color: var(--color-texto-suave); }
+.mp-explicacion { margin-top: 6px !important; color: var(--color-texto) !important; }
+.mp-pendiente { border-left: 3px solid var(--color-alerta); }
+.mp-porque { margin: var(--espacio-2) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.mp-porque li { display: flex; gap: 6px; align-items: center; }
+.mp-porque svg { width: 14px; height: 14px; flex: none; color: var(--color-exito); }
+.mp-vacio { display: flex; flex-direction: column; align-items: center; gap: var(--espacio-3); padding: var(--espacio-8); text-align: center; }
+.mp-vacio svg { width: 28px; height: 28px; color: var(--color-exito); }
+.mp-seccion { padding: var(--espacio-6); display: flex; flex-direction: column; gap: var(--espacio-3); }
+.mp-seccion h3 { margin: 0; font-size: 17px; }
+.mp-seccion .postular-cuerpo { padding: 0; }
+.mp-confirmar { display: flex; flex-direction: column; gap: var(--espacio-3); }
+.mp-hv { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.mp-hv .mono { font-size: 12px; color: var(--color-texto-tenue); }
+/* Aviso en las pantallas que se abren con enlace: todo eso también está en el portal */
+.mp-aviso-enlace { display: flex; gap: var(--espacio-2); align-items: center; justify-content: center; flex-wrap: wrap; padding: var(--espacio-2) var(--espacio-4);
+  background: var(--color-primario-suave); color: var(--color-texto); font-size: 13px; text-align: center; }

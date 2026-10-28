@@ -91,6 +91,7 @@ public static class ReclutamientoEndpoints
         MapPreseleccionCandidato(app.MapGroup("/portal/preseleccion").WithTags("Preselección conversacional (candidato)").AllowAnonymous()
             .RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         MapPortal(app.MapGroup("/portal").WithTags("Portal de empleo público").AllowAnonymous().RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
+        app.MapPortalPersona();
         return app;
     }
 

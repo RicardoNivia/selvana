@@ -53,6 +53,7 @@
 .pill-error { background: var(--color-error-suave); color: var(--color-error); }
 .pill-ia { background: var(--color-ia-suave); color: var(--color-ia); }
 .pill-neutra { background: var(--color-superficie-2); color: var(--color-texto-suave); }
+.pill-info { background: var(--color-info-suave); color: var(--color-info); }
 
 .cita { font: 11px var(--fuente-datos); padding: 2px 8px; border-radius: 4px; background: var(--color-superficie-2); border: 1px solid var(--color-borde); color: var(--color-texto-suave); white-space: nowrap; }
 .mono { font-family: var(--fuente-datos); font-variant-numeric: tabular-nums; }

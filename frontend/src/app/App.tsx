@@ -11,6 +11,7 @@ import { Legal } from '../features/inicio/Legal'
 import { RequiereSesion } from '../features/sesion/RequiereSesion'
 import { Inicio } from '../features/inicio/Inicio'
 import { PortalLayout } from '../features/portal/PortalLayout'
+import { IngresarPortal, MiPortal, RegistroPortal } from '../features/portal-persona/MiPortal'
 import { MisDatos } from '../features/portal/MisDatos'
 import { PortalListado } from '../features/portal/PortalListado'
 import { PortalVacante } from '../features/portal/PortalVacante'
@@ -42,6 +43,16 @@ const router = createBrowserRouter([
       { path: 'mis-datos', element: <MisDatos /> },
       { path: ':codigo', element: <PortalVacante /> },
       { path: ':codigo/postular', element: <Postular /> },
+    ],
+  },
+  // Portal de la persona: su cuenta, sus postulaciones, sus pendientes y ofertas (ADR 0013)
+  {
+    path: '/mi-portal',
+    element: <PortalLayout />,
+    children: [
+      { index: true, element: <MiPortal /> },
+      { path: 'ingresar', element: <IngresarPortal /> },
+      { path: 'registro', element: <RegistroPortal /> },
     ],
   },
   // El candidato presenta sus pruebas con su enlace, sin cuenta

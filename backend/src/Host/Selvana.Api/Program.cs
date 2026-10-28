@@ -44,6 +44,10 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy(Sesiones.PoliticaIngreso, http => RateLimitPartition.GetFixedWindowLimiter(
         http.Connection.RemoteIpAddress?.ToString() ?? "anonimo",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
+    // Portal de la persona: ingreso y registro, 10 por minuto por IP
+    o.AddPolicy(SesionesPortal.PoliticaIngreso, http => RateLimitPartition.GetFixedWindowLimiter(
+        http.Connection.RemoteIpAddress?.ToString() ?? "anonimo",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
 });
 
 var app = builder.Build();

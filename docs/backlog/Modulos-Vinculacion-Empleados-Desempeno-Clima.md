@@ -84,9 +84,10 @@ Hoy cada cosa llega por un enlace distinto (preselección, pruebas, oferta y doc
 
 | Bloque | Qué se construye |
 | --- | --- |
-| **P1 · Cuenta y acceso** | La persona entra con su correo o celular (código de un solo uso, sin contraseña); ve sus datos y su autorización Ley 1581 y puede pedir corrección o supresión. |
-| **P2 · Mis postulaciones** | Cada postulación con su estado en palabras claras (recibida, en revisión, pruebas, finalista, no seleccionada), sin puntajes internos ni motivos que la expongan. |
-| **P3 · Mis pendientes** | Una bandeja de lo que la persona debe hacer: pruebas por presentar, preguntas de la preselección, oferta por aceptar, documentos por subir o corregir, con su fecha límite. |
+| **P1 · Cuenta y acceso** | Cualquier persona se registra con correo y contraseña y sube su hoja de vida (la IA la lee como en la postulación); confirma sus datos y acepta la autorización Ley 1581. Sesión propia del portal, distinta de la consola (ADR 0013). Puede actualizar su hoja de vida y sus datos. |
+| **P2 · Mis postulaciones** | Cada postulación con su estado en palabras claras (recibida, en revisión, en preselección, finalista, contratada, no seleccionada), sin puntajes internos ni motivos que la expongan. Se unen a la cuenta solo si el correo y la cédula coinciden. |
+| **P3 · Mis pendientes** | Una bandeja de lo que la persona debe hacer: chat de preselección, pruebas por presentar, oferta por aceptar y firmar, documentos por subir o corregir. Los enlaces que se envían llevan al portal. |
+| **P3b · Ofertas para ti** | Vacantes publicadas que encajan con su hoja de vida (reglas sobre cargos, habilidades y ciudad), para postularse con un clic con la hoja de vida que ya subió. |
 | **P4 · Mis documentos** | Subir y reemplazar documentos (cédula, certificados) una sola vez y reutilizarlos en otros procesos de la misma empresa, con su vigencia. |
 | **P5 · Empleado** | Al vincularse, el mismo portal pasa a ser el del empleado: certificados, solicitudes y actualización de datos (conecta con Empleados E2 y E3). |
 
