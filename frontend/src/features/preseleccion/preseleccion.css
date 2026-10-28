@@ -48,6 +48,3 @@
 .presel-mensaje.persona { border-left-color: var(--color-primario); }
 .presel-mensaje.candidato { border-left-color: var(--color-texto-tenue); }
 
-.ficha-preseleccion { display: flex; flex-direction: column; gap: var(--espacio-4); padding: var(--espacio-4) var(--espacio-6) var(--espacio-6); border-top: 1px solid var(--color-borde); }
-.ficha-preseleccion h3 { margin: 0 0 var(--espacio-2); font-size: 15px; }
-.ficha-preseleccion h3 .mono { font-size: 12px; font-weight: 400; color: var(--color-texto-tenue); }
