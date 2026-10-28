@@ -184,8 +184,10 @@ export function VacanteNueva() {
             <AutocompletarMunicipio valor={{ codigo: f.codigoMunicipio, ciudad: f.ciudad }} ia={deIa.ciudad}
               onElegir={(m, texto) => { setF((x) => ({ ...x, ciudad: m?.municipio ?? texto, codigoMunicipio: m?.codigo ?? null })); setDeIa((d) => ({ ...d, ciudad: false })) }} />
           </label>
-          <label>Posiciones disponibles <span className="ayuda">Cuántas personas se contratan para este cargo</span>
+          <label>
+            Posiciones disponibles
             <input className={clase('cupos')} type="number" min={1} value={f.cupos} onChange={(e) => poner('cupos', e.target.value)} />
+            <span className="ayuda">Cuántas personas se contratan para este cargo</span>
           </label>
           <label>Jornada<input className={clase('jornada')} value={f.jornada} onChange={(e) => poner('jornada', e.target.value)} placeholder="Ej.: Turno noche, lunes a sábado" /></label>
           <label>Salario mínimo (COP)<input className={clase('salarioMinimo')} type="number" min={0} value={f.salarioMinimo} onChange={(e) => poner('salarioMinimo', e.target.value)} /></label>
