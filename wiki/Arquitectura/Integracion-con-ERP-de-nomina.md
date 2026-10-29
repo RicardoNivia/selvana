@@ -17,7 +17,7 @@ Selvana es un producto independiente: **no depende de ningún ERP** y se conecta
 | 3. Archivo programado | Exportación/importación automática CSV/Excel por SFTP con plantilla configurable | ERP sin API |
 | 4. Manual asistido | Descarga del archivo de novedades listo para cargar | Cualquier ERP, desde el día uno |
 
-**Qué se sincroniza:** maestros (empresas, sedes, centros de costo, cargos) del ERP hacia Selvana; altas, cambios, novedades y retiros de Selvana hacia el ERP; desprendibles y certificados de nómina del ERP hacia el autoservicio.
+**Qué se sincroniza:** maestros (empresas, sedes, centros de costo, cargos) del ERP hacia Selvana; altas, cambios, novedades y retiros de Selvana hacia el ERP.
 
 **Garantías:** bitácora de cada sincronización, reintentos automáticos, cola de errores para revisar y conciliación mensual empleados Selvana vs. ERP.
 

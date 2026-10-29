@@ -24,7 +24,7 @@ Objetivo: pasar de gestionar a anticipar: formar según brechas, medir clima y a
 
 - [ ] Modelo de riesgo de rotación y ausentismo con razones explicadas y acciones sugeridas
 - [ ] Planeador de planta: personal necesario según demanda o contratos
-- [ ] Proceso de retiro: paz y salvo, encuesta de salida conducida por el asistente, liquidación vía nómina
+- [ ] Proceso de retiro: paz y salvo, encuesta de salida por enlace, liquidación vía nómina
 - [ ] Preguntas en lenguaje natural sobre todos los datos de talento; conectores nativos con 2 ERP de nómina adicionales
 
 **Gate de salida:** módulo completo en producción; alertas de riesgo validadas contra retiros reales de los clientes activos.

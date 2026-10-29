@@ -27,7 +27,6 @@ La diferencia con una aplicación normal de talento humano es que cada proceso t
 | Pruebas | Envía y persigue | Envía, recuerda, califica y resume resultados | Revisa el informe |
 | Contratación | Llena contrato y checklist | Genera contrato, pide documentos, valida soportes y crea el empleado en nómina | Firma y aprueba |
 | Hoja de vida del empleado | RRHH digita cambios | El empleado sube un soporte; la IA lo lee, actualiza y valida vencimientos | Aprueba el cambio |
-| Consultas del empleado | RRHH responde correos | Asistente responde vacaciones, certificados, reglamento y genera documentos | Atiende solo lo escalado |
 | Desempeño | Llena formularios | Resume evidencias, redacta borrador de evaluación y plan de desarrollo | Ajusta y conversa |
 | Clima y retención | Tabula encuestas | Analiza sentimiento, detecta riesgo de fuga y propone acciones | Decide la acción |
 
