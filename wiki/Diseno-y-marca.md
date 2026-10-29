@@ -53,5 +53,5 @@ Para abrir el mock localmente se necesita el editor de Design de Claude; la vers
 
 - Estilo de ilustración.
 - Completar en Claude Design el design system (tokens y componentes) y las pantallas restantes.
-- Portal de empleo, portal del líder, portal del empleado y flujos de WhatsApp completos.
+- Portal de empleo, «Mi equipo» del líder en la consola, portal del empleado y flujos de WhatsApp completos.
 - Storybook y marca blanca configurable.

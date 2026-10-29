@@ -111,6 +111,13 @@ internal static class SemillaEjemplo
             Ok(p.ActualizarAfiliacion(TipoAfiliacion.CajaCompensacion, EstadoAfiliacion.Confirmada, "Comfatolima", "CCF-2026-5532", ingreso, null, porRrhh, afiliado));
             Ok(p.EditarAlta("Operaciones", "CC-210 Bodega Ibagué", c.CiudadVacante, "Bancolombia", "Ahorros", "24512345678", porRrhh, afiliado));
             Ok(p.CrearEmpleado(true, porRrhh, afiliado.AddHours(1)));
+            // Como el caso de uso real: el empleado nace en Expediente por el evento (el plan de inducción con IA no se pide)
+            string Entidad(TipoAfiliacion t) => p.Afiliaciones.FirstOrDefault(a => a.Tipo == t) is { Estado: EstadoAfiliacion.Confirmada } a ? a.Entidad : "";
+            db.AddIntegrationEvent(new Contracts.Empleados.EmpleadoVinculado(Guid.CreateVersion7(), afiliado.AddHours(1), p.EmpresaId, p.Id, p.Vacante.CandidatoId,
+                p.EmpresaUsuariaId, p.Persona.Documento, p.Persona.Nombre, p.Persona.Correo, p.Persona.Celular, p.Persona.Ciudad, p.Vacante.Cargo, p.Alta.Area,
+                p.Alta.CentroCosto, p.Alta.Sede, ReglasContrato.Nombre(p.Condiciones), p.Condiciones.SalarioCop, p.Condiciones.FechaIngreso, p.Condiciones.FechaFin,
+                Entidad(TipoAfiliacion.Eps), Entidad(TipoAfiliacion.Pension), Entidad(TipoAfiliacion.Arl),
+                p.Afiliaciones.FirstOrDefault(a => a.Tipo == TipoAfiliacion.Arl)?.ClaseRiesgo, Entidad(TipoAfiliacion.CajaCompensacion), porRrhh, p.EmpresaUsuaria));
         }
 
         await db.SaveChangesAsync();

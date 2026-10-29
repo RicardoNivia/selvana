@@ -91,16 +91,11 @@ internal sealed class EnviarPostulacionHandler(
 {
     public async Task<Result<string>> Handle(EnviarPostulacionCommand c, CancellationToken cancellationToken)
     {
-        // Solo se postula quien tiene cuenta en el portal (ADR 0013), y con su correo y su identificación: nunca a nombre de otra persona
+        // Con sesión del portal se postula con el correo y la identificación de su cuenta; sin sesión, con los que confirma (ADR 0014)
         var cuenta = persona.CuentaId is { } cuentaId ? await cuentas.ObtenerAsync(cuentaId, cancellationToken) : null;
-        if (cuenta is null)
-        {
-            return CuentaErrors.NoExiste;
-        }
-
         var ahora = reloj.GetUtcNow();
         var borrador = await borradores.ObtenerAsync(c.BorradorId, cancellationToken);
-        if (borrador is null || borrador.Vencido(ahora) || borrador.DatosLeidos?.Documento != cuenta.Documento)
+        if (borrador is null || borrador.Vencido(ahora) || (cuenta is not null && borrador.DatosLeidos?.Documento is { Length: > 0 } documentoLeido && documentoLeido != cuenta.Documento))
         {
             return BorradorErrors.NoExiste;
         }
@@ -120,9 +115,9 @@ internal sealed class EnviarPostulacionHandler(
         var datos = new DatosCandidato
         {
             Nombre = c.Nombre.Trim(),
-            Documento = cuenta.Documento,
+            Documento = cuenta?.Documento ?? Candidato.NormalizarDocumento(c.Documento),
             Celular = new string([.. c.Celular.Where(char.IsDigit)]),
-            Correo = cuenta.Correo,
+            Correo = cuenta?.Correo ?? (c.Correo ?? "").Trim().ToLowerInvariant(),
             Ciudad = (c.Ciudad ?? "").Trim(),
             Experiencia = leidos.Experiencia,
             Formacion = leidos.Formacion,

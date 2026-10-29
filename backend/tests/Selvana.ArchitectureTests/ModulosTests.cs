@@ -6,8 +6,8 @@ namespace Selvana.ArchitectureTests;
 /// <summary>Los módulos solo se ven entre sí a través de sus Contracts (CLAUDE.md, regla 5).</summary>
 public class ModulosTests
 {
-    // Agregar aquí cada módulo nuevo: Desempeno, Formacion, Clima
-    private static readonly string[] Modulos = ["Core", "Reclutamiento", "Vinculacion", "Expediente"];
+    // Agregar aquí cada módulo nuevo (Formacion…)
+    private static readonly string[] Modulos = ["Core", "Reclutamiento", "Vinculacion", "Expediente", "Desempeno", "Clima"];
     private static readonly string[] Capas = ["Domain", "Application", "Infrastructure", "Api"];
 
     [Fact]

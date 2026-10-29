@@ -76,6 +76,12 @@ public sealed partial class CadenaModelosChatClient(
 
                 await RegistrarAsync(contexto, eslabon, intento, null, entrada, salida, costo, inicio).ConfigureAwait(false);
 
+                // Algunos modelos devuelven el JSON pedido dentro de un bloque de código o con texto alrededor: se deja solo el JSON
+                if (opciones.ResponseFormat is ChatResponseFormatJson)
+                {
+                    RespuestaJson.SoloJson(respuesta);
+                }
+
                 respuesta.ModelId ??= eslabon.Opciones.Modelo;
                 respuesta.AdditionalProperties ??= [];
                 respuesta.AdditionalProperties[PropiedadProveedor] = eslabon.Opciones.Proveedor;
@@ -222,4 +228,37 @@ public sealed class CadenaModelosAgotadaException(IReadOnlyList<string> fallas)
     : Exception("Ningún modelo de IA respondió: " + string.Join(" | ", fallas))
 {
     public IReadOnlyList<string> Fallas { get; } = fallas;
+}
+
+/// <summary>Limpia la respuesta cuando se pidió JSON: algunos modelos lo envuelven en bloques de código o le ponen texto alrededor.</summary>
+internal static class RespuestaJson
+{
+    /// <summary>Deja en el último mensaje solo el objeto JSON (sin ```json ni texto antes o después) para que se pueda leer el resultado tipado.</summary>
+    internal static void SoloJson(ChatResponse respuesta)
+    {
+        var mensaje = respuesta.Messages.LastOrDefault(m => m.Role == ChatRole.Assistant);
+        if (mensaje is null || mensaje.Text is not { Length: > 0 } texto)
+        {
+            return;
+        }
+
+        var limpio = ExtraerJson(texto);
+        if (limpio != texto)
+        {
+            mensaje.Contents = [.. mensaje.Contents.Where(c => c is not TextContent), new TextContent(limpio)];
+        }
+    }
+
+    internal static string ExtraerJson(string texto)
+    {
+        var t = texto.Trim();
+        if (t.StartsWith('{') || t.StartsWith('['))
+        {
+            return t;
+        }
+
+        var inicio = t.IndexOfAny(['{', '[']);
+        var fin = t.LastIndexOfAny(['}', ']']);
+        return inicio >= 0 && fin > inicio ? t[inicio..(fin + 1)] : texto;
+    }
 }

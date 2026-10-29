@@ -50,5 +50,10 @@ internal sealed class CuentaCandidatoConfiguration : IEntityTypeConfiguration<Cu
             d.OwnsMany(x => x.Formacion);
         });
         builder.OwnsOne(c => c.Autorizacion, a => a.ToJson());
+        builder.OwnsMany(c => c.Documentos, d =>
+        {
+            d.ToJson();
+            d.OwnsMany(x => x.Envios);
+        });
     }
 }

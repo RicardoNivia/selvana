@@ -5,16 +5,17 @@ import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { HojasCayendo } from '../../shared/ui/HojasCayendo'
 import {
   Chispa, IconoAlerta, IconoBuscar, IconoCandado, IconoChat, IconoCheck, IconoDocumento, IconoEscudo, IconoFlecha, IconoInicio,
-  IconoPrueba, IconoSalir, IconoSubir, IconoUbicacion, IconoUsuarios, IconoVacantes,
+  IconoCupos, IconoPrueba, IconoSalir, IconoSubir, IconoUbicacion, IconoUsuarios, IconoVacantes,
 } from '../../shared/ui/Iconos'
 import { useContador } from '../../shared/ui/animaciones'
 import { rangoSalario } from '../portal/api'
 import { HojaDeVidaPdf } from './HojaDeVidaPdf'
 import { MiHojaDeVida } from './MiHojaDeVida'
+import { MiEmpleoPanel, MisDocumentosPanel } from './MisDocumentos'
 import { type SeccionHv, faltantesPerfil, totalPasosPerfil } from './perfil'
 import {
   type MiCuenta, type MiPostulacion, type OfertaParaTi, type Pendiente, useAbrirPendiente, useChatDePostulacion, useMiCuenta, useMiPortal,
-  useOfertasParaTi, usePostularmeConMiPerfil, useSalirPortal,
+  useMiEmpleo, useMisDocumentos, useOfertasParaTi, usePostularmeConMiPerfil, useSalirPortal,
 } from './api'
 import './portal-persona.css'
 
@@ -24,11 +25,13 @@ const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' })
 const fechaHora = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
 const relativo = new Intl.RelativeTimeFormat('es-CO', { numeric: 'auto' })
 
-type Seccion = 'inicio' | 'procesos' | 'ofertas' | 'hv' | 'cuenta'
-const secciones: { clave: Seccion; texto: string; corto: string; icono: ReactNode }[] = [
+type Seccion = 'inicio' | 'procesos' | 'ofertas' | 'documentos' | 'empleo' | 'hv' | 'cuenta'
+const todasLasSecciones: { clave: Seccion; texto: string; corto: string; icono: ReactNode }[] = [
   { clave: 'inicio', texto: 'Inicio', corto: 'Inicio', icono: <IconoInicio /> },
   { clave: 'procesos', texto: 'Mis procesos', corto: 'Procesos', icono: <IconoVacantes /> },
   { clave: 'ofertas', texto: 'Ofertas para ti', corto: 'Ofertas', icono: <IconoBuscar /> },
+  { clave: 'documentos', texto: 'Mis documentos', corto: 'Documentos', icono: <IconoCandado /> },
+  { clave: 'empleo', texto: 'Mi empleo', corto: 'Empleo', icono: <IconoCupos /> },
   { clave: 'hv', texto: 'Mi hoja de vida', corto: 'Hoja de vida', icono: <IconoDocumento /> },
   { clave: 'cuenta', texto: 'Mi cuenta', corto: 'Cuenta', icono: <IconoUsuarios /> },
 ]
@@ -44,6 +47,10 @@ export function MiPortal() {
   const cuenta = useMiCuenta()
   const portal = useMiPortal()
   const ofertas = useOfertasParaTi(cuenta.isSuccess)
+  const documentos = useMisDocumentos(cuenta.isSuccess)
+  const empleo = useMiEmpleo(cuenta.isSuccess)
+  // «Mi empleo» solo aparece cuando la persona ya trabaja en una empresa que usa Selvana (P5)
+  const secciones = todasLasSecciones.filter((s) => s.clave !== 'empleo' || (empleo.data?.length ?? 0) > 0)
   const [parametros, setParametros] = useSearchParams()
   const seccion = (secciones.some((s) => s.clave === parametros.get('ver')) ? parametros.get('ver') : 'inicio') as Seccion
   const parteHv = (parametros.get('parte') ?? undefined) as SeccionHv | undefined
@@ -62,7 +69,9 @@ export function MiPortal() {
   const c = cuenta.data
   const pendientes = portal.data?.pendientes ?? []
   const postulaciones = portal.data?.postulaciones ?? []
-  const insignias: Partial<Record<Seccion, number>> = { inicio: pendientes.length, ofertas: ofertas.data?.length }
+  const pedidos = documentos.data?.pedidos.filter((p) => p.estado === 'Pendiente' || p.estado === 'Rechazado').length
+  const campanas = empleo.data?.filter((x) => x.actualizacionPedida && !x.cambioPendiente).length
+  const insignias: Partial<Record<Seccion, number>> = { inicio: pendientes.length, ofertas: ofertas.data?.length, documentos: pedidos, empleo: campanas }
 
   return (
     <main className="mp">
@@ -84,6 +93,8 @@ export function MiPortal() {
           {seccion === 'inicio' && <Inicio cuenta={c} pendientes={pendientes} postulaciones={postulaciones} ofertas={ofertas.data} cargando={portal.isPending} ir={ir} />}
           {seccion === 'procesos' && <Procesos postulaciones={postulaciones} cargando={portal.isPending} />}
           {seccion === 'ofertas' && <Ofertas ofertas={ofertas.data} cargando={ofertas.isPending} ir={ir} />}
+          {seccion === 'documentos' && <MisDocumentosPanel />}
+          {seccion === 'empleo' && empleo.data && <MiEmpleoPanel empleos={empleo.data} />}
           {seccion === 'hv' && <MiHojaDeVida cuenta={c} seccionInicial={parteHv} />}
           {seccion === 'cuenta' && <MiCuentaPanel cuenta={c} />}
         </div>

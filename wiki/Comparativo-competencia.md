@@ -11,7 +11,7 @@ El mercado ya vende agentes de IA para selección y asistentes para el empleado;
 | [Workday](https://blog.workday.com/en-us/workday-leads-talent-acquisition-agentic-era.html) | Grandes empresas globales | Recruiting Agent (búsqueda, filtro y emparejamiento explicable y auditado en sesgos) + agente conversacional para alto volumen | Amplio | Licencia enterprise | IA explicable y auditoría de sesgo |
 | [SAP SuccessFactors](https://www.savictech.com/insights/sap-successfactors-1h-2026-smartrecruiters-agentic-hr/) | Grandes empresas globales | Agentes Joule + SmartRecruiters para selección y onboarding (2S-2026) | Resúmenes de desempeño con IA | Licencia enterprise | Catálogo de habilidades transversal |
 
-**Funciones que el mercado ya da por hechas** (sin ellas no se vende): portal de empleo, ranking con IA, asistente del empleado, firma electrónica, app móvil, autoservicio, desempeño con 9-box, tableros.
+**Funciones que el mercado ya da por hechas** (sin ellas no se vende): portal de empleo, ranking con IA, asistente del empleado (Selvana no lo hará: decisión del 2026-10-29), firma electrónica, app móvil, autoservicio, desempeño con 9-box, tableros.
 
 **Diferenciadores de Selvana**
 

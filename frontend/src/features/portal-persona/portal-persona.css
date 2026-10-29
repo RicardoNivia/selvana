@@ -459,3 +459,68 @@ body.mp-con-cv { overflow: hidden; }
     animation-duration: 1ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
   .mp .hojas-cayendo, .mp-acceso .hojas-cayendo { display: none; }
 }
+
+/* ---------- P4 · Mis documentos ---------- */
+.mp-docs, .mp-empleos { display: flex; flex-direction: column; gap: var(--espacio-4); }
+.mp-docs-bloque { display: flex; flex-direction: column; gap: var(--espacio-3); }
+.mp-docs-bloque h3 { margin: 0; font: 700 18px var(--fuente-display); letter-spacing: -0.01em; }
+.mp-docs-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--espacio-2); }
+.mp-docs-fila {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4); border: 1px solid var(--color-borde); border-radius: var(--radio-m); background: var(--color-superficie);
+  animation: entra var(--duracion-media) var(--curva-salida) both; animation-delay: calc(var(--i, 0) * 40ms);
+}
+.mp-docs-icono { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radio-m); background: var(--color-superficie-2); color: var(--color-texto-tenue); }
+.mp-docs-icono.listo { background: var(--color-primario-suave); color: var(--color-primario); }
+.mp-docs-icono svg { width: 18px; height: 18px; }
+.mp-docs-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mp-docs-texto b { font-size: 14px; }
+.mp-docs-texto span { font-size: 12px; color: var(--color-texto-tenue); overflow-wrap: anywhere; }
+.mp-docs-acciones { display: flex; gap: var(--espacio-2); }
+.mp-docs-quitar { color: var(--color-error); }
+.mp-docs-form { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--espacio-3); padding: var(--espacio-4); border-radius: var(--radio-m); background: var(--color-superficie-2); }
+.mp-docs-form-acciones { display: flex; flex-wrap: wrap; gap: var(--espacio-2); justify-content: flex-end; }
+.mp-docs-proceso { border: 1px solid color-mix(in srgb, var(--color-alerta) 40%, var(--color-borde)); border-radius: var(--radio-m); background: var(--color-superficie); overflow: hidden; }
+.mp-docs-proceso header { display: flex; align-items: center; gap: var(--espacio-3); padding: var(--espacio-3) var(--espacio-4); background: var(--color-alerta-suave); }
+.mp-docs-proceso header svg { width: 20px; height: 20px; color: var(--color-alerta); }
+.mp-docs-proceso header div { display: flex; flex-direction: column; }
+.mp-docs-proceso header span { font-size: 12px; color: var(--color-texto-suave); }
+.mp-docs-proceso ul { list-style: none; margin: 0; padding: var(--espacio-2) var(--espacio-4); display: flex; flex-direction: column; }
+.mp-docs-proceso li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--espacio-3); padding: var(--espacio-2) 0; font-size: 14px; }
+.mp-docs-proceso li + li { border-top: 1px solid var(--color-borde); }
+.mp-docs-proceso li > div { display: flex; flex-direction: column; gap: 2px; }
+.mp-docs-motivo { font-size: 12px; color: var(--color-error); }
+.mp-docs > .mp-nota { display: flex; align-items: center; gap: 6px; }
+.mp-docs > .mp-nota svg { width: 14px; height: 14px; color: var(--color-primario); }
+
+/* ---------- P5 · Mi empleo ---------- */
+.mp-empleo { display: flex; flex-direction: column; gap: var(--espacio-4); padding: var(--espacio-6); border: 1px solid var(--color-borde); border-radius: var(--radio-l); background: var(--color-superficie); animation: entra var(--duracion-media) var(--curva-salida) both; }
+.mp-empleo-cabeza { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--espacio-3); }
+.mp-empleo-cabeza h2 { margin: 2px 0; font: 800 26px / 1.15 var(--fuente-display); letter-spacing: -0.02em; }
+.mp-empleo-cabeza p { margin: 0; font-size: 14px; color: var(--color-texto-suave); }
+.mp-empleo-datos { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: var(--espacio-3); }
+.mp-empleo-dato { display: flex; flex-direction: column; gap: 2px; padding: var(--espacio-3); border-radius: var(--radio-m); background: var(--color-superficie-2); }
+.mp-empleo-dato span { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-texto-tenue); }
+.mp-empleo-dato b { font-size: 14px; overflow-wrap: anywhere; }
+.mp-empleo-campana { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-3); padding: var(--espacio-4); border-radius: var(--radio-m); background: var(--color-alerta-suave); }
+.mp-empleo-campana > svg { width: 22px; height: 22px; flex: none; color: var(--color-alerta); }
+.mp-empleo-campana > div:nth-child(2) { flex: 1 1 240px; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.mp-empleo-campana span { font-size: 13px; color: var(--color-texto-suave); }
+.mp-empleo-campana-acciones, .mp-empleo-acciones { display: flex; flex-wrap: wrap; gap: var(--espacio-2); }
+.mp-empleo-pendiente { padding: var(--espacio-4); border-radius: var(--radio-m); border: 1px dashed var(--color-borde); font-size: 14px; }
+.mp-empleo-pendiente ul { margin: var(--espacio-2) 0 0; padding-left: var(--espacio-4); color: var(--color-texto-suave); font-size: 13px; }
+.mp-empleo-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--espacio-3); }
+
+@media (max-width: 640px) {
+  .mp-docs-fila { grid-template-columns: auto minmax(0, 1fr); }
+  .mp-docs-fila > .pill, .mp-docs-acciones { grid-column: 2; justify-self: start; }
+  .mp-docs-proceso li { grid-template-columns: minmax(0, 1fr); }
+  .mp-empleo { padding: var(--espacio-4); }
+}
+@media (prefers-reduced-motion: reduce) { .mp-docs-fila, .mp-empleo { animation: none; } }
+
+/* Pulsos y autoevaluación en Mi empleo */
+.mp-escala-fila { display: flex; flex-wrap: wrap; gap: var(--espacio-2) var(--espacio-4); align-items: center; justify-content: space-between; padding: var(--espacio-2) 0; border-top: 1px solid var(--color-borde); font-size: 14px; }
+.mp-escala { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.mp-escala button { min-width: 36px; height: 36px; border-radius: var(--radio-s); border: 1px solid var(--color-borde); background: var(--color-superficie); font: 600 14px var(--fuente-datos); color: var(--color-texto-suave); cursor: pointer; transition: background var(--duracion-corta), color var(--duracion-corta); }
+.mp-escala button[aria-pressed='true'] { background: var(--color-primario); border-color: var(--color-primario); color: var(--color-sobre-primario); }

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { useSesion } from './api'
+import '../../app/riel.css'
 
 /** La consola solo se ve con sesión; sin ella lleva al inicio de sesión y vuelve aquí después. */
 export function RequiereSesion({ children }: { children: ReactNode }) {
@@ -11,9 +12,11 @@ export function RequiereSesion({ children }: { children: ReactNode }) {
   if (sesion.isPending) {
     return (
       <div className="consola" aria-busy="true">
-        <nav className="lateral" aria-label="Principal">
-          <Esqueleto alto={28} ancho="60%" />
-          {Array.from({ length: 6 }, (_, i) => <Esqueleto key={i} alto={36} />)}
+        <nav className="riel" aria-label="Principal">
+          <span className="riel-marca" />
+          <div className="riel-menu riel-esqueleto">
+            {Array.from({ length: 6 }, (_, i) => <span key={i} />)}
+          </div>
         </nav>
         <main className="contenido">
           <Esqueleto alto={32} ancho="40%" />

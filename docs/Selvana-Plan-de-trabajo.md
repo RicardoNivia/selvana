@@ -33,12 +33,12 @@ El orden real se ajustó para tener un flujo completo de punta a punta antes de 
 | Etapa 2 · V1 Contratación y oferta, con maestro de tipos de contrato y plantillas | Hecho |
 | Etapa 2 · V2 Documentos de ingreso · V3 Alta y afiliaciones | Hechos |
 | Portal de la persona · P1 a P3b (cuenta, procesos, pendientes, ofertas para ti) y rediseño | Hecho |
-| Etapa 2 · V4 Onboarding · plan de inducción con seguimiento | Hecho; asistente de bienvenida con las integraciones y encuestas de 30, 60 y 90 días con Clima |
+| Etapa 2 · V4 Onboarding · plan de inducción con seguimiento | Hecho; encuestas de 30, 60 y 90 días con Clima |
 | Etapa 3 · Empleados E1 · Expediente digital y carga de la planta | Hecho |
-| Etapa 3 · Empleados E2 · Actualización inteligente | Hecho; campaña anual con el asistente, con las integraciones |
-| **Etapa 3 · Empleados E3 y E4** | **Sigue** |
-| Portal · P4 Mis documentos · P5 Portal del empleado | Después de E1 |
-| Etapa 4 · Desempeño · Etapa 5 · Clima | Después |
+| Etapa 3 · Empleados E2 · Actualización inteligente | Hecho; campaña anual desde el portal del empleado (P5) |
+| **Etapa 3 · Empleados E4 · «Mi equipo» del líder en la consola** | **Sigue** |
+| Portal · P4 Mis documentos · P5 Portal del empleado | Hecho (29/10/2026) |
+| Etapa 4 · Desempeño (D1 a D4) · Etapa 5 · Clima (C1 a C4) | Hecho (29/10/2026); tableros por área y primer ciclo real, con clientes |
 | Etapa 1 · Sprint 10 · Estabilización y lanzamiento | Antes de vender el primer plan |
 | Integraciones (WhatsApp, correo, firma, ERP) | Al final |
 
@@ -57,7 +57,6 @@ La diferencia con una aplicación normal de talento humano es que cada proceso t
 | Pruebas | Envía y persigue | Envía, recuerda, califica y resume resultados | Revisa el informe |
 | Contratación | Llena contrato y checklist | Genera contrato, pide documentos, valida soportes y crea el empleado en nómina | Firma y aprueba |
 | Hoja de vida del empleado | RRHH digita cambios | El empleado sube un soporte; la IA lo lee, actualiza y valida vencimientos | Aprueba el cambio |
-| Consultas del empleado | RRHH responde correos | Asistente responde vacaciones, certificados, reglamento y genera documentos | Atiende solo lo escalado |
 | Desempeño | Llena formularios | Resume evidencias, redacta borrador de evaluación y plan de desarrollo | Ajusta y conversa |
 | Clima y retención | Tabula encuestas | Analiza sentimiento, detecta riesgo de fuga y propone acciones | Decide la acción |
 
@@ -82,7 +81,7 @@ El mercado ya vende agentes de IA para selección y asistentes para el empleado;
 | [Workday](https://blog.workday.com/en-us/workday-leads-talent-acquisition-agentic-era.html) | Grandes empresas globales | Recruiting Agent (búsqueda, filtro y emparejamiento explicable y auditado en sesgos) + agente conversacional para alto volumen | Amplio | Licencia enterprise | IA explicable y auditoría de sesgo |
 | [SAP SuccessFactors](https://www.savictech.com/insights/sap-successfactors-1h-2026-smartrecruiters-agentic-hr/) | Grandes empresas globales | Agentes Joule + SmartRecruiters para selección y onboarding (2S-2026) | Resúmenes de desempeño con IA | Licencia enterprise | Catálogo de habilidades transversal |
 
-**Funciones que el mercado ya da por hechas** (sin ellas no se vende): portal de empleo, ranking con IA, asistente del empleado, firma electrónica, app móvil, autoservicio, desempeño con 9-box, tableros.
+**Funciones que el mercado ya da por hechas** (sin ellas no se vende): portal de empleo, ranking con IA, asistente del empleado (Selvana no lo hará: decisión del 2026-10-29), firma electrónica, app móvil, autoservicio, desempeño con 9-box, tableros.
 
 **Diferenciadores de Selvana**
 
@@ -101,7 +100,7 @@ Sin pilotos, la validación sale del benchmark del mercado, de pruebas de usabil
 | --- | --- | --- | --- |
 | Selección IA | Sprint 10 (fin Etapa 1) | Vacantes con IA, portal de empleo, lector de HV, ranking explicable, preselección por WhatsApp, pruebas | Empresas temporales, retail, BPO, cualquier empresa que contrate seguido |
 | Selección + Vinculación | Sprint 14 | + contratos con firma, agente de documentos, alta en nómina por conector, onboarding, paquete temporales | Quien quiere eliminar la digitación de ingresos |
-| Talento Core | Sprint 18 | + expediente vivo, asistente del empleado y del líder | Empresas con mucho trámite de empleados |
+| Talento Core | Sprint 18 | + expediente vivo y «Mi equipo» del líder | Empresas con mucho trámite de empleados |
 | Selvana Completo | Sprint 30 | + desempeño con copiloto, formación, clima, retención predictiva | Empresa mediana y grande |
 
 **Modelo de precio** (alineado con la práctica del mercado, por ejemplo Buk): suscripción mensual por colaborador activo, con descuento por volumen y por módulos combinados; el plan Selección IA también por vacante o paquete de postulaciones para empresas con poca planta y mucha rotación. El consumo de IA queda incluido hasta un límite por plan.
@@ -148,7 +147,7 @@ Selvana v1.0 se considera terminado cuando se cumple todo esto:
 
 **Fuera de la v1.0** (no bloquean el cierre): nómina propia, app nativa instalable, operación en otros países.
 
-**Fuera del alcance por ahora:** manejo de presupuestos (presupuesto de planta y validación de requisiciones contra presupuesto). Decisión del 2026-10-22.
+**Fuera del alcance por ahora:** manejo de presupuestos (presupuesto de planta y validación de requisiciones contra presupuesto). Decisión del 2026-10-22. Tampoco asistente del empleado (ni el de bienvenida). Tampoco certificados laborales, desprendibles ni solicitudes de vacaciones, permisos o incapacidades: son de la nómina y los maneja el ERP del cliente (decisión del 2026-10-29).
 
 ## Etapa D – Diseño, marca y design system (sprints 1 a 3, va primero)
 
@@ -169,7 +168,7 @@ Objetivo: definir la marca de la aplicación, crear el design system y diseñar 
 - [ ] Design tokens en Claude Design: color, tipografía, espaciado, radios, sombras y breakpoints
 - [x] Modo claro y modo oscuro
 - [ ] Librería de componentes base en Claude Design (botones, formularios, tablas, tarjetas, modales, navegación)
-- [ ] Patrones de IA: bandeja de aprobaciones, explicación de sugerencias, chat del asistente y estados del agente
+- [ ] Patrones de IA: bandeja de aprobaciones, explicación de sugerencias, chat de preselección y estados del agente
 - [ ] Lineamientos de accesibilidad WCAG 2.1 AA y diseño responsive
 
 **Diseño de pantallas en Claude Design (sprints 2 y 3)**
@@ -177,8 +176,8 @@ Objetivo: definir la marca de la aplicación, crear el design system y diseñar 
 - [ ] Mapa de navegación y arquitectura de información del producto
 - [ ] Pantallas de la consola RRHH y bandeja de aprobaciones
 - [ ] Pantallas del portal de empleo y postulación móvil
-- [ ] Pantallas del portal del líder y del portal del empleado
-- [ ] Flujos conversacionales de WhatsApp (preselección, documentos, asistente)
+- [ ] Pantallas de «Mi equipo» del líder (en la consola) y del portal del empleado
+- [ ] Flujos conversacionales de WhatsApp (preselección y documentos)
 - [ ] Prototipo navegable de punta a punta para pruebas de usabilidad
 
 **Theme de diseño en el frontend (sprint 3)**
@@ -312,8 +311,8 @@ Adelantado (ADR 0013). Detalle en `docs/backlog/Modulos-Vinculacion-Empleados-De
 - [x] P3b · Ofertas para ti — *vacantes que encajan por reglas (cargo, habilidades, ciudad) con el porqué, y postularse con la hoja de vida del perfil*
 - [x] Rediseño del portal (28/10/2026) — *bienvenida con cifras, anillo de perfil y buscador; navegación con indicador deslizante (barra inferior en el celular); hoja de vida por partes con etiquetas y barra de guardar; transiciones de la marca que se apagan con movimiento reducido*
 - [x] Funciones nuevas del portal (28/10/2026) — *hoja de vida en PDF con la marca (sin foto, edad ni dirección), «Completa tu perfil» (reglas), «Mi cuenta y privacidad» (autorización Ley 1581 y solicitudes del titular) y sesión visible en el portal de empleo: nombre y menú en la cabecera y tarjeta «Hola, …» con pendientes, procesos y perfil*
-- [ ] P4 · Mis documentos — *subir cédula y certificados una vez y reutilizarlos en otros procesos de la misma empresa, con su vigencia*
-- [ ] P5 · Portal del empleado — *al vincularse, el mismo portal muestra certificados, solicitudes y actualización de datos (necesita Empleados E1)*
+- [x] P4 · Mis documentos — *hecho el 29/10/2026: la persona sube cédula, certificados y soportes una vez (cifrados, uno por tipo, con vencimiento) y los entrega con un clic a los procesos que se los piden; llegan como si los subiera por su enlace (la IA los lee y RRHH aprueba)*
+- [x] P5 · Portal del empleado — *hecho el 29/10/2026: «Mi empleo» aparece cuando la cédula y el correo coinciden con un empleado; ve su contrato, afiliaciones, carpeta y avisos, propone cambios a sus datos (RRHH aplica o descarta en la bandeja) y sube soportes que lee la IA*
 
 **Sprint 12 – Agente de documentos**
 
@@ -331,41 +330,35 @@ Adelantado (ADR 0013). Detalle en `docs/backlog/Modulos-Vinculacion-Empleados-De
 **Sprint 14 – Onboarding guiado**
 
 - [x] Plan de inducción generado por cargo: tareas, responsables y fechas — *bloque V4 (28/10/2026): al crear el empleado, el planificador de inducción (IA, sin datos de la persona) propone de 8 a 16 tareas por momento (antes del ingreso, primer día, primera semana, primer mes y periodo de prueba) con responsable (RRHH, líder, empleado, SST, TI o empresa usuaria), día relativo al ingreso, razones y alertas (avisa si falta SG-SST). Queda en violeta en la pestaña «Onboarding» y en la bandeja; RRHH lo ajusta y lo aprueba. Si la IA falla hay un plan base por reglas. El equipo marca las tareas (cada una queda en la bitácora) y, con todo hecho, «Cerrar el onboarding» deja el proceso «Vinculado». Falta el banco de pruebas del agente*
-- [ ] Asistente de bienvenida que responde dudas los primeros días
-- [ ] Encuestas automáticas a los 30, 60 y 90 días con alerta temprana de retiro
+- [x] Encuestas automáticas a los 30, 60 y 90 días con alerta temprana de retiro — *C3: pulsos en el portal del empleado; la alerta llega a la bandeja*
 
 **Gate de salida:** de candidato aprobado a empleado en nómina sin redigitar datos; plan “Selección + Vinculación” a la venta.
 
-## Etapa 3 – Expediente vivo y asistente del empleado (sprints 15 a 18, 8 semanas)
+## Etapa 3 – Expediente vivo y equipo del líder (sprints 15 a 18, 8 semanas)
 
-Objetivo: que la hoja de vida del empleado se mantenga actualizada sola y que el empleado resuelva sus trámites con un asistente, no con RRHH.
+Objetivo: que la hoja de vida del empleado se mantenga actualizada sola y que cada líder vea y atienda a su equipo dentro de la consola.
 
 **Sprint 15 – Expediente digital**
 
-- [ ] Hoja de vida corporativa con historial de cargos, salarios, traslados, sedes o clientes
-- [ ] Carpeta documental con versiones y vencimientos
+- [x] Hoja de vida corporativa con historial de cargos, salarios, traslados, sedes o clientes — *E1: novedades con antes y después*
+- [x] Carpeta documental con versiones y vencimientos — *E1: cifrada, con alertas*
 - [ ] Migración asistida: la IA clasifica y extrae datos de carpetas escaneadas existentes
 
 **Sprint 16 – Actualización inteligente**
 
-- [ ] El empleado sube una foto o PDF (diploma, curso, licencia); la IA identifica el tipo, extrae datos y propone el cambio
-- [ ] RRHH aprueba con un clic desde la bandeja
-- [ ] Alertas automáticas de documentos y certificaciones por vencer, al empleado y al líder
-- [ ] Campaña anual de actualización de datos conducida por el asistente
+- [x] El empleado sube una foto o PDF (diploma, curso, licencia); la IA identifica el tipo, extrae datos y propone el cambio — *E2: lo sube RRHH desde la ficha; el empleado lo hará desde el portal (P5)*
+- [x] RRHH aprueba con un clic desde la bandeja — *E2*
+- [x] Alertas automáticas de documentos y certificaciones por vencer, al empleado y al líder — *E1 y E2: alertas en la ficha; el aviso al empleado y al líder llega con las integraciones y E4*
+- [x] Campaña anual de actualización de datos desde el portal del empleado (P5) — *RRHH la pide a uno o a todos; el empleado confirma o propone cambios*
 
-**Sprint 17 – Asistente del empleado (web y WhatsApp)**
+**Sprint 17** — *libre: el asistente del empleado se descartó el 2026-10-29 (no va en Selvana).*
 
-- [ ] Respuestas sobre reglamento, políticas y beneficios a partir de los documentos de la empresa
-- [ ] Generación inmediata de certificados laborales y desprendibles
-- [ ] Solicitud de vacaciones, permisos e incapacidades conversando, con envío al aprobador
-- [ ] Escalamiento a RRHH con el caso resumido
+**Sprint 18 – «Mi equipo»: el líder dentro de la consola**
 
-**Sprint 18 – Portal del líder**
-
-- [ ] Vista de su equipo, aprobaciones pendientes y alertas
+- [ ] Vista «Mi equipo» en la consola para el rol Líder (no es un portal aparte): su gente, sus aprobaciones pendientes y alertas
 - [ ] Preguntas en lenguaje natural (“¿quién de mi equipo tiene el curso de alturas vencido?”)
 
-**Gate de salida:** al menos la mitad de las consultas de empleados de los clientes activos resueltas por el asistente sin intervención de RRHH.
+**Gate de salida:** al menos la mitad de los cambios del expediente de los clientes activos entra por un documento leído por la IA y aprobado en la bandeja, y los líderes atienden sus alertas desde «Mi equipo».
 
 ## Etapa 4 – Desempeño con copiloto IA (sprints 19 a 23, 10 semanas)
 
@@ -373,24 +366,24 @@ Objetivo: evaluaciones periódicas que se preparan solas a partir de la evidenci
 
 **Sprint 19 – Ciclos y formularios**
 
-- [ ] Ciclos configurables: anual, semestral, trimestral, periodo de prueba, fin de misión o proyecto
-- [ ] Tipos 90°, 180° y 360° con formularios por cargo generados desde las competencias
+- [x] Ciclos configurables: anual, semestral, trimestral, periodo de prueba, fin de misión o proyecto — *hecho el 29/10/2026*
+- [x] Tipos 90°, 180° y 360° con formularios por cargo generados desde las competencias — *hecho el 29/10/2026*
 
 **Sprint 20 – Objetivos**
 
-- [ ] Objetivos (OKR/KPI) con pesos; la IA sugiere objetivos desde el cargo y los objetivos del área
-- [ ] Registro de avance y evidencias durante el periodo
+- [x] Objetivos (OKR/KPI) con pesos; la IA sugiere objetivos desde el cargo y los objetivos del área — *hecho el 29/10/2026*
+- [x] Registro de avance y evidencias durante el periodo — *hecho el 29/10/2026*
 
 **Sprint 21 – Copiloto del evaluador**
 
-- [ ] Resumen automático de evidencias, feedback recibido y avance de objetivos por empleado
-- [ ] Borrador de evaluación y comentarios que el líder ajusta
-- [ ] Detección de sesgos de calificación (todo alto, todo medio, diferencias entre grupos)
+- [x] Resumen automático de evidencias, feedback recibido y avance de objetivos por empleado — *hecho el 29/10/2026*
+- [x] Borrador de evaluación y comentarios que el líder ajusta — *hecho el 29/10/2026*
+- [x] Detección de sesgos de calificación (todo alto, todo medio, diferencias entre grupos) — *hecho el 29/10/2026*
 
 **Sprint 22 – Calibración y desarrollo**
 
-- [ ] Comité de calibración y matriz 9-box
-- [ ] Plan de desarrollo individual (PDI) propuesto por la IA desde las brechas
+- [x] Comité de calibración y matriz 9-box — *hecho el 29/10/2026*
+- [x] Plan de desarrollo individual (PDI) propuesto por la IA desde las brechas — *propuesto por reglas desde las brechas (competencias en 1 o 2); el líder lo edita*
 - [ ] Feedback continuo y reconocimientos
 
 **Sprint 23 – Estabilización**
@@ -418,15 +411,15 @@ Objetivo: pasar de gestionar a anticipar: formar según brechas, medir clima y a
 
 **Sprints 27 y 28 – Clima, bienestar y SST**
 
-- [ ] Encuestas de clima y eNPS anónimas con análisis de sentimiento y temas en comentarios abiertos
+- [x] Encuestas de clima y eNPS anónimas con análisis de sentimiento y temas en comentarios abiertos — *hecho el 29/10/2026*
 - [ ] Batería de riesgo psicosocial (aplicada por psicólogo licenciado) y seguimiento de planes de acción
 - [ ] Exámenes ocupacionales periódicos y de retiro con alertas
 
 **Sprints 29 y 30 – Analítica predictiva y retiro**
 
-- [ ] Modelo de riesgo de rotación y ausentismo con razones explicadas y acciones sugeridas
+- [x] Modelo de riesgo de rotación y ausentismo con razones explicadas y acciones sugeridas — *C4: señales explicadas por reglas (pulso, antigüedad, contrato, clima del área, desempeño); el modelo predictivo y el ausentismo llegan con datos reales*
 - [ ] Planeador de planta: personal necesario según demanda o contratos
-- [ ] Proceso de retiro: paz y salvo, encuesta de salida conducida por el asistente, liquidación vía nómina
+- [ ] Proceso de retiro: paz y salvo, encuesta de salida por enlace, liquidación vía nómina
 - [ ] Preguntas en lenguaje natural sobre todos los datos de talento; conectores nativos con 2 ERP de nómina adicionales
 
 **Gate de salida:** módulo completo en producción; alertas de riesgo validadas contra retiros reales de los clientes activos.
@@ -442,12 +435,11 @@ Todos los agentes comparten la misma plataforma, construida en la Etapa 0 y ampl
 | Bandeja de aprobaciones | Muestra lo que la IA preparó, con explicación, para aprobar, corregir o rechazar | 0 |
 | Extracción de documentos | Lee HV, cédulas, diplomas, certificados e incapacidades | 1 |
 | Búsqueda semántica | Encuentra candidatos y empleados por significado, no solo palabras | 1 |
-| Base de conocimiento por empresa | Reglamento, políticas y manuales para el asistente | 3 |
 | Modelos predictivos | Rotación, ausentismo, planta requerida | 5 |
 | Evaluación continua | Bancos de prueba por agente: precisión, sesgo, alucinaciones; corre en cada versión | 0 |
 | Controles | Variables protegidas excluidas, datos sensibles enmascarados, registro de cada sugerencia y decisión | 0 |
 
-**Catálogo de agentes por etapa:** Reclutador y Preselección (1) · Documentos y Onboarding (2) · Asistente del empleado y del líder (3) · Copiloto de desempeño (4) · Formación, Clima y Retención (5).
+**Catálogo de agentes por etapa:** Reclutador y Preselección (1) · Documentos y Onboarding (2) · Actualización del expediente y consultas del líder (3) · Copiloto de desempeño (4) · Formación, Clima y Retención (5).
 
 ## Arquitectura: .NET + React, monolito modular
 
@@ -469,7 +461,7 @@ Todos los agentes comparten la misma plataforma, construida en la Etapa 0 y ampl
 
 | Pieza | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| Frontend | React + TypeScript (Vite), TanStack Query, librería de componentes del ERP | Consola RRHH, portal del líder, portal del empleado, portal de empleo, bandeja de aprobaciones |
+| Frontend | React + TypeScript (Vite), TanStack Query, librería de componentes del ERP | Consola de la empresa (RRHH y «Mi equipo» del líder), portal del empleado, portal de empleo, bandeja de aprobaciones |
 | API Selvana (monolito modular) | ASP.NET Core Web API en .NET 10 (LTS), EF Core con proveedor Npgsql | Todos los módulos de negocio, seguridad, integración con ERP |
 | Servicio de IA (worker) | .NET Worker Service con Microsoft.Extensions.AI o Semantic Kernel | Agentes, extracción de documentos, ranking, resúmenes, conversación |
 | Mensajería | HTTP con outbox e inbox, sin broker (ADR 0008) | Eventos entre API y servicio de IA (“HV recibida”, “ranking listo”) |
@@ -523,7 +515,7 @@ Selvana es un producto independiente: **no depende de ningún ERP** y se conecta
 | 3. Archivo programado | Exportación/importación automática CSV/Excel por SFTP con plantilla configurable | ERP sin API |
 | 4. Manual asistido | Descarga del archivo de novedades listo para cargar | Cualquier ERP, desde el día uno |
 
-**Qué se sincroniza:** maestros (empresas, sedes, centros de costo, cargos) del ERP hacia Selvana; altas, cambios, novedades y retiros de Selvana hacia el ERP; desprendibles y certificados de nómina del ERP hacia el autoservicio.
+**Qué se sincroniza:** maestros (empresas, sedes, centros de costo, cargos) del ERP hacia Selvana; altas, cambios, novedades y retiros de Selvana hacia el ERP.
 
 **Garantías:** bitácora de cada sincronización, reintentos automáticos, cola de errores para revisar y conciliación mensual empleados Selvana vs. ERP.
 

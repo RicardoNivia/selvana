@@ -6,6 +6,12 @@ using Selvana.Core.Api;
 using Selvana.Core.Infrastructure;
 using Selvana.Core.Infrastructure.Empresas;
 using Selvana.Core.Infrastructure.Persistence;
+using Selvana.Clima.Api;
+using Selvana.Clima.Infrastructure;
+using Selvana.Clima.Infrastructure.Persistence;
+using Selvana.Desempeno.Api;
+using Selvana.Desempeno.Infrastructure;
+using Selvana.Desempeno.Infrastructure.Persistence;
 using Selvana.Expediente.Api;
 using Selvana.Expediente.Infrastructure;
 using Selvana.Expediente.Infrastructure.Persistence;
@@ -32,11 +38,14 @@ builder.Services.AddSelvanaAuth(builder.Configuration, builder.Environment);
 // Monolito modular: los módulos se hablan en proceso; con el AI.Worker se habla por HTTP con outbox e inbox (ADR 0008)
 builder.Services.AddMensajeriaHttp(builder.Configuration);
 builder.Services.AddCqrs(Selvana.Core.Application.AssemblyReference.Assembly, Selvana.Reclutamiento.Application.AssemblyReference.Assembly,
-    Selvana.Vinculacion.Application.AssemblyReference.Assembly, Selvana.Expediente.Application.AssemblyReference.Assembly);
+    Selvana.Vinculacion.Application.AssemblyReference.Assembly, Selvana.Expediente.Application.AssemblyReference.Assembly,
+    Selvana.Desempeno.Application.AssemblyReference.Assembly, Selvana.Clima.Application.AssemblyReference.Assembly);
 builder.Services.AddCoreModule(builder.Configuration);
 builder.Services.AddReclutamientoModule(builder.Configuration);
 builder.Services.AddVinculacionModule(builder.Configuration);
 builder.Services.AddExpedienteModule(builder.Configuration);
+builder.Services.AddDesempenoModule(builder.Configuration);
+builder.Services.AddClimaModule(builder.Configuration);
 
 // Hojas de vida cifradas (historia 188) y portal público protegido contra abuso: 60 peticiones por minuto por IP
 var proteccion = builder.Services.AddDataProtection().SetApplicationName("Selvana");
@@ -81,6 +90,8 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await app.Services.MigrateReclutamientoModuleAsync();
     await app.Services.MigrateVinculacionModuleAsync();
     await app.Services.MigrateExpedienteModuleAsync();
+    await app.Services.MigrateDesempenoModuleAsync();
+    await app.Services.MigrateClimaModuleAsync();
 }
 
 // El ambiente de pruebas en línea también lleva la empresa de ejemplo, con la contraseña desde sus secretos
@@ -98,7 +109,14 @@ if (app.Configuration.GetValue<bool>("Ejemplo:Sembrar"))
     var empresas = await app.Services.SembrarEjemploCoreAsync(new AccesoEjemplo(ejemplo["CorreoDueno"] ?? "", dueno,
         ejemplo["ContrasenaDueno"] ?? "", ejemplo["ContrasenaFicticios"] ?? ""));
     var contratables = await app.Services.SembrarEjemploReclutamientoAsync(empresas, dueno);
-    await app.Services.SembrarEjemploVinculacionAsync(contratables, "Valentina Ríos");
+    // Más volumen: diez vacantes con postulantes en todas las etapas, la planta de cada empresa y cuentas en el portal de la persona
+    var ampliada = await app.Services.SembrarEjemploAmpliadoReclutamientoAsync(empresas, dueno);
+    await app.Services.SembrarEjemploVinculacionAsync([.. contratables, .. ampliada.Contratables], "Valentina Ríos");
+    var planta = await app.Services.SembrarEjemploExpedienteAsync(empresas, "Valentina Ríos");
+    await app.Services.SembrarCuentasPortalEjemploAsync([.. ampliada.Personas, .. planta], ejemplo["ContrasenaFicticios"] ?? "");
+    // Desempeño y clima sobre la planta: ciclos con evaluaciones y 9-box, encuesta con respuestas y pulsos de ingreso
+    await app.Services.SembrarEjemploDesempenoAsync(empresas, "Valentina Ríos");
+    await app.Services.SembrarEjemploClimaAsync(empresas, "Valentina Ríos");
 }
 
 // Datos maestros por defecto de cada empresa (idempotente): tipos de contrato
@@ -133,6 +151,8 @@ app.MapEventosEntrantes<CoreDbContext>("/internal/eventos/core");
 app.MapEventosEntrantes<ReclutamientoDbContext>("/internal/eventos/reclutamiento");
 app.MapEventosEntrantes<VinculacionDbContext>("/internal/eventos/vinculacion");
 app.MapEventosEntrantes<ExpedienteDbContext>("/internal/eventos/expediente");
+app.MapEventosEntrantes<DesempenoDbContext>("/internal/eventos/desempeno");
+app.MapEventosEntrantes<ClimaDbContext>("/internal/eventos/clima");
 app.MapReclutamientoInterno();
 app.MapVinculacionInterno();
 app.MapExpedienteInterno();
@@ -145,6 +165,9 @@ v1.MapBandejaEndpoints();
 v1.MapReclutamientoEndpoints();
 v1.MapVinculacionEndpoints();
 v1.MapExpedienteEndpoints();
+v1.MapDesempenoEndpoints();
+v1.MapClimaEndpoints();
+v1.MapClimaPublico();
 
 await app.RunAsync();
 

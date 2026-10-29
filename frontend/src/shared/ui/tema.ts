@@ -26,8 +26,7 @@ function aplicarTema(tema: Tema) {
 
 export function useTema() {
   const [tema, setTema] = useState(leerTema)
-  const alternar = () => {
-    const nuevo = siguiente[tema]
+  const elegir = (nuevo: Tema) => {
     aplicarTema(nuevo)
     try {
       if (nuevo === 'sistema') localStorage.removeItem(claveTema)
@@ -37,5 +36,6 @@ export function useTema() {
     }
     setTema(nuevo)
   }
-  return { tema, alternar }
+  const alternar = () => elegir(siguiente[tema])
+  return { tema, alternar, elegir }
 }

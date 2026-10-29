@@ -9,12 +9,11 @@ Todos los agentes comparten la misma plataforma, construida en la Etapa 0 y ampl
 | Bandeja de aprobaciones | Muestra lo que la IA preparó, con explicación, para aprobar, corregir o rechazar | 0 |
 | Extracción de documentos | Lee HV, cédulas, diplomas, certificados e incapacidades | 1 |
 | Búsqueda semántica | Encuentra candidatos y empleados por significado, no solo palabras | 1 |
-| Base de conocimiento por empresa | Reglamento, políticas y manuales para el asistente | 3 |
 | Modelos predictivos | Rotación, ausentismo, planta requerida | 5 |
 | Evaluación continua | Bancos de prueba por agente: precisión, sesgo, alucinaciones; corre en cada versión | 0 |
 | Controles | Variables protegidas excluidas, datos sensibles enmascarados, registro de cada sugerencia y decisión | 0 |
 
-**Catálogo de agentes por etapa:** Reclutador y Preselección (1) · Documentos y Onboarding (2) · Asistente del empleado y del líder (3) · Copiloto de desempeño (4) · Formación, Clima y Retención (5).
+**Catálogo de agentes por etapa:** Reclutador y Preselección (1) · Documentos y Onboarding (2) · Actualización del expediente y consultas del líder (3) · Copiloto de desempeño (4) · Formación, Clima y Retención (5).
 
 ## Gateway de modelos (construido)
 

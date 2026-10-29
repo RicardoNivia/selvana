@@ -54,7 +54,87 @@ public sealed class CuentaCandidato : AggregateRoot<Guid>
     public int IntentosFallidos { get; private set; }
     public DateTimeOffset? BloqueadaHasta { get; private set; }
 
+    /// <summary>
+    /// Empresas con las que la persona decidió compartir su hoja de vida del portal (por ejemplo, su empleador, para su expediente).
+    /// Sin esto, su empresa no la ve: la autorización del portal es con Selvana, no con cada empresa (Ley 1581).
+    /// </summary>
+    public List<Guid> HojaDeVidaCompartidaCon { get; private set; } = [];
+
+    public void CompartirHojaDeVida(Guid empresaId, bool compartir)
+    {
+        HojaDeVidaCompartidaCon = compartir
+            ? [.. HojaDeVidaCompartidaCon.Append(empresaId).Distinct()]
+            : [.. HojaDeVidaCompartidaCon.Where(e => e != empresaId)];
+    }
+
+    /// <summary>P4 · Mis documentos: uno por tipo, cifrados, listos para entregar a los procesos que los pidan.</summary>
+    public List<DocumentoPersona> Documentos { get; private set; } = [];
+
     public static readonly IReadOnlyList<string> TiposDocumento = ["CC", "CE", "TI", "PA", "PPT"];
+
+    /// <summary>Guarda un documento; si ya había uno del mismo tipo lo reemplaza y devuelve el archivo anterior para borrarlo.</summary>
+    public Result<(DocumentoPersona Documento, Guid? ArchivoAnterior)> GuardarDocumento(string tipo, Guid archivoId, string nombreArchivo, string tipoContenido,
+        DateOnly? venceEn, DateTimeOffset ahora)
+    {
+        if (TiposDocumentoPersona.Nombre(tipo) is null)
+        {
+            return DocumentosPersonaErrors.TipoInvalido;
+        }
+
+        var d = Documentos.FirstOrDefault(x => x.Tipo == tipo);
+        Guid? anterior = null;
+        if (d is null)
+        {
+            d = new DocumentoPersona { Id = Guid.CreateVersion7(), Tipo = tipo };
+            Documentos.Add(d);
+        }
+        else
+        {
+            anterior = d.ArchivoId;
+        }
+
+        d.ArchivoId = archivoId;
+        d.NombreArchivo = nombreArchivo;
+        d.TipoContenido = tipoContenido;
+        d.VenceEn = venceEn;
+        d.SubidoEn = ahora;
+        // La lista se reemplaza para que EF Core note el cambio en la columna JSON
+        Documentos = [.. Documentos];
+        return (d, anterior);
+    }
+
+    public Result<Guid> QuitarDocumento(Guid id)
+    {
+        var d = Documentos.FirstOrDefault(x => x.Id == id);
+        if (d is null)
+        {
+            return DocumentosPersonaErrors.NoExiste;
+        }
+
+        Documentos = [.. Documentos.Where(x => x.Id != id)];
+        return d.ArchivoId;
+    }
+
+    /// <summary>El documento vigente de ese tipo, listo para entregar; falla si no existe o ya venció.</summary>
+    public Result<DocumentoPersona> DocumentoParaEnviar(string tipo, DateOnly hoy)
+    {
+        var d = Documentos.FirstOrDefault(x => x.Tipo == tipo);
+        if (d is null)
+        {
+            return DocumentosPersonaErrors.NoExiste;
+        }
+
+        return d.VenceEn is { } vence && vence < hoy ? DocumentosPersonaErrors.Vencido : d;
+    }
+
+    public void RegistrarEnvio(Guid documentoId, Guid procesoId, string empresa, DateTimeOffset ahora)
+    {
+        if (Documentos.FirstOrDefault(x => x.Id == documentoId) is { } d)
+        {
+            d.Envios = [.. d.Envios, new EnvioDocumento { ProcesoId = procesoId, Empresa = empresa, En = ahora }];
+            Documentos = [.. Documentos];
+        }
+    }
 
     public static string NormalizarCorreo(string correo) => (correo ?? "").Trim().ToLowerInvariant();
 

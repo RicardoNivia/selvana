@@ -26,4 +26,21 @@ public static class SesionesPortal
     }
 
     public static Task CerrarAsync(HttpContext http) => http.SignOutAsync(Esquema);
+
+    /// <summary>
+    /// Filtro para endpoints públicos donde la sesión del portal es opcional (postularse, ADR 0014): si llega la cookie del portal, la persona
+    /// queda identificada; si no, sigue como anónima.
+    /// </summary>
+    public static async ValueTask<object?> UsarSiHay(EndpointFilterInvocationContext contexto, EndpointFilterDelegate siguiente)
+    {
+        ArgumentNullException.ThrowIfNull(contexto);
+        ArgumentNullException.ThrowIfNull(siguiente);
+        var resultado = await contexto.HttpContext.AuthenticateAsync(Esquema);
+        if (resultado.Succeeded)
+        {
+            contexto.HttpContext.User = resultado.Principal;
+        }
+
+        return await siguiente(contexto);
+    }
 }

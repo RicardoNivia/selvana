@@ -6,7 +6,7 @@ Sin pilotos, la validación sale del benchmark del mercado, de pruebas de usabil
 | --- | --- | --- | --- |
 | Selección IA | Sprint 10 (fin Etapa 1) | Vacantes con IA, portal de empleo, lector de HV, ranking explicable, preselección por WhatsApp, pruebas | Empresas temporales, retail, BPO, cualquier empresa que contrate seguido |
 | Selección + Vinculación | Sprint 14 | + contratos con firma, agente de documentos, alta en nómina por conector, onboarding, paquete temporales | Quien quiere eliminar la digitación de ingresos |
-| Talento Core | Sprint 18 | + expediente vivo, asistente del empleado y del líder | Empresas con mucho trámite de empleados |
+| Talento Core | Sprint 18 | + expediente vivo y «Mi equipo» del líder | Empresas con mucho trámite de empleados |
 | Selvana Completo | Sprint 30 | + desempeño con copiloto, formación, clima, retención predictiva | Empresa mediana y grande |
 
 **Modelo de precio** (alineado con la práctica del mercado, por ejemplo Buk): suscripción mensual por colaborador activo, con descuento por volumen y por módulos combinados; el plan Selección IA también por vacante o paquete de postulaciones para empresas con poca planta y mucha rotación. El consumo de IA queda incluido hasta un límite por plan.

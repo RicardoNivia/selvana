@@ -16,6 +16,15 @@ if (args is ["probar-vacante", ..])
     return await PruebaRedactorVacantes.EjecutarAsync(host.Services, string.Join(' ', args.Skip(1)));
 }
 
+// Diagnóstico del lector de hojas de vida: dotnet run --project src/Workers/Selvana.AI.Worker -- probar-hv "<ruta del archivo>"
+if (args is ["probar-hv", var ruta])
+{
+    var demo = Host.CreateApplicationBuilder([]);
+    demo.Services.AddPlataformaIa(demo.Configuration);
+    using var host = demo.Build();
+    return await Selvana.AI.Agentes.Reclutamiento.DiagnosticoLector.ProbarAsync(host.Services, ruta);
+}
+
 // Demo del motor de agentes: dotnet run --project src/Workers/Selvana.AI.Worker -- probar-agente ["<mensaje>"]
 if (args is ["probar-agente", ..])
 {

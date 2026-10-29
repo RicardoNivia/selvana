@@ -40,6 +40,7 @@ public static class ReclutamientoModule
         services.AddScoped<ILecturaPortalPersona, LecturaPortalPersona>();
         services.AddScoped<ILecturaOfertas, LecturaOfertas>();
         services.AddSingleton<IHasherClavesPortal, HasherClavesPortal>();
+        services.AddScoped<Contracts.IHojasDeVidaParaEmpresa, Portal.HojasDeVidaParaEmpresa>();
         services.AddScoped<IEventosReclutamiento, EventosReclutamiento>();
         services.AddScoped<IAlmacenHojasDeVida, AlmacenHojasDeVida>();
         services.AddScoped<ILecturaReclutamiento, LecturaReclutamiento>();
@@ -76,6 +77,27 @@ public static class ReclutamientoModule
         var sp = scope.ServiceProvider;
         return await Ejemplo.SemillaEjemplo.SembrarAsync(sp.GetRequiredService<ReclutamientoDbContext>(), sp.GetRequiredService<IAlmacenHojasDeVida>(),
             sp.GetRequiredService<ITokensPruebas>(), empresas, nombreDueno, sp.GetRequiredService<TimeProvider>());
+    }
+
+    /// <summary>Más vacantes con postulantes en todas las etapas (idempotente por vacante). Devuelve los que siguen a Vinculación y quiénes tendrán cuenta en el portal.</summary>
+    public static async Task<(IReadOnlyList<(Guid EmpresaId, PostulanteContratable Postulante, string Avance)> Contratables,
+        IReadOnlyList<Selvana.Infrastructure.Common.Ejemplo.PersonaPortalEjemplo> Personas)> SembrarEjemploAmpliadoReclutamientoAsync(
+        this IServiceProvider services, IReadOnlyList<Core.Contracts.Empresas.EmpresaResumen> empresas, string nombreDueno)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await Ejemplo.SemillaEjemplo.SembrarAmpliadaAsync(sp.GetRequiredService<ReclutamientoDbContext>(), sp.GetRequiredService<IAlmacenHojasDeVida>(),
+            sp.GetRequiredService<ITokensPruebas>(), empresas, nombreDueno, sp.GetRequiredService<TimeProvider>());
+    }
+
+    /// <summary>Cuentas del portal de la persona para los candidatos y empleados de ejemplo (idempotente). Devuelve cuántas creó.</summary>
+    public static async Task<int> SembrarCuentasPortalEjemploAsync(this IServiceProvider services,
+        IReadOnlyList<Selvana.Infrastructure.Common.Ejemplo.PersonaPortalEjemplo> personas, string contrasena)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await Ejemplo.SemillaEjemplo.SembrarCuentasPortalAsync(sp.GetRequiredService<ReclutamientoDbContext>(), sp.GetRequiredService<IAlmacenHojasDeVida>(),
+            sp.GetRequiredService<Application.Portal.IHasherClavesPortal>(), personas, contrasena, sp.GetRequiredService<TimeProvider>());
     }
 
     public static async Task MigrateReclutamientoModuleAsync(this IServiceProvider services)

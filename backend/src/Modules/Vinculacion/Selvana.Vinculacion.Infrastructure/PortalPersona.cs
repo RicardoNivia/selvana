@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Selvana.SharedKernel.Messaging;
+using Selvana.SharedKernel.Results;
 using Selvana.Vinculacion.Application.Abstracciones;
+using Selvana.Vinculacion.Application.Documentos;
 using Selvana.Vinculacion.Contracts;
 using Selvana.Vinculacion.Domain.Procesos;
 using Selvana.Vinculacion.Infrastructure.Persistence;
@@ -7,8 +10,21 @@ using Selvana.Vinculacion.Infrastructure.Persistence;
 namespace Selvana.Vinculacion.Infrastructure;
 
 /// <summary>Lo que el portal de la persona ve de sus procesos de contratación (ADR 0013). Busca por cédula y correo a la vez.</summary>
-internal sealed class ProcesosDeLaPersona(VinculacionDbContext db, ITokensEnlace tokens, TimeProvider reloj) : IProcesosDeLaPersona
+internal sealed class ProcesosDeLaPersona(VinculacionDbContext db, ITokensEnlace tokens, TimeProvider reloj,
+    ICommandHandler<EntregarDocumentoDesdePortalCommand> entregar) : IProcesosDeLaPersona
 {
+    public async Task<IReadOnlyList<DocumentoPedidoALaPersona>> DocumentosPedidosAsync(string documento, string correo, CancellationToken cancellationToken)
+    {
+        var procesos = await Buscar(documento, correo).AsNoTracking().Where(p => p.Etapa == EtapaVinculacion.Documentos).ToListAsync(cancellationToken);
+        return [.. procesos.OrderByDescending(p => p.ActualizadoEn).SelectMany(p => p.Documentos.Where(d => !d.LoCargaEmpresa).Select(d =>
+            new DocumentoPedidoALaPersona(p.Id, p.EmpresaUsuaria ?? p.Empresa, p.Vacante.Cargo is { Length: > 0 } cargo ? cargo : p.Vacante.Titulo,
+                d.Tipo.ToString(), RequisitosDocumentales.Nombre(d.Tipo), d.Obligatorio, d.Estado.ToString(), d.MotivoRechazo)))];
+    }
+
+    public Task<Result> EntregarDocumentoAsync(string documento, string correo, EntregaDesdePortal entrega, CancellationToken cancellationToken) =>
+        entregar.Handle(new EntregarDocumentoDesdePortalCommand(entrega.ProcesoId, documento, correo, entrega.Tipo, entrega.NombreArchivo, entrega.TipoContenido,
+            entrega.Contenido), cancellationToken);
+
     public async Task<IReadOnlyList<ProcesoDeLaPersona>> ListarAsync(string documento, string correo, CancellationToken cancellationToken)
     {
         var procesos = await Buscar(documento, correo).AsNoTracking().ToListAsync(cancellationToken);

@@ -91,7 +91,8 @@ public static class ReclutamientoEndpoints
         MapPreseleccionCandidato(app.MapGroup("/portal/preseleccion").WithTags("Preselección conversacional (candidato)").AllowAnonymous()
             .RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         MapPortal(app.MapGroup("/portal").WithTags("Portal de empleo público").AllowAnonymous().RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
-        MapPostularse(app.MapGroup("/portal").WithTags("Postularse (con cuenta del portal)").RequireAuthorization(SesionesPortal.Politica)
+        // Postularse no exige cuenta (ADR 0014): si hay sesión del portal, se usa su correo y su identificación
+        MapPostularse(app.MapGroup("/portal").WithTags("Postularse").AllowAnonymous().AddEndpointFilter(SesionesPortal.UsarSiHay)
             .RequireRateLimiting(ClaveInterna.PoliticaPortalPublico));
         app.MapPortalPersona();
         return app;
@@ -433,7 +434,8 @@ public static class ReclutamientoEndpoints
                 await using var flujo = hojaDeVida.OpenReadStream();
                 using var memoria = new MemoryStream();
                 await flujo.CopyToAsync(memoria, ct);
-                var r = await h.Handle(new IniciarPostulacionCommand(codigo, hojaDeVida.FileName, hojaDeVida.ContentType, memoria.ToArray()), ct);
+                var r = await h.Handle(new IniciarPostulacionCommand(codigo, hojaDeVida.FileName, TiposArchivo.PorExtension(hojaDeVida.FileName, hojaDeVida.ContentType),
+                    memoria.ToArray()), ct);
                 return r.IsSuccess ? Results.Created($"/api/v1/portal/postulaciones/{r.Value}", new CreadoResponse(r.Value)) : r.ToHttp();
             })
             .WithName("IniciarPostulacion").DisableAntiforgery().Produces<CreadoResponse>(StatusCodes.Status201Created);
@@ -452,4 +454,18 @@ public static class ReclutamientoEndpoints
             })
             .WithName("EnviarPostulacion").Produces<PostulacionEnviadaResponse>();
     }
+}
+
+/// <summary>Algunos navegadores (y clientes como PowerShell) mandan el Word o el PDF sin tipo: se deduce por la extensión.</summary>
+internal static class TiposArchivo
+{
+    public static string PorExtension(string nombre, string tipoRecibido) => Path.GetExtension(nombre).ToUpperInvariant() switch
+    {
+        ".PDF" => "application/pdf",
+        ".DOCX" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ".JPG" or ".JPEG" => "image/jpeg",
+        ".PNG" => "image/png",
+        ".WEBP" => "image/webp",
+        _ => tipoRecibido,
+    };
 }

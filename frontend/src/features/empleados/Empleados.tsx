@@ -2,12 +2,12 @@ import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
-import { IconoAlerta } from '../../shared/ui/Iconos'
+import { IconoAlerta, IconoCheck } from '../../shared/ui/Iconos'
 import { Buscador, Paginacion } from '../../shared/ui/Paginacion'
 import { usePaginacion } from '../../shared/ui/paginado'
 import { useTiposContrato } from '../vinculacion/api'
 import { CargaPlanta } from './CargaPlanta'
-import { type Afiliaciones, fechaCorta, type NuevoEmpleado, pesos, type Situacion, useCrearEmpleado, useEmpleados } from './api'
+import { type Afiliaciones, fechaCorta, type NuevoEmpleado, pesos, type Situacion, useCampanaActualizacion, useCrearEmpleado, useEmpleados } from './api'
 import './empleados.css'
 
 /** Empleados: el expediente vivo de la planta. Llegan solos desde la vinculación o se crean a mano. */
@@ -19,6 +19,7 @@ export function Empleados() {
   const [creando, setCreando] = useState(false)
   const [cargando, setCargando] = useState(false)
   const empleados = useEmpleados({ pagina, tamano, buscar, estado, alertas })
+  const campana = useCampanaActualizacion()
   const alBuscar = useCallback((t: string) => { setBuscar(t); setPagina(1) }, [setPagina])
   const c = empleados.data?.conteo
 
@@ -31,12 +32,16 @@ export function Empleados() {
         </div>
         {!creando && !cargando && (
           <div className="vin-acciones">
+            <Boton cargando={campana.isPending} textoCargando="Pidiendo…" onClick={() => campana.mutate(undefined)}
+              title="Cada empleado activo la ve en su portal y confirma o propone cambios">Pedir actualización de datos</Boton>
             <Boton onClick={() => setCargando(true)}>Cargar la planta</Boton>
             <Boton variante="primario" onClick={() => setCreando(true)}>Crear empleado</Boton>
           </div>
         )}
       </header>
 
+      {campana.isSuccess && <p className="aviso aviso-ok" role="status"><IconoCheck />Se pidió a {campana.data.pedidos} {campana.data.pedidos === 1 ? 'empleado' : 'empleados'} confirmar o actualizar sus datos. Lo verán en su portal.</p>}
+      {campana.error && <p className="aviso aviso-error" role="alert"><IconoAlerta />{campana.error.message}</p>}
       {creando && <NuevoEmpleadoFormulario onListo={() => setCreando(false)} />}
       {cargando && <CargaPlanta onListo={() => setCargando(false)} />}
 

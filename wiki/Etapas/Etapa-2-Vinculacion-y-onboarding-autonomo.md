@@ -24,7 +24,6 @@ Objetivo: que el candidato aprobado quede contratado, afiliado y creado en nómi
 **Sprint 14 – Onboarding guiado**
 
 - [ ] Plan de inducción generado por cargo: tareas, responsables y fechas
-- [ ] Asistente de bienvenida que responde dudas los primeros días
 - [ ] Encuestas automáticas a los 30, 60 y 90 días con alerta temprana de retiro
 
 **Gate de salida:** de candidato aprobado a empleado en nómina sin redigitar datos; plan “Selección + Vinculación” a la venta.

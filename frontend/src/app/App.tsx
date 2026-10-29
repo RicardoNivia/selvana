@@ -29,6 +29,12 @@ import { ProcesosVinculacion } from '../features/vinculacion/ProcesosVinculacion
 import { TiposContrato } from '../features/vinculacion/TiposContrato'
 import { Empleados } from '../features/empleados/Empleados'
 import { FichaEmpleado } from '../features/empleados/FichaEmpleado'
+import { Clima } from '../features/clima/Clima'
+import { EncuestaDetalle } from '../features/clima/EncuestaDetalle'
+import { EncuestaPublica } from '../features/clima/EncuestaPublica'
+import { CicloDetalle } from '../features/desempeno/CicloDetalle'
+import { Desempeno } from '../features/desempeno/Desempeno'
+import { EvaluacionDetalle } from '../features/desempeno/EvaluacionDetalle'
 import { Layout } from './Layout'
 
 const router = createBrowserRouter([
@@ -62,6 +68,8 @@ const router = createBrowserRouter([
   { path: '/pruebas', element: <PortalLayout />, children: [{ path: ':token', element: <PresentarPruebas /> }] },
   // El candidato conversa con el asistente de preselección con su enlace, sin cuenta
   { path: '/preseleccion', element: <PortalLayout />, children: [{ path: ':token', element: <ConversacionCandidato /> }] },
+  // Encuesta de clima anónima por enlace, sin cuenta
+  { path: '/clima', element: <PortalLayout />, children: [{ path: ':token', element: <EncuestaPublica /> }] },
   // El candidato lee y acepta su oferta laboral con su enlace, sin cuenta
   { path: '/vinculacion', element: <PortalLayout />, children: [{ path: ':token', element: <OfertaCandidato /> }] },
   // Consola de RRHH (requiere sesión)
@@ -80,6 +88,11 @@ const router = createBrowserRouter([
       { path: 'vinculacion/:id', element: <ProcesoVinculacion /> },
       { path: 'empleados', element: <Empleados /> },
       { path: 'empleados/:id', element: <FichaEmpleado /> },
+      { path: 'desempeno', element: <Desempeno /> },
+      { path: 'desempeno/evaluaciones/:id', element: <EvaluacionDetalle /> },
+      { path: 'desempeno/:id', element: <CicloDetalle /> },
+      { path: 'clima', element: <Clima /> },
+      { path: 'clima/encuestas/:id', element: <EncuestaDetalle /> },
       { path: 'empresa/conectar-nomina', element: <ConectarNomina /> },
       { path: 'empresa/estructura', element: <EstructuraCargos /> },
       { path: 'empresa/estructura/cargos/nuevo', element: <CargoNuevo /> },

@@ -281,6 +281,11 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("hoja_de_vida_actualizada_en");
 
+                    b.PrimitiveCollection<List<Guid>>("HojaDeVidaCompartidaCon")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("hoja_de_vida_compartida_con");
+
                     b.Property<int>("IntentosFallidos")
                         .HasColumnType("integer")
                         .HasColumnName("intentos_fallidos");
@@ -1324,11 +1329,78 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                             b1.Navigation("Formacion");
                         });
 
+                    b.OwnsMany("Selvana.Reclutamiento.Domain.Portal.DocumentoPersona", "Documentos", b1 =>
+                        {
+                            b1.Property<Guid>("CuentaCandidatoId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<Guid>("ArchivoId");
+
+                            b1.Property<Guid>("Id");
+
+                            b1.Property<string>("NombreArchivo")
+                                .IsRequired();
+
+                            b1.Property<DateTimeOffset>("SubidoEn");
+
+                            b1.Property<string>("Tipo")
+                                .IsRequired();
+
+                            b1.Property<string>("TipoContenido")
+                                .IsRequired();
+
+                            b1.Property<DateOnly?>("VenceEn");
+
+                            b1.HasKey("CuentaCandidatoId", "__synthesizedOrdinal");
+
+                            b1.ToTable("cuentas_candidato", "reclutamiento");
+
+                            b1
+                                .ToJson("documentos")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CuentaCandidatoId")
+                                .HasConstraintName("fk_cuentas_candidato_cuentas_candidato_cuenta_candidato_id");
+
+                            b1.OwnsMany("Selvana.Reclutamiento.Domain.Portal.EnvioDocumento", "Envios", b2 =>
+                                {
+                                    b2.Property<Guid>("DocumentoPersonaCuentaCandidatoId");
+
+                                    b2.Property<int>("DocumentoPersona__synthesizedOrdinal");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAdd();
+
+                                    b2.Property<string>("Empresa")
+                                        .IsRequired();
+
+                                    b2.Property<DateTimeOffset>("En");
+
+                                    b2.Property<Guid>("ProcesoId");
+
+                                    b2.HasKey("DocumentoPersonaCuentaCandidatoId", "DocumentoPersona__synthesizedOrdinal", "__synthesizedOrdinal")
+                                        .HasName("pk_cuentas_candidato");
+
+                                    b2.ToTable("cuentas_candidato", "reclutamiento");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("DocumentoPersonaCuentaCandidatoId", "DocumentoPersona__synthesizedOrdinal")
+                                        .HasConstraintName("fk_cuentas_candidato_cuentas_candidato_documento_persona_cuenta_c");
+                                });
+
+                            b1.Navigation("Envios");
+                        });
+
                     b.Navigation("Autorizacion")
                         .IsRequired();
 
                     b.Navigation("Datos")
                         .IsRequired();
+
+                    b.Navigation("Documentos");
                 });
 
             modelBuilder.Entity("Selvana.Reclutamiento.Domain.Postulaciones.BorradorPostulacion", b =>

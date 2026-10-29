@@ -58,3 +58,5 @@ export const IconoPrueba = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true"
 export const IconoMas = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M10 4v12M4 10h12" /></svg>
 export const IconoCerrar = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M5 5l10 10M15 5 5 15" /></svg>
 export const IconoInicio = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M3 9 10 3l7 6v7.5a1 1 0 0 1-1 1h-3.5V12h-5v5.5H4a1 1 0 0 1-1-1V9Z" /></svg>
+export const IconoEdificio = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M3.5 17.5V5l6-2.5V17.5M9.5 7.5h7v10M2 17.5h16M6 7.5v.01M6 10.5v.01M6 13.5v.01M12.5 10.5h1M12.5 13.5h1" /></svg>
+export const IconoClima = (p: P) => <svg viewBox="0 0 20 20" aria-hidden="true" {...linea} {...p}><path d="M10 17.5c-3.6-2.4-6-4.9-6-7.8A3.4 3.4 0 0 1 10 7.6a3.4 3.4 0 0 1 6 2.1c0 2.9-2.4 5.4-6 7.8Z" /><path d="M10 2.5v2M4.2 4.4l1.4 1.4M15.8 4.4l-1.4 1.4" /></svg>

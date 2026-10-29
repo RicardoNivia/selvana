@@ -31,6 +31,8 @@
   --color-sobre-selva: #ffffff;
   --color-sobre-selva-2: #7fdcc8;
   --color-ia-sobre-selva: #c590f0;
+  /* Fondo selva profundo: riel de la consola y paneles de marca */
+  --color-selva-profundo: #073f38;
 
   /* Semánticos */
   --color-exito: #2a8a3e;
@@ -91,6 +93,7 @@
     --color-ia-suave: #2a1a3a;
     --color-ia-borde: #5a3a7a;
     --color-sobre-ia: #1b0a2a;
+  --color-selva-profundo: #0b2c27;
     --color-exito: #5cc774;
     --color-exito-suave: #163222;
     --color-alerta: #f0a63a;
@@ -121,6 +124,7 @@
   --color-ia-suave: #2a1a3a;
   --color-ia-borde: #5a3a7a;
   --color-sobre-ia: #1b0a2a;
+  --color-selva-profundo: #0b2c27;
   --color-exito: #5cc774;
   --color-exito-suave: #163222;
   --color-alerta: #f0a63a;

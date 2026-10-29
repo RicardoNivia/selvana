@@ -25,6 +25,8 @@ public static class ExpedienteModule
         services.AddScoped<IEventosExpediente, EventosExpediente>();
         services.AddScoped<IBitacora, Bitacora>();
         services.AddScoped<IAlmacenArchivos, AlmacenArchivos>();
+        services.AddScoped<Contracts.IEmpleoDeLaPersona, EmpleoDeLaPersona>();
+        services.AddScoped<Contracts.IPlantaActiva, PlantaActiva>();
         services.AddSingleton<Integrations.Nomina.ArchivoPlantaCsv>();
         services.AddScoped<Application.Empleados.ILectorPlanta, LectorPlanta>();
 
@@ -32,6 +34,16 @@ public static class ExpedienteModule
         services.AddHostedService<OutboxProcessor<ExpedienteDbContext>>();
         services.AddHostedService<InboxProcessor<ExpedienteDbContext>>();
         return services;
+    }
+
+    /// <summary>Ambiente de pruebas en línea: planta de empleados de ejemplo (idempotente). Devuelve los que tendrán cuenta en el portal.</summary>
+    public static async Task<IReadOnlyList<Selvana.Infrastructure.Common.Ejemplo.PersonaPortalEjemplo>> SembrarEjemploExpedienteAsync(this IServiceProvider services,
+        IReadOnlyList<Core.Contracts.Empresas.EmpresaResumen> empresas, string porRrhh)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await Ejemplo.SemillaEjemplo.SembrarAsync(sp.GetRequiredService<ExpedienteDbContext>(), sp.GetRequiredService<IAlmacenArchivos>(), empresas, porRrhh,
+            sp.GetRequiredService<TimeProvider>());
     }
 
     public static async Task MigrateExpedienteModuleAsync(this IServiceProvider services)

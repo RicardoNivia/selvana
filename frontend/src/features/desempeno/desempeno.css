@@ -1,0 +1,78 @@
+/* Desempeño (Etapa 4). Solo variables de theme/tokens.css; el violeta solo en lo que propuso la IA. */
+.des-avance { height: 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; max-width: 160px; }
+.des-avance span { display: block; height: 100%; background: var(--color-primario); border-radius: inherit; transition: width var(--duracion-larga) var(--curva-salida); }
+.des-campos { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--espacio-3); }
+.des-peso { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--color-texto-suave); }
+.des-peso input { accent-color: var(--color-primario); }
+
+.des-pasos { display: flex; flex-wrap: wrap; gap: var(--espacio-2); align-items: center; }
+.des-paso { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radio-full); background: var(--color-superficie-2); color: var(--color-texto-tenue); font-size: 13px; }
+.des-paso.hecho { background: var(--color-exito-suave); color: var(--color-exito); }
+.des-paso.actual { background: var(--color-primario-suave); color: var(--color-primario); font-weight: 600; }
+.des-paso svg { width: 14px; height: 14px; }
+.des-barra { display: flex; flex-wrap: wrap; gap: var(--espacio-2); align-items: center; justify-content: space-between; }
+
+.des-formularios { display: flex; flex-direction: column; gap: var(--espacio-3); }
+.des-formulario { display: flex; flex-direction: column; gap: var(--espacio-3); padding: var(--espacio-4); }
+.des-formulario > header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); }
+.des-formulario > header h3 { margin: 0; font: 700 17px var(--fuente-display); }
+.des-formulario > header .derecha { margin-left: auto; display: flex; gap: var(--espacio-2); flex-wrap: wrap; }
+.des-formulario.ia { border-color: var(--color-ia-borde); }
+.des-listas { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--espacio-4); }
+.des-lista { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.des-lista li { display: flex; gap: var(--espacio-2); justify-content: space-between; align-items: baseline; }
+.des-lista li small { display: block; color: var(--color-texto-tenue); font-size: 12px; }
+.des-lista .peso { font-family: var(--fuente-datos); color: var(--color-texto-suave); flex: none; }
+.des-subtitulo { margin: 0 0 4px; font: 500 11px var(--fuente-datos); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-texto-tenue); }
+.des-editor { display: flex; flex-direction: column; gap: var(--espacio-2); }
+.des-editor-fila { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) 80px auto; gap: var(--espacio-2); align-items: center; }
+.des-editor-fila .entrada { padding: 8px 10px; }
+.des-suma { font: 500 12px var(--fuente-datos); }
+.des-suma.mal { color: var(--color-error); }
+
+.des-matriz { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
+.des-matriz-eje { font: 500 11px var(--fuente-datos); color: var(--color-texto-tenue); text-transform: uppercase; letter-spacing: 0.05em; display: grid; place-items: center; text-align: center; }
+.des-caja { min-height: 110px; padding: var(--espacio-3); border-radius: var(--radio-m); background: var(--color-superficie-2); display: flex; flex-direction: column; gap: 6px; }
+.des-caja b { font-size: 12px; color: var(--color-texto-suave); }
+.des-caja.alta { background: var(--color-exito-suave); }
+.des-caja.baja { background: var(--color-alerta-suave); }
+.des-caja ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px; }
+.des-caja li a { display: inline-block; padding: 2px 8px; border-radius: var(--radio-full); background: var(--color-superficie); font-size: 12px; text-decoration: none; color: var(--color-texto); border: 1px solid var(--color-borde); }
+.des-caja li a.calibrada { border-color: var(--color-primario); }
+
+.des-sesgos { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+
+.des-evaluacion { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--espacio-4); align-items: start; }
+.des-bloque { display: flex; flex-direction: column; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-6); }
+.des-bloque > header { display: flex; flex-wrap: wrap; gap: var(--espacio-2); align-items: center; justify-content: space-between; }
+.des-bloque h2 { margin: 0; font: 700 17px / 1.2 var(--fuente-display); }
+.des-objetivo { display: flex; flex-direction: column; gap: 6px; padding: var(--espacio-3) 0; border-top: 1px solid var(--color-borde); }
+.des-objetivo:first-of-type { border-top: 0; }
+.des-objetivo-fila { display: flex; gap: var(--espacio-3); align-items: center; justify-content: space-between; }
+.des-objetivo small { color: var(--color-texto-tenue); font-size: 12px; }
+.des-objetivo input[type='range'] { flex: 1; accent-color: var(--color-primario); }
+.des-evidencias { margin: 0; padding-left: var(--espacio-4); font-size: 13px; color: var(--color-texto-suave); }
+.des-competencia { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--espacio-3); align-items: center; padding: var(--espacio-2) 0; border-top: 1px solid var(--color-borde); }
+.des-competencia small { display: block; color: var(--color-texto-tenue); font-size: 12px; }
+.des-escala { display: inline-flex; gap: 4px; }
+.des-escala button { width: 34px; height: 34px; border-radius: var(--radio-s); border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto-suave); font: 600 14px var(--fuente-datos); cursor: pointer; transition: background var(--duracion-corta), color var(--duracion-corta); }
+.des-escala button[aria-pressed='true'] { background: var(--color-primario); border-color: var(--color-primario); color: var(--color-sobre-primario); }
+.des-escala button:disabled { cursor: default; }
+.des-referencias { display: flex; gap: var(--espacio-2); font: 500 11px var(--fuente-datos); color: var(--color-texto-tenue); }
+.des-puntaje { font: 800 40px / 1 var(--fuente-display); letter-spacing: -0.03em; }
+.des-potencial { display: inline-flex; padding: 3px; border-radius: var(--radio-m); background: var(--color-superficie-2); gap: 2px; }
+.des-potencial button { padding: 6px 12px; border: 0; border-radius: var(--radio-s); background: none; font: 500 13px var(--fuente-base); color: var(--color-texto-suave); cursor: pointer; }
+.des-potencial button[aria-pressed='true'] { background: var(--color-superficie); color: var(--color-primario); font-weight: 600; box-shadow: var(--sombra-1); }
+.des-plan-fila { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) 150px auto auto; gap: var(--espacio-2); align-items: center; }
+
+@media (max-width: 900px) {
+  .des-evaluacion { grid-template-columns: minmax(0, 1fr); }
+  .des-editor-fila, .des-plan-fila { grid-template-columns: minmax(0, 1fr); }
+  .des-matriz { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .des-matriz-eje { display: none; }
+}
+
+/* Compartidas por Desempeño y Clima */
+.des-formularios .ayuda, .des-bloque .ayuda, .des-barra .ayuda { margin: 0; font-size: 12px; color: var(--color-texto-tenue); }
+.acciones-formulario { display: flex; flex-wrap: wrap; gap: var(--espacio-2); justify-content: flex-end; }
+.emp-formulario .ayuda, .cli-publica .ayuda { margin: 0; font-size: 12px; color: var(--color-texto-tenue); }

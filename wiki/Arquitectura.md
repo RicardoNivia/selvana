@@ -18,7 +18,7 @@
 
 | Pieza | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| Frontend | React + TypeScript (Vite), TanStack Query, librería de componentes del ERP | Consola RRHH, portal del líder, portal del empleado, portal de empleo, bandeja de aprobaciones |
+| Frontend | React + TypeScript (Vite), TanStack Query, librería de componentes del ERP | Consola de la empresa (RRHH y «Mi equipo» del líder), portal del empleado, portal de empleo, bandeja de aprobaciones |
 | API Selvana (monolito modular) | ASP.NET Core Web API en .NET 10 (LTS), EF Core con proveedor Npgsql | Todos los módulos de negocio, seguridad, integración con ERP |
 | Servicio de IA (worker) | .NET Worker Service con Microsoft.Extensions.AI o Semantic Kernel | Agentes, extracción de documentos, ranking, resúmenes, conversación |
 | Mensajería | HTTP con outbox e inbox, sin broker (ADR 0008) | Eventos entre API y servicio de IA (“HV recibida”, “ranking listo”) |

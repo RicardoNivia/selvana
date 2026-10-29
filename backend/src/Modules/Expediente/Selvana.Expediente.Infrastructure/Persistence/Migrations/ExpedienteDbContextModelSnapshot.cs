@@ -29,6 +29,10 @@ namespace Selvana.Expediente.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<DateTimeOffset?>("ActualizacionPedidaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("actualizacion_pedida_en");
+
                     b.Property<DateTimeOffset>("ActualizadoEn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("actualizado_en");
@@ -86,6 +90,10 @@ namespace Selvana.Expediente.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreadoEn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("creado_en");
+
+                    b.Property<DateTimeOffset?>("DatosConfirmadosEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datos_confirmados_en");
 
                     b.Property<string>("Documento")
                         .IsRequired()
@@ -171,6 +179,9 @@ namespace Selvana.Expediente.Infrastructure.Persistence.Migrations
                     b.HasIndex("Codigo")
                         .IsUnique()
                         .HasDatabaseName("ix_empleados_codigo");
+
+                    b.HasIndex("Documento")
+                        .HasDatabaseName("ix_empleados_documento");
 
                     b.HasIndex("ProcesoVinculacionId")
                         .HasDatabaseName("ix_empleados_proceso_vinculacion_id");
@@ -337,6 +348,43 @@ namespace Selvana.Expediente.Infrastructure.Persistence.Migrations
 
                             b1
                                 .ToJson("afiliaciones")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EmpleadoId")
+                                .HasConstraintName("fk_empleados_empleados_id");
+                        });
+
+                    b.OwnsOne("Selvana.Expediente.Domain.Empleados.CambioPropuestoEmpleado", "CambioPropuesto", b1 =>
+                        {
+                            b1.Property<Guid>("EmpleadoId");
+
+                            b1.Property<string>("CajaCompensacion")
+                                .IsRequired();
+
+                            b1.PrimitiveCollection<string>("Cambios")
+                                .IsRequired();
+
+                            b1.Property<string>("Celular")
+                                .IsRequired();
+
+                            b1.Property<string>("Ciudad")
+                                .IsRequired();
+
+                            b1.Property<DateTimeOffset>("En");
+
+                            b1.Property<string>("Eps")
+                                .IsRequired();
+
+                            b1.Property<string>("FondoPension")
+                                .IsRequired();
+
+                            b1.HasKey("EmpleadoId");
+
+                            b1.ToTable("empleados", "expediente");
+
+                            b1
+                                .ToJson("cambio_propuesto")
                                 .HasColumnType("jsonb");
 
                             b1.WithOwner()
@@ -589,6 +637,8 @@ namespace Selvana.Expediente.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Afiliaciones")
                         .IsRequired();
+
+                    b.Navigation("CambioPropuesto");
 
                     b.Navigation("Documentos");
 

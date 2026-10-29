@@ -1,5 +1,8 @@
 const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000'
 
+/** Dirección completa de la API, para enlaces de descarga que abren en el navegador (llevan la cookie de sesión). */
+export const urlApi = (path: string) => `${baseUrl}${path}`
+
 interface ProblemDetails {
   title?: string
   detail?: string

@@ -66,7 +66,9 @@ internal sealed class ObtenerMatrizPermisosHandler : IQueryHandler<ObtenerMatriz
         [Accion.ConfigurarAgentes] = ("Configurar agentes y autonomía", null),
         [Accion.VerBitacora] = ("Ver bitácora de auditoría", null),
         [Accion.GestionarEmpleados] = ("Gestionar el expediente de los empleados", null),
-        [Accion.ConsultarSusDatos] = ("Consultar sus vacaciones, certificados y documentos", null),
+        [Accion.GestionarDesempeno] = ("Evaluar el desempeño", null),
+        [Accion.GestionarClima] = ("Medir el clima y la rotación", null),
+        [Accion.ConsultarSusDatos] = ("Consultar sus datos y documentos", null),
     };
 
     public Task<Result<MatrizPermisosDto>> Handle(ObtenerMatrizPermisosQuery query, CancellationToken cancellationToken)
