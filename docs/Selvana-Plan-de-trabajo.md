@@ -38,7 +38,7 @@ El orden real se ajustó para tener un flujo completo de punta a punta antes de 
 | Etapa 3 · Empleados E2 · Actualización inteligente | Hecho; campaña anual desde el portal del empleado (P5) |
 | **Etapa 3 · Empleados E4 · «Mi equipo» del líder en la consola** | **Sigue** |
 | Portal · P4 Mis documentos · P5 Portal del empleado | Hecho (29/10/2026) |
-| Etapa 4 · Desempeño · Etapa 5 · Clima | Después |
+| Etapa 4 · Desempeño (D1 a D4) · Etapa 5 · Clima (C1 a C4) | Hecho (29/10/2026); tableros por área y primer ciclo real, con clientes |
 | Etapa 1 · Sprint 10 · Estabilización y lanzamiento | Antes de vender el primer plan |
 | Integraciones (WhatsApp, correo, firma, ERP) | Al final |
 
@@ -330,7 +330,7 @@ Adelantado (ADR 0013). Detalle en `docs/backlog/Modulos-Vinculacion-Empleados-De
 **Sprint 14 – Onboarding guiado**
 
 - [x] Plan de inducción generado por cargo: tareas, responsables y fechas — *bloque V4 (28/10/2026): al crear el empleado, el planificador de inducción (IA, sin datos de la persona) propone de 8 a 16 tareas por momento (antes del ingreso, primer día, primera semana, primer mes y periodo de prueba) con responsable (RRHH, líder, empleado, SST, TI o empresa usuaria), día relativo al ingreso, razones y alertas (avisa si falta SG-SST). Queda en violeta en la pestaña «Onboarding» y en la bandeja; RRHH lo ajusta y lo aprueba. Si la IA falla hay un plan base por reglas. El equipo marca las tareas (cada una queda en la bitácora) y, con todo hecho, «Cerrar el onboarding» deja el proceso «Vinculado». Falta el banco de pruebas del agente*
-- [ ] Encuestas automáticas a los 30, 60 y 90 días con alerta temprana de retiro
+- [x] Encuestas automáticas a los 30, 60 y 90 días con alerta temprana de retiro — *C3: pulsos en el portal del empleado; la alerta llega a la bandeja*
 
 **Gate de salida:** de candidato aprobado a empleado en nómina sin redigitar datos; plan “Selección + Vinculación” a la venta.
 
@@ -366,24 +366,24 @@ Objetivo: evaluaciones periódicas que se preparan solas a partir de la evidenci
 
 **Sprint 19 – Ciclos y formularios**
 
-- [ ] Ciclos configurables: anual, semestral, trimestral, periodo de prueba, fin de misión o proyecto
-- [ ] Tipos 90°, 180° y 360° con formularios por cargo generados desde las competencias
+- [x] Ciclos configurables: anual, semestral, trimestral, periodo de prueba, fin de misión o proyecto — *hecho el 29/10/2026*
+- [x] Tipos 90°, 180° y 360° con formularios por cargo generados desde las competencias — *hecho el 29/10/2026*
 
 **Sprint 20 – Objetivos**
 
-- [ ] Objetivos (OKR/KPI) con pesos; la IA sugiere objetivos desde el cargo y los objetivos del área
-- [ ] Registro de avance y evidencias durante el periodo
+- [x] Objetivos (OKR/KPI) con pesos; la IA sugiere objetivos desde el cargo y los objetivos del área — *hecho el 29/10/2026*
+- [x] Registro de avance y evidencias durante el periodo — *hecho el 29/10/2026*
 
 **Sprint 21 – Copiloto del evaluador**
 
-- [ ] Resumen automático de evidencias, feedback recibido y avance de objetivos por empleado
-- [ ] Borrador de evaluación y comentarios que el líder ajusta
-- [ ] Detección de sesgos de calificación (todo alto, todo medio, diferencias entre grupos)
+- [x] Resumen automático de evidencias, feedback recibido y avance de objetivos por empleado — *hecho el 29/10/2026*
+- [x] Borrador de evaluación y comentarios que el líder ajusta — *hecho el 29/10/2026*
+- [x] Detección de sesgos de calificación (todo alto, todo medio, diferencias entre grupos) — *hecho el 29/10/2026*
 
 **Sprint 22 – Calibración y desarrollo**
 
-- [ ] Comité de calibración y matriz 9-box
-- [ ] Plan de desarrollo individual (PDI) propuesto por la IA desde las brechas
+- [x] Comité de calibración y matriz 9-box — *hecho el 29/10/2026*
+- [x] Plan de desarrollo individual (PDI) propuesto por la IA desde las brechas — *propuesto por reglas desde las brechas (competencias en 1 o 2); el líder lo edita*
 - [ ] Feedback continuo y reconocimientos
 
 **Sprint 23 – Estabilización**
@@ -411,13 +411,13 @@ Objetivo: pasar de gestionar a anticipar: formar según brechas, medir clima y a
 
 **Sprints 27 y 28 – Clima, bienestar y SST**
 
-- [ ] Encuestas de clima y eNPS anónimas con análisis de sentimiento y temas en comentarios abiertos
+- [x] Encuestas de clima y eNPS anónimas con análisis de sentimiento y temas en comentarios abiertos — *hecho el 29/10/2026*
 - [ ] Batería de riesgo psicosocial (aplicada por psicólogo licenciado) y seguimiento de planes de acción
 - [ ] Exámenes ocupacionales periódicos y de retiro con alertas
 
 **Sprints 29 y 30 – Analítica predictiva y retiro**
 
-- [ ] Modelo de riesgo de rotación y ausentismo con razones explicadas y acciones sugeridas
+- [x] Modelo de riesgo de rotación y ausentismo con razones explicadas y acciones sugeridas — *C4: señales explicadas por reglas (pulso, antigüedad, contrato, clima del área, desempeño); el modelo predictivo y el ausentismo llegan con datos reales*
 - [ ] Planeador de planta: personal necesario según demanda o contratos
 - [ ] Proceso de retiro: paz y salvo, encuesta de salida por enlace, liquidación vía nómina
 - [ ] Preguntas en lenguaje natural sobre todos los datos de talento; conectores nativos con 2 ERP de nómina adicionales

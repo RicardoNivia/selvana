@@ -4,7 +4,7 @@ import { useResumenBandeja } from '../features/bandeja/api'
 import { iniciales, nombreRol, usePuede, useSalir, useSesion } from '../features/sesion/api'
 import { elegirEmpresaUsuaria, useEmpresaUsuariaActual } from '../features/sesion/empresaUsuaria'
 import {
-  Chispa, IconoBandeja, IconoCandado, IconoCerrar, IconoConexion, IconoCupos, IconoDocumento, IconoEdificio, IconoEstructura,
+  Chispa, IconoBandeja, IconoCandado, IconoCerrar, IconoConexion, IconoCupos, IconoDocumento, IconoClima, IconoEdificio, IconoEstructura,
   IconoFlecha, IconoInsignia, IconoLuna, IconoManos, IconoPantalla, IconoPersonas, IconoSalir, IconoSol, IconoUsuarios, IconoVacantes,
 } from '../shared/ui/Iconos'
 import { HojasCayendo } from '../shared/ui/HojasCayendo'
@@ -64,6 +64,8 @@ export function Layout() {
   const veBitacora = usePuede('VerBitacora')
   const veCandidatos = usePuede('VerHojasDeVida')
   const gestionaEmpleados = usePuede('GestionarEmpleados')
+  const gestionaDesempeno = usePuede('GestionarDesempeno')
+  const gestionaClima = usePuede('GestionarClima')
   const pendientes = useResumenBandeja(Boolean(sesion)).data?.pendientes ?? 0
   const conSelector = Boolean(sesion?.empresaTemporal && sesion.empresasUsuarias.length > 0)
   const { tema, elegir: elegirTema } = useTema()
@@ -101,6 +103,8 @@ export function Layout() {
           {veCandidatos && <ItemRiel a="/consola/candidatos" icono={<IconoPersonas />} texto="Candidatos" />}
           {veCandidatos && <ItemRiel a="/consola/vinculacion" icono={<IconoDocumento />} texto="Vinculación" />}
           {gestionaEmpleados && <ItemRiel a="/consola/empleados" icono={<IconoCupos />} texto="Empleados" />}
+          {gestionaDesempeno && <ItemRiel a="/consola/desempeno" icono={<IconoInsignia />} texto="Desempeño" />}
+          {gestionaClima && <ItemRiel a="/consola/clima" icono={<IconoClima />} texto="Clima" />}
           <span className="riel-separador" aria-hidden="true" />
           <button type="button" className={`riel-item${enEmpresa ? ' active' : ''}${abierto === 'empresa' ? ' abierto' : ''}`}
             aria-expanded={abierto === 'empresa'} aria-controls="cajon-empresa" onClick={() => alternar('empresa')} title="Empresa">
@@ -136,7 +140,6 @@ export function Layout() {
             {/* Lo que viene en el plan de trabajo: visible pero desactivado, sin prometer pantallas que aún no existen */}
             <span className="cajon-grupo">Próximamente</span>
             <ProntoCajon icono={<Chispa />} texto="Agentes y autonomía" cuando="Pronto" />
-            <ProntoCajon icono={<IconoInsignia />} texto="Desempeño y clima" cuando="Etapa 4" />
           </div>
         </section>
 

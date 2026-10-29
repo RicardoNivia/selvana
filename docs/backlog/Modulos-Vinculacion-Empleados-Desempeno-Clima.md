@@ -73,10 +73,10 @@ Se construye justo después de Vinculación V1 y antes de V2. Un ATS clásico de
 
 | Bloque | Qué se construye ahora |
 | --- | --- |
-| **D1 · Ciclos y formularios** | Ciclos (anual, semestral, trimestral, periodo de prueba, fin de misión); tipos 90°, 180° y 360°; formulario por cargo generado por la IA desde las competencias del perfil, que RRHH aprueba. |
-| **D2 · Objetivos** | Objetivos con pesos sugeridos por la IA desde el cargo; avance y evidencias durante el periodo. |
-| **D3 · Copiloto del evaluador** | Resumen de evidencias, feedback y avance; borrador de comentarios que el líder ajusta (la calificación la pone el líder); detección de sesgos de calificación (todo alto, todo medio, diferencias entre grupos). |
-| **D4 · Calibración y desarrollo** | Matriz 9-box, comité de calibración y plan de desarrollo individual propuesto por la IA desde las brechas. |
+| **D1 · Ciclos y formularios** *(hecho el 29/10/2026)* | Ciclos (anual, semestral, trimestral, periodo de prueba, fin de misión); tipos 90°, 180° y 360°; formulario por cargo generado por la IA desde las competencias del perfil, que RRHH aprueba. |
+| **D2 · Objetivos** *(hecho el 29/10/2026)* | Objetivos con pesos sugeridos por la IA desde el cargo; avance y evidencias durante el periodo. |
+| **D3 · Copiloto del evaluador** *(hecho el 29/10/2026)* | Resumen de evidencias, feedback y avance; borrador de comentarios que el líder ajusta (la calificación la pone el líder); detección de sesgos de calificación (todo alto, todo medio, diferencias entre grupos). |
+| **D4 · Calibración y desarrollo** *(hecho el 29/10/2026)* | Matriz 9-box, comité de calibración y plan de desarrollo individual propuesto por la IA desde las brechas. |
 
 ## 4. Clima (Etapa 5)
 
@@ -84,10 +84,10 @@ Se construye justo después de Vinculación V1 y antes de V2. Un ATS clásico de
 
 | Bloque | Qué se construye ahora | Qué queda para después |
 | --- | --- | --- |
-| **C1 · Encuestas de clima y eNPS** | Encuestas anónimas por enlace; resultados por área, sede o cliente con mínimo de 5 respuestas por grupo. | Envío por WhatsApp |
-| **C2 · Análisis de comentarios** | La IA agrupa los comentarios abiertos por temas y sentimiento, sin exponer a nadie. | — |
-| **C3 · Pulsos de ingreso** | Encuestas de 30, 60 y 90 días a los vinculados, con alerta temprana de retiro. | — |
-| **C4 · Riesgo de rotación** | Señales explicadas (clima, desempeño, ausentismo) con acciones sugeridas. | Modelo predictivo entrenado con retiros reales |
+| **C1 · Encuestas de clima y eNPS** *(hecho el 29/10/2026)* | Encuestas anónimas por enlace; resultados por área, sede o cliente con mínimo de 5 respuestas por grupo. | Envío por WhatsApp |
+| **C2 · Análisis de comentarios** *(hecho el 29/10/2026)* | La IA agrupa los comentarios abiertos por temas y sentimiento, sin exponer a nadie. | — |
+| **C3 · Pulsos de ingreso** *(hecho el 29/10/2026)* | Encuestas de 30, 60 y 90 días a los vinculados, con alerta temprana de retiro. | — |
+| **C4 · Riesgo de rotación** *(hecho el 29/10/2026)* | Señales explicadas (clima, desempeño, ausentismo) con acciones sugeridas. | Modelo predictivo entrenado con retiros reales |
 
 Formación (LMS, plan de capacitación) y Carrera y sucesión siguen en la Etapa 5 del plan, después de estos bloques.
 

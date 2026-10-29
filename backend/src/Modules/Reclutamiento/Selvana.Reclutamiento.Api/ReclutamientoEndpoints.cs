@@ -434,16 +434,8 @@ public static class ReclutamientoEndpoints
                 await using var flujo = hojaDeVida.OpenReadStream();
                 using var memoria = new MemoryStream();
                 await flujo.CopyToAsync(memoria, ct);
-                // Algunos navegadores mandan el Word (o el PDF) sin tipo: se deduce por la extensión
-                var tipoContenido = Path.GetExtension(hojaDeVida.FileName).ToUpperInvariant() switch
-                {
-                    ".PDF" => "application/pdf",
-                    ".DOCX" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    ".JPG" or ".JPEG" => "image/jpeg",
-                    ".PNG" => "image/png",
-                    _ => hojaDeVida.ContentType,
-                };
-                var r = await h.Handle(new IniciarPostulacionCommand(codigo, hojaDeVida.FileName, tipoContenido, memoria.ToArray()), ct);
+                var r = await h.Handle(new IniciarPostulacionCommand(codigo, hojaDeVida.FileName, TiposArchivo.PorExtension(hojaDeVida.FileName, hojaDeVida.ContentType),
+                    memoria.ToArray()), ct);
                 return r.IsSuccess ? Results.Created($"/api/v1/portal/postulaciones/{r.Value}", new CreadoResponse(r.Value)) : r.ToHttp();
             })
             .WithName("IniciarPostulacion").DisableAntiforgery().Produces<CreadoResponse>(StatusCodes.Status201Created);
@@ -462,4 +454,18 @@ public static class ReclutamientoEndpoints
             })
             .WithName("EnviarPostulacion").Produces<PostulacionEnviadaResponse>();
     }
+}
+
+/// <summary>Algunos navegadores (y clientes como PowerShell) mandan el Word o el PDF sin tipo: se deduce por la extensión.</summary>
+internal static class TiposArchivo
+{
+    public static string PorExtension(string nombre, string tipoRecibido) => Path.GetExtension(nombre).ToUpperInvariant() switch
+    {
+        ".PDF" => "application/pdf",
+        ".DOCX" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ".JPG" or ".JPEG" => "image/jpeg",
+        ".PNG" => "image/png",
+        ".WEBP" => "image/webp",
+        _ => tipoRecibido,
+    };
 }

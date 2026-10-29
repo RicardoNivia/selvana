@@ -3,9 +3,9 @@ import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { IconoAlerta, IconoCheck, IconoDocumento, IconoEscudo, IconoFlecha, IconoSubir, IconoVacantes } from '../../shared/ui/Iconos'
 import {
-  type DatosPropuestos, type DocumentoPedido, type Empleo, type MiDocumento, type MisDocumentos, type Vigencia, tiposSoporte, urlDocumentoEmpleo,
+  type Autoevaluacion, type DatosPropuestos, type DocumentoPedido, type Empleo, type PulsoPendiente, type MiDocumento, type MisDocumentos, type Vigencia, tiposSoporte, urlDocumentoEmpleo,
   urlMiDocumento, useConfirmarMisDatos, useEnviarMiDocumento, useMisDocumentos, useProponerMisDatos, useQuitarMiDocumento, useSubirMiDocumento,
-  useSubirSoporteEmpleo,
+  useAutoevaluarme, usePendientesEmpleo, useResponderPulso, useSubirSoporteEmpleo,
 } from './api'
 
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' })
@@ -153,7 +153,96 @@ function FilaDocumento({ tipo, documento, indice }: { tipo: MisDocumentos['tipos
 /* ---------- P5 · Mi empleo ---------- */
 
 export function MiEmpleoPanel({ empleos }: { empleos: Empleo[] }) {
-  return <div className="mp-empleos">{empleos.map((e) => <TarjetaEmpleo key={e.empleadoId} empleo={e} />)}</div>
+  const pendientes = usePendientesEmpleo()
+  const pulsos = pendientes.data?.pulsos.filter((p) => !p.respondido) ?? []
+  const autoevaluaciones = pendientes.data?.autoevaluaciones ?? []
+  return (
+    <div className="mp-empleos">
+      {pulsos.map((p) => <PulsoEmpleado key={p.pulsoId} pulso={p} />)}
+      {autoevaluaciones.map((a) => <AutoevaluacionEmpleado key={a.evaluacionId} a={a} />)}
+      {empleos.map((e) => <TarjetaEmpleo key={e.empleadoId} empleo={e} />)}
+    </div>
+  )
+}
+
+type Pulso = { satisfaccion?: number; claridad?: number; apoyo?: number; recomendaria?: number }
+
+/** C3 · Pulso de ingreso: tres preguntas rápidas y la recomendación. Lo lee Recursos Humanos para acompañarte. */
+function PulsoEmpleado({ pulso }: { pulso: PulsoPendiente }) {
+  const responder = useResponderPulso()
+  const [r, setR] = useState<Pulso>({})
+  const [comentario, setComentario] = useState('')
+  const preguntas: ['satisfaccion' | 'claridad' | 'apoyo', string][] = [
+    ['satisfaccion', 'Me siento a gusto en mi trabajo'], ['claridad', 'Tengo claro lo que se espera de mí'], ['apoyo', 'Mi líder y mi equipo me apoyan'],
+  ]
+  const completo = preguntas.every(([k]) => r[k]) && r.recomendaria !== undefined
+  return (
+    <section className="mp-empleo">
+      <header className="mp-empleo-cabeza">
+        <div><span className="mp-ceja">Pulso de {pulso.hito} días</span><h2>¿Cómo te ha ido?</h2><p>Dos minutos. Recursos Humanos lo lee para acompañarte.</p></div>
+      </header>
+      {preguntas.map(([k, t]) => (
+        <div key={k} className="mp-escala-fila"><span>{t}</span><Escala valor={r[k]} desde={1} hasta={5} onElegir={(v) => setR((x) => ({ ...x, [k]: v }))} etiqueta={t} /></div>
+      ))}
+      <div className="mp-escala-fila"><span>¿Recomendarías esta empresa a un amigo? (0 a 10)</span>
+        <Escala valor={r.recomendaria} desde={0} hasta={10} onElegir={(v) => setR((x) => ({ ...x, recomendaria: v }))} etiqueta="Recomendación" /></div>
+      <label className="postular-campo">Algo más que quieras contar <span className="mp-nota">opcional</span>
+        <textarea className="entrada" rows={3} value={comentario} onChange={(e) => setComentario(e.target.value)} /></label>
+      {responder.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{responder.error.message}</p>}
+      <div>
+        <Boton variante="primario" disabled={!completo} cargando={responder.isPending} textoCargando="Enviando…"
+          onClick={() => responder.mutate({ pulsoId: pulso.pulsoId, satisfaccion: r.satisfaccion!, claridad: r.claridad!, apoyo: r.apoyo!, recomendaria: r.recomendaria!, comentario })}>
+          Enviar
+        </Boton>
+      </div>
+    </section>
+  )
+}
+
+/** 180° y 360° · Autoevaluación: te calificas en cada competencia y cuentas cómo te fue. La calificación final la pone tu líder. */
+function AutoevaluacionEmpleado({ a }: { a: Autoevaluacion }) {
+  const autoevaluar = useAutoevaluarme()
+  const [notas, setNotas] = useState<Record<string, number>>(() => Object.fromEntries(a.competencias.filter((c) => c.miCalificacion).map((c) => [c.nombre, c.miCalificacion!])))
+  const [comentario, setComentario] = useState(a.comentario)
+  const completo = a.competencias.every((c) => notas[c.nombre])
+  return (
+    <section className="mp-empleo">
+      <header className="mp-empleo-cabeza">
+        <div><span className="mp-ceja">{a.ciclo}</span><h2>Tu autoevaluación</h2><p>{a.cargo} · hasta el {dia(a.hasta)}. Tu líder ve lo que respondas; la calificación final la pone tu líder.</p></div>
+        {a.respondida && <span className="pill pill-ok"><IconoCheck />Enviada</span>}
+      </header>
+      {a.objetivos.length > 0 && (
+        <div className="mp-docs-bloque">
+          <h3>Tus objetivos</h3>
+          {a.objetivos.map((o) => <div key={o.descripcion} className="mp-escala-fila"><span>{o.descripcion}<span className="mp-nota"> · meta {o.meta}</span></span><span className="mono">{o.avance} %</span></div>)}
+        </div>
+      )}
+      {a.competencias.map((c) => (
+        <div key={c.nombre} className="mp-escala-fila"><span><b>{c.nombre}</b><span className="mp-nota"> · {c.descripcion}</span></span>
+          <Escala valor={notas[c.nombre]} desde={1} hasta={5} onElegir={(v) => setNotas((x) => ({ ...x, [c.nombre]: v }))} etiqueta={c.nombre} /></div>
+      ))}
+      <label className="postular-campo">¿Cómo te fue en este periodo?
+        <textarea className="entrada" rows={3} value={comentario} onChange={(e) => setComentario(e.target.value)} placeholder="Lo que lograste, lo que te costó y en qué quieres crecer." />
+      </label>
+      {autoevaluar.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{autoevaluar.error.message}</p>}
+      <div>
+        <Boton variante="primario" disabled={!completo} cargando={autoevaluar.isPending} textoCargando="Enviando…"
+          onClick={() => autoevaluar.mutate({ evaluacionId: a.evaluacionId, calificaciones: notas, comentario })}>
+          {a.respondida ? 'Actualizar mi autoevaluación' : 'Enviar mi autoevaluación'}
+        </Boton>
+      </div>
+    </section>
+  )
+}
+
+function Escala({ valor, desde, hasta, onElegir, etiqueta }: { valor?: number; desde: number; hasta: number; onElegir: (v: number) => void; etiqueta: string }) {
+  return (
+    <span className="mp-escala" role="group" aria-label={etiqueta}>
+      {Array.from({ length: hasta - desde + 1 }, (_, i) => desde + i).map((n) => (
+        <button key={n} type="button" aria-pressed={valor === n} onClick={() => onElegir(n)}>{n}</button>
+      ))}
+    </span>
+  )
 }
 
 function TarjetaEmpleo({ empleo: e }: { empleo: Empleo }) {

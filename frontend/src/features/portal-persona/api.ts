@@ -298,3 +298,35 @@ export const useSubirSoporteEmpleo = () =>
   })
 
 export const urlDocumentoEmpleo = (empleadoId: string, documentoId: string) => urlApi(`${base}/empleo/${empleadoId}/documentos/${documentoId}`)
+
+/* ---------- Desempeño y clima en Mi empleo ---------- */
+
+export interface Autoevaluacion {
+  evaluacionId: string
+  ciclo: string
+  cargo: string
+  hasta: string
+  respondida: boolean
+  competencias: { nombre: string; descripcion: string; miCalificacion: number | null }[]
+  objetivos: { descripcion: string; meta: string; avance: number }[]
+  comentario: string
+}
+
+export interface PulsoPendiente { pulsoId: string; hito: number; pendienteDesde: string; respondido: boolean }
+
+export function usePendientesEmpleo(activo = true) {
+  return useQuery({
+    queryKey: ['portal-persona', 'empleo', 'pendientes'],
+    queryFn: ({ signal }) => apiGet<{ autoevaluaciones: Autoevaluacion[]; pulsos: PulsoPendiente[] }>(`${base}/empleo/pendientes`, signal),
+    enabled: activo,
+    retry: false,
+  })
+}
+
+export const useAutoevaluarme = () =>
+  useMutacionCuenta((v: { evaluacionId: string; calificaciones: Record<string, number>; comentario: string }) =>
+    apiSend('POST', `${base}/empleo/autoevaluacion/${v.evaluacionId}`, { calificaciones: v.calificaciones, comentario: v.comentario }))
+
+export const useResponderPulso = () =>
+  useMutacionCuenta((v: { pulsoId: string; satisfaccion: number; claridad: number; apoyo: number; recomendaria: number; comentario: string }) =>
+    apiSend('POST', `${base}/empleo/pulsos/${v.pulsoId}`, v))

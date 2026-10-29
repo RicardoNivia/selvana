@@ -518,3 +518,9 @@ body.mp-con-cv { overflow: hidden; }
   .mp-empleo { padding: var(--espacio-4); }
 }
 @media (prefers-reduced-motion: reduce) { .mp-docs-fila, .mp-empleo { animation: none; } }
+
+/* Pulsos y autoevaluación en Mi empleo */
+.mp-escala-fila { display: flex; flex-wrap: wrap; gap: var(--espacio-2) var(--espacio-4); align-items: center; justify-content: space-between; padding: var(--espacio-2) 0; border-top: 1px solid var(--color-borde); font-size: 14px; }
+.mp-escala { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.mp-escala button { min-width: 36px; height: 36px; border-radius: var(--radio-s); border: 1px solid var(--color-borde); background: var(--color-superficie); font: 600 14px var(--fuente-datos); color: var(--color-texto-suave); cursor: pointer; transition: background var(--duracion-corta), color var(--duracion-corta); }
+.mp-escala button[aria-pressed='true'] { background: var(--color-primario); border-color: var(--color-primario); color: var(--color-sobre-primario); }

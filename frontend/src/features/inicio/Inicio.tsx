@@ -34,8 +34,8 @@ const modulos = [
   { nombre: 'Vinculación', estado: 'Disponible', texto: 'Oferta y contrato con tus plantillas, aceptación con evidencia, documentos de ingreso leídos por la IA, afiliaciones y plan de inducción.' },
   { nombre: 'Expediente vivo', estado: 'Disponible', texto: 'Contrato, novedades con antes y después, carpeta cifrada con vencimientos, carga de la planta y cambios propuestos desde cada documento.' },
   { nombre: 'Portal de la persona', estado: 'Disponible', texto: 'Cada candidato sigue sus procesos y guarda sus documentos una vez; cada empleado ve su expediente y actualiza sus datos.' },
-  { nombre: 'Desempeño', estado: 'Próximamente', texto: 'Ciclos y formularios por cargo, objetivos con evidencias, borradores para el líder y calibración con 9-box.' },
-  { nombre: 'Clima y retención', estado: 'Próximamente', texto: 'Encuestas anónimas y eNPS, temas de los comentarios, pulsos de ingreso y señales de riesgo de rotación.' },
+  { nombre: 'Desempeño', estado: 'Disponible', texto: 'Ciclos de 90°, 180° y 360° con formulario por cargo, objetivos con evidencias, copiloto que redacta para el líder, alertas de sesgo y calibración con 9-box.' },
+  { nombre: 'Clima y retención', estado: 'Disponible', texto: 'Encuestas anónimas con eNPS, temas de los comentarios, pulsos a los 30, 60 y 90 días y señales de rotación explicadas.' },
 ]
 
 const titular = ['La', 'IA', 'hace', 'el', 'trabajo', 'de', 'selección.']

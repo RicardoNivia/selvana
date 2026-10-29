@@ -44,7 +44,8 @@ public static class PortalPersonaEndpoints
                 await using var flujo = hojaDeVida.OpenReadStream();
                 using var memoria = new MemoryStream();
                 await flujo.CopyToAsync(memoria, ct);
-                var r = await h.Handle(new SubirHojaDeVidaPerfilCommand(hojaDeVida.FileName, hojaDeVida.ContentType, memoria.ToArray()), ct);
+                var r = await h.Handle(new SubirHojaDeVidaPerfilCommand(hojaDeVida.FileName, TiposArchivo.PorExtension(hojaDeVida.FileName, hojaDeVida.ContentType),
+                    memoria.ToArray()), ct);
                 return r.IsSuccess ? Results.Created($"/api/v1/portal/cuenta/hoja-de-vida/{r.Value}", new CreadoResponse(r.Value)) : r.ToHttp();
             })
             .WithName("SubirHojaDeVidaPerfil").DisableAntiforgery().Produces<CreadoResponse>(StatusCodes.Status201Created);
