@@ -6,6 +6,8 @@
     <ProjectReference Include="..\..\Modules\Reclutamiento\Selvana.Reclutamiento.Contracts\Selvana.Reclutamiento.Contracts.csproj" />
     <ProjectReference Include="..\..\Modules\Vinculacion\Selvana.Vinculacion.Contracts\Selvana.Vinculacion.Contracts.csproj" />
     <ProjectReference Include="..\..\Modules\Expediente\Selvana.Expediente.Contracts\Selvana.Expediente.Contracts.csproj" />
+    <ProjectReference Include="..\..\Modules\Desempeno\Selvana.Desempeno.Contracts\Selvana.Desempeno.Contracts.csproj" />
+    <ProjectReference Include="..\..\Modules\Clima\Selvana.Clima.Contracts\Selvana.Clima.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Anthropic" />

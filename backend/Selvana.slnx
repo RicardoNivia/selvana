@@ -33,6 +33,20 @@
     <Project Path="src/Modules/Expediente/Selvana.Expediente.Domain/Selvana.Expediente.Domain.csproj" />
     <Project Path="src/Modules/Expediente/Selvana.Expediente.Infrastructure/Selvana.Expediente.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Clima/">
+    <Project Path="src/Modules/Clima/Selvana.Clima.Api/Selvana.Clima.Api.csproj" />
+    <Project Path="src/Modules/Clima/Selvana.Clima.Application/Selvana.Clima.Application.csproj" />
+    <Project Path="src/Modules/Clima/Selvana.Clima.Contracts/Selvana.Clima.Contracts.csproj" />
+    <Project Path="src/Modules/Clima/Selvana.Clima.Domain/Selvana.Clima.Domain.csproj" />
+    <Project Path="src/Modules/Clima/Selvana.Clima.Infrastructure/Selvana.Clima.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Desempeno/">
+    <Project Path="src/Modules/Desempeno/Selvana.Desempeno.Api/Selvana.Desempeno.Api.csproj" />
+    <Project Path="src/Modules/Desempeno/Selvana.Desempeno.Application/Selvana.Desempeno.Application.csproj" />
+    <Project Path="src/Modules/Desempeno/Selvana.Desempeno.Contracts/Selvana.Desempeno.Contracts.csproj" />
+    <Project Path="src/Modules/Desempeno/Selvana.Desempeno.Domain/Selvana.Desempeno.Domain.csproj" />
+    <Project Path="src/Modules/Desempeno/Selvana.Desempeno.Infrastructure/Selvana.Desempeno.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Vinculacion/">
     <Project Path="src/Modules/Vinculacion/Selvana.Vinculacion.Api/Selvana.Vinculacion.Api.csproj" />
     <Project Path="src/Modules/Vinculacion/Selvana.Vinculacion.Application/Selvana.Vinculacion.Application.csproj" />
@@ -52,6 +66,8 @@
     <Project Path="tests/Selvana.Core.IntegrationTests/Selvana.Core.IntegrationTests.csproj" />
     <Project Path="tests/Selvana.Reclutamiento.Domain.Tests/Selvana.Reclutamiento.Domain.Tests.csproj" />
     <Project Path="tests/Selvana.SharedKernel.Tests/Selvana.SharedKernel.Tests.csproj" />
+    <Project Path="tests/Selvana.Clima.Domain.Tests/Selvana.Clima.Domain.Tests.csproj" />
+    <Project Path="tests/Selvana.Desempeno.Domain.Tests/Selvana.Desempeno.Domain.Tests.csproj" />
     <Project Path="tests/Selvana.Expediente.Domain.Tests/Selvana.Expediente.Domain.Tests.csproj" />
     <Project Path="tests/Selvana.Vinculacion.Domain.Tests/Selvana.Vinculacion.Domain.Tests.csproj" />
   </Folder>

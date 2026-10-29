@@ -45,6 +45,8 @@ services:
       Mensajeria__Destinos__0__Prefijos__1: Selvana.Reclutamiento.Contracts.
       Mensajeria__Destinos__0__Prefijos__2: Selvana.Vinculacion.Contracts.Ia.
       Mensajeria__Destinos__0__Prefijos__3: Selvana.Expediente.Contracts.Ia.
+      Mensajeria__Destinos__0__Prefijos__4: Selvana.Desempeno.Contracts.Ia.
+      Mensajeria__Destinos__0__Prefijos__5: Selvana.Clima.Contracts.Ia.
       Mensajeria__Destinos__1__Url: http://localhost:8080/internal/eventos/core
       Mensajeria__Destinos__1__Prefijos__0: Selvana.Core.Contracts.Auditoria.
       Mensajeria__Destinos__1__Prefijos__1: Selvana.Core.Contracts.Bandeja.
@@ -74,6 +76,10 @@ services:
       Mensajeria__Destinos__2__Prefijos__0: Selvana.AI.Contracts.Vinculacion.
       Mensajeria__Destinos__3__Url: http://api:8080/internal/eventos/expediente
       Mensajeria__Destinos__3__Prefijos__0: Selvana.AI.Contracts.Expediente.
+      Mensajeria__Destinos__4__Url: http://api:8080/internal/eventos/desempeno
+      Mensajeria__Destinos__4__Prefijos__0: Selvana.AI.Contracts.Desempeno.
+      Mensajeria__Destinos__5__Url: http://api:8080/internal/eventos/clima
+      Mensajeria__Destinos__5__Prefijos__0: Selvana.AI.Contracts.Clima.
       Reclutamiento__UrlArchivos: http://api:8080/internal/archivos/
       Vinculacion__UrlArchivos: http://api:8080/internal/archivos/vinculacion/
       Expediente__UrlArchivos: http://api:8080/internal/archivos/expediente/

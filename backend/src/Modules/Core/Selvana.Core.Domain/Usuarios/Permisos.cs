@@ -25,6 +25,12 @@ public enum Accion
 
     /// <summary>Expediente de los empleados: crear, editar, registrar novedades y documentos.</summary>
     GestionarEmpleados,
+
+    /// <summary>Desempeño: ciclos, formularios, objetivos, calificaciones, calibración y planes de desarrollo.</summary>
+    GestionarDesempeno,
+
+    /// <summary>Clima: encuestas, resultados por grupo, pulsos de ingreso y señales de rotación.</summary>
+    GestionarClima,
 }
 
 /// <summary>Hasta dónde llega un permiso. Todo lo que no es <see cref="No"/> permite la acción con ese alcance.</summary>
@@ -55,6 +61,8 @@ public static class MatrizPermisos
         [Accion.VerBitacora] = [Alcance.Si, Alcance.Si, Alcance.No, Alcance.No, Alcance.No, Alcance.No],
         [Accion.ConsultarSusDatos] = [Alcance.No, Alcance.No, Alcance.No, Alcance.Si, Alcance.Si, Alcance.No],
         [Accion.GestionarEmpleados] = [Alcance.Si, Alcance.Si, Alcance.Si, Alcance.No, Alcance.No, Alcance.No],
+        [Accion.GestionarDesempeno] = [Alcance.Si, Alcance.Si, Alcance.Si, Alcance.SuEquipo, Alcance.No, Alcance.No],
+        [Accion.GestionarClima] = [Alcance.Si, Alcance.Si, Alcance.Si, Alcance.No, Alcance.No, Alcance.No],
     };
 
     public static IReadOnlyList<Rol> Roles => Orden;

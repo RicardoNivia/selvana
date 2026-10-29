@@ -229,6 +229,25 @@ public sealed class Postulacion : Entity<Guid>
         ArchivoHojaDeVidaId = Guid.Empty;
     }
 
+    private const string Alfabeto = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+    /// <summary>
+    /// Ocho caracteres sin letras que se confunden (I, L, O, U) tomados de la parte aleatoria del id: 40 bits, para que dos postulaciones
+    /// no choquen aunque haya cientos de miles (con seis dígitos chocaban a los pocos cientos).
+    /// </summary>
+    internal static string Codigo(Guid id)
+    {
+        var valor = BitConverter.ToUInt64(id.ToByteArray(), 8);
+        return string.Create(8, valor, (letras, v) =>
+        {
+            for (var i = letras.Length - 1; i >= 0; i--)
+            {
+                letras[i] = Alfabeto[(int)(v % 32)];
+                v /= 32;
+            }
+        });
+    }
+
     internal static Postulacion Crear(Guid vacanteId, CanalPostulacion canal, IEnumerable<RespuestaFiltro> respuestas,
         AutorizacionDatos autorizacion, Guid archivoId, IEnumerable<string> camposCorregidos, DateTimeOffset ahora)
     {
@@ -236,7 +255,7 @@ public sealed class Postulacion : Entity<Guid>
         return new Postulacion(id)
         {
             VacanteId = vacanteId,
-            Numero = $"P-{ahora:yyyy}-{Math.Abs(BitConverter.ToInt32(id.ToByteArray(), 12)) % 1_000_000:D6}",
+            Numero = $"P-{ahora:yyyy}-{Codigo(id)}",
             Canal = canal,
             Respuestas = [.. respuestas],
             Autorizacion = autorizacion,

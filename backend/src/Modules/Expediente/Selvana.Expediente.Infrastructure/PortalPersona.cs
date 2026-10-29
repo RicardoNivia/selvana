@@ -10,6 +10,15 @@ using Selvana.SharedKernel.Results;
 
 namespace Selvana.Expediente.Infrastructure;
 
+internal sealed class PlantaActiva(ExpedienteDbContext db) : IPlantaActiva
+{
+    public async Task<IReadOnlyList<EmpleadoActivo>> ListarAsync(Guid empresaId, CancellationToken cancellationToken) =>
+        await db.Set<Empleado>().AsNoTracking().Where(e => e.EmpresaId == empresaId && e.Estado == EstadoEmpleado.Activo).OrderBy(e => e.Nombre)
+            .Select(e => new EmpleadoActivo(e.Id, e.Codigo, e.Nombre, e.Documento, e.Correo, e.Cargo, e.Area, e.Sede, e.EmpresaUsuariaId, e.EmpresaUsuaria,
+                e.FechaIngreso, e.FechaFinContrato))
+            .ToListAsync(cancellationToken);
+}
+
 /// <summary>P5 · Lo que el portal de la persona ve y hace de su empleo. Siempre por cédula y correo a la vez.</summary>
 internal sealed class EmpleoDeLaPersona(
     ExpedienteDbContext db, IDirectorioEmpresas directorio, IAlmacenArchivos almacen, TimeProvider reloj,

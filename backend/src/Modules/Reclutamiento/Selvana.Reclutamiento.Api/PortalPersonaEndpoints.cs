@@ -25,6 +25,8 @@ public sealed record PerfilRequest(
 
 public sealed record EnviarMiDocumentoRequest(Guid ProcesoId, string Tipo);
 
+public sealed record AutoevaluacionRequest(IReadOnlyDictionary<string, int> Calificaciones, string Comentario);
+
 public sealed record ActualizarHojaDeVidaRequest(Guid BorradorId, string Nombre, string Celular, string Ciudad, string? LinkedIn);
 
 /// <summary>Portal de la persona (ADR 0013): registro con la hoja de vida, ingreso y su cuenta. Sesión propia, distinta de la consola.</summary>
@@ -196,6 +198,19 @@ public static class PortalPersonaEndpoints
                 return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
             })
             .WithName("DescargarDocumentoEmpleo");
+
+        // Desempeño y clima: su autoevaluación (180° y 360°) y sus pulsos de ingreso de 30, 60 y 90 días
+        cuenta.MapGet("/empleo/pendientes", async (IQueryHandler<ObtenerPendientesEmpleoQuery, PendientesEmpleoDto> h, CancellationToken ct) =>
+                (await h.Handle(new ObtenerPendientesEmpleoQuery(), ct)).ToHttp())
+            .WithName("PendientesEmpleo").Produces<PendientesEmpleoDto>();
+
+        cuenta.MapPost("/empleo/autoevaluacion/{evaluacionId:guid}", async (Guid evaluacionId, AutoevaluacionRequest b, ICommandHandler<AutoevaluarmeCommand> h,
+                CancellationToken ct) => (await h.Handle(new AutoevaluarmeCommand(evaluacionId, b.Calificaciones ?? new Dictionary<string, int>(), b.Comentario ?? ""), ct)).ToHttp())
+            .WithName("Autoevaluarme");
+
+        cuenta.MapPost("/empleo/pulsos/{pulsoId:guid}", async (Guid pulsoId, Clima.Contracts.RespuestaPulsoDeLaPersona b, ICommandHandler<ResponderMiPulsoCommand> h,
+                CancellationToken ct) => (await h.Handle(new ResponderMiPulsoCommand(pulsoId, b), ct)).ToHttp())
+            .WithName("ResponderMiPulso");
 
         return app;
     }

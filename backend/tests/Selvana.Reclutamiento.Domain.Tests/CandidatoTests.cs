@@ -41,7 +41,7 @@ public sealed class CandidatoTests
         candidato.Postulaciones.Should().ContainSingle();
         postulacion.Autorizacion.Version.Should().Be("v3");
         postulacion.CamposCorregidos.Should().Equal("celular");
-        postulacion.Numero.Should().MatchRegex(@"^P-2026-\d{6}$");
+        postulacion.Numero.Should().MatchRegex(@"^P-2026-[0-9A-HJKMNP-TV-Z]{8}$");
     }
 
     [Fact]

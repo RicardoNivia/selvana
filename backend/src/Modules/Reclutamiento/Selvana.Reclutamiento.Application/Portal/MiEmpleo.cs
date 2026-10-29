@@ -1,3 +1,5 @@
+using Selvana.Clima.Contracts;
+using Selvana.Desempeno.Contracts;
 using Selvana.Expediente.Contracts;
 using Selvana.Reclutamiento.Application.Abstracciones;
 using Selvana.Reclutamiento.Application.Privacidad;
@@ -74,5 +76,51 @@ internal sealed class DescargarDocumentoEmpleoHandler(IPersonaActual persona, IC
         return await empleos.DescargarAsync(query.EmpleadoId, r.Value.Documento, r.Value.Correo, query.DocumentoId, cancellationToken) is { } a
             ? new ArchivoDto(a.Nombre, a.TipoContenido, a.Contenido)
             : DocumentosPersonaErrors.NoExiste;
+    }
+}
+
+/* Desempeño y clima desde el portal del empleado: su autoevaluación (180° y 360°) y sus pulsos de ingreso */
+
+public sealed record PendientesEmpleoDto(IReadOnlyList<AutoevaluacionDeLaPersona> Autoevaluaciones, IReadOnlyList<PulsoDeLaPersona> Pulsos);
+
+public sealed record ObtenerPendientesEmpleoQuery : IQuery<PendientesEmpleoDto>;
+
+public sealed record AutoevaluarmeCommand(Guid EvaluacionId, IReadOnlyDictionary<string, int> Calificaciones, string Comentario) : ICommand;
+
+public sealed record ResponderMiPulsoCommand(Guid PulsoId, RespuestaPulsoDeLaPersona Respuesta) : ICommand;
+
+internal sealed class ObtenerPendientesEmpleoHandler(IPersonaActual persona, ICuentasCandidato cuentas, IEvaluacionesDeLaPersona evaluaciones, IPulsosDeLaPersona pulsos)
+    : IQueryHandler<ObtenerPendientesEmpleoQuery, PendientesEmpleoDto>
+{
+    public async Task<Result<PendientesEmpleoDto>> Handle(ObtenerPendientesEmpleoQuery query, CancellationToken cancellationToken)
+    {
+        var r = await MisDocumentos.CuentaAsync(persona, cuentas, cancellationToken);
+        if (r.IsFailure)
+        {
+            return r.Error;
+        }
+
+        return new PendientesEmpleoDto(await evaluaciones.ListarAsync(r.Value.Documento, r.Value.Correo, cancellationToken),
+            await pulsos.ListarAsync(r.Value.Documento, r.Value.Correo, cancellationToken));
+    }
+}
+
+internal sealed class AutoevaluarmeHandler(IPersonaActual persona, ICuentasCandidato cuentas, IEvaluacionesDeLaPersona evaluaciones) : ICommandHandler<AutoevaluarmeCommand>
+{
+    public async Task<Result> Handle(AutoevaluarmeCommand c, CancellationToken cancellationToken)
+    {
+        var r = await MisDocumentos.CuentaAsync(persona, cuentas, cancellationToken);
+        return r.IsFailure
+            ? Result.Failure(r.Error)
+            : await evaluaciones.AutoevaluarAsync(c.EvaluacionId, r.Value.Documento, r.Value.Correo, c.Calificaciones, c.Comentario ?? "", cancellationToken);
+    }
+}
+
+internal sealed class ResponderMiPulsoHandler(IPersonaActual persona, ICuentasCandidato cuentas, IPulsosDeLaPersona pulsos) : ICommandHandler<ResponderMiPulsoCommand>
+{
+    public async Task<Result> Handle(ResponderMiPulsoCommand c, CancellationToken cancellationToken)
+    {
+        var r = await MisDocumentos.CuentaAsync(persona, cuentas, cancellationToken);
+        return r.IsFailure ? Result.Failure(r.Error) : await pulsos.ResponderAsync(c.PulsoId, r.Value.Documento, r.Value.Correo, c.Respuesta, cancellationToken);
     }
 }

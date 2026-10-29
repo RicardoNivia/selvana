@@ -47,6 +47,9 @@ public static class PlataformaIaServiceCollectionExtensions
         services.AddSingleton<IRedactorOferta, RedactorOfertaAgente>();
         services.AddSingleton<ILectorDocumentosIngreso, LectorDocumentosAgente>();
         services.AddSingleton<IPlanificadorInduccion, PlanificadorInduccionAgente>();
+        services.AddSingleton<Agentes.Desempeno.IDisenadorEvaluaciones, Agentes.Desempeno.DisenadorEvaluacionesAgente>();
+        services.AddSingleton<Agentes.Desempeno.ICopilotoEvaluador, Agentes.Desempeno.CopilotoEvaluadorAgente>();
+        services.AddSingleton<Agentes.Clima.IAnalistaClima, Agentes.Clima.AnalistaClimaAgente>();
         services.AddHttpClient("archivos-reclutamiento", c => c.Timeout = TimeSpan.FromSeconds(30));
 
         return services;
