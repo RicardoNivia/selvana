@@ -5,7 +5,7 @@ import { IconoAlerta, IconoCheck, IconoDocumento, IconoEscudo, IconoFlecha, Icon
 import {
   type Autoevaluacion, type DatosPropuestos, type DocumentoPedido, type Empleo, type PulsoPendiente, type MiDocumento, type MisDocumentos, type Vigencia, tiposSoporte, urlDocumentoEmpleo,
   urlMiDocumento, useConfirmarMisDatos, useEnviarMiDocumento, useMisDocumentos, useProponerMisDatos, useQuitarMiDocumento, useSubirMiDocumento,
-  useAutoevaluarme, usePendientesEmpleo, useResponderPulso, useSubirSoporteEmpleo,
+  useAutoevaluarme, useCompartirHojaDeVida, useHojaDeVidaCompartida, usePendientesEmpleo, useResponderPulso, useSubirSoporteEmpleo,
 } from './api'
 
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium' })
@@ -304,6 +304,8 @@ function TarjetaEmpleo({ empleo: e }: { empleo: Empleo }) {
       )}
       {activo && subiendo && <FormularioSoporte empleadoId={e.empleadoId} onCerrar={() => setSubiendo(false)} />}
 
+      <CompartirHojaDeVida empleo={e} />
+
       <div className="mp-docs-bloque">
         <h3>Tu carpeta en la empresa</h3>
         {e.documentos.length === 0 ? <p className="mp-nota">Aún no hay documentos en tu carpeta.</p> : (
@@ -382,5 +384,29 @@ function FormularioSoporte({ empleadoId, onCerrar }: { empleadoId: string; onCer
         <Boton type="submit" variante="primario" icono={<IconoSubir />} cargando={subir.isPending} textoCargando="Subiendo…" disabled={!archivo}>Enviar</Boton>
       </div>
     </form>
+  )
+}
+
+/** La empresa solo ve la hoja de vida del portal si la persona decide compartirla (su autorización del portal es con Selvana). */
+function CompartirHojaDeVida({ empleo: e }: { empleo: Empleo }) {
+  const compartidas = useHojaDeVidaCompartida()
+  const compartir = useCompartirHojaDeVida()
+  const compartida = compartidas.data?.includes(e.empresaId) ?? false
+  return (
+    <div className="mp-empleo-pendiente">
+      <b>{compartida ? `${e.empresa} puede ver tu hoja de vida del portal` : `¿Compartes tu hoja de vida con ${e.empresa}?`}</b>
+      <p className="mp-nota">
+        {compartida
+          ? 'La ven en tu expediente para tu plan de carrera y vacantes internas. Puedes dejar de compartirla cuando quieras.'
+          : 'Así queda en tu expediente con tu experiencia y tus estudios, y te tienen en cuenta para vacantes internas. Si no la compartes, no la ven.'}
+      </p>
+      {compartir.error && <p role="alert" className="aviso aviso-alerta"><IconoAlerta />{compartir.error.message}</p>}
+      <div style={{ marginTop: 8 }}>
+        <Boton pequeno variante={compartida ? 'secundario' : 'primario'} disabled={compartidas.isPending} cargando={compartir.isPending}
+          textoCargando={compartida ? 'Dejando de compartir…' : 'Compartiendo…'} onClick={() => compartir.mutate({ empresaId: e.empresaId, compartir: !compartida })}>
+          {compartida ? 'Dejar de compartir' : 'Compartir mi hoja de vida'}
+        </Boton>
+      </div>
+    </div>
   )
 }

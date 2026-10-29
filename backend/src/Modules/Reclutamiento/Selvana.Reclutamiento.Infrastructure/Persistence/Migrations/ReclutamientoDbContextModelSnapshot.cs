@@ -281,6 +281,11 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("hoja_de_vida_actualizada_en");
 
+                    b.PrimitiveCollection<List<Guid>>("HojaDeVidaCompartidaCon")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("hoja_de_vida_compartida_con");
+
                     b.Property<int>("IntentosFallidos")
                         .HasColumnType("integer")
                         .HasColumnName("intentos_fallidos");

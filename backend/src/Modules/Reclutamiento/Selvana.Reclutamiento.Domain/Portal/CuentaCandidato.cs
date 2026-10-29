@@ -54,6 +54,19 @@ public sealed class CuentaCandidato : AggregateRoot<Guid>
     public int IntentosFallidos { get; private set; }
     public DateTimeOffset? BloqueadaHasta { get; private set; }
 
+    /// <summary>
+    /// Empresas con las que la persona decidió compartir su hoja de vida del portal (por ejemplo, su empleador, para su expediente).
+    /// Sin esto, su empresa no la ve: la autorización del portal es con Selvana, no con cada empresa (Ley 1581).
+    /// </summary>
+    public List<Guid> HojaDeVidaCompartidaCon { get; private set; } = [];
+
+    public void CompartirHojaDeVida(Guid empresaId, bool compartir)
+    {
+        HojaDeVidaCompartidaCon = compartir
+            ? [.. HojaDeVidaCompartidaCon.Append(empresaId).Distinct()]
+            : [.. HojaDeVidaCompartidaCon.Where(e => e != empresaId)];
+    }
+
     /// <summary>P4 · Mis documentos: uno por tipo, cifrados, listos para entregar a los procesos que los pidan.</summary>
     public List<DocumentoPersona> Documentos { get; private set; } = [];
 

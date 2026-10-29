@@ -267,6 +267,7 @@ export interface Empleo {
   actualizacionPedida: boolean
   datosConfirmadosEn: string | null
   cambioPendiente: { cambios: string[]; en: string } | null
+  empresaId: string
 }
 
 export interface DatosPropuestos {
@@ -330,3 +331,17 @@ export const useAutoevaluarme = () =>
 export const useResponderPulso = () =>
   useMutacionCuenta((v: { pulsoId: string; satisfaccion: number; claridad: number; apoyo: number; recomendaria: number; comentario: string }) =>
     apiSend('POST', `${base}/empleo/pulsos/${v.pulsoId}`, v))
+
+/* ---------- Compartir su hoja de vida con su empresa (para su expediente) ---------- */
+
+export function useHojaDeVidaCompartida(activo = true) {
+  return useQuery({
+    queryKey: ['portal-persona', 'empleo', 'hoja-compartida'],
+    queryFn: ({ signal }) => apiGet<string[]>(`${base}/empleo/hoja-de-vida-compartida`, signal),
+    enabled: activo,
+    retry: false,
+  })
+}
+
+export const useCompartirHojaDeVida = () =>
+  useMutacionCuenta((v: { empresaId: string; compartir: boolean }) => apiSend('PUT', `${base}/empleo/hoja-de-vida-compartida`, v))

@@ -16,7 +16,7 @@ public sealed record EmpleoDeLaPersona(
     Guid EmpleadoId, string Empresa, string Codigo, string Cargo, string Area, string Sede, string? EmpresaUsuaria, string TipoContrato, decimal SalarioCop,
     DateOnly FechaIngreso, DateOnly? FechaFinContrato, string Estado, string Celular, string Ciudad, string Eps, string FondoPension, string Arl,
     string CajaCompensacion, IReadOnlyList<DocumentoDelEmpleo> Documentos, IReadOnlyList<string> Avisos, bool ActualizacionPedida,
-    DateTimeOffset? DatosConfirmadosEn, CambioPendienteDelEmpleo? CambioPendiente);
+    DateTimeOffset? DatosConfirmadosEn, CambioPendienteDelEmpleo? CambioPendiente, Guid EmpresaId);
 
 /// <summary>Los datos que el empleado puede proponer cambiar; RRHH los aplica en el expediente.</summary>
 public sealed record DatosPropuestosPorElEmpleado(string Celular, string Ciudad, string Eps, string FondoPension, string CajaCompensacion);

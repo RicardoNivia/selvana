@@ -40,6 +40,7 @@ public static class ReclutamientoModule
         services.AddScoped<ILecturaPortalPersona, LecturaPortalPersona>();
         services.AddScoped<ILecturaOfertas, LecturaOfertas>();
         services.AddSingleton<IHasherClavesPortal, HasherClavesPortal>();
+        services.AddScoped<Contracts.IHojasDeVidaParaEmpresa, Portal.HojasDeVidaParaEmpresa>();
         services.AddScoped<IEventosReclutamiento, EventosReclutamiento>();
         services.AddScoped<IAlmacenHojasDeVida, AlmacenHojasDeVida>();
         services.AddScoped<ILecturaReclutamiento, LecturaReclutamiento>();

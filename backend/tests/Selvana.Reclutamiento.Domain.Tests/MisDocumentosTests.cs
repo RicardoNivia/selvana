@@ -62,4 +62,18 @@ public sealed class MisDocumentosTests
         c.QuitarDocumento(d.Id).Value.Should().Be(archivo);
         c.Documentos.Should().BeEmpty();
     }
+
+    [Fact]
+    public void CompartirLaHojaDeVidaEsPorEmpresaYSeRetira()
+    {
+        var c = Cuenta();
+        var empresa = Guid.NewGuid();
+
+        c.CompartirHojaDeVida(empresa, true);
+        c.CompartirHojaDeVida(empresa, true);
+        c.HojaDeVidaCompartidaCon.Should().ContainSingle().Which.Should().Be(empresa);
+
+        c.CompartirHojaDeVida(empresa, false);
+        c.HojaDeVidaCompartidaCon.Should().BeEmpty();
+    }
 }

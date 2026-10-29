@@ -18,6 +18,8 @@ public sealed record RetiroRequest(DateOnly Fecha, string Motivo);
 
 public sealed record CreadoResponse(Guid Id);
 
+public sealed record MotivoRequest(string Motivo);
+
 /// <summary>A cuántos empleados se les pidió actualizar sus datos.</summary>
 public sealed record CampanaResponse(int Pedidos);
 
@@ -103,6 +105,18 @@ public static class ExpedienteEndpoints
                 return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
             })
             .WithName("DescargarArchivoEmpleado");
+
+        // Hoja de vida del empleado: la de su postulación o la que compartió desde su portal
+        g.MapGet("/{id:guid}/hoja-de-vida", async (Guid id, IQueryHandler<ObtenerHojaDeVidaEmpleadoQuery, HojaDeVidaEmpleadoDto> h, CancellationToken ct) =>
+                (await h.Handle(new ObtenerHojaDeVidaEmpleadoQuery(id), ct)).ToHttp())
+            .WithName("HojaDeVidaEmpleado").Produces<HojaDeVidaEmpleadoDto>();
+
+        g.MapPost("/{id:guid}/hoja-de-vida/abrir", async (Guid id, MotivoRequest b, ICommandHandler<AbrirHojaDeVidaCompartidaCommand, ArchivoDto> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new AbrirHojaDeVidaCompartidaCommand(id, b.Motivo ?? ""), ct);
+                return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
+            })
+            .WithName("AbrirHojaDeVidaCompartida");
 
         // P5 · Lo que el empleado propuso desde su portal: una persona aplica o descarta
         g.MapPost("/{id:guid}/datos-propuestos/aplicar", async (Guid id, ICommandHandler<AplicarCambioPropuestoCommand> h, CancellationToken ct) =>

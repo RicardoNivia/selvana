@@ -25,6 +25,8 @@ public sealed record PerfilRequest(
 
 public sealed record EnviarMiDocumentoRequest(Guid ProcesoId, string Tipo);
 
+public sealed record CompartirHojaDeVidaRequest(Guid EmpresaId, bool Compartir);
+
 public sealed record AutoevaluacionRequest(IReadOnlyDictionary<string, int> Calificaciones, string Comentario);
 
 public sealed record ActualizarHojaDeVidaRequest(Guid BorradorId, string Nombre, string Celular, string Ciudad, string? LinkedIn);
@@ -199,6 +201,15 @@ public static class PortalPersonaEndpoints
                 return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
             })
             .WithName("DescargarDocumentoEmpleo");
+
+        // Compartir su hoja de vida del portal con su empresa (para su expediente)
+        cuenta.MapGet("/empleo/hoja-de-vida-compartida", async (IQueryHandler<EmpresasConMiHojaDeVidaQuery, IReadOnlyList<Guid>> h, CancellationToken ct) =>
+                (await h.Handle(new EmpresasConMiHojaDeVidaQuery(), ct)).ToHttp())
+            .WithName("EmpresasConMiHojaDeVida").Produces<IReadOnlyList<Guid>>();
+
+        cuenta.MapPut("/empleo/hoja-de-vida-compartida", async (CompartirHojaDeVidaRequest b, ICommandHandler<CompartirMiHojaDeVidaCommand> h, CancellationToken ct) =>
+                (await h.Handle(new CompartirMiHojaDeVidaCommand(b.EmpresaId, b.Compartir), ct)).ToHttp())
+            .WithName("CompartirMiHojaDeVida");
 
         // Desempeño y clima: su autoevaluación (180° y 360°) y sus pulsos de ingreso de 30, 60 y 90 días
         cuenta.MapGet("/empleo/pendientes", async (IQueryHandler<ObtenerPendientesEmpleoQuery, PendientesEmpleoDto> h, CancellationToken ct) =>

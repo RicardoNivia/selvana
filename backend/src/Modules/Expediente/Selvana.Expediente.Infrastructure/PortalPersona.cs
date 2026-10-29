@@ -40,7 +40,7 @@ internal sealed class EmpleoDeLaPersona(
                 [.. e.Documentos.OrderBy(d => d.Tipo).ThenBy(d => d.Nombre).Select(d => new DocumentoDelEmpleo(d.Id, d.Tipo, d.Nombre, d.Vigente?.VenceEn,
                     Vigencia(d.Vigente?.VenceEn, hoy), d.Vigente?.Lectura is { Estado: EstadoLectura.Leyendo or EstadoLectura.PorRevisar }))],
                 e.AvisosParaElEmpleado(hoy), e.ActualizacionPedidaEn is not null, e.DatosConfirmadosEn,
-                e.CambioPropuesto is { } p ? new CambioPendienteDelEmpleo(p.Cambios, p.En) : null));
+                e.CambioPropuesto is { } p ? new CambioPendienteDelEmpleo(p.Cambios, p.En) : null, e.EmpresaId));
         }
 
         return lista;

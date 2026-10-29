@@ -5,6 +5,7 @@ import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { IconoAlerta, IconoCheck, IconoDocumento, IconoSubir } from '../../shared/ui/Iconos'
 import { usePuede } from '../sesion/api'
 import { CamposAfiliaciones, CamposSituacion } from './Empleados'
+import { HojaDeVidaEmpleado } from './HojaDeVidaEmpleado'
 import { LecturaDocumento } from './LecturaDocumento'
 import {
   abrirArchivo, type Afiliaciones, legiblePorIa, type Documento, type Empleado, fechaCorta, nombreNovedad, novedadesRegistrables, pesos, type Situacion, type TipoNovedad,
@@ -13,8 +14,8 @@ import {
 } from './api'
 import './empleados.css'
 
-type Pestana = 'resumen' | 'historial' | 'carpeta'
-const pestanas: [Pestana, string][] = [['resumen', 'Resumen'], ['historial', 'Historial'], ['carpeta', 'Carpeta']]
+type Pestana = 'resumen' | 'hoja' | 'historial' | 'carpeta'
+const pestanas: [Pestana, string][] = [['resumen', 'Resumen'], ['hoja', 'Hoja de vida'], ['historial', 'Historial'], ['carpeta', 'Carpeta']]
 const fechaHora = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
 const hoyIso = () => new Date().toISOString().slice(0, 10)
 
@@ -55,6 +56,7 @@ export function FichaEmpleado() {
 
       <div role="tabpanel" className="emp-panel">
         {pestana === 'resumen' && <Resumen e={e} />}
+        {pestana === 'hoja' && <HojaDeVidaEmpleado empleadoId={e.id} irACarpeta={() => setParametros({ pestana: 'carpeta' }, { replace: true })} />}
         {pestana === 'historial' && <Historial e={e} />}
         {pestana === 'carpeta' && <Carpeta e={e} />}
       </div>

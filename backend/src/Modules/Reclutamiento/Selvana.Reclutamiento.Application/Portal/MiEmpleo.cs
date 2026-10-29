@@ -79,6 +79,48 @@ internal sealed class DescargarDocumentoEmpleoHandler(IPersonaActual persona, IC
     }
 }
 
+/* Compartir la hoja de vida del portal con su empresa (para su expediente); sin esto, la empresa no la ve */
+
+public sealed record EmpresasConMiHojaDeVidaQuery : IQuery<IReadOnlyList<Guid>>;
+
+public sealed record CompartirMiHojaDeVidaCommand(Guid EmpresaId, bool Compartir) : ICommand;
+
+internal sealed class EmpresasConMiHojaDeVidaHandler(IPersonaActual persona, ICuentasCandidato cuentas) : IQueryHandler<EmpresasConMiHojaDeVidaQuery, IReadOnlyList<Guid>>
+{
+    public async Task<Result<IReadOnlyList<Guid>>> Handle(EmpresasConMiHojaDeVidaQuery query, CancellationToken cancellationToken)
+    {
+        var r = await MisDocumentos.CuentaAsync(persona, cuentas, cancellationToken);
+        return r.IsFailure ? r.Error : r.Value.HojaDeVidaCompartidaCon;
+    }
+}
+
+internal sealed class CompartirMiHojaDeVidaHandler(IPersonaActual persona, ICuentasCandidato cuentas, IEmpleoDeLaPersona empleos, IBitacora bitacora,
+    IUnidadReclutamiento unidad) : ICommandHandler<CompartirMiHojaDeVidaCommand>
+{
+    public async Task<Result> Handle(CompartirMiHojaDeVidaCommand c, CancellationToken cancellationToken)
+    {
+        var r = await MisDocumentos.CuentaAsync(persona, cuentas, cancellationToken);
+        if (r.IsFailure)
+        {
+            return Result.Failure(r.Error);
+        }
+
+        // Solo con una empresa donde la persona trabaja (o trabajó)
+        var cuenta = r.Value;
+        if (!(await empleos.ListarAsync(cuenta.Documento, cuenta.Correo, cancellationToken)).Any(e => e.EmpresaId == c.EmpresaId))
+        {
+            return Result.Failure(Error.NotFound("Portal.SinEmpleo", "No encontramos tu empleo en esa empresa."));
+        }
+
+        cuenta.CompartirHojaDeVida(c.EmpresaId, c.Compartir);
+        bitacora.Registrar(c.EmpresaId, Core.Contracts.Auditoria.TipoActor.Titular, cuenta.Datos.Nombre,
+            c.Compartir ? "Compartió su hoja de vida del portal con la empresa" : "Dejó de compartir su hoja de vida del portal",
+            cuenta.Documento, "Autorización de la persona desde su portal", "CuentaPortal", cuenta.Id);
+        await unidad.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+}
+
 /* Desempeño y clima desde el portal del empleado: su autoevaluación (180° y 360°) y sus pulsos de ingreso */
 
 public sealed record PendientesEmpleoDto(IReadOnlyList<AutoevaluacionDeLaPersona> Autoevaluaciones, IReadOnlyList<PulsoDeLaPersona> Pulsos);
