@@ -1,4 +1,5 @@
-import { type CSSProperties, type ReactNode, useCallback, useEffect, useState } from 'react'
+import { type CSSProperties, Fragment, type ReactNode, useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
@@ -38,7 +39,8 @@ const aceptable = (p: PersonaProceso) =>
  * El proceso de selección de la vacante, pensado como lo haría un psicólogo organizacional:
  * mismos criterios para todos (selección estructurada), cada paso con su evidencia, la IA propone y una persona decide.
  */
-export function ProcesoSeleccion({ vacante }: { vacante: Vacante }) {
+/** «encabezado»: el espacio del header verde de la vacante donde se pinta el embudo. */
+export function ProcesoSeleccion({ vacante, encabezado }: { vacante: Vacante; encabezado: HTMLElement | null }) {
   const [etapa, setEtapa] = useState<Etapa | null>(null)
   const [porDecidir, setPorDecidir] = useState(false)
   const [buscar, setBuscar] = useState('')
@@ -58,7 +60,7 @@ export function ProcesoSeleccion({ vacante }: { vacante: Vacante }) {
 
   return (
     <div className="proceso">
-      <Embudo etapas={d.etapas} contratados={d.contratados} elegida={etapa} onElegir={elegir} />
+      {encabezado && createPortal(<Embudo etapas={d.etapas} contratados={d.contratados} elegida={etapa} onElegir={elegir} />, encabezado)}
 
       <AgenteSeleccion proceso={d} vacante={vacante} seleccion={seleccion} editando={editandoReglas} onEditar={setEditandoReglas}
         onAplicado={() => setSeleccion(new Set())} />
@@ -110,49 +112,43 @@ export function ProcesoSeleccion({ vacante }: { vacante: Vacante }) {
   )
 }
 
-/* ---------- Embudo: una etapa por color, cuántos están, cuántos llegaron y qué espera decisión ---------- */
+/* ---------- Embudo en el encabezado verde: una ficha por etapa con su color, cuántos están y qué espera decisión ---------- */
 
 function Embudo({ etapas: datos, contratados, elegida, onElegir }: { etapas: EtapaProceso[]; contratados: number; elegida: Etapa | null; onElegir: (e: Etapa | null) => void }) {
   const de = (e: Etapa) => datos.find((x) => x.etapa === e) ?? { etapa: e, total: 0, alcanzaron: 0, porDecidir: 0, esperando: 0 }
   const base = Math.max(1, de('Recibida').alcanzaron)
+  const descartadas = de('Descartada')
   return (
-    <nav className="embudo" aria-label="Etapas del proceso">
-      <ol className="embudo-flujo">
-        {flujo.map((e, i) => (
-          <li key={e} className="embudo-paso" style={{ '--i': i } as CSSProperties}>
-            <NodoEtapa dato={de(e)} base={base} activo={elegida === e} onElegir={() => onElegir(elegida === e ? null : e)} />
-            {i < flujo.length - 1 && <span className="embudo-conector" aria-hidden="true"><i /><i /><i /></span>}
-          </li>
-        ))}
-      </ol>
-      <div className="embudo-pie">
-        <button type="button" className={`embudo-descartadas ${claseEtapa('Descartada')}`} aria-pressed={elegida === 'Descartada'} onClick={() => onElegir(elegida === 'Descartada' ? null : 'Descartada')}>
-          <IconoCerrar /> Descartadas <b className="mono">{de('Descartada').total}</b>
-        </button>
-        {contratados > 0 && <span className="embudo-contratados"><IconoCheck /> <b className="mono">{contratados}</b> {contratados === 1 ? 'pasó' : 'pasaron'} a vinculación</span>}
-        {elegida && <button type="button" className="enlace-boton" onClick={() => onElegir(null)}>Ver todas las etapas</button>}
-      </div>
+    <nav className="eh" aria-label="Etapas del proceso">
+      {flujo.map((e, i) => (
+        <Fragment key={e}>
+          {i > 0 && <IconoFlecha className="eh-flecha" aria-hidden="true" />}
+          <NodoEtapa dato={de(e)} base={base} indice={i} activo={elegida === e} onElegir={() => onElegir(elegida === e ? null : e)} />
+        </Fragment>
+      ))}
+      <span className="eh-sep" aria-hidden="true" />
+      <button type="button" className={`eh-nodo eh-chico ${claseEtapa('Descartada')}`} aria-pressed={elegida === 'Descartada'} title={queHace.Descartada}
+        onClick={() => onElegir(elegida === 'Descartada' ? null : 'Descartada')} style={{ '--i': 4 } as CSSProperties}>
+        <span className="eh-punto" /><span className="eh-nombre">Descartadas</span><b className="eh-total">{descartadas.total}</b>
+      </button>
+      {contratados > 0 && <span className="eh-contratados" title="Contratación aprobada: siguen en Vinculación"><IconoCheck /><b className="mono">{contratados}</b> en vinculación</span>}
     </nav>
   )
 }
 
-function NodoEtapa({ dato, base, activo, onElegir }: { dato: EtapaProceso; base: number; activo: boolean; onElegir: () => void }) {
+function NodoEtapa({ dato, base, indice, activo, onElegir }: { dato: EtapaProceso; base: number; indice: number; activo: boolean; onElegir: () => void }) {
   const total = useContador(0, dato.total, true, 900)
   const conversion = Math.round((100 * dato.alcanzaron) / base)
   return (
-    <button type="button" className={`embudo-nodo ${claseEtapa(dato.etapa)}`} aria-pressed={activo} onClick={onElegir} title={queHace[dato.etapa]}
-      aria-label={`${nombreEtapa[dato.etapa]}: ${dato.total} hoy, ${dato.porDecidir} por decidir`}>
-      <span className="embudo-fila">
-        <span className="embudo-icono">{iconoEtapa[dato.etapa]}</span>
-        <span className="embudo-nombre">{nombreEtapa[dato.etapa]}</span>
-        <b className="embudo-total">{total}</b>
-      </span>
-      <span className="embudo-barra" aria-hidden="true"><span style={{ width: `${conversion}%` }} /></span>
-      <span className="embudo-fila">
-        <span className="embudo-conversion mono">{dato.etapa === 'Recibida' ? `${dato.alcanzaron} en total` : `${conversion} % llegó`}</span>
-        {dato.porDecidir > 0 && <span className="marca-ia" title="Por decidir"><Chispa />{dato.porDecidir}</span>}
-        {dato.esperando > 0 && <span className="marca-espera" title="Esperando al candidato"><IconoReloj />{dato.esperando}</span>}
-      </span>
+    <button type="button" className={`eh-nodo ${claseEtapa(dato.etapa)}`} aria-pressed={activo} onClick={onElegir} style={{ '--i': indice } as CSSProperties}
+      title={`${queHace[dato.etapa]} · ${dato.etapa === 'Recibida' ? `${dato.alcanzaron} en total` : `${conversion} % llegó aquí`}`}
+      aria-label={`${nombreEtapa[dato.etapa]}: ${dato.total} hoy, ${dato.porDecidir} por decidir, ${dato.esperando} esperando`}>
+      <span className="eh-punto" />
+      <span className="eh-nombre">{nombreEtapa[dato.etapa]}</span>
+      <b className="eh-total">{total}</b>
+      {dato.porDecidir > 0 && <span className="eh-ia" title="Pasos que sugiere la IA y esperan su decisión"><Chispa />{dato.porDecidir}</span>}
+      {dato.esperando > 0 && <span className="eh-espera" title="Esperando al candidato"><IconoReloj />{dato.esperando}</span>}
+      <span className="eh-barra" aria-hidden="true"><span style={{ width: `${conversion}%` }} /></span>
     </button>
   )
 }
@@ -462,7 +458,6 @@ function PanelPersona({ persona: p, onCerrar }: { persona: PersonaProceso; onCer
 function EsqueletoProceso() {
   return (
     <div className="proceso">
-      <div className="embudo"><ol className="embudo-flujo">{flujo.map((e) => <li key={e} className="embudo-paso"><Esqueleto alto={72} /></li>)}</ol></div>
       <Esqueleto alto={84} />
       <div className="tarjeta proceso-lista" style={{ padding: 16, display: 'grid', gap: 12 }}>{[0, 1, 2].map((i) => <Esqueleto key={i} alto={180} />)}</div>
     </div>

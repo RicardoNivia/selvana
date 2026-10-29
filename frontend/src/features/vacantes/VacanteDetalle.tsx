@@ -44,6 +44,7 @@ export function VacanteDetalle() {
   const pedida = parametros.get('pestana') ?? ''
   const [elegida, setPestana] = useState<Pestana | null>(() => alias[pedida]?.[0] ?? ((pestanas as readonly string[]).includes(pedida) ? pedida as Pestana : null))
   const [sub, setSub] = useState<Sub | null>(() => alias[pedida]?.[1] ?? null)
+  const [encabezado, setEncabezado] = useState<HTMLDivElement | null>(null)
 
   if (vacante.isPending) {
     return (
@@ -91,6 +92,7 @@ export function VacanteDetalle() {
             {v.estado === 'Publicada' && <a className="boton boton-secundario boton-pequeno" href={`/empleos/${v.codigo}`} target="_blank" rel="noreferrer">Ver en el portal</a>}
           </span>
         </div>
+        {pestana === 'proceso' && <div ref={setEncabezado} className="vacante-hero-embudo" />}
         <span style={{ fontSize: 12, opacity: 0.8 }}>Creada por {v.creadaPor} el {fecha.format(new Date(v.creadaEn))}</span>
       </header>
 
@@ -111,7 +113,7 @@ export function VacanteDetalle() {
         </div>
       )}
 
-      {pestana === 'proceso' ? <ProcesoSeleccion vacante={v} />
+      {pestana === 'proceso' ? <ProcesoSeleccion vacante={v} encabezado={encabezado} />
         : pestana === 'vacante' ? (v.estado === 'Redactando' ? <Redactando frase={v.frase} /> : <Contenido key={`${v.id}-${v.estado}`} vacante={v} />)
         : pestana === 'banco' && conProceso ? <DelBanco vacante={v} />
         : pestana === 'postulantes' ? <Postulantes vacante={v} />
