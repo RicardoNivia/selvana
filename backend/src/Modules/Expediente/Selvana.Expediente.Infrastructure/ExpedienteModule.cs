@@ -25,6 +25,7 @@ public static class ExpedienteModule
         services.AddScoped<IEventosExpediente, EventosExpediente>();
         services.AddScoped<IBitacora, Bitacora>();
         services.AddScoped<IAlmacenArchivos, AlmacenArchivos>();
+        services.AddScoped<Contracts.IEmpleoDeLaPersona, EmpleoDeLaPersona>();
         services.AddSingleton<Integrations.Nomina.ArchivoPlantaCsv>();
         services.AddScoped<Application.Empleados.ILectorPlanta, LectorPlanta>();
 

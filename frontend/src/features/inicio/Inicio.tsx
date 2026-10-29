@@ -11,8 +11,10 @@ import { PieLegal } from './PieLegal'
 const pasos = [
   { titulo: 'Escribes una frase', texto: '«Necesito 25 auxiliares de bodega en Funza, turno noche». El agente redacta el aviso, los requisitos, las preguntas y el rango salarial.' },
   { titulo: 'La IA atrae y lee', texto: 'La vacante sale al portal de empleo. Cada candidato sube su hoja de vida y la IA llena la postulación; él solo confirma.' },
-  { titulo: 'Recibes la terna explicada', texto: 'Cada candidato llega ordenado con 3 a 5 razones y la evidencia de dónde sale cada una. Sin edad, género ni foto en el puntaje.' },
+  { titulo: 'Preselecciona y prueba', texto: 'Conversa con cada candidato por chat, revisa los requisitos excluyentes, aplica pruebas psicotécnicas y arma la terna con 3 a 5 razones con evidencia.' },
   { titulo: 'Tú decides', texto: 'Apruebas o corriges en tu bandeja. Lo que cambies queda registrado y la IA aprende de tu criterio.' },
+  { titulo: 'Contratas sin digitar', texto: 'Oferta y contrato con tu plantilla, firma con evidencia, documentos de ingreso leídos por la IA, afiliaciones prellenadas y plan de inducción.' },
+  { titulo: 'El expediente sigue vivo', texto: 'El empleado nace con su contrato y su carpeta. Él actualiza sus datos y sube soportes desde su portal; tú apruebas cada cambio.' },
 ]
 
 const sectores = [
@@ -27,11 +29,13 @@ const sectores = [
 const oficios = ['Auxiliar de bodega', 'Asesor de servicio', 'Auxiliar de enfermería', 'Montacarguista', 'Cajero', 'Oficial de obra', 'Agente bilingüe', 'Operario de producción', 'Mensajero', 'Conductor C2', 'Analista de nómina', 'Vigilante']
 
 const modulos = [
-  { nombre: 'Selección con IA', estado: 'Disponible', texto: 'Vacante en una frase, portal de empleo, lector de hojas de vida y terna explicada.' },
-  { nombre: 'Vinculación', estado: 'Próximamente', texto: 'Contrato, documentos y empleado creado en tu nómina sin digitar.' },
-  { nombre: 'Expediente y asistente', estado: 'Próximamente', texto: 'Hoja de vida viva y un asistente que responde a tus empleados.' },
-  { nombre: 'Desempeño', estado: 'Próximamente', texto: 'Borradores de evaluación con evidencias y planes de desarrollo.' },
-  { nombre: 'Clima y retención', estado: 'Próximamente', texto: 'Señales de riesgo de fuga y acciones sugeridas.' },
+  { nombre: 'Selección con IA', estado: 'Disponible', texto: 'Vacante en una frase, requisiciones con aprobación, portal de empleo, lector de hojas de vida, filtros, ranking explicado, chat de preselección, pruebas psicotécnicas y terna.' },
+  { nombre: 'Banco de talento', estado: 'Disponible', texto: 'Busca en tus candidatos como lo dirías en voz alta y vuelve a invitar a quien encaja cuando publicas una vacante parecida.' },
+  { nombre: 'Vinculación', estado: 'Disponible', texto: 'Oferta y contrato con tus plantillas, aceptación con evidencia, documentos de ingreso leídos por la IA, afiliaciones y plan de inducción.' },
+  { nombre: 'Expediente vivo', estado: 'Disponible', texto: 'Contrato, novedades con antes y después, carpeta cifrada con vencimientos, carga de la planta y cambios propuestos desde cada documento.' },
+  { nombre: 'Portal de la persona', estado: 'Disponible', texto: 'Cada candidato sigue sus procesos y guarda sus documentos una vez; cada empleado ve su expediente y actualiza sus datos.' },
+  { nombre: 'Desempeño', estado: 'Próximamente', texto: 'Ciclos y formularios por cargo, objetivos con evidencias, borradores para el líder y calibración con 9-box.' },
+  { nombre: 'Clima y retención', estado: 'Próximamente', texto: 'Encuestas anónimas y eNPS, temas de los comentarios, pulsos de ingreso y señales de riesgo de rotación.' },
 ]
 
 const titular = ['La', 'IA', 'hace', 'el', 'trabajo', 'de', 'selección.']
@@ -111,7 +115,7 @@ export function Inicio() {
 
       <section id="como" className="inicio-seccion">
         <div className="inicio-ancho">
-          <h2 data-revelar>Así avanza una vacante</h2>
+          <h2 data-revelar>De la vacante al empleado</h2>
           <ol className="inicio-pasos" data-revelar>
             {pasos.map((p, i) => (
               <li key={p.titulo} style={v(i)}>
@@ -159,7 +163,7 @@ export function Inicio() {
           <div style={v(1)}>
             <span className="inicio-distinto-icono"><IconoEscudo /></span>
             <h3>Colombia en cada detalle</h3>
-            <p>Autorización de la Ley 1581 en cada postulación, salario mínimo vigente, ReTHUS, ARL y candidatos que se postulan desde el celular.</p>
+            <p>Autorización de la Ley 1581 en cada postulación, solicitudes de los titulares con plazos hábiles, salario mínimo vigente, ARL por clase de riesgo, EPS, pensión y caja.</p>
           </div>
           <div style={v(2)}>
             <span className="inicio-distinto-icono"><IconoCheck /></span>

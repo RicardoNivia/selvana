@@ -5,6 +5,7 @@
     <ProjectReference Include="..\..\Core\Selvana.Core.Contracts\Selvana.Core.Contracts.csproj" />
     <ProjectReference Include="..\..\..\Workers\Selvana.AI.Contracts\Selvana.AI.Contracts.csproj" />
     <ProjectReference Include="..\..\Vinculacion\Selvana.Vinculacion.Contracts\Selvana.Vinculacion.Contracts.csproj" />
+    <ProjectReference Include="..\..\Expediente\Selvana.Expediente.Contracts\Selvana.Expediente.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Selvana.SharedKernel\Selvana.SharedKernel.csproj" />
   </ItemGroup>
   <ItemGroup>

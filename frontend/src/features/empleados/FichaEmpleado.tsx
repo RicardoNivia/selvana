@@ -8,7 +8,8 @@ import { CamposAfiliaciones, CamposSituacion } from './Empleados'
 import { LecturaDocumento } from './LecturaDocumento'
 import {
   abrirArchivo, type Afiliaciones, legiblePorIa, type Documento, type Empleado, fechaCorta, nombreNovedad, novedadesRegistrables, pesos, type Situacion, type TipoNovedad,
-  tiposDocumento, useActualizarDatos, useEmpleado, useGuardarDocumento, useRegistrarNovedad, useRetirar,
+  tiposDocumento, useActualizarDatos, useAplicarDatosPropuestos, useDescartarDatosPropuestos, useEmpleado, useGuardarDocumento, usePedirActualizacion,
+  useRegistrarNovedad, useRetirar,
 } from './api'
 import './empleados.css'
 
@@ -74,6 +75,7 @@ function Resumen({ e }: { e: Empleado }) {
           ))}
         </ul>
       )}
+      {e.datosPropuestos && <DatosPropuestos e={e} />}
       {e.estado === 'Retirado' && <p className="aviso aviso-neutro">Retirado el <span className="mono">{fechaCorta(e.fechaRetiro)}</span>: «{e.motivoRetiro}».</p>}
 
       <div className="emp-grilla">
@@ -107,6 +109,7 @@ function Resumen({ e }: { e: Empleado }) {
           )}
         </section>
       </div>
+      {e.estado === 'Activo' && <CampanaDatos e={e} />}
       {e.estado === 'Activo' && <Retiro e={e} />}
     </div>
   )
@@ -316,5 +319,46 @@ function SubirDocumento({ e, documento, onListo }: { e: Empleado; documento?: Do
         <Boton onClick={onListo} disabled={guardar.isPending}>Cancelar</Boton>
       </div>
     </div>
+  )
+}
+
+/** P5 · Lo que el empleado propuso desde su portal: una persona aplica o descarta (queda en la bitácora). */
+function DatosPropuestos({ e }: { e: Empleado }) {
+  const aplicar = useAplicarDatosPropuestos(e.id)
+  const descartar = useDescartarDatosPropuestos(e.id)
+  const p = e.datosPropuestos!
+  return (
+    <section className="tarjeta emp-propuesta" aria-label="Cambios propuestos por el empleado">
+      <header>
+        <h2>{e.nombre.split(' ')[0]} propuso cambios en sus datos</h2>
+        <span className="cita">Portal del empleado · {fechaCorta(p.en.slice(0, 10))}</span>
+      </header>
+      <ul>{p.cambios.map((c) => <li key={c} className="mono">{c}</li>)}</ul>
+      {(aplicar.error ?? descartar.error) && <p role="alert" className="aviso aviso-error"><IconoAlerta />{(aplicar.error ?? descartar.error)!.message}</p>}
+      <div className="decision">
+        <Boton variante="primario" cargando={aplicar.isPending} textoCargando="Aplicando…" disabled={descartar.isPending} onClick={() => aplicar.mutate(undefined)}>Aplicar al expediente</Boton>
+        <Boton cargando={descartar.isPending} textoCargando="Descartando…" disabled={aplicar.isPending} onClick={() => descartar.mutate(undefined)}>Descartar</Boton>
+        <span className="registro">Se registran la propuesta y su decisión</span>
+      </div>
+    </section>
+  )
+}
+
+/** Campaña de actualización: el empleado la ve en su portal y confirma o propone cambios. */
+function CampanaDatos({ e }: { e: Empleado }) {
+  const pedir = usePedirActualizacion(e.id)
+  return (
+    <section className="tarjeta emp-bloque emp-campana">
+      <div>
+        <h2>Actualización de datos</h2>
+        <p className="ayuda">
+          {e.actualizacionPedidaEn ? <>Pedida el <span className="mono">{fechaCorta(e.actualizacionPedidaEn.slice(0, 10))}</span>: el empleado la ve en su portal.</>
+            : e.datosConfirmadosEn ? <>Respondió el <span className="mono">{fechaCorta(e.datosConfirmadosEn.slice(0, 10))}</span>.</>
+              : 'Pídale que confirme o actualice sus datos desde su portal.'}
+        </p>
+      </div>
+      {!e.actualizacionPedidaEn && <Boton pequeno cargando={pedir.isPending} textoCargando="Pidiendo…" onClick={() => pedir.mutate(undefined)}>Pedir actualización</Boton>}
+      {pedir.error && <p role="alert" className="aviso aviso-error"><IconoAlerta />{pedir.error.message}</p>}
+    </section>
   )
 }

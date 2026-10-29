@@ -81,3 +81,11 @@
 .emp-cambio-actual { color: var(--color-texto-suave); text-decoration: line-through; text-decoration-color: var(--color-texto-tenue); overflow-wrap: anywhere; }
 @media (max-width: 720px) { .emp-cambios li { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); } .emp-cambio-marca, .emp-cambios .cita { grid-column: 1 / -1; } }
 .emp-leer-ia { display: flex; align-items: flex-start; gap: var(--espacio-2); font-size: 13px; }
+
+/* P5 · Cambios que propone el empleado desde su portal y campaña de actualización */
+.emp-propuesta { display: flex; flex-direction: column; border-color: color-mix(in srgb, var(--color-alerta) 45%, var(--color-borde)); }
+.emp-propuesta > header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--espacio-2); padding: var(--espacio-4) var(--espacio-6) 0; }
+.emp-propuesta h2 { margin: 0; font: 700 17px / 1.2 var(--fuente-display); }
+.emp-propuesta ul { margin: var(--espacio-3) 0; padding: 0 var(--espacio-6) 0 calc(var(--espacio-6) + var(--espacio-4)); display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.emp-campana { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.emp-campana > div { display: flex; flex-direction: column; gap: 4px; }

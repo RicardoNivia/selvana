@@ -18,6 +18,9 @@ public sealed record RetiroRequest(DateOnly Fecha, string Motivo);
 
 public sealed record CreadoResponse(Guid Id);
 
+/// <summary>A cuántos empleados se les pidió actualizar sus datos.</summary>
+public sealed record CampanaResponse(int Pedidos);
+
 public sealed record AplicarLecturaRequest(IReadOnlyList<CambioAplicadoRequest> Cambios);
 
 public static class ExpedienteEndpoints
@@ -100,6 +103,30 @@ public static class ExpedienteEndpoints
                 return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
             })
             .WithName("DescargarArchivoEmpleado");
+
+        // P5 · Lo que el empleado propuso desde su portal: una persona aplica o descarta
+        g.MapPost("/{id:guid}/datos-propuestos/aplicar", async (Guid id, ICommandHandler<AplicarCambioPropuestoCommand> h, CancellationToken ct) =>
+                (await h.Handle(new AplicarCambioPropuestoCommand(id), ct)).ToHttp())
+            .WithName("AplicarDatosPropuestos");
+
+        g.MapPost("/{id:guid}/datos-propuestos/descartar", async (Guid id, ICommandHandler<DescartarCambioPropuestoCommand> h, CancellationToken ct) =>
+                (await h.Handle(new DescartarCambioPropuestoCommand(id), ct)).ToHttp())
+            .WithName("DescartarDatosPropuestos");
+
+        // Campaña de actualización de datos: a un empleado o a todos los activos que ve el usuario
+        g.MapPost("/{id:guid}/pedir-actualizacion", async (Guid id, ICommandHandler<PedirActualizacionDatosCommand, int> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new PedirActualizacionDatosCommand(id), ct);
+                return r.IsSuccess ? Results.Ok(new CampanaResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("PedirActualizacionEmpleado").Produces<CampanaResponse>();
+
+        g.MapPost("/campana-actualizacion", async (ICommandHandler<PedirActualizacionDatosCommand, int> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new PedirActualizacionDatosCommand(null), ct);
+                return r.IsSuccess ? Results.Ok(new CampanaResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("CampanaActualizacionDatos").Produces<CampanaResponse>();
 
         // Planta que ya existía: primero se previsualiza (no guarda nada) y una persona confirma la carga
         var planta = app.MapGroup("/expediente/planta").WithTags("Empleados · carga de planta").RequireAuthorization(Politicas.DeAccion("GestionarEmpleados"));

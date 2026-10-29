@@ -26,6 +26,19 @@ internal sealed class EmpleadosRepositorio(ExpedienteDbContext db) : IEmpleados
             .Select(e => e.Documento).ToListAsync(cancellationToken)];
 
     public void Agregar(Empleado empleado) => db.Add(empleado);
+
+    public async Task<IReadOnlyList<Empleado>> ActivosAsync(Guid empresaId, CancellationToken cancellationToken) =>
+        await db.Set<Empleado>().Where(e => e.EmpresaId == empresaId && e.Estado == EstadoEmpleado.Activo).ToListAsync(cancellationToken);
+
+    public Task<Empleado?> DeLaPersonaAsync(Guid id, string documento, string correo, CancellationToken cancellationToken) =>
+        DeLaPersona(db.Set<Empleado>(), documento, correo).FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+
+    /// <summary>Por cédula y correo a la vez; el correo sin mayúsculas (ILIKE) y escapado, para que % o _ no funcionen como comodines.</summary>
+    public static IQueryable<Empleado> DeLaPersona(IQueryable<Empleado> q, string documento, string correo)
+    {
+        var patron = correo.Trim().Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal);
+        return q.Where(e => e.Documento == documento && EF.Functions.ILike(e.Correo, patron, "\\"));
+    }
 }
 
 internal sealed class LecturaEmpleados(ExpedienteDbContext db) : ILecturaEmpleados

@@ -37,7 +37,7 @@ El orden real se ajustó para tener un flujo completo de punta a punta antes de 
 | Etapa 3 · Empleados E1 · Expediente digital y carga de la planta | Hecho |
 | Etapa 3 · Empleados E2 · Actualización inteligente | Hecho; campaña anual desde el portal del empleado (P5) |
 | **Etapa 3 · Empleados E4 · «Mi equipo» del líder en la consola** | **Sigue** |
-| Portal · P4 Mis documentos · P5 Portal del empleado | Después de E1 |
+| Portal · P4 Mis documentos · P5 Portal del empleado | Hecho (29/10/2026) |
 | Etapa 4 · Desempeño · Etapa 5 · Clima | Después |
 | Etapa 1 · Sprint 10 · Estabilización y lanzamiento | Antes de vender el primer plan |
 | Integraciones (WhatsApp, correo, firma, ERP) | Al final |
@@ -311,8 +311,8 @@ Adelantado (ADR 0013). Detalle en `docs/backlog/Modulos-Vinculacion-Empleados-De
 - [x] P3b · Ofertas para ti — *vacantes que encajan por reglas (cargo, habilidades, ciudad) con el porqué, y postularse con la hoja de vida del perfil*
 - [x] Rediseño del portal (28/10/2026) — *bienvenida con cifras, anillo de perfil y buscador; navegación con indicador deslizante (barra inferior en el celular); hoja de vida por partes con etiquetas y barra de guardar; transiciones de la marca que se apagan con movimiento reducido*
 - [x] Funciones nuevas del portal (28/10/2026) — *hoja de vida en PDF con la marca (sin foto, edad ni dirección), «Completa tu perfil» (reglas), «Mi cuenta y privacidad» (autorización Ley 1581 y solicitudes del titular) y sesión visible en el portal de empleo: nombre y menú en la cabecera y tarjeta «Hola, …» con pendientes, procesos y perfil*
-- [ ] P4 · Mis documentos — *subir cédula y certificados una vez y reutilizarlos en otros procesos de la misma empresa, con su vigencia*
-- [ ] P5 · Portal del empleado — *al vincularse, el mismo portal muestra su expediente y la actualización de datos (necesita Empleados E1 y E2)*
+- [x] P4 · Mis documentos — *hecho el 29/10/2026: la persona sube cédula, certificados y soportes una vez (cifrados, uno por tipo, con vencimiento) y los entrega con un clic a los procesos que se los piden; llegan como si los subiera por su enlace (la IA los lee y RRHH aprueba)*
+- [x] P5 · Portal del empleado — *hecho el 29/10/2026: «Mi empleo» aparece cuando la cédula y el correo coinciden con un empleado; ve su contrato, afiliaciones, carpeta y avisos, propone cambios a sus datos (RRHH aplica o descarta en la bandeja) y sube soportes que lee la IA*
 
 **Sprint 12 – Agente de documentos**
 
@@ -349,7 +349,7 @@ Objetivo: que la hoja de vida del empleado se mantenga actualizada sola y que ca
 - [x] El empleado sube una foto o PDF (diploma, curso, licencia); la IA identifica el tipo, extrae datos y propone el cambio — *E2: lo sube RRHH desde la ficha; el empleado lo hará desde el portal (P5)*
 - [x] RRHH aprueba con un clic desde la bandeja — *E2*
 - [x] Alertas automáticas de documentos y certificaciones por vencer, al empleado y al líder — *E1 y E2: alertas en la ficha; el aviso al empleado y al líder llega con las integraciones y E4*
-- [ ] Campaña anual de actualización de datos desde el portal del empleado (P5)
+- [x] Campaña anual de actualización de datos desde el portal del empleado (P5) — *RRHH la pide a uno o a todos; el empleado confirma o propone cambios*
 
 **Sprint 17** — *libre: el asistente del empleado se descartó el 2026-10-29 (no va en Selvana).*
 

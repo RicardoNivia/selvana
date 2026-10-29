@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { apiGet, apiSend, apiUpload } from '../../shared/api/client'
+import { apiGet, apiSend, apiUpload, urlApi } from '../../shared/api/client'
 import type { DatosCandidato } from '../portal/api'
 
 /** Portal de la persona (ADR 0013): su propia sesión, distinta de la consola. */
@@ -178,3 +178,123 @@ export const useAbrirPendiente = () =>
 
 /** Deja listo el borrador de la vacante con la hoja de vida del perfil; la persona responde las preguntas en la postulación. */
 export const usePostularmeConMiPerfil = () => useMutation({ mutationFn: (codigo: string) => apiSend<{ id: string }>('POST', `${base}/postular/${codigo}`) })
+
+/* ---------- P4 · Mis documentos ---------- */
+
+export type Vigencia = 'Vigente' | 'PorVencer' | 'Vencido' | 'SinVencimiento'
+
+export interface MiDocumento {
+  id: string
+  tipo: string
+  nombre: string
+  nombreArchivo: string
+  venceEn: string | null
+  vigencia: Vigencia
+  subidoEn: string
+  envios: { empresa: string; en: string }[]
+}
+
+/** Lo que le pide un proceso de contratación; `puedeEnviar` si ya lo tiene vigente en su portal. */
+export interface DocumentoPedido {
+  procesoId: string
+  empresa: string
+  cargo: string
+  tipo: string
+  nombre: string
+  obligatorio: boolean
+  estado: 'Pendiente' | 'Rechazado' | 'Leyendo' | 'PorRevisar' | 'Aprobado'
+  motivoRechazo: string | null
+  puedeEnviar: boolean
+}
+
+export interface MisDocumentos {
+  tipos: { clave: string; nombre: string; vence: boolean }[]
+  documentos: MiDocumento[]
+  pedidos: DocumentoPedido[]
+}
+
+export function useMisDocumentos(activo = true) {
+  return useQuery({ queryKey: ['portal-persona', 'documentos'], queryFn: ({ signal }) => apiGet<MisDocumentos>(`${base}/documentos`, signal), enabled: activo, retry: false })
+}
+
+export const useSubirMiDocumento = () =>
+  useMutacionCuenta((v: { tipo: string; venceEn?: string; archivo: File }) => {
+    const form = new FormData()
+    form.append('archivo', v.archivo)
+    const q = new URLSearchParams({ tipo: v.tipo })
+    if (v.venceEn) q.set('venceEn', v.venceEn)
+    return apiUpload<{ id: string }>(`${base}/documentos?${q}`, form)
+  })
+
+export const useQuitarMiDocumento = () => useMutacionCuenta((id: string) => apiSend('DELETE', `${base}/documentos/${id}`))
+
+export const useEnviarMiDocumento = () => useMutacionCuenta((v: { procesoId: string; tipo: string }) => apiSend('POST', `${base}/documentos/enviar`, v))
+
+export const urlMiDocumento = (id: string) => urlApi(`${base}/documentos/${id}/archivo`)
+
+/* ---------- P5 · Mi empleo ---------- */
+
+export interface DocumentoDelEmpleo {
+  id: string
+  tipo: string
+  nombre: string
+  venceEn: string | null
+  vigencia: Vigencia
+  enRevision: boolean
+}
+
+export interface Empleo {
+  empleadoId: string
+  empresa: string
+  codigo: string
+  cargo: string
+  area: string
+  sede: string
+  empresaUsuaria: string | null
+  tipoContrato: string
+  salarioCop: number
+  fechaIngreso: string
+  fechaFinContrato: string | null
+  estado: 'Activo' | 'Retirado'
+  celular: string
+  ciudad: string
+  eps: string
+  fondoPension: string
+  arl: string
+  cajaCompensacion: string
+  documentos: DocumentoDelEmpleo[]
+  avisos: string[]
+  actualizacionPedida: boolean
+  datosConfirmadosEn: string | null
+  cambioPendiente: { cambios: string[]; en: string } | null
+}
+
+export interface DatosPropuestos {
+  celular: string
+  ciudad: string
+  eps: string
+  fondoPension: string
+  cajaCompensacion: string
+}
+
+export const tiposSoporte = ['Certificado de estudios', 'Curso o certificación', 'Licencia', 'Afiliación', 'Certificado bancario', 'Otro']
+
+export function useMiEmpleo(activo = true) {
+  return useQuery({ queryKey: ['portal-persona', 'empleo'], queryFn: ({ signal }) => apiGet<Empleo[]>(`${base}/empleo`, signal), enabled: activo, retry: false })
+}
+
+export const useProponerMisDatos = () =>
+  useMutacionCuenta((v: DatosPropuestos & { empleadoId: string }) => apiSend('PUT', `${base}/empleo/${v.empleadoId}/datos`, v))
+
+export const useConfirmarMisDatos = () => useMutacionCuenta((empleadoId: string) => apiSend('POST', `${base}/empleo/${empleadoId}/confirmar`))
+
+export const useSubirSoporteEmpleo = () =>
+  useMutacionCuenta((v: { empleadoId: string; tipo: string; nombre: string; venceEn?: string; archivo: File }) => {
+    const form = new FormData()
+    form.append('archivo', v.archivo)
+    const q = new URLSearchParams({ tipo: v.tipo, nombre: v.nombre })
+    if (v.venceEn) q.set('venceEn', v.venceEn)
+    return apiUpload(`${base}/empleo/${v.empleadoId}/soportes?${q}`, form)
+  })
+
+export const urlDocumentoEmpleo = (empleadoId: string, documentoId: string) => urlApi(`${base}/empleo/${empleadoId}/documentos/${documentoId}`)

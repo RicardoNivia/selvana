@@ -36,7 +36,11 @@ public sealed record AlertaDto(string Nivel, string Texto, string Fuente);
 public sealed record EmpleadoDto(
     Guid Id, string Codigo, string Documento, string Nombre, string Correo, string Celular, string Ciudad, string Origen, Guid? ProcesoVinculacionId,
     SituacionDto Situacion, DateOnly FechaIngreso, AfiliacionesDto Afiliaciones, string Estado, DateOnly? FechaRetiro, string? MotivoRetiro,
-    IReadOnlyList<AlertaDto> Alertas, IReadOnlyList<NovedadDto> Novedades, IReadOnlyList<DocumentoDto> Documentos, DateTimeOffset CreadoEn, DateTimeOffset ActualizadoEn);
+    IReadOnlyList<AlertaDto> Alertas, IReadOnlyList<NovedadDto> Novedades, IReadOnlyList<DocumentoDto> Documentos, DateTimeOffset CreadoEn, DateTimeOffset ActualizadoEn,
+    DatosPropuestosDto? DatosPropuestos, DateTimeOffset? ActualizacionPedidaEn, DateTimeOffset? DatosConfirmadosEn);
+
+/// <summary>Lo que el empleado propuso desde su portal y espera la decisión de RRHH.</summary>
+public sealed record DatosPropuestosDto(IReadOnlyList<string> Cambios, DateTimeOffset En);
 
 public sealed record ListaEmpleadosDto(Pagina<FilaEmpleadoDto> Empleados, ConteoEmpleadosDto Conteo);
 
@@ -115,7 +119,7 @@ internal static class Expedientes
                 .Select(n => new NovedadDto(n.Id, n.Tipo.ToString(), n.FechaEfectiva, n.Cambios, n.Motivo, n.Por, n.En))],
             [.. e.Documentos.OrderBy(d => d.Tipo).ThenBy(d => d.Nombre).Select(d => new DocumentoDto(d.Id, d.Tipo, d.Nombre, d.Vigente?.VenceEn, Vigencia(d, hoy),
                 [.. d.Versiones.AsEnumerable().Reverse().Select(v => new VersionDto(v.ArchivoId, v.NombreArchivo, v.VenceEn, v.Nota, v.SubidoPor, v.SubidoEn, Lectura(v.Lectura)))]))],
-            e.CreadoEn, e.ActualizadoEn);
+            e.CreadoEn, e.ActualizadoEn, e.CambioPropuesto is { } p ? new DatosPropuestosDto(p.Cambios, p.En) : null, e.ActualizacionPedidaEn, e.DatosConfirmadosEn);
     }
 }
 

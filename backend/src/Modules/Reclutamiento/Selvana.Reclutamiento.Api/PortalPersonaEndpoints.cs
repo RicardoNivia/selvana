@@ -23,6 +23,8 @@ public sealed record PerfilRequest(
     string Nombre, string Celular, string Ciudad, string? LinkedIn, IReadOnlyList<ExperienciaDto> Experiencia, IReadOnlyList<FormacionDto> Formacion,
     IReadOnlyList<string> Cursos, IReadOnlyList<string> Habilidades);
 
+public sealed record EnviarMiDocumentoRequest(Guid ProcesoId, string Tipo);
+
 public sealed record ActualizarHojaDeVidaRequest(Guid BorradorId, string Nombre, string Celular, string Ciudad, string? LinkedIn);
 
 /// <summary>Portal de la persona (ADR 0013): registro con la hoja de vida, ingreso y su cuenta. Sesión propia, distinta de la consola.</summary>
@@ -131,6 +133,69 @@ public static class PortalPersonaEndpoints
                 return r.IsSuccess ? Results.Ok(new CreadoResponse(r.Value)) : r.ToHttp();
             })
             .WithName("PostularmeConMiPerfil").Produces<CreadoResponse>();
+
+        // P4 · Mis documentos: se suben una vez (cifrados) y se entregan a los procesos que los piden
+        cuenta.MapGet("/documentos", async (IQueryHandler<ObtenerMisDocumentosQuery, MisDocumentosDto> h, CancellationToken ct) =>
+                (await h.Handle(new ObtenerMisDocumentosQuery(), ct)).ToHttp())
+            .WithName("MisDocumentos").Produces<MisDocumentosDto>();
+
+        cuenta.MapPost("/documentos", async (IFormFile archivo, string tipo, DateOnly? venceEn, ICommandHandler<SubirMiDocumentoCommand, Guid> h, CancellationToken ct) =>
+            {
+                await using var flujo = archivo.OpenReadStream();
+                using var memoria = new MemoryStream();
+                await flujo.CopyToAsync(memoria, ct);
+                var tipoContenido = Path.GetExtension(archivo.FileName).Equals(".pdf", StringComparison.OrdinalIgnoreCase) ? "application/pdf" : archivo.ContentType;
+                var r = await h.Handle(new SubirMiDocumentoCommand(tipo, venceEn, archivo.FileName, tipoContenido, memoria.ToArray()), ct);
+                return r.IsSuccess ? Results.Ok(new CreadoResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("SubirMiDocumento").DisableAntiforgery().Produces<CreadoResponse>();
+
+        cuenta.MapDelete("/documentos/{id:guid}", async (Guid id, ICommandHandler<QuitarMiDocumentoCommand> h, CancellationToken ct) =>
+                (await h.Handle(new QuitarMiDocumentoCommand(id), ct)).ToHttp())
+            .WithName("QuitarMiDocumento");
+
+        cuenta.MapGet("/documentos/{id:guid}/archivo", async (Guid id, IQueryHandler<DescargarMiDocumentoQuery, Application.Privacidad.ArchivoDto> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new DescargarMiDocumentoQuery(id), ct);
+                return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
+            })
+            .WithName("DescargarMiDocumento");
+
+        cuenta.MapPost("/documentos/enviar", async (EnviarMiDocumentoRequest b, ICommandHandler<EnviarMiDocumentoCommand> h, CancellationToken ct) =>
+                (await h.Handle(new EnviarMiDocumentoCommand(b.ProcesoId, b.Tipo), ct)).ToHttp())
+            .WithName("EnviarMiDocumento");
+
+        // P5 · Mi empleo: su expediente, proponer cambios a sus datos, responder la campaña y subir soportes
+        cuenta.MapGet("/empleo", async (IQueryHandler<ObtenerMiEmpleoQuery, IReadOnlyList<Expediente.Contracts.EmpleoDeLaPersona>> h, CancellationToken ct) =>
+                (await h.Handle(new ObtenerMiEmpleoQuery(), ct)).ToHttp())
+            .WithName("MiEmpleo").Produces<IReadOnlyList<Expediente.Contracts.EmpleoDeLaPersona>>();
+
+        cuenta.MapPut("/empleo/{empleadoId:guid}/datos", async (Guid empleadoId, Expediente.Contracts.DatosPropuestosPorElEmpleado b, ICommandHandler<ProponerMisDatosCommand> h,
+                CancellationToken ct) => (await h.Handle(new ProponerMisDatosCommand(empleadoId, b), ct)).ToHttp())
+            .WithName("ProponerMisDatos");
+
+        cuenta.MapPost("/empleo/{empleadoId:guid}/confirmar", async (Guid empleadoId, ICommandHandler<ConfirmarMisDatosCommand> h, CancellationToken ct) =>
+                (await h.Handle(new ConfirmarMisDatosCommand(empleadoId), ct)).ToHttp())
+            .WithName("ConfirmarMisDatos");
+
+        cuenta.MapPost("/empleo/{empleadoId:guid}/soportes", async (Guid empleadoId, IFormFile archivo, string tipo, string nombre, DateOnly? venceEn,
+                ICommandHandler<SubirSoporteEmpleoCommand> h, CancellationToken ct) =>
+            {
+                await using var flujo = archivo.OpenReadStream();
+                using var memoria = new MemoryStream();
+                await flujo.CopyToAsync(memoria, ct);
+                var tipoContenido = Path.GetExtension(archivo.FileName).Equals(".pdf", StringComparison.OrdinalIgnoreCase) ? "application/pdf" : archivo.ContentType;
+                return (await h.Handle(new SubirSoporteEmpleoCommand(empleadoId, tipo, nombre, venceEn, archivo.FileName, tipoContenido, memoria.ToArray()), ct)).ToHttp();
+            })
+            .WithName("SubirSoporteEmpleo").DisableAntiforgery();
+
+        cuenta.MapGet("/empleo/{empleadoId:guid}/documentos/{documentoId:guid}", async (Guid empleadoId, Guid documentoId,
+                IQueryHandler<DescargarDocumentoEmpleoQuery, Application.Privacidad.ArchivoDto> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new DescargarDocumentoEmpleoQuery(empleadoId, documentoId), ct);
+                return r.IsSuccess ? Results.File(r.Value.Contenido, r.Value.TipoContenido, r.Value.Nombre) : r.ToHttp();
+            })
+            .WithName("DescargarDocumentoEmpleo");
 
         return app;
     }

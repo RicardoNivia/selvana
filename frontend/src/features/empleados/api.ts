@@ -92,6 +92,10 @@ export interface Empleado {
   documentos: Documento[]
   creadoEn: string
   actualizadoEn: string
+  /** Lo que el empleado propuso desde su portal (P5) y espera la decisión de RRHH. */
+  datosPropuestos: { cambios: string[]; en: string } | null
+  actualizacionPedidaEn: string | null
+  datosConfirmadosEn: string | null
 }
 
 export interface NuevoEmpleado {
@@ -140,6 +144,12 @@ function useAccion<V, R = unknown>(fn: (v: V) => Promise<R>) {
   const cliente = useQueryClient()
   return useMutation({ mutationFn: fn, onSuccess: () => cliente.invalidateQueries({ queryKey: ['empleados'] }) })
 }
+
+/* P5 · Lo que propone el empleado desde su portal y la campaña de actualización de datos */
+export const useAplicarDatosPropuestos = (id: string) => useAccion(() => apiSend('POST', `${base}/${id}/datos-propuestos/aplicar`))
+export const useDescartarDatosPropuestos = (id: string) => useAccion(() => apiSend('POST', `${base}/${id}/datos-propuestos/descartar`))
+export const usePedirActualizacion = (id: string) => useAccion(() => apiSend<{ pedidos: number }>('POST', `${base}/${id}/pedir-actualizacion`))
+export const useCampanaActualizacion = () => useAccion(() => apiSend<{ pedidos: number }>('POST', `${base}/campana-actualizacion`))
 
 export const useCrearEmpleado = () => useAccion((v: NuevoEmpleado) => apiSend<{ id: string }>('POST', base, v))
 export const useActualizarDatos = (id: string) =>

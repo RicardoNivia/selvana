@@ -102,8 +102,8 @@ Hoy cada cosa llega por un enlace distinto (preselección, pruebas, oferta y doc
 | **P3 · Mis pendientes** | Una bandeja de lo que la persona debe hacer: chat de preselección, pruebas por presentar, oferta por aceptar y firmar, documentos por subir o corregir. Los enlaces que se envían llevan al portal. |
 | **P3b · Ofertas para ti** | Vacantes publicadas que encajan con su hoja de vida (reglas sobre cargos, habilidades y ciudad), para postularse con un clic con la hoja de vida que ya subió. |
 | **Hecho además** | Rediseño con la marca (bienvenida, cifras, navegación animada, hoja de vida por partes), hoja de vida en PDF, «Completa tu perfil», «Mi cuenta y privacidad» y sesión visible en el portal de empleo (menú con nombre y tarjeta «Hola, …»). |
-| **P4 · Mis documentos** | Subir y reemplazar documentos (cédula, certificados) una sola vez y reutilizarlos en otros procesos de la misma empresa, con su vigencia. |
-| **P5 · Empleado** | Al vincularse, el mismo portal pasa a ser el del empleado: su expediente y la actualización de datos (conecta con Empleados E2). |
+| **P4 · Mis documentos** *(hecho el 29/10/2026)* | Subir y reemplazar documentos (cédula, certificados) una sola vez y reutilizarlos en otros procesos de la misma empresa, con su vigencia. |
+| **P5 · Empleado** *(hecho el 29/10/2026)* | Al vincularse, el mismo portal pasa a ser el del empleado: su expediente y la actualización de datos (conecta con Empleados E2). |
 
 ## Definición de terminado de cada bloque
 

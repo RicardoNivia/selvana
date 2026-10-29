@@ -123,6 +123,58 @@ internal sealed class SubirDocumentoCandidatoHandler(IProcesos procesos, ITokens
     }
 }
 
+/// <summary>
+/// P4 · La persona entrega desde «Mis documentos» de su portal uno que ya tenía. Sigue el mismo camino que la subida por enlace:
+/// la IA lo lee y RRHH lo aprueba. El proceso debe ser de esa persona (cédula y correo).
+/// </summary>
+public sealed record EntregarDocumentoDesdePortalCommand(
+    Guid ProcesoId, string Documento, string Correo, string Tipo, string NombreArchivo, string TipoContenido, byte[] Contenido) : ICommand;
+
+internal sealed class EntregarDocumentoDesdePortalValidator : AbstractValidator<EntregarDocumentoDesdePortalCommand>
+{
+    public EntregarDocumentoDesdePortalValidator()
+    {
+        RuleFor(c => c.Contenido).NotEmpty().WithMessage("El archivo está vacío. Vuelve a subirlo en Mis documentos.")
+            .Must(c => c.Length <= Docs.TamanoMaximo).WithMessage("El archivo pesa más de 10 MB. Sube un PDF más liviano o una foto.");
+        RuleFor(c => c.TipoContenido).Must(t => Docs.Tipos.Contains(t)).WithMessage("Este documento no está en PDF ni en foto. Súbelo de nuevo en Mis documentos.");
+    }
+}
+
+internal sealed class EntregarDocumentoDesdePortalHandler(IProcesos procesos, IAlmacenDocumentos almacen, IEventosVinculacion eventos, IBitacora bitacora,
+    IUnidadVinculacion unidad, TimeProvider reloj) : ICommandHandler<EntregarDocumentoDesdePortalCommand>
+{
+    public async Task<Result> Handle(EntregarDocumentoDesdePortalCommand c, CancellationToken cancellationToken)
+    {
+        var p = await procesos.PorIdAsync(c.ProcesoId, cancellationToken);
+        if (p is null || p.Etapa == EtapaVinculacion.Cancelado || p.Persona.Documento != c.Documento
+            || !string.Equals(p.Persona.Correo.Trim(), c.Correo.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            return Result.Failure(ProcesoErrors.EnlaceNoExiste);
+        }
+
+        var tipo = Docs.Tipo(c.Tipo);
+        if (tipo.IsFailure)
+        {
+            return tipo;
+        }
+
+        var ahora = reloj.GetUtcNow();
+        p.AsegurarDocumentos();
+        var archivo = almacen.Guardar(p.EmpresaId, c.NombreArchivo, c.TipoContenido, c.Contenido, ahora);
+        var d = p.SubirDocumento(tipo.Value, archivo, c.NombreArchivo, desdeEnlace: true, p.Persona.Nombre, ahora);
+        if (d.IsFailure)
+        {
+            return d;
+        }
+
+        eventos.Publicar(Docs.Evento(p, d.Value, c.TipoContenido, ahora));
+        bitacora.Registrar(p.EmpresaId, TipoActor.Titular, p.Persona.Nombre, $"Entregó «{RequisitosDocumentales.Nombre(tipo.Value)}» desde su portal", p.Codigo,
+            "Lo tenía en Mis documentos; la IA lo lee y RRHH lo aprueba", "ProcesoVinculacion", p.Id);
+        await unidad.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+}
+
 internal sealed class SubirDocumentoConsolaHandler(IUsuarioActual usuario, IProcesos procesos, IAlmacenDocumentos almacen, ICifradoSensible cifrado, IEventosVinculacion eventos,
     IBitacora bitacora, IUnidadVinculacion unidad, TimeProvider reloj) : ICommandHandler<SubirDocumentoConsolaCommand>
 {

@@ -38,6 +38,12 @@ public interface IEmpleados
     Task<HashSet<string>> DocumentosActivosAsync(Guid empresaId, IReadOnlyList<string> documentos, CancellationToken cancellationToken);
 
     void Agregar(Empleado empleado);
+
+    /// <summary>Activos de la empresa, con seguimiento (campaña de actualización).</summary>
+    Task<IReadOnlyList<Empleado>> ActivosAsync(Guid empresaId, CancellationToken cancellationToken);
+
+    /// <summary>El empleado solo si su cédula y su correo coinciden con los de la cuenta del portal (P5).</summary>
+    Task<Empleado?> DeLaPersonaAsync(Guid id, string documento, string correo, CancellationToken cancellationToken);
 }
 
 public interface IEventosExpediente
