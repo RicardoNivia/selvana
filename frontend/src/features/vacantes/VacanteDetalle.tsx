@@ -1,9 +1,9 @@
-import { Fragment, useCallback, useState } from 'react'
+import { type CSSProperties, Fragment, type ReactNode, useCallback, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { AutocompletarMunicipio } from '../../shared/ui/AutocompletarMunicipio'
 import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto, EsqueletoPanel } from '../../shared/ui/Esqueleto'
-import { Chispa, IconoAlerta, IconoCheck, IconoEscudo } from '../../shared/ui/Iconos'
+import { Chispa, IconoAlerta, IconoCheck, IconoCupos, IconoDinero, IconoDocumento, IconoEdificio, IconoEscudo, IconoUbicacion } from '../../shared/ui/Iconos'
 import { Buscador, Paginacion } from '../../shared/ui/Paginacion'
 import { usePaginacion } from '../../shared/ui/paginado'
 import { PruebasDeLaVacante } from '../pruebas/PruebasDeLaVacante'
@@ -17,7 +17,8 @@ import { DelBanco } from './DelBanco'
 import { ComparativoFinalistas } from './ComparativoFinalistas'
 import { FiltrosAts } from './FiltrosAts'
 import { ReporteSesgo } from './ReporteSesgo'
-import { TableroVacante } from './TableroVacante'
+import { ProcesoSeleccion } from './ProcesoSeleccion'
+import './proceso.css'
 import { type EstadoPreseleccion, estadoVacante, type Vacante, useCalcularAfinidad, useCerrarVacante, useEditarVacante, usePostulantes, useAprobarRequisicion, useSolicitarAprobacion, useVacante } from './api'
 import { textoAprobar } from './AprobacionRequisicion'
 import { useSesion } from '../sesion/api'
@@ -25,20 +26,29 @@ import { useSesion } from '../sesion/api'
 const pesos = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
 
-const pestanas = ['vacante', 'postulantes', 'banco', 'filtros', 'tablero', 'finalistas', 'equidad', 'pruebas'] as const
+const pestanas = ['proceso', 'vacante', 'postulantes', 'analisis', 'configuracion'] as const
 type Pestana = (typeof pestanas)[number]
+type Sub = 'finalistas' | 'equidad' | 'filtros' | 'pruebas' | 'banco'
+
+/** Enlaces viejos (?pestana=tablero, filtros…) siguen llegando a su lugar. */
+const alias: Record<string, [Pestana, Sub?]> = {
+  tablero: ['proceso'], finalistas: ['analisis', 'finalistas'], equidad: ['analisis', 'equidad'], filtros: ['configuracion', 'filtros'],
+  pruebas: ['configuracion', 'pruebas'], banco: ['configuracion', 'banco'],
+}
 
 export function VacanteDetalle() {
   const { id = '' } = useParams()
   const vacante = useVacante(id)
-  // La pestaña se puede abrir desde un enlace (?pestana=tablero), por ejemplo desde la bandeja
+  // La pestaña se puede abrir desde un enlace (?pestana=proceso), por ejemplo desde la bandeja
   const [parametros] = useSearchParams()
-  const [pestana, setPestana] = useState<Pestana>(() => (pestanas as readonly string[]).includes(parametros.get('pestana') ?? '') ? parametros.get('pestana') as Pestana : 'vacante')
+  const pedida = parametros.get('pestana') ?? ''
+  const [elegida, setPestana] = useState<Pestana | null>(() => alias[pedida]?.[0] ?? ((pestanas as readonly string[]).includes(pedida) ? pedida as Pestana : null))
+  const [sub, setSub] = useState<Sub | null>(() => alias[pedida]?.[1] ?? null)
 
   if (vacante.isPending) {
     return (
       <>
-        <div className="encabezado"><Esqueleto alto={14} ancho={120} /><Esqueleto alto={34} ancho="50%" style={{ marginTop: 10 }} /></div>
+        <div className="vacante-hero"><Esqueleto alto={14} ancho={120} /><Esqueleto alto={34} ancho="50%" /><Esqueleto alto={24} ancho="70%" /></div>
         <div className="tarjeta" style={{ padding: 0 }}><EsqueletoPanel /></div>
       </>
     )
@@ -47,35 +57,65 @@ export function VacanteDetalle() {
 
   const v = vacante.data
   const e = estadoVacante[v.estado]
+  const conProceso = v.estado === 'Publicada' || v.estado === 'Cerrada'
+  // Abre en el proceso si ya hay postulantes: es lo que hay que decidir hoy
+  const pestana: Pestana = elegida ?? (conProceso && v.postulantes > 0 ? 'proceso' : 'vacante')
+  const visibles: [Pestana, string][] = [
+    ...(conProceso ? [['proceso', `Proceso · ${v.postulantes}`] as [Pestana, string]] : []),
+    ['vacante', 'Vacante'],
+    ...(v.postulantes > 0 ? [['postulantes', 'Postulantes'] as [Pestana, string], ['analisis', 'Análisis'] as [Pestana, string]] : []),
+    ...(v.estado !== 'Redactando' ? [['configuracion', 'Configuración'] as [Pestana, string]] : []),
+  ]
+  const subAnalisis: Sub = sub === 'equidad' ? 'equidad' : 'finalistas'
+  const subConfig: Sub = sub === 'pruebas' || sub === 'banco' ? sub : 'filtros'
+  const meta: [ReactNode, ReactNode][] = [
+    [<IconoUbicacion key="u" />, v.ciudad || 'Sin ciudad'],
+    [<IconoCupos key="c" />, `${v.cupos} ${v.cupos === 1 ? 'cupo' : 'cupos'}`],
+    ...(v.salarioMaximo > 0 ? [[<IconoDinero key="d" />, <span key="s" className="mono">{pesos.format(v.salarioMinimo)} – {pesos.format(v.salarioMaximo)}</span>] as [ReactNode, ReactNode]] : []),
+    [<IconoEdificio key="e" />, v.empresa],
+    [<IconoDocumento key="k" />, <span key="m" className="mono">{v.codigo}</span>],
+  ]
+
   return (
     <>
-      <header className="encabezado" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <Link to="/consola/vacantes" style={{ fontSize: 13 }}>← Vacantes</Link>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div>
+      <header className="vacante-hero">
+        <Link to="/consola/vacantes" className="volver">← Vacantes</Link>
+        <div className="vacante-hero-fila">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
             <h1>{v.titulo || 'Vacante en redacción'}</h1>
-            <p>{v.empresa} · <span className="mono">{v.codigo}</span> · creada por {v.creadaPor} el {fecha.format(new Date(v.creadaEn))}</p>
+            <ul className="vacante-hero-meta">{meta.map(([i, t], n) => <li key={n} style={{ '--i': n } as CSSProperties}>{i}{t}</li>)}</ul>
           </div>
-          <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span className={`pill ${e.clase}`}>{e.texto}</span>
+          <span className="vacante-hero-acciones">
+            <span className="pill">{e.texto}</span>
             {v.estado === 'Publicada' && <a className="boton boton-secundario boton-pequeno" href={`/empleos/${v.codigo}`} target="_blank" rel="noreferrer">Ver en el portal</a>}
           </span>
         </div>
+        <span style={{ fontSize: 12, opacity: 0.8 }}>Creada por {v.creadaPor} el {fecha.format(new Date(v.creadaEn))}</span>
       </header>
 
       <div role="tablist" aria-label="Vacante" className="pestanas">
-        <button type="button" role="tab" className="pestana" aria-selected={pestana === 'vacante'} onClick={() => setPestana('vacante')}>Vacante</button>
-        <button type="button" role="tab" className="pestana" aria-selected={pestana === 'postulantes'} onClick={() => setPestana('postulantes')}>Postulantes · {v.postulantes}</button>
-        {(v.estado === 'Publicada' || v.estado === 'Cerrada') && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'banco'} onClick={() => setPestana('banco')}>Del banco</button>}
-        {v.estado !== 'Redactando' && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'filtros'} onClick={() => setPestana('filtros')}>Filtros ATS</button>}
-        {v.postulantes > 0 && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'tablero'} onClick={() => setPestana('tablero')}>Tablero</button>}
-        {v.postulantes > 0 && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'finalistas'} onClick={() => setPestana('finalistas')}>Finalistas</button>}
-        {v.postulantes > 0 && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'equidad'} onClick={() => setPestana('equidad')}>Equidad</button>}
-        {v.estado !== 'Redactando' && <button type="button" role="tab" className="pestana" aria-selected={pestana === 'pruebas'} onClick={() => setPestana('pruebas')}>Pruebas · {v.pruebas.length}</button>}
+        {visibles.map(([k, t]) => <button key={k} type="button" role="tab" className="pestana" aria-selected={pestana === k} onClick={() => setPestana(k)}>{t}</button>)}
       </div>
 
-      {pestana === 'vacante' ? (v.estado === 'Redactando' ? <Redactando frase={v.frase} /> : <Contenido key={`${v.id}-${v.estado}`} vacante={v} />)
-        : pestana === 'pruebas' ? <PruebasDeLaVacante vacante={v} /> : pestana === 'tablero' ? <TableroVacante vacante={v} /> : pestana === 'equidad' ? <ReporteSesgo vacanteId={v.id} /> : pestana === 'finalistas' ? <ComparativoFinalistas vacanteId={v.id} /> : pestana === 'filtros' ? <FiltrosAts vacanteId={v.id} /> : pestana === 'banco' ? <DelBanco vacante={v} /> : <Postulantes vacante={v} />}
+      {pestana === 'analisis' && (
+        <div className="segmentado subpestanas" role="group" aria-label="Análisis">
+          <button type="button" aria-pressed={subAnalisis === 'finalistas'} onClick={() => setSub('finalistas')}>Finalistas</button>
+          <button type="button" aria-pressed={subAnalisis === 'equidad'} onClick={() => setSub('equidad')}>Equidad</button>
+        </div>
+      )}
+      {pestana === 'configuracion' && (
+        <div className="segmentado subpestanas" role="group" aria-label="Configuración">
+          <button type="button" aria-pressed={subConfig === 'filtros'} onClick={() => setSub('filtros')}>Filtros ATS</button>
+          <button type="button" aria-pressed={subConfig === 'pruebas'} onClick={() => setSub('pruebas')}>Pruebas · {v.pruebas.length}</button>
+          {conProceso && <button type="button" aria-pressed={subConfig === 'banco'} onClick={() => setSub('banco')}>Del banco</button>}
+        </div>
+      )}
+
+      {pestana === 'proceso' ? <ProcesoSeleccion vacante={v} />
+        : pestana === 'vacante' ? (v.estado === 'Redactando' ? <Redactando frase={v.frase} /> : <Contenido key={`${v.id}-${v.estado}`} vacante={v} />)
+        : pestana === 'postulantes' ? <Postulantes vacante={v} />
+        : pestana === 'analisis' ? (subAnalisis === 'equidad' ? <ReporteSesgo vacanteId={v.id} /> : <ComparativoFinalistas vacanteId={v.id} />)
+        : subConfig === 'pruebas' ? <PruebasDeLaVacante vacante={v} /> : subConfig === 'banco' && conProceso ? <DelBanco vacante={v} /> : <FiltrosAts vacanteId={v.id} />}
     </>
   )
 }

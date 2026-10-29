@@ -1851,6 +1851,30 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Selvana.Reclutamiento.Domain.Vacantes.Vacante", b =>
                 {
+                    b.OwnsOne("Selvana.Reclutamiento.Domain.Seleccion.ReglasAvance", "ReglasAvance", b1 =>
+                        {
+                            b1.Property<Guid>("VacanteId");
+
+                            b1.Property<string>("Modo")
+                                .IsRequired();
+
+                            b1.Property<int>("ToleranciaSalarial");
+
+                            b1.Property<int>("UmbralAfinidad");
+
+                            b1.HasKey("VacanteId");
+
+                            b1.ToTable("vacantes", "reclutamiento");
+
+                            b1
+                                .ToJson("reglas_avance")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("VacanteId")
+                                .HasConstraintName("fk_vacantes_vacantes_id");
+                        });
+
                     b.OwnsMany("Selvana.Reclutamiento.Domain.Vacantes.AclaracionVacante", "Aclaraciones", b1 =>
                         {
                             b1.Property<Guid>("VacanteId");
@@ -2013,6 +2037,8 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                     b.Navigation("Pruebas");
 
                     b.Navigation("Razones");
+
+                    b.Navigation("ReglasAvance");
                 });
 
             modelBuilder.Entity("Selvana.Reclutamiento.Domain.Candidatos.Candidato", b =>

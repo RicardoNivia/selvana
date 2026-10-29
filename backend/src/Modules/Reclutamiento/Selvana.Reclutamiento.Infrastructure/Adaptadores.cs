@@ -5,6 +5,7 @@ using Selvana.Reclutamiento.Application.Abstracciones;
 using Selvana.Reclutamiento.Contracts;
 using Selvana.Reclutamiento.Domain.Candidatos;
 using Selvana.Reclutamiento.Domain.Postulaciones;
+using Selvana.Reclutamiento.Domain.Seleccion;
 using Selvana.Reclutamiento.Domain.Vacantes;
 using Selvana.Reclutamiento.Infrastructure.Persistence;
 using Selvana.SharedKernel.Messaging;
@@ -20,6 +21,13 @@ internal sealed class VacantesRepositorio(ReclutamientoDbContext db) : IVacantes
     {
         var normalizado = codigo.Trim().ToUpperInvariant();
         return db.Set<Vacante>().FirstOrDefaultAsync(v => v.Codigo == normalizado, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Guid>> ConAvanceAutomaticoAsync(CancellationToken cancellationToken)
+    {
+        var publicadas = await db.Set<Vacante>().AsNoTracking().Where(v => v.Estado == EstadoVacante.Publicada && v.ReglasAvance != null)
+            .Select(v => new { v.Id, v.ReglasAvance }).ToListAsync(cancellationToken);
+        return [.. publicadas.Where(v => v.ReglasAvance!.Modo == ModoAvance.Automatico).Select(v => v.Id)];
     }
 
     public void Agregar(Vacante vacante) => db.Add(vacante);

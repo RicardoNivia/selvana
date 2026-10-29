@@ -36,6 +36,9 @@ public interface IVacantes
 
     Task<Vacante?> ObtenerPorCodigoAsync(string codigo, CancellationToken cancellationToken);
 
+    /// <summary>Vacantes publicadas cuyas reglas de avance están en modo automático (todas las empresas).</summary>
+    Task<IReadOnlyList<Guid>> ConAvanceAutomaticoAsync(CancellationToken cancellationToken);
+
     void Agregar(Vacante vacante);
 }
 

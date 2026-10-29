@@ -1,4 +1,5 @@
 using Selvana.Reclutamiento.Domain.Pruebas;
+using Selvana.Reclutamiento.Domain.Seleccion;
 using Selvana.SharedKernel.Domain;
 using Selvana.SharedKernel.Results;
 
@@ -169,6 +170,28 @@ public sealed class Vacante : AggregateRoot<Guid>
 
     /// <summary>Filtros ATS (excluyentes); null = aún no se configuran.</summary>
     public FiltrosVacante? Filtros { get; private set; }
+
+    /// <summary>Criterios de paso entre etapas; null = los de base (sugerir, afinidad 70, tolerancia salarial 10 %).</summary>
+    public ReglasAvance? ReglasAvance { get; private set; }
+
+    public ReglasAvance Reglas => ReglasAvance ?? new ReglasAvance();
+
+    /// <summary>Una persona ajusta cuándo pasa alguien de etapa y si la IA puede hacer sola los pasos de bajo riesgo.</summary>
+    public Result ConfigurarReglasAvance(ModoAvance modo, int umbralAfinidad, int toleranciaSalarial)
+    {
+        if (Estado == EstadoVacante.Cerrada)
+        {
+            return Result.Failure(VacanteErrors.Cerrada);
+        }
+
+        if (umbralAfinidad is < 0 or > 100 || toleranciaSalarial is < 0 or > 100)
+        {
+            return Result.Failure(Error.Validation("Vacante.ReglasInvalidas", "El umbral y la tolerancia van de 0 a 100."));
+        }
+
+        ReglasAvance = new ReglasAvance { Modo = modo, UmbralAfinidad = umbralAfinidad, ToleranciaSalarial = toleranciaSalarial };
+        return Result.Success();
+    }
 
     /// <summary>Una persona define qué es excluyente. Solo puede marcar requisitos y preguntas que tiene la vacante.</summary>
     public Result ConfigurarFiltros(IEnumerable<string> requisitos, IEnumerable<string> preguntas, IEnumerable<string> ciudades, int? experienciaMinimaMeses,

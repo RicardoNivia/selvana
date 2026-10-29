@@ -45,5 +45,8 @@ internal sealed class ConversacionesRepositorio(ReclutamientoDbContext db) : ICo
     public Task<ConversacionPreseleccion?> PorPostulacionAsync(Guid empresaId, Guid postulacionId, CancellationToken cancellationToken) =>
         db.Set<ConversacionPreseleccion>().FirstOrDefaultAsync(c => c.EmpresaId == empresaId && c.PostulacionId == postulacionId, cancellationToken);
 
+    public async Task<IReadOnlyList<ConversacionPreseleccion>> DeVacanteAsync(Guid empresaId, Guid vacanteId, CancellationToken cancellationToken) =>
+        await db.Set<ConversacionPreseleccion>().AsNoTracking().Where(c => c.EmpresaId == empresaId && c.VacanteId == vacanteId).ToListAsync(cancellationToken);
+
     public void Agregar(ConversacionPreseleccion conversacion) => db.Add(conversacion);
 }

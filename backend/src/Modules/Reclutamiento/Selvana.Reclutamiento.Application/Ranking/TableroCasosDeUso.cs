@@ -2,6 +2,7 @@ using FluentValidation;
 using Selvana.Core.Contracts.Auditoria;
 using Selvana.Core.Contracts.Bandeja;
 using Selvana.Reclutamiento.Application.Abstracciones;
+using Selvana.Reclutamiento.Application.Seleccion;
 using Selvana.Reclutamiento.Domain.Candidatos;
 using Selvana.Reclutamiento.Domain.Filtros;
 using Selvana.Reclutamiento.Domain.Vacantes;
@@ -22,7 +23,7 @@ public sealed record TableroDto(IReadOnlyList<ColumnaDto> Columnas);
 public sealed record FilaTablero(
     Guid PostulacionId, Guid CandidatoId, string Numero, string Nombre, string Ciudad, EtapaPostulacion Etapa, AfinidadPostulacion? Afinidad,
     int RespuestasNegativas, DateTimeOffset RecibidaEn, string? MotivoDescarte, bool Suprimido, Guid? ProcesoVinculacionId = null,
-    DatosCandidato? Datos = null, IReadOnlyList<RespuestaFiltro>? Respuestas = null, string? RescatadaPor = null);
+    DatosCandidato? Datos = null, IReadOnlyList<RespuestaFiltro>? Respuestas = null, string? RescatadaPor = null, IReadOnlyList<CambioEtapa>? Historial = null);
 
 public interface ILecturaTablero
 {
@@ -51,6 +52,19 @@ internal static class Tablero
     public const string TipoTerna = "Terna";
 
     public static int? Puntaje(AfinidadPostulacion? a) => a?.Estado == EstadoAfinidad.Lista ? a.Puntaje : null;
+
+    /// <summary>Filtros ATS: el resultado de la postulación y, si no cumple, el motivo (rescatada = una persona decidió seguir).</summary>
+    public static (string Resultado, string? Motivo) Filtro(Vacante vacante, FilaTablero f, DateOnly hoy)
+    {
+        if (f.Datos is null || vacante.Filtros is null)
+        {
+            return (nameof(ResultadoFiltros.SinFiltros), null);
+        }
+
+        var e = EvaluadorFiltros.Evaluar(vacante.Filtros, f.Datos, f.Respuestas ?? [], f.Afinidad, hoy);
+        return e.Resultado == ResultadoFiltros.NoCumple && f.RescatadaPor is not null ? ("Rescatada", e.PrimerNoCumple?.Filtro)
+            : (e.Resultado.ToString(), e.PrimerNoCumple is { } n ? $"{n.Filtro}: {n.Detalle}" : e.Chequeos.FirstOrDefault(c => c.Estado == EstadoChequeo.SinEvidencia)?.Filtro);
+    }
 }
 
 internal sealed class MoverPostulacionValidator : AbstractValidator<MoverPostulacionCommand>
@@ -73,72 +87,25 @@ internal sealed class ObtenerTableroHandler(IUsuarioActual usuario, IVacantes va
         var tope = Math.Clamp(q.PorColumna ?? 20, 1, 100);
         var filas = await lectura.PostulacionesAsync(vacante.EmpresaId, vacante.Id, ct);
         var hoy = DateOnly.FromDateTime(reloj.GetUtcNow().UtcDateTime);
-        // Filtros ATS: el resultado de cada tarjeta y, si no cumple, el motivo (rescatada = una persona decidió seguir)
-        (string Resultado, string? Motivo) Filtro(FilaTablero f)
-        {
-            if (f.Datos is null || vacante.Filtros is null)
-            {
-                return (nameof(ResultadoFiltros.SinFiltros), null);
-            }
-
-            var e = EvaluadorFiltros.Evaluar(vacante.Filtros, f.Datos, f.Respuestas ?? [], f.Afinidad, hoy);
-            return e.Resultado == ResultadoFiltros.NoCumple && f.RescatadaPor is not null ? ("Rescatada", e.PrimerNoCumple?.Filtro)
-                : (e.Resultado.ToString(), e.PrimerNoCumple is { } n ? $"{n.Filtro}: {n.Detalle}" : e.Chequeos.FirstOrDefault(c => c.Estado == EstadoChequeo.SinEvidencia)?.Filtro);
-        }
-
         var columnas = Enum.GetValues<EtapaPostulacion>().Select(etapa =>
         {
             var deLaEtapa = filas.Where(f => f.Etapa == etapa).OrderByDescending(f => Tablero.Puntaje(f.Afinidad) ?? -1).ThenByDescending(f => f.RecibidaEn).ToList();
             return new ColumnaDto(etapa.ToString(), deLaEtapa.Count, [.. deLaEtapa.Take(tope).Select(f => new TarjetaDto(
                 f.PostulacionId, f.CandidatoId, f.Numero, f.Nombre, f.Ciudad, Tablero.Puntaje(f.Afinidad), f.Afinidad?.Estado.ToString() ?? nameof(EstadoAfinidad.SinCalcular),
                 f.Afinidad?.PuntajeAjustado is not null, f.Afinidad?.Razones.FirstOrDefault(r => r.Signo == "+")?.Texto, f.RespuestasNegativas, f.RecibidaEn,
-                f.MotivoDescarte, f.ProcesoVinculacionId, Filtro(f).Resultado, Filtro(f).Motivo))]);
+                f.MotivoDescarte, f.ProcesoVinculacionId, Tablero.Filtro(vacante, f, hoy).Resultado, Tablero.Filtro(vacante, f, hoy).Motivo))]);
         }).ToList();
         return new TableroDto(columnas);
     }
 }
 
-internal sealed class MoverPostulacionHandler(IUsuarioActual usuario, ICandidatos candidatos, IVacantes vacantes, IBitacora bitacora, IUnidadReclutamiento unidad, TimeProvider reloj)
-    : ICommandHandler<MoverPostulacionCommand>
+/// <summary>Mover en el tablero es lo mismo que avanzar en el proceso: la etapa hace su trabajo (invitar al chat, enviar pruebas).</summary>
+internal sealed class MoverPostulacionHandler(ICommandHandler<AvanzarPostulacionCommand, AvanceDto> avanzar) : ICommandHandler<MoverPostulacionCommand>
 {
-    private static readonly Dictionary<EtapaPostulacion, string> Nombres = new()
-    {
-        [EtapaPostulacion.Recibida] = "Recibidas", [EtapaPostulacion.Preseleccion] = "Preselección", [EtapaPostulacion.Pruebas] = "Pruebas",
-        [EtapaPostulacion.Terna] = "Terna", [EtapaPostulacion.Descartada] = "Descartadas",
-    };
-
     public async Task<Result> Handle(MoverPostulacionCommand c, CancellationToken cancellationToken)
     {
-        if (!Enum.TryParse<EtapaPostulacion>(c.Etapa, ignoreCase: true, out var etapa))
-        {
-            return Result.Failure(TableroErrors.EtapaInvalida);
-        }
-
-        var candidato = await candidatos.ObtenerPorPostulacionAsync(usuario.EmpresaId, c.PostulacionId, cancellationToken);
-        var postulacion = candidato?.Postulaciones.FirstOrDefault(p => p.Id == c.PostulacionId);
-        var vacante = postulacion is null ? null : await vacantes.ObtenerAsync(postulacion.VacanteId, cancellationToken);
-        if (candidato is null || vacante is null || !usuario.Ve(vacante.EmpresaUsuariaId))
-        {
-            return Result.Failure(AfinidadErrors.NoExiste);
-        }
-
-        var antes = postulacion!.Etapa;
-        var r = candidato.MoverPostulacion(c.PostulacionId, etapa, c.Motivo, usuario.Nombre, reloj.GetUtcNow());
-        if (r.IsFailure)
-        {
-            return Result.Failure(r.Error);
-        }
-
-        if (antes != etapa)
-        {
-            bitacora.Registrar(vacante.EmpresaId, TipoActor.Persona, usuario.Nombre,
-                etapa == EtapaPostulacion.Descartada ? $"Descartó la postulación {postulacion.Numero}" : $"Movió la postulación {postulacion.Numero} a {Nombres[etapa]}",
-                $"{vacante.Codigo} · {Nombres[antes]} → {Nombres[etapa]}", etapa == EtapaPostulacion.Descartada ? $"Motivo: {postulacion.MotivoDescarte}" : null,
-                "Postulacion", postulacion.Id);
-            await unidad.SaveChangesAsync(cancellationToken);
-        }
-
-        return Result.Success();
+        var r = await avanzar.Handle(new AvanzarPostulacionCommand(c.PostulacionId, c.Etapa, c.Motivo), cancellationToken);
+        return r.IsSuccess ? Result.Success() : Result.Failure(r.Error);
     }
 }
 

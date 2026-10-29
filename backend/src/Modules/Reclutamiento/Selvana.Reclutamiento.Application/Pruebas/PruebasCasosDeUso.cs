@@ -1,6 +1,7 @@
 using FluentValidation;
 using Selvana.Core.Contracts.Auditoria;
 using Selvana.Reclutamiento.Application.Abstracciones;
+using Selvana.Reclutamiento.Domain.Candidatos;
 using Selvana.Reclutamiento.Domain.Pruebas;
 using Selvana.Reclutamiento.Domain.Vacantes;
 using Selvana.SharedKernel.Messaging;
@@ -60,6 +61,9 @@ public interface IAplicacionesPruebas
     Task<AplicacionPruebas?> ObtenerPorPostulacionAsync(Guid empresaId, Guid postulacionId, CancellationToken cancellationToken);
 
     Task<AplicacionPruebas?> ObtenerAsync(Guid empresaId, Guid id, CancellationToken cancellationToken);
+
+    /// <summary>Las aplicaciones de la vacante, sin tracking (para leer el proceso).</summary>
+    Task<IReadOnlyList<AplicacionPruebas>> DeVacanteAsync(Guid empresaId, Guid vacanteId, CancellationToken cancellationToken);
 
     void Agregar(AplicacionPruebas aplicacion);
 }
@@ -291,6 +295,11 @@ internal sealed class EnviarPruebasHandler(
             else
             {
                 existente.Reenviar(huella, usuario.Nombre, ahora);
+            }
+
+            if (postulacion.Etapa is EtapaPostulacion.Recibida or EtapaPostulacion.Preseleccion)
+            {
+                candidato.MoverPostulacion(postulacionId, EtapaPostulacion.Pruebas, "Pruebas enviadas", usuario.Nombre, ahora);
             }
 
             enviados.Add(new EnvioPruebasDto(postulacionId, candidato.Datos.Nombre, token, ahora.Add(AplicacionPruebas.Vigencia)));
