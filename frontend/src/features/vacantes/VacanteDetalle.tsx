@@ -26,14 +26,14 @@ import { useSesion } from '../sesion/api'
 const pesos = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
 const fecha = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
 
-const pestanas = ['proceso', 'vacante', 'postulantes', 'analisis', 'configuracion'] as const
+const pestanas = ['proceso', 'vacante', 'banco', 'postulantes', 'analisis', 'configuracion'] as const
 type Pestana = (typeof pestanas)[number]
-type Sub = 'finalistas' | 'equidad' | 'filtros' | 'pruebas' | 'banco'
+type Sub = 'finalistas' | 'equidad' | 'filtros' | 'pruebas'
 
 /** Enlaces viejos (?pestana=tablero, filtros…) siguen llegando a su lugar. */
 const alias: Record<string, [Pestana, Sub?]> = {
   tablero: ['proceso'], finalistas: ['analisis', 'finalistas'], equidad: ['analisis', 'equidad'], filtros: ['configuracion', 'filtros'],
-  pruebas: ['configuracion', 'pruebas'], banco: ['configuracion', 'banco'],
+  pruebas: ['configuracion', 'pruebas'],
 }
 
 export function VacanteDetalle() {
@@ -63,11 +63,12 @@ export function VacanteDetalle() {
   const visibles: [Pestana, string][] = [
     ...(conProceso ? [['proceso', `Proceso · ${v.postulantes}`] as [Pestana, string]] : []),
     ['vacante', 'Vacante'],
+    ...(conProceso ? [['banco', 'Del banco'] as [Pestana, string]] : []),
     ...(v.postulantes > 0 ? [['postulantes', 'Postulantes'] as [Pestana, string], ['analisis', 'Análisis'] as [Pestana, string]] : []),
     ...(v.estado !== 'Redactando' ? [['configuracion', 'Configuración'] as [Pestana, string]] : []),
   ]
   const subAnalisis: Sub = sub === 'equidad' ? 'equidad' : 'finalistas'
-  const subConfig: Sub = sub === 'pruebas' || sub === 'banco' ? sub : 'filtros'
+  const subConfig: Sub = sub === 'pruebas' ? 'pruebas' : 'filtros'
   const meta: [ReactNode, ReactNode][] = [
     [<IconoUbicacion key="u" />, v.ciudad || 'Sin ciudad'],
     [<IconoCupos key="c" />, `${v.cupos} ${v.cupos === 1 ? 'cupo' : 'cupos'}`],
@@ -107,15 +108,15 @@ export function VacanteDetalle() {
         <div className="segmentado subpestanas" role="group" aria-label="Configuración">
           <button type="button" aria-pressed={subConfig === 'filtros'} onClick={() => setSub('filtros')}>Filtros ATS</button>
           <button type="button" aria-pressed={subConfig === 'pruebas'} onClick={() => setSub('pruebas')}>Pruebas · {v.pruebas.length}</button>
-          {conProceso && <button type="button" aria-pressed={subConfig === 'banco'} onClick={() => setSub('banco')}>Del banco</button>}
         </div>
       )}
 
       {pestana === 'proceso' ? <ProcesoSeleccion vacante={v} />
         : pestana === 'vacante' ? (v.estado === 'Redactando' ? <Redactando frase={v.frase} /> : <Contenido key={`${v.id}-${v.estado}`} vacante={v} />)
+        : pestana === 'banco' && conProceso ? <DelBanco vacante={v} />
         : pestana === 'postulantes' ? <Postulantes vacante={v} />
         : pestana === 'analisis' ? (subAnalisis === 'equidad' ? <ReporteSesgo vacanteId={v.id} /> : <ComparativoFinalistas vacanteId={v.id} />)
-        : subConfig === 'pruebas' ? <PruebasDeLaVacante vacante={v} /> : subConfig === 'banco' && conProceso ? <DelBanco vacante={v} /> : <FiltrosAts vacanteId={v.id} />}
+        : subConfig === 'pruebas' ? <PruebasDeLaVacante vacante={v} /> : <FiltrosAts vacanteId={v.id} />}
     </>
   )
 }

@@ -140,17 +140,18 @@ function NodoEtapa({ dato, base, activo, onElegir }: { dato: EtapaProceso; base:
   const total = useContador(0, dato.total, true, 900)
   const conversion = Math.round((100 * dato.alcanzaron) / base)
   return (
-    <button type="button" className={`embudo-nodo ${claseEtapa(dato.etapa)}`} aria-pressed={activo} onClick={onElegir}
+    <button type="button" className={`embudo-nodo ${claseEtapa(dato.etapa)}`} aria-pressed={activo} onClick={onElegir} title={queHace[dato.etapa]}
       aria-label={`${nombreEtapa[dato.etapa]}: ${dato.total} hoy, ${dato.porDecidir} por decidir`}>
-      <span className="embudo-icono">{iconoEtapa[dato.etapa]}</span>
-      <span className="embudo-nombre">{nombreEtapa[dato.etapa]}</span>
-      <b className="embudo-total">{total}</b>
-      <span className="embudo-que">{queHace[dato.etapa]}</span>
+      <span className="embudo-fila">
+        <span className="embudo-icono">{iconoEtapa[dato.etapa]}</span>
+        <span className="embudo-nombre">{nombreEtapa[dato.etapa]}</span>
+        <b className="embudo-total">{total}</b>
+      </span>
       <span className="embudo-barra" aria-hidden="true"><span style={{ width: `${conversion}%` }} /></span>
-      <span className="embudo-conversion mono">{dato.etapa === 'Recibida' ? `${dato.alcanzaron} en total` : `${conversion} % llegó aquí`}</span>
-      <span className="embudo-marcas">
-        {dato.porDecidir > 0 && <span className="marca-ia"><Chispa />{dato.porDecidir} por decidir</span>}
-        {dato.esperando > 0 && <span className="marca-espera"><IconoReloj />{dato.esperando} esperando</span>}
+      <span className="embudo-fila">
+        <span className="embudo-conversion mono">{dato.etapa === 'Recibida' ? `${dato.alcanzaron} en total` : `${conversion} % llegó`}</span>
+        {dato.porDecidir > 0 && <span className="marca-ia" title="Por decidir"><Chispa />{dato.porDecidir}</span>}
+        {dato.esperando > 0 && <span className="marca-espera" title="Esperando al candidato"><IconoReloj />{dato.esperando}</span>}
       </span>
     </button>
   )
@@ -461,7 +462,7 @@ function PanelPersona({ persona: p, onCerrar }: { persona: PersonaProceso; onCer
 function EsqueletoProceso() {
   return (
     <div className="proceso">
-      <div className="embudo"><ol className="embudo-flujo">{flujo.map((e) => <li key={e} className="embudo-paso"><Esqueleto alto={168} /></li>)}</ol></div>
+      <div className="embudo"><ol className="embudo-flujo">{flujo.map((e) => <li key={e} className="embudo-paso"><Esqueleto alto={72} /></li>)}</ol></div>
       <Esqueleto alto={84} />
       <div className="tarjeta proceso-lista" style={{ padding: 16, display: 'grid', gap: 12 }}>{[0, 1, 2].map((i) => <Esqueleto key={i} alto={180} />)}</div>
     </div>

@@ -39,15 +39,15 @@
 
 /* ---------- Embudo ---------- */
 .embudo { display: flex; flex-direction: column; gap: var(--espacio-3); }
-.embudo-flujo { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espacio-3); }
+.embudo-flujo { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espacio-3); max-width: 960px; }
 .embudo-paso { position: relative; display: flex; animation: entra-arriba var(--duracion-media) var(--curva-salida) both; animation-delay: calc(var(--i, 0) * 90ms); }
 .embudo-nodo {
-  flex: 1; position: relative; display: grid; gap: 4px; text-align: left; padding: var(--espacio-4); cursor: pointer; overflow: hidden;
+  flex: 1; position: relative; display: grid; gap: 6px; text-align: left; padding: 10px var(--espacio-3); cursor: pointer; overflow: hidden;
   border-radius: var(--radio-l); border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto); font: inherit;
   transition: transform var(--duracion-corta) var(--curva-salida), box-shadow var(--duracion-corta), border-color var(--duracion-corta);
 }
 .embudo-nodo::before {
-  content: ''; position: absolute; inset: 0 0 auto; height: 4px; background: var(--etapa);
+  content: ''; position: absolute; inset: 0 0 auto; height: 3px; background: var(--etapa);
   transform-origin: left; animation: crece-x var(--duracion-larga) var(--curva-salida) both; animation-delay: calc(var(--i, 0) * 90ms + 120ms);
 }
 .embudo-nodo::after {
@@ -58,19 +58,18 @@
 .embudo-nodo:hover::after, .embudo-nodo[aria-pressed='true']::after { opacity: 1; }
 .embudo-nodo[aria-pressed='true'] { border-color: var(--etapa); box-shadow: 0 0 0 1px var(--etapa), var(--sombra-1); }
 .embudo-nodo:focus-visible { outline: 2px solid var(--etapa); outline-offset: 2px; }
+.embudo-fila { display: flex; align-items: center; gap: var(--espacio-2); min-width: 0; }
 .embudo-icono {
-  width: 34px; height: 34px; border-radius: var(--radio-m); display: grid; place-items: center;
+  width: 24px; height: 24px; flex: none; border-radius: var(--radio-s); display: grid; place-items: center;
   background: color-mix(in srgb, var(--etapa) 14%, transparent); color: var(--etapa);
 }
-.embudo-icono svg { width: 18px; height: 18px; }
-.embudo-nombre { font-weight: 600; font-size: 14px; margin-top: 4px; }
-.embudo-total { font: 700 36px/1 var(--fuente-display); color: var(--etapa); font-variant-numeric: tabular-nums; }
-.embudo-que { font-size: 12px; color: var(--color-texto-suave); min-height: 2.6em; }
-.embudo-barra { height: 6px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; }
+.embudo-icono svg { width: 14px; height: 14px; }
+.embudo-nombre { font-weight: 600; font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.embudo-total { font: 700 22px/1 var(--fuente-display); color: var(--etapa); font-variant-numeric: tabular-nums; }
+.embudo-barra { height: 4px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; }
 .embudo-barra span { display: block; height: 100%; border-radius: inherit; background: var(--etapa); transition: width var(--duracion-larga) var(--curva-salida); animation: crece-x var(--duracion-larga) var(--curva-salida) both; transform-origin: left; }
-.embudo-conversion { font-size: 11px; color: var(--color-texto-tenue); }
-.embudo-marcas { display: flex; flex-wrap: wrap; gap: 6px; min-height: 22px; }
-.marca-ia, .marca-espera { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: var(--radio-full); }
+.embudo-conversion { font-size: 11px; color: var(--color-texto-tenue); margin-right: auto; }
+.marca-ia, .marca-espera { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: var(--radio-full); }
 .marca-ia { background: var(--color-ia-suave); color: var(--color-ia); position: relative; }
 .marca-ia::before { content: ''; position: absolute; inset: -2px; border-radius: inherit; border: 1px solid var(--color-ia); opacity: 0; animation: halo 2.4s var(--curva-organica) infinite; }
 .marca-espera { background: var(--color-superficie-2); color: var(--color-texto-suave); font-weight: 500; }
