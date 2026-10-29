@@ -37,59 +37,37 @@
 .vacante-hero .pill { background: color-mix(in srgb, var(--color-sobre-selva) 16%, transparent); color: var(--color-sobre-selva); }
 .vacante-hero .boton-secundario { background: transparent; color: var(--color-sobre-selva); border-color: color-mix(in srgb, var(--color-sobre-selva) 40%, transparent); }
 
-/* ---------- Embudo ---------- */
-.embudo { display: flex; flex-direction: column; gap: var(--espacio-3); }
-.embudo-flujo { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espacio-3); max-width: 960px; }
-.embudo-paso { position: relative; display: flex; animation: entra-arriba var(--duracion-media) var(--curva-salida) both; animation-delay: calc(var(--i, 0) * 90ms); }
-.embudo-nodo {
-  flex: 1; position: relative; display: grid; gap: 6px; text-align: left; padding: 10px var(--espacio-3); cursor: pointer; overflow: hidden;
-  border-radius: var(--radio-l); border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto); font: inherit;
-  transition: transform var(--duracion-corta) var(--curva-salida), box-shadow var(--duracion-corta), border-color var(--duracion-corta);
+/* ---------- Embudo en el encabezado verde ---------- */
+.vacante-hero-embudo:empty { display: none; }
+.eh { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); padding-top: var(--espacio-2); border-top: 1px solid color-mix(in srgb, var(--color-sobre-selva) 14%, transparent); }
+.eh-nodo {
+  --tinte: color-mix(in srgb, var(--etapa) 55%, var(--color-sobre-selva));
+  position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: var(--espacio-2); padding: 7px 12px 9px; cursor: pointer; font: inherit;
+  border-radius: var(--radio-m); color: var(--color-sobre-selva); background: color-mix(in srgb, var(--color-sobre-selva) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-sobre-selva) 16%, transparent);
+  animation: entra-arriba var(--duracion-media) var(--curva-salida) both; animation-delay: calc(var(--i, 0) * 70ms);
+  transition: background var(--duracion-corta), border-color var(--duracion-corta), transform var(--duracion-corta) var(--curva-salida);
 }
-.embudo-nodo::before {
-  content: ''; position: absolute; inset: 0 0 auto; height: 3px; background: var(--etapa);
-  transform-origin: left; animation: crece-x var(--duracion-larga) var(--curva-salida) both; animation-delay: calc(var(--i, 0) * 90ms + 120ms);
-}
-.embudo-nodo::after {
-  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity var(--duracion-media);
-  background: radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--etapa) 14%, transparent), transparent 60%);
-}
-.embudo-nodo:hover { transform: translateY(-2px); box-shadow: var(--sombra-1); border-color: color-mix(in srgb, var(--etapa) 45%, var(--color-borde)); }
-.embudo-nodo:hover::after, .embudo-nodo[aria-pressed='true']::after { opacity: 1; }
-.embudo-nodo[aria-pressed='true'] { border-color: var(--etapa); box-shadow: 0 0 0 1px var(--etapa), var(--sombra-1); }
-.embudo-nodo:focus-visible { outline: 2px solid var(--etapa); outline-offset: 2px; }
-.embudo-fila { display: flex; align-items: center; gap: var(--espacio-2); min-width: 0; }
-.embudo-icono {
-  width: 24px; height: 24px; flex: none; border-radius: var(--radio-s); display: grid; place-items: center;
-  background: color-mix(in srgb, var(--etapa) 14%, transparent); color: var(--etapa);
-}
-.embudo-icono svg { width: 14px; height: 14px; }
-.embudo-nombre { font-weight: 600; font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.embudo-total { font: 700 22px/1 var(--fuente-display); color: var(--etapa); font-variant-numeric: tabular-nums; }
-.embudo-barra { height: 4px; border-radius: var(--radio-full); background: var(--color-superficie-2); overflow: hidden; }
-.embudo-barra span { display: block; height: 100%; border-radius: inherit; background: var(--etapa); transition: width var(--duracion-larga) var(--curva-salida); animation: crece-x var(--duracion-larga) var(--curva-salida) both; transform-origin: left; }
-.embudo-conversion { font-size: 11px; color: var(--color-texto-tenue); margin-right: auto; }
-.marca-ia, .marca-espera { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: var(--radio-full); }
-.marca-ia { background: var(--color-ia-suave); color: var(--color-ia); position: relative; }
-.marca-ia::before { content: ''; position: absolute; inset: -2px; border-radius: inherit; border: 1px solid var(--color-ia); opacity: 0; animation: halo 2.4s var(--curva-organica) infinite; }
-.marca-espera { background: var(--color-superficie-2); color: var(--color-texto-suave); font-weight: 500; }
-.marca-ia svg, .marca-espera svg { width: 12px; height: 12px; }
-
-/* Conector entre etapas: puntos que fluyen hacia la derecha */
-.embudo-conector { position: absolute; right: calc(-1 * var(--espacio-3)); top: 50%; width: var(--espacio-3); height: 2px; z-index: 1; display: flex; justify-content: space-around; transform: translateY(-50%); }
-.embudo-conector i { width: 3px; height: 3px; border-radius: 50%; background: var(--color-texto-tenue); animation: fluye 1.6s linear infinite; }
-.embudo-conector i:nth-child(2) { animation-delay: 0.5s; }
-.embudo-conector i:nth-child(3) { animation-delay: 1s; }
-@keyframes fluye { 0% { opacity: 0; transform: translateX(-4px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateX(4px); } }
-
-.embudo-pie { display: flex; flex-wrap: wrap; gap: var(--espacio-3); align-items: center; }
-.embudo-descartadas {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radio-full); cursor: pointer; font: inherit; font-size: 13px;
-  border: 1px solid var(--color-borde); background: var(--color-superficie); color: var(--color-texto-suave);
-}
-.embudo-descartadas[aria-pressed='true'] { border-color: var(--etapa); color: var(--color-texto); }
-.embudo-descartadas svg, .embudo-contratados svg { width: 14px; height: 14px; }
-.embudo-contratados { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--color-exito); }
+.eh-nodo:hover { background: color-mix(in srgb, var(--color-sobre-selva) 14%, transparent); transform: translateY(-1px); }
+.eh-nodo[aria-pressed='true'] { background: color-mix(in srgb, var(--tinte) 24%, transparent); border-color: var(--tinte); box-shadow: 0 0 0 1px var(--tinte); }
+.eh-nodo:focus-visible { outline: 2px solid var(--color-sobre-selva); outline-offset: 2px; }
+.eh-punto { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--tinte); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tinte) 30%, transparent); }
+.eh-nombre { font-size: 13px; font-weight: 600; }
+.eh-total { font: 700 20px/1 var(--fuente-display); font-variant-numeric: tabular-nums; }
+.eh-ia, .eh-espera { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: var(--radio-full); }
+.eh-ia { color: var(--color-ia-sobre-selva); border: 1px solid var(--color-ia-sobre-selva); position: relative; }
+.eh-ia::before { content: ''; position: absolute; inset: -2px; border-radius: inherit; border: 1px solid var(--color-ia-sobre-selva); opacity: 0; animation: halo 2.4s var(--curva-organica) infinite; }
+.eh-espera { color: var(--color-sobre-selva-2); background: color-mix(in srgb, var(--color-sobre-selva) 10%, transparent); font-weight: 500; }
+.eh-ia svg, .eh-espera svg { width: 11px; height: 11px; }
+.eh-barra { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: color-mix(in srgb, var(--color-sobre-selva) 10%, transparent); }
+.eh-barra span { display: block; height: 100%; background: var(--tinte); transform-origin: left; animation: crece-x var(--duracion-larga) var(--curva-salida) both; transition: width var(--duracion-larga) var(--curva-salida); }
+.eh-flecha { width: 14px; height: 14px; flex: none; color: color-mix(in srgb, var(--color-sobre-selva) 45%, transparent); animation: empuja 1.8s var(--curva-organica) infinite; }
+@keyframes empuja { 50% { transform: translateX(3px); } }
+.eh-sep { width: 1px; align-self: stretch; margin: 2px var(--espacio-1); background: color-mix(in srgb, var(--color-sobre-selva) 18%, transparent); }
+.eh-chico { padding-block: 6px; }
+.eh-chico .eh-total { font-size: 15px; }
+.eh-contratados { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--color-sobre-selva-2); }
+.eh-contratados svg { width: 14px; height: 14px; }
 
 /* ---------- Agente de selección (la IA, protagonista) ---------- */
 .agente-banda {
@@ -273,21 +251,19 @@
 @keyframes aparece-escala { from { opacity: 0; transform: scale(0.97); } }
 @keyframes crece-x { from { transform: scaleX(0); } }
 
-@media (max-width: 900px) {
-  .embudo-flujo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .embudo-conector { display: none; }
+@media (max-width: 700px) {
+  .eh-flecha, .eh-sep { display: none; }
 }
 @media (max-width: 520px) {
-  .embudo-flujo { grid-template-columns: 1fr; }
   .agente-banda { padding: var(--espacio-4); }
   .persona-manual { margin-left: 0; }
   .vacante-hero { padding: var(--espacio-4); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vacante-hero::before, .vacante-hero::after, .vacante-hero-meta li, .embudo-paso, .embudo-nodo::before, .embudo-barra span, .embudo-conector i, .marca-ia::before,
+  .vacante-hero::before, .vacante-hero::after, .vacante-hero-meta li, .eh-nodo, .eh-barra span, .eh-flecha, .eh-ia::before,
   .agente-banda::before, .agente-orbe > span, .agente-hecho, .reglas-editor, .reglas-mapa li, .aviso-avance, .aviso-avance-icono, .persona, .persona-sugerencia::after,
   .anillo-valor, .anillo.calculando .anillo-pista, .panel-velo, .panel-persona, .linea-tiempo li { animation: none !important; }
-  .embudo-nodo, .persona, .boton-etapa svg { transition: none; }
-  .embudo-nodo:hover, .persona:hover { transform: none; }
+  .eh-nodo, .persona, .boton-etapa svg { transition: none; }
+  .eh-nodo:hover, .persona:hover { transform: none; }
 }
