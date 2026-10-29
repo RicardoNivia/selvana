@@ -20,7 +20,7 @@ namespace Selvana.Reclutamiento.Infrastructure.Ejemplo;
 /// normalmente produce la IA (borrador de la vacante, lectura de la HV, ranking, preselección): no encola nada hacia el AI.Worker,
 /// así que no gasta IA. Lo que va a la bandeja viaja por el outbox a la propia API.
 /// </summary>
-internal static class SemillaEjemplo
+internal static partial class SemillaEjemplo
 {
     private const string Modelo = "ejemplo (sin IA)";
     private static readonly CultureInfo Pesos = new("es-CO");

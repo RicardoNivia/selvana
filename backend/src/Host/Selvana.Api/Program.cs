@@ -98,7 +98,11 @@ if (app.Configuration.GetValue<bool>("Ejemplo:Sembrar"))
     var empresas = await app.Services.SembrarEjemploCoreAsync(new AccesoEjemplo(ejemplo["CorreoDueno"] ?? "", dueno,
         ejemplo["ContrasenaDueno"] ?? "", ejemplo["ContrasenaFicticios"] ?? ""));
     var contratables = await app.Services.SembrarEjemploReclutamientoAsync(empresas, dueno);
-    await app.Services.SembrarEjemploVinculacionAsync(contratables, "Valentina Ríos");
+    // Más volumen: diez vacantes con postulantes en todas las etapas, la planta de cada empresa y cuentas en el portal de la persona
+    var ampliada = await app.Services.SembrarEjemploAmpliadoReclutamientoAsync(empresas, dueno);
+    await app.Services.SembrarEjemploVinculacionAsync([.. contratables, .. ampliada.Contratables], "Valentina Ríos");
+    var planta = await app.Services.SembrarEjemploExpedienteAsync(empresas, "Valentina Ríos");
+    await app.Services.SembrarCuentasPortalEjemploAsync([.. ampliada.Personas, .. planta], ejemplo["ContrasenaFicticios"] ?? "");
 }
 
 // Datos maestros por defecto de cada empresa (idempotente): tipos de contrato

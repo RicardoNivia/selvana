@@ -35,6 +35,16 @@ public static class ExpedienteModule
         return services;
     }
 
+    /// <summary>Ambiente de pruebas en línea: planta de empleados de ejemplo (idempotente). Devuelve los que tendrán cuenta en el portal.</summary>
+    public static async Task<IReadOnlyList<Selvana.Infrastructure.Common.Ejemplo.PersonaPortalEjemplo>> SembrarEjemploExpedienteAsync(this IServiceProvider services,
+        IReadOnlyList<Core.Contracts.Empresas.EmpresaResumen> empresas, string porRrhh)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await Ejemplo.SemillaEjemplo.SembrarAsync(sp.GetRequiredService<ExpedienteDbContext>(), sp.GetRequiredService<IAlmacenArchivos>(), empresas, porRrhh,
+            sp.GetRequiredService<TimeProvider>());
+    }
+
     public static async Task MigrateExpedienteModuleAsync(this IServiceProvider services)
     {
         await using var scope = services.CreateAsyncScope();

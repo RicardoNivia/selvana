@@ -45,7 +45,7 @@ hacia el AI.Worker, así que sembrar no gasta tokens; la IA solo gasta cuando al
 de vida y los documentos son PDF ficticios de una página, cifrados como los reales.
 
 Código: `SemillaEjemplo` en `Selvana.Core.Infrastructure/Empresas`, `Selvana.Reclutamiento.Infrastructure/Ejemplo` y
-`Selvana.Vinculacion.Infrastructure/Ejemplo`; se llaman desde `Program.cs`.
+`Selvana.Vinculacion.Infrastructure/Ejemplo` y `Selvana.Expediente.Infrastructure/Ejemplo` (más `SemillaAmpliada` en Reclutamiento); se llaman desde `Program.cs`.
 
 | Empresa | Tipo | Quién entra | Qué trae |
 | --- | --- | --- | --- |
@@ -55,6 +55,22 @@ Código: `SemillaEjemplo` en `Selvana.Core.Infrastructure/Empresas`, `Selvana.Re
 
 En la bandeja de Talento Andino quedan tres decisiones: la requisición de analista de nómina (gerencia), la oferta de
 Natalia Gómez y los documentos de ingreso de Yeison Bermúdez.
+
+**Datos ampliados (29/10/2026).** Además de lo anterior, cada arranque completa (sin duplicar) diez vacantes más, cada una con catorce
+postulantes en todas las etapas (recibida, ajustada, descartada, preselección, pruebas, terna, oferta, documentos y contratada):
+
+| Empresa | Vacantes nuevas |
+| --- | --- |
+| Talento Andino | Cajero de supermercado y mercaderista (Retail Express), operario de producción (Agroindustrial del Tolima), asesor de servicio al cliente |
+| Logística Caribe | Auxiliar de bodega, montacarguista y coordinador de despachos |
+| Clínica del Valle | Auxiliar de farmacia, enfermera jefe de urgencias y camillero |
+
+- **Vinculación:** 21 procesos nuevos (7 con la oferta por aprobar, 7 con documentos por revisar y 7 contratados); los contratados llegan al expediente.
+- **Expediente:** planta de 36, 18 y 18 empleados «del archivo de planta», con novedades (aumentos y traslados), carpeta con cursos vigentes, por vencer y vencidos,
+  afiliaciones incompletas, retiros, campaña de actualización pendiente, cambios propuestos desde el portal y una lectura de la IA por decidir.
+- **Portal de la persona:** unas 130 cuentas con la contraseña `CONTRASENA_PRUEBAS`: los candidatos desde preselección en adelante (ven sus procesos y pendientes),
+  los contratados y un tercio de la planta (ven «Mi empleo»), con «Mis documentos» ya cargados. Ejemplos: `natalia.gomez@ejemplo.co` (oferta por aceptar),
+  `yeison.bermudez@ejemplo.co` (documentos de ingreso pendientes), y cualquier correo `…@ejemplo.co` de la ficha de un empleado.
 
 Los usuarios ficticios usan la contraseña `CONTRASENA_PRUEBAS`. Además sigue la empresa de desarrollo «Servicios Andinos EST»
 (`laura.moreno@`, `admin@` y `camilo.duarte@serviciosandinos.co`, misma contraseña). Solo datos ficticios: nada real de candidatos.

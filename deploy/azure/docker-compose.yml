@@ -34,7 +34,7 @@ services:
       Desarrollo__Contrasena: ${CONTRASENA_PRUEBAS:?Defina CONTRASENA_PRUEBAS en .env}
       # Tres empresas de ejemplo con el flujo completo, sin IA (deploy/azure/README.md)
       # Desactivado el 28/10/2026: la base de pruebas se vació a pedido (solo usuarios y empresas). Poner "true" para volver a sembrar
-      Ejemplo__Sembrar: "false"
+      Ejemplo__Sembrar: "true"
       Ejemplo__CorreoDueno: ${EJEMPLO_CORREO:?Defina EJEMPLO_CORREO en .env}
       Ejemplo__NombreDueno: ${EJEMPLO_NOMBRE:-Dueño del ambiente}
       Ejemplo__ContrasenaDueno: ${EJEMPLO_CONTRASENA:?Defina EJEMPLO_CONTRASENA en .env}
