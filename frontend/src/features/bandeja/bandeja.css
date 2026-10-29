@@ -1,7 +1,6 @@
 /* Bandeja de aprobaciones (pantalla 1). Solo tokens de la marca Dosel; el violeta solo en lo que propuso la IA. */
 
 .nav-contador { margin-left: auto; min-width: 20px; padding: 1px 6px; border-radius: var(--radio-full); background: var(--color-primario); color: var(--color-sobre-primario); font: 600 11px var(--fuente-datos); text-align: center; animation: portal-check-pop var(--duracion-media) var(--curva-salida); }
-.nav-item.active .nav-contador { background: var(--color-primario); }
 
 .bandeja-encabezado { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-end; }
 

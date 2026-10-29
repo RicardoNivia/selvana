@@ -39,6 +39,7 @@ Se descartaron las rutas Guacamaya (rojo, amarillo y azul; choca con los colores
 | Selva (`--color-primario`) | #0B5D52 | #3FC2AA | Marca, acciones humanas, botón primario, navegación activa |
 | Orquídea (`--color-ia`) | #8A3FC4 | #C590F0 | **Solo IA**: sugerencias, campos prellenados, estados del agente |
 | Tinta (`--color-texto`) | #10211B | #E6EFEB | Texto |
+| Selva profundo (`--color-selva-profundo`) | #073F38 | #0B2C27 | Fondo del riel de la consola y paneles de marca; encima van `--color-sobre-selva` y `--color-sobre-selva-2` |
 | Claro de bosque (`--color-fondo`) | #F3F6F3 | #0C1513 | Fondo de la aplicación |
 | Éxito / alerta / error / info | #2A8A3E / #B86E00 / #C23A2E / #2A62B8 | #5CC774 / #F0A63A / #F07A6E / #7AA8F0 | Estados |
 
@@ -79,6 +80,7 @@ Escala: display 56/60 · h1 32/38 · h2 22/28 · body 15/24 · label 13/18 · da
 - **Enlaces:** verde selva, sin subrayado hasta pasar el cursor; en tablas, color de texto y fila resaltada. Nunca el azul o morado del navegador.
 - **Carga en los botones**: todo botón que llama a la API se deshabilita, muestra un indicador circular y cambia el texto al gerundio ("Guardando…").
 - **Esqueletos**: mientras llegan los datos se dibuja la forma final de la pantalla con bloques en `--color-superficie-2`; nunca una pantalla en blanco ni un "Cargando…" suelto.
+- **Menú de la consola (riel)**: riel fijo en selva profundo que nunca se desplaza: contraído (76 px) muestra solo íconos de línea y al acercar el mouse o con el teclado se expande (248 px) encima de la página con los nombres y el logo animado; al fondo caen hojas suaves y se mece una hoja grande. Solo lo diario va en el riel (Bandeja, Vacantes, Candidatos, Vinculación, Empleados); la configuración de la empresa y la cuenta (empresa en la que trabaja, tema, salir) se abren en cajones flotantes al lado, con velo sobre la página y cierre con Escape o clic afuera. El activo lleva la píldora menta y una marca lateral que crece. En celular el riel pasa a ser una barra abajo y los cajones suben como hojas.
 - **Datos maestros editables**: sedes, áreas, centros de costo y cargos se editan y se activan o desactivan en Selvana; la sincronización con el ERP no pisa lo que editó una persona. Editar lo que propuso la IA lo confirma (pierde el violeta).
 
 ## Principios de UX

@@ -1,27 +1,7 @@
 /* Componentes base de Selvana (marca Dosel). Solo variables de theme/tokens.css. */
 
-.consola { display: flex; flex-wrap: wrap; min-height: 100vh; background: var(--color-fondo); }
-.lateral {
-  flex: 1 1 232px; max-width: 100%; box-sizing: border-box; background: var(--color-superficie);
-  border-right: 1px solid var(--color-borde); padding: var(--espacio-6) var(--espacio-3);
-  display: flex; flex-direction: column; gap: var(--espacio-1);
-}
-.contenido { flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: var(--espacio-8) var(--espacio-8) var(--espacio-12); display: flex; flex-direction: column; gap: var(--espacio-6); }
+.contenido { min-width: 0; box-sizing: border-box; padding: var(--espacio-8) var(--espacio-8) var(--espacio-12); display: flex; flex-direction: column; gap: var(--espacio-6); }
 @media (max-width: 640px) { .contenido { padding: var(--espacio-6) var(--espacio-4); } }
-
-.marca { display: flex; align-items: center; gap: var(--espacio-2); padding: 0 var(--espacio-3) var(--espacio-6); font-family: var(--fuente-display); font-weight: 800; font-size: 21px; letter-spacing: -0.03em; color: var(--color-texto); text-decoration: none; }
-.marca svg { width: 26px; height: 26px; }
-.nav-grupo { font: 500 10px var(--fuente-datos); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-texto-tenue); padding: var(--espacio-4) var(--espacio-3) var(--espacio-1); }
-.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px var(--espacio-3); border-radius: 8px; color: var(--color-texto-suave); text-decoration: none; font-size: 14px; }
-.nav-item svg { width: 18px; height: 18px; flex: none; }
-.nav-item:hover { background: var(--color-superficie-2); }
-.nav-item.active { background: var(--color-primario-suave); color: var(--color-primario); font-weight: 600; }
-.nav-item.pronto { color: var(--color-texto-tenue); cursor: default; }
-.nav-item.pronto:hover { background: transparent; }
-.nav-item .etiqueta { margin-left: auto; font: 500 10px var(--fuente-datos); color: var(--color-texto-tenue); }
-.empresa-actual { margin-top: auto; padding: var(--espacio-3); border: 1px solid var(--color-borde); border-radius: var(--radio-m); font-size: 12px; color: var(--color-texto-suave); display: flex; gap: 10px; align-items: center; }
-.empresa-actual .logo { flex: 0 0 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: var(--color-primario); color: var(--color-sobre-primario); font-weight: 700; font-size: 12px; }
-.empresa-actual b { display: block; color: var(--color-texto); font-size: 13px; }
 
 .encabezado h1 { margin: 0; font-size: 32px; }
 .encabezado p { margin: var(--espacio-1) 0 0; color: var(--color-texto-suave); font-size: 14px; max-width: 72ch; }
@@ -229,56 +209,6 @@
 .explicacion-afinidad .ficha-nota { padding: var(--espacio-3) var(--espacio-4); border-top: 1px solid var(--color-borde); }
 .afinidad-ajuste { flex-direction: row; flex-wrap: wrap; align-items: flex-end; }
 
-/* Menú lateral siempre contraído: solo íconos, con el nombre al pasar el cursor */
-.lateral { transition: flex-basis var(--duracion-media) var(--curva-salida), padding var(--duracion-media) var(--curva-salida); }
-.lateral-cabeza { display: flex; align-items: center; justify-content: space-between; gap: var(--espacio-2); padding-bottom: var(--espacio-6); }
-.lateral-cabeza .marca { padding-bottom: 0; min-width: 0; }
-.empresa-actual-detalle { min-width: 0; flex: 1; }
-/* Encabezado arriba, enlaces en medio (se desplazan si no caben) y pie fijo abajo con la persona y «Salir» */
-.lateral-menu { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: var(--espacio-1); overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
-.lateral-pie { flex: none; display: flex; flex-direction: column; gap: var(--espacio-1); margin-top: var(--espacio-3); padding-top: var(--espacio-3); border-top: 1px solid var(--color-borde); background: var(--color-superficie); }
-.lateral-pie .empresa-actual { margin-top: 0; }
-.nav-texto { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.nav-item .etiqueta { flex: none; }
-.nav-salir { display: flex; align-items: center; gap: 10px; }
-
-@media (min-width: 720px) {
-  /* El menú siempre ocupa la altura de la pantalla y no se mueve con el desplazamiento: «Salir» queda siempre visible abajo */
-  .lateral { flex: 0 0 232px; position: sticky; top: 0; align-self: flex-start; height: 100vh; overflow: hidden; }
-
-  /* La franja del menú (con su borde) se pinta en el fondo de toda la consola: llega hasta abajo aunque la página sea más alta que la ventana */
-  .consola {
-    --ancho-menu: 232px;
-    background: linear-gradient(to right, var(--color-superficie) 0 calc(var(--ancho-menu) - 1px), var(--color-borde) calc(var(--ancho-menu) - 1px) var(--ancho-menu), var(--color-fondo) var(--ancho-menu));
-  }
-  .consola.menu-colapsado { --ancho-menu: 72px; padding-left: 72px; }
-
-  /*
-   * Contraído: el menú conserva su diseño de 232 px y solo se ven los primeros 72 (los íconos). Al acercar el mouse se descubre
-   * el resto ENCIMA de la página: nada se reacomoda ni se mueve el contenido, y la animación es corta.
-   */
-  .consola.menu-colapsado .lateral {
-    position: fixed; top: 0; left: 0; bottom: auto; height: 100vh; z-index: 30; width: 72px; max-width: none;
-    overflow: hidden; transition: width 180ms var(--curva-salida), box-shadow 180ms var(--curva-salida);
-  }
-  .consola.menu-colapsado .lateral > * { width: 208px; }
-  .lateral-cabeza, .lateral-pie { flex-shrink: 0; }
-  .consola.menu-colapsado .lateral:hover, .consola.menu-colapsado .lateral:has(:focus-visible) {
-    width: 232px; box-shadow: var(--sombra-2); transition-delay: 60ms;
-  }
-  .menu-colapsado .lateral :is(.nav-texto, .nav-item .etiqueta, .empresa-actual-detalle, .nav-grupo, .nav-texto + .nav-contador) {
-    transition: opacity 140ms var(--curva-salida);
-  }
-  .menu-colapsado .lateral:not(:hover):not(:has(:focus-visible)) :is(.nav-texto, .nav-item .etiqueta, .empresa-actual-detalle, .nav-grupo) {
-    opacity: 0; pointer-events: none;
-  }
-  .menu-colapsado .lateral :is(.nav-item, .marca) { white-space: nowrap; }
-  /* Contraído, el contador de la bandeja queda como un punto sobre el ícono */
-  .menu-colapsado .lateral:not(:hover):not(:has(:focus-visible)) .nav-contador { position: absolute; left: 30px; top: 4px; min-width: 16px; padding: 0 4px; font-size: 10px; }
-  .menu-colapsado .lateral .nav-item { position: relative; }
-  .menu-colapsado .lateral:not(:hover):not(:has(:focus-visible)) .empresa-actual { border-color: transparent; }
-}
-@media (prefers-reduced-motion: reduce) { .lateral { transition: none; } }
 
 /* Tablero de la vacante */
 .tablero-vacante { display: flex; flex-direction: column; gap: var(--espacio-3); }
@@ -362,7 +292,7 @@
 .comp-prueba { display: flex; justify-content: space-between; gap: var(--espacio-2); }
 .comp-bajo { color: var(--color-alerta); }
 @media print {
-  .lateral, .pestanas, .comp-selector, .comp-imprimir, .encabezado a { display: none !important; }
+  .pestanas, .comp-selector, .comp-imprimir, .encabezado a { display: none !important; }
   .consola, .contenido { display: block; padding: 0; background: var(--color-superficie); }
   .comp-grilla { overflow: visible; }
   .comp-columna { break-inside: avoid; }

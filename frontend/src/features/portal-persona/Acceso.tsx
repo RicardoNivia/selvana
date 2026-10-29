@@ -41,13 +41,15 @@ function MarcoAcceso({ titulo, children }: { titulo: string; children: ReactNode
 }
 
 /** Contraseña con el botón «Ver» para revisarla antes de enviar. */
-function CampoContrasena({ etiqueta, valor, onCambiar, nueva, extra }: { etiqueta: ReactNode; valor: string; onCambiar: (v: string) => void; nueva?: boolean; extra?: ReactNode }) {
+function CampoContrasena({ etiqueta, valor, onCambiar, nueva, invalida, extra }: {
+  etiqueta: ReactNode; valor: string; onCambiar: (v: string) => void; nueva?: boolean; invalida?: boolean; extra?: ReactNode
+}) {
   const [ver, setVer] = useState(false)
   return (
     <label className="postular-campo">{etiqueta}
       <span className="ingresar-contrasena">
         <input className="entrada" type={ver ? 'text' : 'password'} autoComplete={nueva ? 'new-password' : 'current-password'} minLength={nueva ? 8 : undefined}
-          value={valor} onChange={(e) => onCambiar(e.target.value)} required />
+          value={valor} onChange={(e) => onCambiar(e.target.value)} aria-invalid={invalida || undefined} required />
         <button type="button" className="ingresar-ver" aria-pressed={ver} onClick={() => setVer((v) => !v)}>{ver ? 'Ocultar' : 'Ver'}</button>
       </span>
       {extra}
@@ -102,6 +104,8 @@ export function RegistroPortal() {
   const [f, setF] = useState<Registro>({ correo: '', contrasena: '', nombre: '', tipoDocumento: 'CC', numeroDocumento: '', aceptaAutorizacion: false })
   const poner = (cambio: Partial<Registro>) => setF((x) => ({ ...x, ...cambio }))
   const [nivel, textoNivel] = fuerza(f.contrasena)
+  const [repetida, setRepetida] = useState('')
+  const coinciden = f.contrasena.length > 0 && f.contrasena === repetida
 
   const enviar = (e: FormEvent) => {
     e.preventDefault()
@@ -145,6 +149,8 @@ export function RegistroPortal() {
                   <span>{textoNivel}</span>
                 </span>
               } />
+            <CampoContrasena nueva etiqueta="Repite la contraseña" valor={repetida} onCambiar={setRepetida} invalida={repetida.length > 0 && !coinciden}
+              extra={repetida.length > 0 && !coinciden && <span className="postular-nota-error">Las contraseñas no coinciden.</span>} />
             <label className={`postular-autorizacion ${f.aceptaAutorizacion ? 'aceptada' : ''}`}>
               <input type="checkbox" checked={f.aceptaAutorizacion} onChange={(e) => poner({ aceptaAutorizacion: e.target.checked })} />
               <span>{textoAutorizacion}</span>
@@ -152,7 +158,7 @@ export function RegistroPortal() {
             {registrar.error && <p role="alert" className="aviso aviso-alerta ingresar-error"><IconoAlerta />{registrar.error.message}</p>}
             <div className="mp-form-acciones">
               <Boton onClick={() => setPaso(1)} disabled={registrar.isPending}>Atrás</Boton>
-              <Boton type="submit" variante="primario" className="mp-form-enviar" cargando={registrar.isPending} textoCargando="Creando tu cuenta…" disabled={!f.aceptaAutorizacion}>
+              <Boton type="submit" variante="primario" className="mp-form-enviar" cargando={registrar.isPending} textoCargando="Creando tu cuenta…" disabled={!f.aceptaAutorizacion || !coinciden}>
                 Crear mi cuenta <IconoFlecha />
               </Boton>
             </div>

@@ -69,9 +69,8 @@
 .nota-ok { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 400; color: var(--color-exito); }
 .nota-ok svg { width: 12px; height: 12px; }
 
-/* Barra lateral: empresa usuaria en la que se trabaja */
+/* Menú de la consola (cajón de la cuenta): empresa usuaria en la que se trabaja */
 .selector-empresa-usuaria { display: block; width: 100%; margin: 2px 0; padding: 4px 6px; border: 1px solid var(--color-borde); border-radius: var(--radio-s); background: var(--color-superficie); color: var(--color-texto); font: 600 13px var(--fuente-base); cursor: pointer; }
-.empresa-actual-matriz { display: block; font-size: 11px; color: var(--color-texto-tenue); }
 
 /* Activar cuenta */
 .reglas-contrasena { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: -4px 0 0; padding: 0; list-style: none; font-size: 12px; color: var(--color-texto-tenue); }

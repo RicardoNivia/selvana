@@ -1,0 +1,222 @@
+/*
+ * Menú de la consola: riel de selva fijo que nunca se desplaza. Contraído muestra solo los íconos; al acercar el mouse
+ * (o con el teclado) se expande encima de la página con los nombres al lado. La configuración de la empresa y la cuenta
+ * se abren en cajones y, mientras están abiertos, el riel sigue expandido. Al fondo caen hojas. Solo variables de theme/tokens.css.
+ */
+.consola { --ancho-riel: 76px; --ancho-riel-abierto: 248px; min-height: 100vh; padding-left: var(--ancho-riel); box-sizing: border-box; background: var(--color-fondo); }
+
+.riel {
+  position: fixed; inset: 0 auto 0 0; z-index: 40; width: var(--ancho-riel); box-sizing: border-box;
+  display: flex; flex-direction: column; padding: var(--espacio-3) var(--espacio-2);
+  color: var(--color-sobre-selva);
+  background:
+    radial-gradient(120% 40% at 0% 0%, color-mix(in srgb, var(--color-sobre-selva-2) 16%, transparent), transparent 70%),
+    radial-gradient(140% 30% at 0% 100%, color-mix(in srgb, var(--color-sobre-selva-2) 10%, transparent), transparent 70%),
+    var(--color-selva-profundo);
+  transition: width var(--duracion-media) var(--curva-salida), box-shadow var(--duracion-media) var(--curva-salida);
+}
+.riel > .riel-marca, .riel > .riel-menu, .riel > .riel-pie { position: relative; z-index: 1; }
+
+/* Fondo vivo: hojas que caen y una hoja grande que se mece abajo */
+.riel-fondo { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.riel-fondo .hoja-cae svg { opacity: 0.12; }
+.riel-fondo .hoja-cae-clara svg { opacity: 0.16; }
+.riel-dosel {
+  position: absolute; left: -48px; bottom: -56px; width: 200px; height: 200px; fill: var(--color-sobre-selva-2); opacity: 0.08;
+  transform-origin: 20% 80%; animation: dosel-mecer 14s var(--curva-organica) infinite alternate;
+}
+
+/* Logo animado sobre fondo selva: el isotipo queda en la columna de íconos y la palabra aparece al expandir */
+.riel-marca { display: flex; align-items: center; height: 48px; flex: none; padding-left: 14px; overflow: hidden; border-radius: var(--radio-m); text-decoration: none; }
+.riel-marca .logo-animado { flex: none; }
+.riel-marca .logo-palabra { opacity: 0; transition: opacity var(--duracion-corta) var(--curva-salida); }
+.riel-marca:hover .logo-hoja { animation-duration: var(--duracion-larga), 1.6s; }
+
+.riel-menu { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 2px; margin-top: var(--espacio-4); }
+.riel-pie { flex: none; padding-top: var(--espacio-2); }
+.riel-separador { height: 1px; margin: var(--espacio-2) 14px; background: color-mix(in srgb, var(--color-sobre-selva) 18%, transparent); }
+
+.riel-item {
+  position: relative; display: flex; align-items: center; gap: var(--espacio-3); width: 100%; min-height: 44px; padding: 0 var(--espacio-2); box-sizing: border-box;
+  border: 0; border-radius: var(--radio-m); background: none; cursor: pointer; text-decoration: none; text-align: left;
+  color: color-mix(in srgb, var(--color-sobre-selva) 76%, var(--color-selva-profundo)); font: 600 14px/1.2 var(--fuente-base);
+  transition: color var(--duracion-corta) var(--curva-salida), background var(--duracion-corta);
+}
+.riel-icono {
+  position: relative; display: grid; place-items: center; width: 44px; height: 36px; flex: none; border-radius: var(--radio-full);
+  transition: background var(--duracion-media) var(--curva-salida), color var(--duracion-corta);
+}
+.riel-icono svg { width: 20px; height: 20px; transition: transform var(--duracion-media) var(--curva-salida); }
+.riel-texto {
+  min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  opacity: 0; transform: translateX(-6px); pointer-events: none;
+  transition: opacity var(--duracion-corta) var(--curva-salida), transform var(--duracion-media) var(--curva-salida);
+}
+.riel-flecha { width: 14px; height: 14px; flex: none; opacity: 0; transition: opacity var(--duracion-corta), transform var(--duracion-media) var(--curva-salida); }
+.riel-item.abierto .riel-flecha { transform: translateX(3px); }
+
+/* Marca lateral que crece en el elemento activo */
+.riel-item::before {
+  content: ''; position: absolute; left: calc(-1 * var(--espacio-2)); top: 50%; width: 4px; height: 0; translate: 0 -50%;
+  border-radius: 0 var(--radio-full) var(--radio-full) 0; background: var(--color-sobre-selva-2);
+  transition: height var(--duracion-media) var(--curva-organica);
+}
+.riel-item:hover, .riel-item:focus-visible, .riel-item.abierto { color: var(--color-sobre-selva); }
+.riel-item:hover .riel-icono, .riel-item.abierto .riel-icono { background: color-mix(in srgb, var(--color-sobre-selva) 14%, transparent); }
+.riel-item:hover .riel-icono svg { transform: scale(1.08); }
+.riel-item:focus-visible { outline: 2px solid var(--color-sobre-selva-2); outline-offset: -2px; }
+.riel-item.active { color: var(--color-sobre-selva); }
+.riel-item.active::before { height: 28px; }
+.riel-item.active .riel-icono { background: var(--color-sobre-selva-2); color: var(--color-selva-profundo); }
+
+/* Contador de la bandeja: se asoma sobre el ícono y late una vez al llegar */
+.riel-contador {
+  position: absolute; top: -5px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: var(--radio-full);
+  display: grid; place-items: center; background: var(--color-sobre-selva); color: var(--color-selva-profundo);
+  box-shadow: 0 0 0 2px var(--color-selva-profundo); font: 600 10px var(--fuente-datos);
+  animation: riel-latido var(--duracion-larga) var(--curva-salida);
+}
+@keyframes riel-latido { 0% { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.12); opacity: 1; } 100% { transform: none; } }
+
+/* Cuenta: avatar con las iniciales; expandido, el nombre y la empresa en la que trabaja */
+.riel-avatar {
+  display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 50%;
+  background: var(--color-sobre-selva-2); color: var(--color-selva-profundo); font: 800 13px var(--fuente-display);
+  transition: box-shadow var(--duracion-media) var(--curva-salida);
+}
+.riel-cuenta { min-height: 52px; }
+.riel-cuenta .riel-avatar { margin-inline: 4px; }
+.riel-cuenta .riel-texto b { display: block; overflow: hidden; text-overflow: ellipsis; font-size: 13px; color: var(--color-sobre-selva); }
+.riel-cuenta .riel-texto small { display: block; overflow: hidden; text-overflow: ellipsis; font: 500 11px var(--fuente-base); color: var(--color-sobre-selva-2); }
+.riel-cuenta:hover .riel-avatar, .riel-cuenta.abierto .riel-avatar { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-sobre-selva) 28%, transparent); }
+
+/* Expandido: al acercar el mouse, con el teclado o con un cajón abierto. Se abre encima de la página, sin mover el contenido */
+@media (min-width: 720px) {
+  .riel:hover, .riel:has(:focus-visible), .riel.expandido { width: var(--ancho-riel-abierto); box-shadow: var(--sombra-2); }
+  .riel:hover { transition-delay: 80ms; }
+  .riel:is(:hover, :has(:focus-visible), .expandido) :is(.riel-texto, .riel-flecha, .logo-palabra) { opacity: 1; transform: none; pointer-events: auto; transition-delay: 100ms; }
+  .riel:is(:hover, :has(:focus-visible), .expandido) .riel-item.active { background: color-mix(in srgb, var(--color-sobre-selva) 10%, transparent); }
+}
+
+/* Cajones: paneles flotantes que salen del riel */
+.cajon {
+  position: absolute; z-index: 2; left: calc(100% + var(--espacio-2)); top: var(--espacio-3); width: 320px; max-height: calc(100vh - 2 * var(--espacio-3));
+  box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--color-superficie); color: var(--color-texto); border: 1px solid var(--color-borde); border-radius: var(--radio-l); box-shadow: var(--sombra-2);
+  opacity: 0; visibility: hidden; transform: translateX(-12px) scale(0.98); transform-origin: left top;
+  transition: opacity var(--duracion-corta) var(--curva-salida), transform var(--duracion-media) var(--curva-salida), visibility 0s linear var(--duracion-media);
+}
+.cajon-abajo { top: auto; bottom: var(--espacio-3); transform-origin: left bottom; }
+.cajon.visible { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+
+.cajon-cabeza { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--espacio-3); padding: var(--espacio-4) var(--espacio-4) var(--espacio-3); border-bottom: 1px solid var(--color-borde); }
+.cajon-cabeza h2 { margin: 0; font: 700 20px var(--fuente-display); letter-spacing: -0.02em; }
+.cajon-sobre { display: block; font: 500 10px var(--fuente-datos); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-texto-tenue); }
+.cajon-cerrar { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border: 0; border-radius: var(--radio-s); background: none; color: var(--color-texto-suave); cursor: pointer; }
+.cajon-cerrar:hover { background: var(--color-superficie-2); color: var(--color-texto); }
+.cajon-cerrar svg { width: 18px; height: 18px; }
+.cajon-cuerpo { display: flex; flex-direction: column; gap: 2px; padding: var(--espacio-2); overflow-y: auto; }
+.cajon-grupo { padding: var(--espacio-3) var(--espacio-2) var(--espacio-1); font: 500 10px var(--fuente-datos); letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-texto-tenue); }
+.cajon-nota { margin: 0; padding: var(--espacio-2); font-size: 13px; color: var(--color-texto-suave); }
+
+.cajon-enlace {
+  display: flex; align-items: center; gap: var(--espacio-3); padding: var(--espacio-2); border-radius: var(--radio-m);
+  color: var(--color-texto); text-decoration: none; transition: background var(--duracion-corta), transform var(--duracion-media) var(--curva-salida);
+}
+.cajon-enlace b { display: block; font-size: 14px; font-weight: 600; }
+.cajon-enlace small { display: block; font-size: 12px; color: var(--color-texto-tenue); }
+.cajon-enlace-icono { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: var(--radio-m); background: var(--color-superficie-2); color: var(--color-texto-suave); transition: background var(--duracion-corta), color var(--duracion-corta); }
+.cajon-enlace-icono svg { width: 18px; height: 18px; }
+a.cajon-enlace:hover { background: var(--color-superficie-2); transform: translateX(2px); }
+a.cajon-enlace:hover .cajon-enlace-icono { background: var(--color-primario-suave); color: var(--color-primario); }
+.cajon-enlace.active { background: var(--color-primario-suave); }
+.cajon-enlace.active b { color: var(--color-primario); }
+.cajon-enlace.active .cajon-enlace-icono { background: var(--color-primario); color: var(--color-sobre-primario); }
+.cajon-enlace.pronto { color: var(--color-texto-tenue); cursor: default; }
+.cajon-enlace.pronto b { font-weight: 500; }
+.cajon-etiqueta { margin-left: auto; padding: 2px 8px; border: 1px dashed var(--color-borde); border-radius: var(--radio-full); font: 500 10px var(--fuente-datos); color: var(--color-texto-tenue); }
+
+/* Las entradas del cajón aparecen escalonadas */
+.cajon.visible .cajon-cuerpo > * { animation: cajon-entra var(--duracion-media) var(--curva-salida) both; }
+.cajon.visible .cajon-cuerpo > :nth-child(2) { animation-delay: 30ms; }
+.cajon.visible .cajon-cuerpo > :nth-child(3) { animation-delay: 60ms; }
+.cajon.visible .cajon-cuerpo > :nth-child(4) { animation-delay: 90ms; }
+.cajon.visible .cajon-cuerpo > :nth-child(5) { animation-delay: 120ms; }
+.cajon.visible .cajon-cuerpo > :nth-child(n + 6) { animation-delay: 150ms; }
+@keyframes cajon-entra { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+
+.cajon-persona { display: flex; align-items: center; gap: var(--espacio-3); min-width: 0; }
+.cajon-persona .riel-avatar { width: 40px; height: 40px; background: var(--color-primario); color: var(--color-sobre-primario); }
+.cajon-persona b { display: block; font-size: 15px; }
+.cajon-persona small { display: block; font-size: 12px; color: var(--color-texto-tenue); }
+.cajon-empresa { display: flex; align-items: center; gap: var(--espacio-3); padding: var(--espacio-2); border: 1px solid var(--color-borde); border-radius: var(--radio-m); font-size: 13px; }
+.cajon-empresa > span:last-child { min-width: 0; flex: 1; }
+.cajon-empresa b { display: block; }
+.cajon-empresa small { display: block; font-size: 11px; color: var(--color-texto-tenue); }
+.cajon-empresa-logo { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: var(--radio-s); background: var(--color-primario); color: var(--color-sobre-primario); font-weight: 700; font-size: 12px; }
+
+.cajon-temas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 3px; border-radius: var(--radio-m); background: var(--color-superficie-2); }
+.cajon-temas button {
+  display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 4px; border: 0; border-radius: var(--radio-s);
+  background: none; color: var(--color-texto-suave); font: 500 12px var(--fuente-base); cursor: pointer; transition: background var(--duracion-corta), color var(--duracion-corta);
+}
+.cajon-temas button svg { width: 15px; height: 15px; }
+.cajon-temas button:hover { color: var(--color-texto); }
+.cajon-temas button.activo { background: var(--color-superficie); color: var(--color-primario); font-weight: 600; box-shadow: var(--sombra-1); }
+
+.cajon-salir {
+  display: flex; align-items: center; gap: var(--espacio-2); margin-top: var(--espacio-3); padding: 10px var(--espacio-2);
+  border: 0; border-top: 1px solid var(--color-borde); border-radius: 0; background: none; color: var(--color-texto-suave); font: 500 14px var(--fuente-base); cursor: pointer;
+}
+.cajon-salir svg { width: 18px; height: 18px; }
+.cajon-salir:hover { color: var(--color-error); }
+.cajon-salir:disabled { cursor: progress; }
+
+/* Velo sobre la página mientras hay un cajón abierto: un clic afuera lo cierra */
+.riel-velo { position: fixed; inset: 0; z-index: 35; background: color-mix(in srgb, var(--color-texto) 14%, transparent); animation: riel-velo var(--duracion-corta) var(--curva-salida); }
+@keyframes riel-velo { from { opacity: 0; } }
+
+/* Pantallas bajas: filas más juntas */
+@media (min-width: 720px) and (max-height: 600px) {
+  .riel { padding-block: var(--espacio-2); }
+  .riel-menu { margin-top: var(--espacio-2); gap: 0; }
+  .riel-item { min-height: 38px; }
+  .riel-icono { height: 32px; }
+}
+
+/* Celular: el riel pasa a ser una barra abajo con el nombre debajo del ícono, y los cajones suben como hojas */
+@media (max-width: 719px) {
+  .consola { --ancho-riel: 0px; padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .riel {
+    inset: auto 0 0 0; width: auto; height: calc(68px + env(safe-area-inset-bottom)); flex-direction: row; align-items: stretch;
+    padding: var(--espacio-1) var(--espacio-1) env(safe-area-inset-bottom); background: var(--color-selva-profundo);
+  }
+  .riel-marca, .riel-separador, .riel-fondo, .riel-flecha, .riel-cuenta .riel-texto { display: none; }
+  .riel-menu { flex: 1; flex-direction: row; margin: 0; gap: 0; }
+  .riel-menu > .riel-item, .riel-pie { flex: 1 1 0; min-width: 0; }
+  .riel-pie { padding: 0; }
+  .riel-item { flex-direction: column; justify-content: center; gap: 2px; height: 100%; padding: 0 2px; font-size: 10px; }
+  .riel-texto { flex: none; max-width: 100%; opacity: 1; transform: none; pointer-events: auto; text-align: center; }
+  .riel-icono { height: 30px; }
+  .riel-item::before { left: 50%; top: calc(-1 * var(--espacio-1)); width: 0; height: 3px; translate: -50% 0; border-radius: 0 0 var(--radio-full) var(--radio-full); transition: width var(--duracion-media) var(--curva-organica); }
+  .riel-item.active::before { width: 28px; height: 3px; }
+  .riel-avatar { width: 32px; height: 32px; font-size: 12px; }
+  .riel-cuenta { min-height: 0; }
+  .cajon, .cajon-abajo {
+    position: fixed; left: var(--espacio-2); right: var(--espacio-2); top: auto; bottom: calc(68px + env(safe-area-inset-bottom) + var(--espacio-2));
+    width: auto; max-height: calc(100vh - 100px); transform: translateY(16px); transform-origin: center bottom;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .riel *, .riel *::before, .cajon, .riel-velo { animation: none !important; transition: none !important; }
+}
+
+@media print {
+  .riel, .cajon, .riel-velo { display: none !important; }
+  .consola { padding: 0; }
+}
+
+/* Esqueleto del riel mientras llega la sesión */
+.riel-esqueleto { align-items: center; gap: var(--espacio-3); padding-top: 60px; }
+.riel-esqueleto span { width: 44px; height: 44px; border-radius: var(--radio-m); background: color-mix(in srgb, var(--color-sobre-selva) 12%, transparent); }
