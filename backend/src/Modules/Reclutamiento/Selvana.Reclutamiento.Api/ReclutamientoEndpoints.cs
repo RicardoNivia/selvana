@@ -11,6 +11,7 @@ using Selvana.Reclutamiento.Application.Privacidad;
 using Selvana.Reclutamiento.Application.Pruebas;
 using Selvana.Reclutamiento.Application.Ranking;
 using Selvana.Reclutamiento.Application.Recontacto;
+using Selvana.Reclutamiento.Application.Seleccion;
 using Selvana.Reclutamiento.Application.Vacantes;
 using Selvana.SharedKernel.Messaging;
 using Selvana.SharedKernel.Results;
@@ -43,6 +44,14 @@ public sealed record AjustarAfinidadRequest(int Puntaje, string Motivo);
 public sealed record AfinidadPedidaResponse(int Pedidas);
 
 public sealed record MoverPostulacionRequest(string Etapa, string? Motivo);
+
+public sealed record AvanzarPostulacionRequest(string Destino, string? Motivo);
+
+public sealed record AplicarSugerenciasRequest(IReadOnlyList<Guid> PostulacionIds);
+
+public sealed record SugerenciasAplicadasResponse(int Aplicadas);
+
+public sealed record ReglasAvanceRequest(string Modo, int UmbralAfinidad, int ToleranciaSalarial);
 
 public sealed record TernaPropuestaResponse(int Candidatos);
 
@@ -300,6 +309,27 @@ public static class ReclutamientoEndpoints
         g.MapPut("/postulaciones/{id:guid}/etapa", async (Guid id, MoverPostulacionRequest b, ICommandHandler<MoverPostulacionCommand> h, CancellationToken ct) =>
                 (await h.Handle(new MoverPostulacionCommand(id, b.Etapa, b.Motivo), ct)).ToHttp())
             .WithName("MoverPostulacion").RequireAuthorization(Politicas.VerHojasDeVida);
+
+        // Proceso de selección: embudo, reglas de paso y el siguiente paso de cada persona (la IA sugiere, una persona decide)
+        g.MapGet("/vacantes/{id:guid}/proceso", async (Guid id, string? etapa, bool? porDecidir, string? buscar, int? pagina, int? tamano,
+                IQueryHandler<ObtenerProcesoQuery, ProcesoDto> h, CancellationToken ct) =>
+                (await h.Handle(new ObtenerProcesoQuery(id, etapa, porDecidir ?? false, buscar, pagina ?? 1, tamano ?? 10), ct)).ToHttp())
+            .WithName("ProcesoVacante").Produces<ProcesoDto>().RequireAuthorization(Politicas.VerHojasDeVida);
+
+        g.MapPost("/postulaciones/{id:guid}/avanzar", async (Guid id, AvanzarPostulacionRequest b, ICommandHandler<AvanzarPostulacionCommand, AvanceDto> h, CancellationToken ct) =>
+                (await h.Handle(new AvanzarPostulacionCommand(id, b.Destino, b.Motivo), ct)).ToHttp())
+            .WithName("AvanzarPostulacion").Produces<AvanceDto>().RequireAuthorization(Politicas.VerHojasDeVida);
+
+        g.MapPost("/vacantes/{id:guid}/proceso/sugerencias", async (Guid id, AplicarSugerenciasRequest b, ICommandHandler<AplicarSugerenciasCommand, int> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new AplicarSugerenciasCommand(id, b.PostulacionIds), ct);
+                return r.IsSuccess ? Results.Ok(new SugerenciasAplicadasResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("AplicarSugerencias").Produces<SugerenciasAplicadasResponse>().RequireAuthorization(Politicas.VerHojasDeVida);
+
+        g.MapPut("/vacantes/{id:guid}/proceso/reglas", async (Guid id, ReglasAvanceRequest b, ICommandHandler<ConfigurarReglasAvanceCommand> h, CancellationToken ct) =>
+                (await h.Handle(new ConfigurarReglasAvanceCommand(id, b.Modo, b.UmbralAfinidad, b.ToleranciaSalarial), ct)).ToHttp())
+            .WithName("ReglasAvance").RequireAuthorization(Politicas.DeAccion("CrearVacantes"));
 
         g.MapPost("/vacantes/{id:guid}/terna/proponer", async (Guid id, ICommandHandler<ProponerTernaCommand, int> h, CancellationToken ct) =>
             {

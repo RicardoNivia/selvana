@@ -42,6 +42,7 @@ Se descartaron las rutas Guacamaya (rojo, amarillo y azul; choca con los colores
 | Selva profundo (`--color-selva-profundo`) | #073F38 | #0B2C27 | Fondo del riel de la consola y paneles de marca; encima van `--color-sobre-selva` y `--color-sobre-selva-2` |
 | Claro de bosque (`--color-fondo`) | #F3F6F3 | #0C1513 | Fondo de la aplicación |
 | Éxito / alerta / error / info | #2A8A3E / #B86E00 / #C23A2E / #2A62B8 | #5CC774 / #F0A63A / #F07A6E / #7AA8F0 | Estados |
+| Etapas de selección (`--color-etapa-*`) | recibida #2A62B8 · preselección #0A7F86 · pruebas #B86E00 · terna #2A8A3E · descartada #73867E | #7AA8F0 · #4FD1D0 · #F0A63A · #5CC774 · #7B8F87 | Un color por etapa del proceso de la vacante (embudo, tarjetas, línea de tiempo). Nunca el violeta: ese es de la IA. Descartada va en neutro, no en rojo: descartar no es un error de la persona |
 
 Neutros siempre con sesgo verde, nunca gris puro. Todos los pares texto/fondo cumplen WCAG 2.1 AA.
 

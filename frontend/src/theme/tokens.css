@@ -44,6 +44,13 @@
   --color-info: #2a62b8;
   --color-info-suave: #e2ecfa;
 
+  /* Etapas del proceso de selección: un color por etapa (nunca el violeta, que es de la IA) */
+  --color-etapa-recibida: #2a62b8;
+  --color-etapa-preseleccion: #0a7f86;
+  --color-etapa-pruebas: #b86e00;
+  --color-etapa-terna: #2a8a3e;
+  --color-etapa-descartada: #73867e;
+
   /* Tipografía */
   --fuente-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
   --fuente-base: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
@@ -102,6 +109,11 @@
     --color-error-suave: #3a1a17;
     --color-info: #7aa8f0;
     --color-info-suave: #172740;
+    --color-etapa-recibida: #7aa8f0;
+    --color-etapa-preseleccion: #4fd1d0;
+    --color-etapa-pruebas: #f0a63a;
+    --color-etapa-terna: #5cc774;
+    --color-etapa-descartada: #7b8f87;
     --sombra-1: 0 1px 3px rgba(0, 0, 0, 0.5);
     --sombra-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
     color-scheme: dark;
@@ -133,6 +145,11 @@
   --color-error-suave: #3a1a17;
   --color-info: #7aa8f0;
   --color-info-suave: #172740;
+  --color-etapa-recibida: #7aa8f0;
+  --color-etapa-preseleccion: #4fd1d0;
+  --color-etapa-pruebas: #f0a63a;
+  --color-etapa-terna: #5cc774;
+  --color-etapa-descartada: #7b8f87;
   --sombra-1: 0 1px 3px rgba(0, 0, 0, 0.5);
   --sombra-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
   color-scheme: dark;

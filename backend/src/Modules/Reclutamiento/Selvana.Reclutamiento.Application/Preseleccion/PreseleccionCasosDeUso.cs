@@ -21,6 +21,9 @@ public interface IConversaciones
 
     Task<ConversacionPreseleccion?> PorPostulacionAsync(Guid empresaId, Guid postulacionId, CancellationToken cancellationToken);
 
+    /// <summary>Las conversaciones de la vacante, sin tracking (para leer el proceso).</summary>
+    Task<IReadOnlyList<ConversacionPreseleccion>> DeVacanteAsync(Guid empresaId, Guid vacanteId, CancellationToken cancellationToken);
+
     void Agregar(ConversacionPreseleccion conversacion);
 }
 
@@ -107,6 +110,11 @@ internal sealed class InvitarPreseleccionHandler(
         else
         {
             conversacion.RenovarEnlace(huella, ahora);
+        }
+
+        if (postulacion.Etapa == EtapaPostulacion.Recibida)
+        {
+            candidato.MoverPostulacion(postulacion.Id, EtapaPostulacion.Preseleccion, "Invitada al chat de preselección", usuario.Nombre, ahora);
         }
 
         bitacora.Registrar(vacante.EmpresaId, TipoActor.Persona, usuario.Nombre, $"Invitó a la preselección la postulación {postulacion.Numero}", vacante.Codigo,

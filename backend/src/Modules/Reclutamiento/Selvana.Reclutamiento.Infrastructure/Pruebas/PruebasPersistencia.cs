@@ -67,6 +67,9 @@ internal sealed class AplicacionesPruebasRepositorio(ReclutamientoDbContext db) 
     public Task<AplicacionPruebas?> ObtenerAsync(Guid empresaId, Guid id, CancellationToken cancellationToken) =>
         db.Set<AplicacionPruebas>().FirstOrDefaultAsync(a => a.EmpresaId == empresaId && a.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyList<AplicacionPruebas>> DeVacanteAsync(Guid empresaId, Guid vacanteId, CancellationToken cancellationToken) =>
+        await db.Set<AplicacionPruebas>().AsNoTracking().Where(a => a.EmpresaId == empresaId && a.VacanteId == vacanteId).ToListAsync(cancellationToken);
+
     public void Agregar(AplicacionPruebas aplicacion) => db.Add(aplicacion);
 }
 
