@@ -42,6 +42,10 @@ public interface IUsuarios
 public interface IEmpresas
 {
     Task<Empresa?> ObtenerAsync(Guid empresaId, CancellationToken cancellationToken);
+
+    Task<bool> ExisteNitAsync(string nit, CancellationToken cancellationToken);
+
+    void Agregar(Empresa empresa);
 }
 
 /// <summary>Enlaces de un solo uso: el token va a la persona y solo su huella SHA-256 se guarda.</summary>

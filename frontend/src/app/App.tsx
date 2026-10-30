@@ -37,12 +37,14 @@ import { EncuestaPublica } from '../features/clima/EncuestaPublica'
 import { CicloDetalle } from '../features/desempeno/CicloDetalle'
 import { Desempeno } from '../features/desempeno/Desempeno'
 import { EvaluacionDetalle } from '../features/desempeno/EvaluacionDetalle'
+import { Registro } from '../features/inicio/Registro'
 import { Layout } from './Layout'
 
 const router = createBrowserRouter([
   // Público: página comercial, inicio de sesión y portal de empleo
   { path: '/', element: <Inicio /> },
   { path: '/ingresar', element: <Ingresar /> },
+  { path: '/registro', element: <Registro /> },
   { path: '/legal/:documento', element: <Legal /> },
   { path: '/legal', element: <Navigate to="/legal/tratamiento-de-datos" replace /> },
   { path: '/activar/:token', element: <ActivarCuenta /> },

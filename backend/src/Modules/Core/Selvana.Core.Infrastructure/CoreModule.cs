@@ -44,6 +44,7 @@ public static class CoreModule
         services.AddSingleton<IConectorNomina, ArchivoCsvConector>();
         services.AddScoped<IDirectorioEmpresas, DirectorioEmpresas>();
         services.AddScoped<IDirectorioUsuarios, DirectorioUsuarios>();
+        services.AddScoped<Application.Registro.ILecturaPrimerosPasos, Sesion.LecturaPrimerosPasos>();
         services.AddScoped<ICatalogoCargos, CatalogoCargos>();
         services.AddScoped<IUsuarios, UsuariosRepositorio>();
         services.AddScoped<IEmpresas, EmpresasRepositorio>();

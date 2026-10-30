@@ -220,3 +220,12 @@ a.cajon-enlace:hover .cajon-enlace-icono { background: var(--color-primario-suav
 /* Esqueleto del riel mientras llega la sesión */
 .riel-esqueleto { align-items: center; gap: var(--espacio-3); padding-top: 60px; }
 .riel-esqueleto span { width: 44px; height: 44px; border-radius: var(--radio-m); background: color-mix(in srgb, var(--color-sobre-selva) 12%, transparent); }
+
+/* Prueba gratuita (sprint 10): aviso discreto arriba del contenido */
+.aviso-prueba {
+  margin: 0; display: flex; align-items: center; gap: var(--espacio-2); padding: 8px var(--espacio-4); border-radius: var(--radio-m); font-size: 13px;
+  background: var(--color-primario-suave); color: var(--color-texto);
+}
+.aviso-prueba svg { width: 16px; height: 16px; color: var(--color-primario); flex: none; }
+.aviso-prueba.pronto { background: var(--color-alerta-suave); }
+.aviso-prueba.pronto svg { color: var(--color-alerta); }

@@ -6,6 +6,7 @@ import { elegirEmpresaUsuaria, useEmpresaUsuariaActual } from '../features/sesio
 import {
   Chispa, IconoBandeja, IconoCandado, IconoCerrar, IconoConexion, IconoCupos, IconoEquipo, IconoDocumento, IconoClima, IconoEdificio, IconoEstructura,
   IconoFlecha, IconoInsignia, IconoLuna, IconoManos, IconoPantalla, IconoPersonas, IconoSalir, IconoSol, IconoUsuarios, IconoVacantes,
+  IconoReloj,
 } from '../shared/ui/Iconos'
 import { HojasCayendo } from '../shared/ui/HojasCayendo'
 import { LogoAnimado } from '../shared/ui/LogoAnimado'
@@ -191,8 +192,23 @@ export function Layout() {
       </nav>
       {abierto && <div className="riel-velo" aria-hidden="true" onClick={() => setAbierto(null)} />}
       <main className="contenido">
+        {sesion?.pruebaHasta && <AvisoPrueba hasta={sesion.pruebaHasta} />}
         <Outlet />
       </main>
     </div>
+  )
+}
+
+/** Prueba gratuita (sprint 10): cuántos días quedan; al terminar, cómo seguir. Aún no bloquea nada: los planes llegan con el lanzamiento. */
+function AvisoPrueba({ hasta }: { hasta: string }) {
+  const [ahora] = useState(() => Date.now())
+  const dias = Math.max(0, Math.ceil((new Date(hasta).getTime() - ahora) / 86_400_000))
+  return (
+    <p className={`aviso-prueba ${dias <= 5 ? 'pronto' : ''}`} role="status">
+      <IconoReloj />
+      {dias > 0
+        ? <>Prueba gratuita: le {dias === 1 ? 'queda' : 'quedan'} <b className="mono">{dias}</b> {dias === 1 ? 'día' : 'días'}. Todo lo que haga se conserva al elegir un plan.</>
+        : <>Su prueba gratuita terminó. Escríbanos a <a href="mailto:hola@selvana.co">hola@selvana.co</a> para elegir un plan y seguir con sus datos.</>}
+    </p>
   )
 }

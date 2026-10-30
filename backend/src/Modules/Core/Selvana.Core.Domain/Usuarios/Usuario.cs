@@ -137,6 +137,20 @@ public sealed partial class Usuario : AggregateRoot<Guid>
     public bool InvitacionVigente(DateTimeOffset ahora) =>
         InvitacionHash is not null && InvitacionVence is { } vence && vence > ahora && Estado != EstadoUsuario.Desactivado;
 
+    /// <summary>Quien registra la empresa (autoservicio) queda como administrador activo, con la contraseña que eligió.</summary>
+    public static Result<Usuario> RegistrarDueno(Guid empresaId, string correo, string nombre, string contrasenaHash, DateTimeOffset ahora)
+    {
+        var r = Invitar(empresaId, correo, nombre, Rol.Administrador, null, null, true, [], null, null, "Registro en línea", ahora);
+        if (r.IsFailure)
+        {
+            return r;
+        }
+
+        r.Value.EstablecerContrasena(contrasenaHash);
+        r.Value.Estado = EstadoUsuario.Activo;
+        return r;
+    }
+
     /// <summary>La persona abrió su enlace y creó la contraseña: el enlace deja de servir.</summary>
     public Result ActivarCuenta(string contrasenaHash, DateTimeOffset ahora)
     {

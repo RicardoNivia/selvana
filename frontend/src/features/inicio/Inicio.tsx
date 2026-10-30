@@ -91,7 +91,7 @@ export function Inicio() {
               pasa sin tu aprobación.
             </p>
             <div className="inicio-acciones inicio-entra" style={v(12)}>
-              <Link to="/ingresar" className="boton boton-primario inicio-brillo">Probar Selvana</Link>
+              <Link to="/registro" className="boton boton-primario inicio-brillo">Pruébelo gratis 30 días</Link>
               <Link to="/empleos" className="boton boton-secundario">Ver el portal de empleo</Link>
             </div>
           </div>
@@ -198,7 +198,7 @@ export function Inicio() {
             <h2>Empieza con tu próxima vacante</h2>
             <p>Escribe una frase y mira lo que la IA prepara para ti.</p>
           </div>
-          <Link to="/ingresar" className="boton inicio-boton-claro inicio-halo">Probar Selvana</Link>
+          <Link to="/registro" className="boton inicio-boton-claro inicio-halo">Pruébelo gratis 30 días</Link>
         </div>
       </section>
 

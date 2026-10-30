@@ -55,6 +55,8 @@ services:
       Mensajeria__Destinos__2__Prefijos__1: Selvana.Vinculacion.Contracts.Eventos.
       Mensajeria__Destinos__3__Url: http://localhost:8080/internal/eventos/expediente
       Mensajeria__Destinos__3__Prefijos__0: Selvana.Vinculacion.Contracts.Empleados.
+      Mensajeria__Destinos__4__Url: http://localhost:8080/internal/eventos/vinculacion
+      Mensajeria__Destinos__4__Prefijos__0: Selvana.Core.Contracts.Empresas.
     volumes:
       - llaves:/llaves
 

@@ -62,6 +62,7 @@ public static class ReclutamientoModule
         services.AddScoped<ILecturaRecontacto, LecturaRecontacto>();
         services.AddScoped<LecturaSeleccion>();
         services.AddScoped<Application.Analitica.ILecturaAnalitica, Analitica.LecturaAnalitica>();
+        services.AddScoped<IResumenReclutamiento, Analitica.ResumenReclutamientoLectura>();
         services.AddScoped<TransicionesSeleccion>();
         services.AddHostedService<AgenteSeleccion>();
 

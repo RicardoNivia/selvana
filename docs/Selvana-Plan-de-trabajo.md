@@ -282,9 +282,9 @@ Objetivo: que una vacante pase de solicitud a terna aprobada con la IA haciendo 
 
 **Sprint 10 – Estabilización y lanzamiento comercial**
 
-- [ ] Tablero de selección: vacantes abiertas, tiempo por etapa, fuentes, costo IA por vacante
-- [ ] Pruebas de carga para selección masiva (cientos de postulaciones por vacante)
-- [ ] Autoservicio de alta: registro, prueba gratuita de 30 días, onboarding guiado dentro del producto
+- [x] Tablero de selección: vacantes abiertas, tiempo por etapa, fuentes, costo IA por vacante — *hecho el 30/10/2026: `/consola/vacantes/tablero` con indicadores del periodo (30, 90, 365 días o todo), días promedio por etapa y hasta la terna, conversión por fuente y tabla por vacante; el costo de IA ahora se guarda (redacción de la vacante, ranking de cada postulación y conversación de preselección)*
+- [x] Pruebas de carga para selección masiva (cientos de postulaciones por vacante) — *hecho el 30/10/2026: vacante masiva sin IA con `Carga:Postulaciones` y herramienta `backend/tools/Selvana.Carga`; con 1.000 postulaciones y 32 usuarios en paralelo, 0 errores y p95 máximo de 397 ms (`docs/pruebas/carga-seleccion.md`)*
+- [x] Autoservicio de alta: registro, prueba gratuita de 30 días, onboarding guiado dentro del producto — *hecho el 30/10/2026: `/registro` en dos pasos (empresa con NIT validado, sector y tamaño; cuenta del administrador), 30 días de prueba con aviso en la consola, «Primeros pasos» en la bandeja que se marcan solos (estructura, planta, equipo, primera vacante, postulantes) y tipos de contrato sembrados para la empresa nueva. Al vencer la prueba solo se avisa: los planes y el cobro llegan con el lanzamiento comercial*
 - [ ] Landing, video demo, casos de uso por sector y publicación del plan “Selección IA”
 - [ ] Analítica de uso del producto para medir adopción sin depender de clientes piloto
 

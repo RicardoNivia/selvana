@@ -6,6 +6,7 @@ import { Boton } from '../../shared/ui/Boton'
 import { Esqueleto } from '../../shared/ui/Esqueleto'
 import { Chispa, IconoAlerta, IconoCheck } from '../../shared/ui/Iconos'
 import { useSesion } from '../sesion/api'
+import { PrimerosPasos } from './PrimerosPasos'
 import { type Propuesta, useActividadAgentes, useBandeja, useDecidir, useDescartar, useResumenBandeja } from './api'
 
 const relativo = new Intl.RelativeTimeFormat('es-CO', { numeric: 'auto' })
@@ -60,6 +61,7 @@ export function Bandeja() {
         </div>
       </header>
 
+      {sesion?.pruebaHasta && <PrimerosPasos empresaId={sesion.empresaId} />}
       <Agentes />
 
       <div className="bandeja">
