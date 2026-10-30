@@ -76,6 +76,14 @@ internal sealed class DirectorioEmpresas(CoreDbContext db) : IDirectorioEmpresas
             .Select(e => (e.Id, e.EsTemporal)).ToList();
 }
 
+internal sealed class DirectorioUsuarios(CoreDbContext db) : IDirectorioUsuarios
+{
+    public async Task<IReadOnlyList<UsuarioConsola>> ConsolaAsync(Guid empresaId, CancellationToken cancellationToken) =>
+        [.. (await db.Set<Usuario>().AsNoTracking().Where(u => u.EmpresaId == empresaId && u.Estado != EstadoUsuario.Desactivado)
+                .OrderBy(u => u.Nombre).ToListAsync(cancellationToken))
+            .Select(u => new UsuarioConsola(u.Id, u.Nombre, u.Correo, u.Rol.ToString(), u.CargoNombre))];
+}
+
 /// <summary>Usuario administrador propio del desarrollador (Desarrollo:UsuarioPropio en user-secrets); tiene su propia contraseña.</summary>
 public sealed record UsuarioPropioDesarrollo(string Correo, string Nombre, string Contrasena);
 

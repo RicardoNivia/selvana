@@ -8,7 +8,11 @@ namespace Selvana.Expediente.Application.Abstracciones;
 public interface IUsuarioActual
 {
     Guid EmpresaId { get; }
+    Guid? UsuarioId { get; }
     string Nombre { get; }
+
+    /// <summary>Rol de la matriz de permisos (Administrador, GerenteRrhh, Analista, Lider…).</summary>
+    string Rol { get; }
 
     /// <summary>Empresas usuarias que ve; null = todas.</summary>
     IReadOnlyCollection<Guid>? EmpresasUsuarias { get; }
@@ -75,10 +79,25 @@ public sealed record FilaEmpleadoDto(
 
 public sealed record ConteoEmpleadosDto(int Activos, int Retirados, int ConAlertas);
 
+/// <summary>Un líder con cuántas personas activas tiene a cargo.</summary>
+public sealed record LiderConEquipo(Guid Id, string Nombre, int Personas);
+
+/// <summary>Un área de la planta activa y cuántas de sus personas aún no tienen líder.</summary>
+public sealed record AreaLideres(string Area, int Personas, int SinLider);
+
 public interface ILecturaEmpleados
 {
     Task<Pagina<FilaEmpleadoDto>> EmpleadosAsync(Guid empresaId, IReadOnlyCollection<Guid>? alcance, PaginaSolicitada pagina, string? buscar, string? estado,
         bool soloConAlertas, DateOnly hoy, CancellationToken cancellationToken);
 
     Task<ConteoEmpleadosDto> ConteoAsync(Guid empresaId, IReadOnlyCollection<Guid>? alcance, DateOnly hoy, CancellationToken cancellationToken);
+
+    /// <summary>E4 · Las personas activas a cargo del líder, con su carpeta (sin tracking).</summary>
+    Task<IReadOnlyList<Empleado>> EquipoAsync(Guid empresaId, Guid liderId, CancellationToken cancellationToken);
+
+    /// <summary>E4 · Los líderes que tienen personas activas a cargo.</summary>
+    Task<IReadOnlyList<LiderConEquipo>> LideresAsync(Guid empresaId, CancellationToken cancellationToken);
+
+    /// <summary>E4 · Las áreas de la planta activa, para asignar un líder por área.</summary>
+    Task<IReadOnlyList<AreaLideres>> AreasAsync(Guid empresaId, CancellationToken cancellationToken);
 }

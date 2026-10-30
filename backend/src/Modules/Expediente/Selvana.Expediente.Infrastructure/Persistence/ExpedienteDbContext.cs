@@ -40,6 +40,8 @@ internal sealed class EmpleadoConfiguration : IEntityTypeConfiguration<Empleado>
         builder.Property(e => e.TipoContrato).HasMaxLength(100);
         builder.Property(e => e.Estado).HasConversion<string>().HasMaxLength(20);
         builder.Property(e => e.MotivoRetiro).HasMaxLength(500);
+        builder.Property(e => e.LiderNombre).HasMaxLength(200);
+        builder.HasIndex(e => new { e.EmpresaId, e.LiderId });
         builder.OwnsOne(e => e.Afiliaciones, x => x.ToJson());
         builder.OwnsOne(e => e.CambioPropuesto, x => x.ToJson());
         builder.HasIndex(e => e.Documento);

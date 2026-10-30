@@ -129,6 +129,10 @@ public sealed partial class Empleado : AggregateRoot<Guid>
     public DateOnly? FechaFinContrato { get; private set; }
     public Afiliaciones Afiliaciones { get; private set; } = new();
 
+    /// <summary>Líder directo: un usuario de la consola. Con él arma su vista «Mi equipo» (E4).</summary>
+    public Guid? LiderId { get; private set; }
+    public string? LiderNombre { get; private set; }
+
     public EstadoEmpleado Estado { get; private set; }
     public DateOnly? FechaRetiro { get; private set; }
     public string? MotivoRetiro { get; private set; }
@@ -324,6 +328,20 @@ public sealed partial class Empleado : AggregateRoot<Guid>
         Recalcular();
         ActualizadoEn = ahora;
         return doc;
+    }
+
+    /// <summary>RRHH asigna (o quita, con null) el líder directo. No cambia la situación laboral: no es una novedad.</summary>
+    public Result AsignarLider(Guid? liderId, string? liderNombre, DateTimeOffset ahora)
+    {
+        if (Estado == EstadoEmpleado.Retirado)
+        {
+            return Result.Failure(EmpleadoErrors.Retirado);
+        }
+
+        LiderId = liderId;
+        LiderNombre = liderId is null ? null : liderNombre?.Trim();
+        ActualizadoEn = ahora;
+        return Result.Success();
     }
 
     /// <summary>Lo que hay que atender: documentos vencidos o por vencer, contrato que termina pronto y afiliaciones sin registrar.</summary>

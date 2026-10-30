@@ -46,6 +46,16 @@ public static class ExpedienteModule
             sp.GetRequiredService<TimeProvider>());
     }
 
+    /// <summary>E4 · Asigna los líderes de ejemplo por área a quien aún no tiene líder (idempotente; también en bases ya sembradas).</summary>
+    public static async Task<int> SembrarLideresEjemploAsync(this IServiceProvider services, IReadOnlyList<Core.Contracts.Empresas.EmpresaResumen> empresas,
+        string correoDueno)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await Ejemplo.SemillaLideres.AsignarAsync(sp.GetRequiredService<ExpedienteDbContext>(), sp.GetRequiredService<Core.Contracts.Empresas.IDirectorioUsuarios>(),
+            empresas, correoDueno, sp.GetRequiredService<TimeProvider>());
+    }
+
     public static async Task MigrateExpedienteModuleAsync(this IServiceProvider services)
     {
         await using var scope = services.CreateAsyncScope();

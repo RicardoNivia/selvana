@@ -72,6 +72,9 @@ export interface Version { archivoId: string; nombreArchivo: string; venceEn: st
 export interface Documento { id: string; tipo: string; nombre: string; venceEn: string | null; estadoVigencia: 'SinVencimiento' | 'Vigente' | 'PorVencer' | 'Vencido'; versiones: Version[] }
 
 export interface Empleado {
+  /** Líder directo (usuario de la consola); con él arma su vista «Mi equipo». */
+  liderId: string | null
+  liderNombre: string | null
   id: string
   codigo: string
   documento: string

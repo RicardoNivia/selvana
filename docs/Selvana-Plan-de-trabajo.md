@@ -36,10 +36,10 @@ El orden real se ajustó para tener un flujo completo de punta a punta antes de 
 | Etapa 2 · V4 Onboarding · plan de inducción con seguimiento | Hecho; encuestas de 30, 60 y 90 días con Clima |
 | Etapa 3 · Empleados E1 · Expediente digital y carga de la planta | Hecho |
 | Etapa 3 · Empleados E2 · Actualización inteligente | Hecho; campaña anual desde el portal del empleado (P5) |
-| **Etapa 3 · Empleados E4 · «Mi equipo» del líder en la consola** | **Sigue** |
+| Etapa 3 · Empleados E4 · «Mi equipo» del líder en la consola | Hecho (30/10/2026) |
 | Portal · P4 Mis documentos · P5 Portal del empleado | Hecho (29/10/2026) |
 | Etapa 4 · Desempeño (D1 a D4) · Etapa 5 · Clima (C1 a C4) | Hecho (29/10/2026); tableros por área y primer ciclo real, con clientes |
-| Etapa 1 · Sprint 10 · Estabilización y lanzamiento | Antes de vender el primer plan |
+| **Etapa 1 · Sprint 10 · Estabilización y lanzamiento** | **Sigue**; antes de vender el primer plan |
 | Integraciones (WhatsApp, correo, firma, ERP) | Al final |
 
 ## IA primero: qué hace la IA y qué aprueba el usuario

@@ -31,6 +31,9 @@ public enum Accion
 
     /// <summary>Clima: encuestas, resultados por grupo, pulsos de ingreso y señales de rotación.</summary>
     GestionarClima,
+
+    /// <summary>«Mi equipo» (E4): el líder ve a las personas que tiene a cargo, sus pendientes y alertas. RRHH ve el de cualquier líder.</summary>
+    VerMiEquipo,
 }
 
 /// <summary>Hasta dónde llega un permiso. Todo lo que no es <see cref="No"/> permite la acción con ese alcance.</summary>
@@ -63,6 +66,7 @@ public static class MatrizPermisos
         [Accion.GestionarEmpleados] = [Alcance.Si, Alcance.Si, Alcance.Si, Alcance.No, Alcance.No, Alcance.No],
         [Accion.GestionarDesempeno] = [Alcance.Si, Alcance.Si, Alcance.Si, Alcance.SuEquipo, Alcance.No, Alcance.No],
         [Accion.GestionarClima] = [Alcance.Si, Alcance.Si, Alcance.Si, Alcance.No, Alcance.No, Alcance.No],
+        [Accion.VerMiEquipo] = [Alcance.Si, Alcance.Si, Alcance.Si, Alcance.SuEquipo, Alcance.No, Alcance.No],
     };
 
     public static IReadOnlyList<Rol> Roles => Orden;

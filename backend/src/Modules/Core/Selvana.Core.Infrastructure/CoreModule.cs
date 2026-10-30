@@ -43,6 +43,7 @@ public static class CoreModule
         services.AddScoped<ILectorNomina, LectorNomina>();
         services.AddSingleton<IConectorNomina, ArchivoCsvConector>();
         services.AddScoped<IDirectorioEmpresas, DirectorioEmpresas>();
+        services.AddScoped<IDirectorioUsuarios, DirectorioUsuarios>();
         services.AddScoped<ICatalogoCargos, CatalogoCargos>();
         services.AddScoped<IUsuarios, UsuariosRepositorio>();
         services.AddScoped<IEmpresas, EmpresasRepositorio>();

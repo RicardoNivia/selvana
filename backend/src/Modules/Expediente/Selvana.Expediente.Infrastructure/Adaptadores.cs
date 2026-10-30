@@ -43,6 +43,22 @@ internal sealed class EmpleadosRepositorio(ExpedienteDbContext db) : IEmpleados
 
 internal sealed class LecturaEmpleados(ExpedienteDbContext db) : ILecturaEmpleados
 {
+    public async Task<IReadOnlyList<Empleado>> EquipoAsync(Guid empresaId, Guid liderId, CancellationToken cancellationToken) =>
+        await db.Set<Empleado>().AsNoTracking().Where(e => e.EmpresaId == empresaId && e.LiderId == liderId && e.Estado == EstadoEmpleado.Activo)
+            .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<LiderConEquipo>> LideresAsync(Guid empresaId, CancellationToken cancellationToken) =>
+        [.. (await db.Set<Empleado>().AsNoTracking().Where(e => e.EmpresaId == empresaId && e.Estado == EstadoEmpleado.Activo && e.LiderId != null)
+                .GroupBy(e => new { e.LiderId, e.LiderNombre }).Select(g => new { g.Key.LiderId, g.Key.LiderNombre, Personas = g.Count() })
+                .ToListAsync(cancellationToken))
+            .Select(x => new LiderConEquipo(x.LiderId!.Value, x.LiderNombre ?? "Líder", x.Personas)).OrderBy(x => x.Nombre)];
+
+    public async Task<IReadOnlyList<AreaLideres>> AreasAsync(Guid empresaId, CancellationToken cancellationToken) =>
+        [.. (await db.Set<Empleado>().AsNoTracking().Where(e => e.EmpresaId == empresaId && e.Estado == EstadoEmpleado.Activo)
+                .GroupBy(e => e.Area).Select(g => new { Area = g.Key, Personas = g.Count(), SinLider = g.Count(e => e.LiderId == null) })
+                .ToListAsync(cancellationToken))
+            .Where(x => x.Area != "").Select(x => new AreaLideres(x.Area, x.Personas, x.SinLider)).OrderBy(x => x.Area)];
+
     private IQueryable<Empleado> Visibles(Guid empresaId, IReadOnlyCollection<Guid>? alcance) =>
         db.Set<Empleado>().AsNoTracking().Where(e => e.EmpresaId == empresaId
             && (alcance == null || e.EmpresaUsuariaId == null || alcance.Contains(e.EmpresaUsuariaId.Value)));

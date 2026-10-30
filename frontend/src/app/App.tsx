@@ -29,6 +29,7 @@ import { ProcesosVinculacion } from '../features/vinculacion/ProcesosVinculacion
 import { TiposContrato } from '../features/vinculacion/TiposContrato'
 import { Empleados } from '../features/empleados/Empleados'
 import { FichaEmpleado } from '../features/empleados/FichaEmpleado'
+import { MiEquipo } from '../features/equipo/MiEquipo'
 import { Clima } from '../features/clima/Clima'
 import { EncuestaDetalle } from '../features/clima/EncuestaDetalle'
 import { EncuestaPublica } from '../features/clima/EncuestaPublica'
@@ -88,6 +89,7 @@ const router = createBrowserRouter([
       { path: 'vinculacion/:id', element: <ProcesoVinculacion /> },
       { path: 'empleados', element: <Empleados /> },
       { path: 'empleados/:id', element: <FichaEmpleado /> },
+      { path: 'mi-equipo', element: <MiEquipo /> },
       { path: 'desempeno', element: <Desempeno /> },
       { path: 'desempeno/evaluaciones/:id', element: <EvaluacionDetalle /> },
       { path: 'desempeno/:id', element: <CicloDetalle /> },

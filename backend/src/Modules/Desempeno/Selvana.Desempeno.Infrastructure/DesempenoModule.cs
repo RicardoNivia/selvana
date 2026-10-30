@@ -26,6 +26,7 @@ public static class DesempenoModule
         services.AddScoped<IEventosDesempeno, EventosDesempeno>();
         services.AddScoped<IBitacora, Bitacora>();
         services.AddScoped<Contracts.IDesempenoReciente, DesempenoRecienteLectura>();
+        services.AddScoped<Contracts.IEvaluacionesDelEquipo, EvaluacionesDelEquipoLectura>();
         services.AddScoped<Contracts.IEvaluacionesDeLaPersona, EvaluacionesDeLaPersona>();
 
         services.AddIntegrationEventConsumers<DesempenoDbContext>(AssemblyReference.Assembly);

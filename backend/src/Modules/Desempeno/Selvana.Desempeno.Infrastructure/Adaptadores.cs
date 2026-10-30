@@ -126,6 +126,26 @@ internal sealed class DesempenoRecienteLectura(DesempenoDbContext db) : IDesempe
     }
 }
 
+/// <summary>E4 · Evaluaciones de ciclos abiertos o en calibración de las personas de un equipo.</summary>
+internal sealed class EvaluacionesDelEquipoLectura(DesempenoDbContext db) : IEvaluacionesDelEquipo
+{
+    public async Task<IReadOnlyList<EvaluacionDelEquipo>> AbiertasAsync(Guid empresaId, IReadOnlyCollection<Guid> empleados, CancellationToken cancellationToken)
+    {
+        if (empleados.Count == 0)
+        {
+            return [];
+        }
+
+        var ciclos = await db.Set<Ciclo>().AsNoTracking()
+            .Where(c => c.EmpresaId == empresaId && (c.Estado == EstadoCiclo.Abierto || c.Estado == EstadoCiclo.Calibracion))
+            .ToDictionaryAsync(c => c.Id, cancellationToken);
+        var ids = ciclos.Keys.ToList();
+        var evaluaciones = await db.Set<Evaluacion>().AsNoTracking()
+            .Where(e => e.EmpresaId == empresaId && ids.Contains(e.CicloId) && empleados.Contains(e.EmpleadoId)).ToListAsync(cancellationToken);
+        return [.. evaluaciones.Select(e => new EvaluacionDelEquipo(e.EmpleadoId, e.Id, ciclos[e.CicloId].Nombre, ciclos[e.CicloId].Hasta, e.Estado.ToString(), e.Puntaje))];
+    }
+}
+
 /// <summary>180° y 360° · La autoevaluación desde el portal del empleado, por cédula y correo.</summary>
 internal sealed class EvaluacionesDeLaPersona(DesempenoDbContext db, TimeProvider reloj) : IEvaluacionesDeLaPersona
 {

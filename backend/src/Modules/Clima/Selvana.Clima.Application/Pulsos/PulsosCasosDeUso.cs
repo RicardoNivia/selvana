@@ -1,3 +1,4 @@
+using Selvana.Clima.Contracts;
 using FluentValidation;
 using Selvana.Clima.Application.Abstracciones;
 using Selvana.Clima.Domain.Encuestas;
@@ -139,22 +140,25 @@ public sealed record RiesgoRotacionDto(Pagina<RiesgoDto> Personas, int Altos, in
 
 public sealed record ObtenerRiesgoRotacionQuery(int? Pagina, int? Tamano, string? Nivel) : IQuery<RiesgoRotacionDto>;
 
-/// <summary>
-/// Señales explicadas por persona: pulso de ingreso, antigüedad, fin de contrato, clima de su área (solo con 5 o más respuestas) y desempeño.
-/// Se calculan en el servidor y se paginan; ordenadas de mayor a menor riesgo.
-/// </summary>
-internal sealed class ObtenerRiesgoRotacionHandler(IUsuarioActual usuario, IPlantaActiva planta, IPulsos pulsos, IEncuestas encuestas, ILecturaClima lectura,
-    IDesempenoReciente desempeno, TimeProvider reloj) : IQueryHandler<ObtenerRiesgoRotacionQuery, RiesgoRotacionDto>
+/// <summary>El cálculo del riesgo (C4) de la planta de una empresa; lo usan la pantalla de Clima y «Mi equipo» del líder (E4).</summary>
+public sealed class CalculoRiesgoRotacion(IPlantaActiva planta, IPulsos pulsos, IEncuestas encuestas, ILecturaClima lectura, IDesempenoReciente desempeno,
+    TimeProvider reloj) : IRiesgoDelEquipo
 {
-    public async Task<Result<RiesgoRotacionDto>> Handle(ObtenerRiesgoRotacionQuery q, CancellationToken ct)
+    public async Task<IReadOnlyList<(EmpleadoActivo Empleado, RiesgoPersona Riesgo)>> CalcularAsync(Guid empresaId, Func<EmpleadoActivo, bool> incluir,
+        CancellationToken ct)
     {
         var hoy = DateOnly.FromDateTime(reloj.GetUtcNow().UtcDateTime);
-        var empleados = (await planta.ListarAsync(usuario.EmpresaId, ct)).Where(e => usuario.Ve(e.EmpresaUsuariaId)).ToList();
-        var ultimosPulsos = (await pulsos.UltimosRespondidosAsync(usuario.EmpresaId, ct)).ToDictionary(p => p.EmpleadoId);
-        var calificaciones = (await desempeno.UltimosAsync(usuario.EmpresaId, ct)).ToDictionary(d => d.EmpleadoId);
+        var empleados = (await planta.ListarAsync(empresaId, ct)).Where(incluir).ToList();
+        if (empleados.Count == 0)
+        {
+            return [];
+        }
+
+        var ultimosPulsos = (await pulsos.UltimosRespondidosAsync(empresaId, ct)).ToDictionary(p => p.EmpleadoId);
+        var calificaciones = (await desempeno.UltimosAsync(empresaId, ct)).ToDictionary(d => d.EmpleadoId);
 
         var climaArea = new Dictionary<string, (decimal? Promedio, int? Enps)>(StringComparer.OrdinalIgnoreCase);
-        if (await lectura.UltimaConRespuestasAsync(usuario.EmpresaId, ct) is { } encuesta)
+        if (await lectura.UltimaConRespuestasAsync(empresaId, ct) is { } encuesta)
         {
             var resultados = CalculoResultados.Calcular(encuesta, await encuestas.RespuestasAsync(encuesta.Id, ct));
             foreach (var g in resultados.Grupos.Where(g => g.Tipo == "Área"))
@@ -163,16 +167,33 @@ internal sealed class ObtenerRiesgoRotacionHandler(IUsuarioActual usuario, IPlan
             }
         }
 
-        var todos = empleados.Select(e =>
+        return [.. empleados.Select(e =>
         {
             var p = ultimosPulsos.GetValueOrDefault(e.EmpleadoId);
             var d = calificaciones.GetValueOrDefault(e.EmpleadoId);
             var clima = climaArea.GetValueOrDefault(e.Area);
-            var r = RiesgoRotacion.Calcular(new DatosRiesgo(e.FechaIngreso, e.FechaFinContrato, p?.Promedio, p?.Respuesta?.Recomendaria, p?.Hito, clima.Promedio,
-                clima.Enps, d?.Puntaje, d?.Potencial), hoy);
-            return new RiesgoDto(e.EmpleadoId, e.Nombre, e.Cargo, e.Area, e.Sede, r.Nivel, r.Puntos, [.. r.Senales.Select(s => new SenalDto(s.Texto, s.Evidencia, s.Puntos))],
-                r.Acciones);
-        }).OrderByDescending(x => x.Puntos).ThenBy(x => x.Nombre).ToList();
+            return (e, RiesgoRotacion.Calcular(new DatosRiesgo(e.FechaIngreso, e.FechaFinContrato, p?.Promedio, p?.Respuesta?.Recomendaria, p?.Hito, clima.Promedio,
+                clima.Enps, d?.Puntaje, d?.Potencial), hoy));
+        })];
+    }
+
+    async Task<IReadOnlyList<RiesgoDelEquipo>> IRiesgoDelEquipo.CalcularAsync(Guid empresaId, IReadOnlyCollection<Guid> empleados, CancellationToken cancellationToken) =>
+        [.. (await CalcularAsync(empresaId, e => empleados.Contains(e.EmpleadoId), cancellationToken))
+            .Select(x => new RiesgoDelEquipo(x.Empleado.EmpleadoId, x.Riesgo.Nivel, x.Riesgo.Puntos, [.. x.Riesgo.Senales.Select(s => (s.Texto, s.Evidencia))], x.Riesgo.Acciones))];
+}
+
+/// <summary>
+/// Señales explicadas por persona: pulso de ingreso, antigüedad, fin de contrato, clima de su área (solo con 5 o más respuestas) y desempeño.
+/// Se calculan en el servidor y se paginan; ordenadas de mayor a menor riesgo.
+/// </summary>
+internal sealed class ObtenerRiesgoRotacionHandler(IUsuarioActual usuario, CalculoRiesgoRotacion calculo) : IQueryHandler<ObtenerRiesgoRotacionQuery, RiesgoRotacionDto>
+{
+    public async Task<Result<RiesgoRotacionDto>> Handle(ObtenerRiesgoRotacionQuery q, CancellationToken ct)
+    {
+        var todos = (await calculo.CalcularAsync(usuario.EmpresaId, e => usuario.Ve(e.EmpresaUsuariaId), ct)).Select(x =>
+            new RiesgoDto(x.Empleado.EmpleadoId, x.Empleado.Nombre, x.Empleado.Cargo, x.Empleado.Area, x.Empleado.Sede, x.Riesgo.Nivel, x.Riesgo.Puntos,
+                [.. x.Riesgo.Senales.Select(s => new SenalDto(s.Texto, s.Evidencia, s.Puntos))], x.Riesgo.Acciones))
+            .OrderByDescending(x => x.Puntos).ThenBy(x => x.Nombre).ToList();
 
         var filtrados = string.IsNullOrWhiteSpace(q.Nivel) ? todos : [.. todos.Where(x => x.Nivel.Equals(q.Nivel, StringComparison.OrdinalIgnoreCase))];
         var pagina = new PaginaSolicitada(q.Pagina, q.Tamano);
