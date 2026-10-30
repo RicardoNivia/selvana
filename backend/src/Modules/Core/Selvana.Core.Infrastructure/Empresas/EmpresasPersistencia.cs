@@ -17,6 +17,9 @@ internal sealed class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
         builder.Ignore(e => e.DomainEvents);
         builder.Property(e => e.Nombre).HasMaxLength(200);
         builder.Property(e => e.Nit).HasMaxLength(20);
+        builder.HasIndex(e => e.Nit);
+        builder.Property(e => e.Sector).HasMaxLength(100);
+        builder.Property(e => e.Tamano).HasMaxLength(50);
         builder.HasMany(e => e.EmpresasUsuarias).WithOne().HasForeignKey("EmpresaId").OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(e => e.EmpresasUsuarias).UsePropertyAccessMode(PropertyAccessMode.Field);
     }

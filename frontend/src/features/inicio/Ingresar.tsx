@@ -103,6 +103,7 @@ export function Ingresar() {
             </div>
           )}
 
+          <p className="ingresar-registro">¿Su empresa aún no usa Selvana? <Link to="/registro">Pruébelo gratis 30 días</Link></p>
           <Link to="/" className="ingresar-volver">← Volver a selvana.co</Link>
         </form>
       </main>

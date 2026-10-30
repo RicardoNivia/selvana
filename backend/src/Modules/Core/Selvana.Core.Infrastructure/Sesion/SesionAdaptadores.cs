@@ -38,6 +38,20 @@ internal sealed class EmpresasRepositorio(CoreDbContext db) : IEmpresas
 {
     public Task<Empresa?> ObtenerAsync(Guid empresaId, CancellationToken cancellationToken) =>
         db.Set<Empresa>().Include(e => e.EmpresasUsuarias).FirstOrDefaultAsync(e => e.Id == empresaId, cancellationToken);
+
+    public Task<bool> ExisteNitAsync(string nit, CancellationToken cancellationToken) => db.Set<Empresa>().AnyAsync(e => e.Nit == nit, cancellationToken);
+
+    public void Agregar(Empresa empresa) => db.Add(empresa);
+}
+
+internal sealed class LecturaPrimerosPasos(CoreDbContext db) : Application.Registro.ILecturaPrimerosPasos
+{
+    public async Task<(int Cargos, int Usuarios)> ConteosAsync(Guid empresaId, CancellationToken cancellationToken)
+    {
+        var cargos = await db.Set<Domain.Estructura.Cargo>().AsNoTracking().CountAsync(c => EF.Property<Guid>(c, "EstructuraId") == empresaId && c.Activo, cancellationToken);
+        var usuarios = await db.Set<Usuario>().AsNoTracking().CountAsync(u => u.EmpresaId == empresaId && u.Estado != EstadoUsuario.Desactivado, cancellationToken);
+        return (cargos, usuarios);
+    }
 }
 
 /// <summary>32 bytes aleatorios en Base64 URL; se guarda solo la huella SHA-256 en hexadecimal.</summary>
@@ -79,6 +93,6 @@ internal sealed class LecturaSesion(CoreDbContext db) : ILecturaSesion
         var visibles = e.EmpresasUsuarias.Where(x => x.Activa && u.VeEmpresaUsuaria(x.Id)).OrderBy(x => x.Nombre)
             .Select(x => new EmpresaUsuariaResumenDto(x.Id, x.Nombre)).ToList();
         var acciones = MatrizPermisos.Acciones.Where(a => MatrizPermisos.Puede(u.Rol, a)).Select(a => a.ToString()).ToList();
-        return new SesionDto(u.Id, u.Nombre, u.Correo, u.Rol.ToString(), e.Id, e.Nombre, e.EsTemporal, u.TodasLasEmpresasUsuarias, visibles, acciones);
+        return new SesionDto(u.Id, u.Nombre, u.Correo, u.Rol.ToString(), e.Id, e.Nombre, e.EsTemporal, u.TodasLasEmpresasUsuarias, visibles, acciones, e.PruebaHasta);
     }
 }

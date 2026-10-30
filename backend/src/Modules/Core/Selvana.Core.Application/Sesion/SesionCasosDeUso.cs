@@ -13,7 +13,8 @@ namespace Selvana.Core.Application.Sesion;
 /// </summary>
 public sealed record SesionDto(
     Guid UsuarioId, string Nombre, string Correo, string Rol, Guid EmpresaId, string EmpresaNombre, bool EmpresaTemporal,
-    bool TodasLasEmpresasUsuarias, IReadOnlyList<Usuarios.EmpresaUsuariaResumenDto> EmpresasUsuarias, IReadOnlyList<string> Acciones);
+    bool TodasLasEmpresasUsuarias, IReadOnlyList<Usuarios.EmpresaUsuariaResumenDto> EmpresasUsuarias, IReadOnlyList<string> Acciones,
+    DateTimeOffset? PruebaHasta = null);
 
 public enum MotivoRechazo
 {

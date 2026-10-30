@@ -13,6 +13,20 @@ export interface Sesion {
   empresasUsuarias: { id: string; nombre: string }[]
   /** Acciones de la matriz de permisos que su rol puede hacer (con cualquier alcance). */
   acciones: string[]
+  /** Hasta cuándo va la prueba gratuita; null si la empresa no está en prueba. */
+  pruebaHasta: string | null
+}
+
+export interface RegistroEmpresa {
+  empresa: string
+  nit: string
+  esTemporal: boolean
+  sector: string
+  tamano: string
+  nombre: string
+  correo: string
+  contrasena: string
+  aceptaTerminos: boolean
 }
 
 export const nombreRol: Record<string, string> = {
@@ -58,6 +72,18 @@ export function useIngresar() {
     mutationFn: (datos: { correo: string; contrasena: string }) => apiSend<Sesion>('POST', '/api/v1/sesion/ingresar', datos),
     onSuccess: (sesion) => {
       // Lo de la sesión anterior (otra empresa, otro usuario) no se reutiliza
+      cliente.clear()
+      cliente.setQueryData(claveSesion, sesion)
+    },
+  })
+}
+
+/** Autoservicio: registra la empresa (30 días de prueba) y deja la sesión abierta. */
+export function useRegistrarEmpresa() {
+  const cliente = useQueryClient()
+  return useMutation({
+    mutationFn: (datos: RegistroEmpresa) => apiSend<Sesion>('POST', '/api/v1/sesion/registro', datos),
+    onSuccess: (sesion) => {
       cliente.clear()
       cliente.setQueryData(claveSesion, sesion)
     },

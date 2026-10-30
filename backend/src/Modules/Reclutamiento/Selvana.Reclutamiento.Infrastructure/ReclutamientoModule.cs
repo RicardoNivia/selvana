@@ -61,6 +61,8 @@ public static class ReclutamientoModule
         services.AddScoped<IBancoTalento, BancoTalento>();
         services.AddScoped<ILecturaRecontacto, LecturaRecontacto>();
         services.AddScoped<LecturaSeleccion>();
+        services.AddScoped<Application.Analitica.ILecturaAnalitica, Analitica.LecturaAnalitica>();
+        services.AddScoped<IResumenReclutamiento, Analitica.ResumenReclutamientoLectura>();
         services.AddScoped<TransicionesSeleccion>();
         services.AddHostedService<AgenteSeleccion>();
 
@@ -92,6 +94,15 @@ public static class ReclutamientoModule
         var sp = scope.ServiceProvider;
         return await Ejemplo.SemillaEjemplo.SembrarAmpliadaAsync(sp.GetRequiredService<ReclutamientoDbContext>(), sp.GetRequiredService<IAlmacenHojasDeVida>(),
             sp.GetRequiredService<ITokensPruebas>(), empresas, nombreDueno, sp.GetRequiredService<TimeProvider>());
+    }
+
+    /// <summary>Sprint 10 · Vacante de selección masiva para las pruebas de carga (Carga:Postulaciones). Idempotente; devuelve cuántas postulaciones creó.</summary>
+    public static async Task<int> SembrarCargaReclutamientoAsync(this IServiceProvider services, Core.Contracts.Empresas.EmpresaResumen empresa, int postulaciones)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await Ejemplo.SemillaCarga.SembrarAsync(sp.GetRequiredService<ReclutamientoDbContext>(), sp.GetRequiredService<IAlmacenHojasDeVida>(),
+            sp.GetRequiredService<ITokensPruebas>(), empresa, postulaciones, sp.GetRequiredService<TimeProvider>());
     }
 
     /// <summary>Cuentas del portal de la persona para los candidatos y empleados de ejemplo (idempotente). Devuelve cuántas creó.</summary>

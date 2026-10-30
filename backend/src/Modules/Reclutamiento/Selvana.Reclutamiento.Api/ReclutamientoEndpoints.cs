@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Selvana.Reclutamiento.Application;
 using Selvana.Reclutamiento.Application.Abstracciones;
+using Selvana.Reclutamiento.Application.Analitica;
 using Selvana.Reclutamiento.Application.Candidatos;
 using Selvana.Reclutamiento.Application.Filtros;
 using Selvana.Reclutamiento.Application.Portal;
@@ -309,6 +310,11 @@ public static class ReclutamientoEndpoints
         g.MapPut("/postulaciones/{id:guid}/etapa", async (Guid id, MoverPostulacionRequest b, ICommandHandler<MoverPostulacionCommand> h, CancellationToken ct) =>
                 (await h.Handle(new MoverPostulacionCommand(id, b.Etapa, b.Motivo), ct)).ToHttp())
             .WithName("MoverPostulacion").RequireAuthorization(Politicas.VerHojasDeVida);
+
+        // Tablero de selección (sprint 10): vacantes, tiempo por etapa, fuentes y costo de IA por vacante
+        g.MapGet("/tablero-seleccion", async (int? dias, string? estado, int? pagina, int? tamano, IQueryHandler<ObtenerTableroSeleccionQuery, TableroSeleccionDto> h,
+                CancellationToken ct) => (await h.Handle(new ObtenerTableroSeleccionQuery(dias, estado, pagina, tamano), ct)).ToHttp())
+            .WithName("TableroSeleccion").Produces<TableroSeleccionDto>().RequireAuthorization(Politicas.DeAccion("CrearVacantes"));
 
         // Proceso de selección: embudo, reglas de paso y el siguiente paso de cada persona (la IA sugiere, una persona decide)
         g.MapGet("/vacantes/{id:guid}/proceso", async (Guid id, string? etapa, bool? porDecidir, string? buscar, int? pagina, int? tamano,

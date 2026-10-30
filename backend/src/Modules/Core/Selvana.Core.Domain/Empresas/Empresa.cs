@@ -12,6 +12,8 @@ public static class EmpresaErrors
     public static readonly Error NitRepetido = Error.Conflict("Empresa.NitRepetido", "Ya hay una empresa usuaria con ese NIT.");
     public static readonly Error EmpresaUsuariaNoExiste = Error.NotFound("Empresa.UsuariaNoExiste", "Esa empresa usuaria no existe.");
     public static readonly Error NoExiste = Error.NotFound("Empresa.NoExiste", "La empresa no existe.");
+    public static readonly Error YaRegistrada = Error.Conflict("Empresa.YaRegistrada",
+        "Ya hay una empresa con ese NIT en Selvana. Pídale acceso a su administrador o escríbanos si cree que es un error.");
 }
 
 /// <summary>Cliente de una empresa de servicios temporales (EST): sus datos nunca se mezclan con los de otra.</summary>
@@ -59,6 +61,36 @@ public sealed partial class Empresa : AggregateRoot<Guid>
     public string Nit { get; private set; } = "";
     public bool EsTemporal { get; private set; }
     public IReadOnlyList<EmpresaUsuaria> EmpresasUsuarias => _empresasUsuarias.AsReadOnly();
+
+    /// <summary>Sector y tamaño que dio al registrarse (para el recorrido guiado y la analítica de uso).</summary>
+    public string Sector { get; private set; } = "";
+    public string Tamano { get; private set; } = "";
+
+    /// <summary>Hasta cuándo va la prueba gratuita; null = no está en prueba (empresas de ejemplo o con plan).</summary>
+    public DateTimeOffset? PruebaHasta { get; private set; }
+    public DateTimeOffset? RegistradaEn { get; private set; }
+
+    public const int DiasPrueba = 30;
+
+    /// <summary>Autoservicio (sprint 10): la empresa se registra sola y arranca una prueba gratuita de 30 días.</summary>
+    public static Result<Empresa> Registrar(Guid id, string nombre, string nit, bool esTemporal, string sector, string tamano, DateTimeOffset ahora)
+    {
+        var r = Crear(id, nombre, nit, esTemporal);
+        if (r.IsFailure)
+        {
+            return r;
+        }
+
+        var e = r.Value;
+        e.Sector = (sector ?? "").Trim();
+        e.Tamano = (tamano ?? "").Trim();
+        e.RegistradaEn = ahora;
+        e.PruebaHasta = ahora.AddDays(DiasPrueba);
+        return e;
+    }
+
+    /// <summary>Días que le quedan a la prueba (0 si terminó); null si no está en prueba.</summary>
+    public int? DiasDePrueba(DateTimeOffset ahora) => PruebaHasta is { } fin ? Math.Max(0, (int)Math.Ceiling((fin - ahora).TotalDays)) : null;
 
     public static Result<Empresa> Crear(Guid id, string nombre, string nit, bool esTemporal)
     {

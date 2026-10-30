@@ -141,6 +141,7 @@ internal sealed class AfinidadCalculadaConsumer(ICandidatos candidatos, IBitacor
             return;
         }
 
+        candidato.SumarCostoIa(e.PostulacionId, e.CostoUsd);
         if (e.Error is not null)
         {
             var falla = candidato.RegistrarFallaAfinidad(e.PostulacionId, e.Error);

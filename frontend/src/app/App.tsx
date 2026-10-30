@@ -20,6 +20,7 @@ import { ConversacionCandidato } from '../features/preseleccion/ConversacionCand
 import { PresentarPruebas } from '../features/pruebas/PresentarPruebas'
 import { PrivacidadAuditoria } from '../features/privacidad/PrivacidadAuditoria'
 import { UsuariosRoles } from '../features/usuarios/UsuariosRoles'
+import { TableroSeleccion } from '../features/vacantes/TableroSeleccion'
 import { VacanteDetalle } from '../features/vacantes/VacanteDetalle'
 import { VacanteNueva } from '../features/vacantes/VacanteNueva'
 import { VacantesLista } from '../features/vacantes/VacantesLista'
@@ -36,12 +37,14 @@ import { EncuestaPublica } from '../features/clima/EncuestaPublica'
 import { CicloDetalle } from '../features/desempeno/CicloDetalle'
 import { Desempeno } from '../features/desempeno/Desempeno'
 import { EvaluacionDetalle } from '../features/desempeno/EvaluacionDetalle'
+import { Registro } from '../features/inicio/Registro'
 import { Layout } from './Layout'
 
 const router = createBrowserRouter([
   // Público: página comercial, inicio de sesión y portal de empleo
   { path: '/', element: <Inicio /> },
   { path: '/ingresar', element: <Ingresar /> },
+  { path: '/registro', element: <Registro /> },
   { path: '/legal/:documento', element: <Legal /> },
   { path: '/legal', element: <Navigate to="/legal/tratamiento-de-datos" replace /> },
   { path: '/activar/:token', element: <ActivarCuenta /> },
@@ -82,6 +85,7 @@ const router = createBrowserRouter([
       { path: 'bandeja', element: <Bandeja /> },
       { path: 'vacantes', element: <VacantesLista /> },
       { path: 'vacantes/nueva', element: <VacanteNueva /> },
+      { path: 'vacantes/tablero', element: <TableroSeleccion /> },
       { path: 'vacantes/:id', element: <VacanteDetalle /> },
       { path: 'candidatos', element: <BancoTalento /> },
       { path: 'candidatos/:id', element: <FichaCandidato /> },

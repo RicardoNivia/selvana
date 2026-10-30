@@ -12,6 +12,7 @@ using Selvana.Core.Application.Estructura.Cargos;
 using Selvana.Core.Application.Estructura.EditarMaestros;
 using Selvana.Core.Application.Estructura.ImportarNomina;
 using Selvana.Core.Application.Geografia;
+using Selvana.Core.Application.Registro;
 using Selvana.Core.Application.Sesion;
 using Selvana.Core.Contracts.Empresas;
 using Selvana.SharedKernel.Messaging;
@@ -35,6 +36,9 @@ public sealed record EditarCentroCostoRequest(string Nombre, string Sede, bool A
 public sealed record CrearMaestroRequest(string Nombre);
 
 public sealed record CrearCentroCostoRequest(string Codigo, string Nombre, string Sede);
+
+public sealed record RegistroRequest(
+    string Empresa, string Nit, bool EsTemporal, string Sector, string Tamano, string Nombre, string Correo, string Contrasena, bool AceptaTerminos);
 
 public sealed record IngresarRequest(string Correo, string Contrasena)
 {
@@ -66,6 +70,12 @@ public static class CoreEndpoints
             .Produces<IReadOnlyList<MunicipioDto>>()
             .AllowAnonymous();
 
+        // Recorrido guiado de una empresa nueva: cada paso se marca solo según los datos
+        core.MapGet("/primeros-pasos", async (IQueryHandler<ObtenerPrimerosPasosQuery, PrimerosPasosDto> handler, CancellationToken ct) =>
+                (await handler.Handle(new ObtenerPrimerosPasosQuery(), ct)).ToHttp())
+            .WithName("PrimerosPasos")
+            .Produces<PrimerosPasosDto>();
+
         MapSesion(app.MapGroup("/sesion").WithTags("Sesión"));
         MapNomina(core.MapGroup("/nomina").WithTags("Conectar nómina"));
         MapEstructura(core.MapGroup("/estructura").WithTags("Estructura y cargos"));
@@ -96,6 +106,25 @@ public static class CoreEndpoints
             .RequireRateLimiting(Sesiones.PoliticaIngreso)
             .Produces<SesionDto>()
             .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        // Autoservicio: la empresa se registra sola, con 30 días de prueba gratuita, y entra de una vez
+        sesion.MapPost("/registro", async (RegistroRequest b, HttpContext http, ICommandHandler<RegistrarEmpresaCommand, SesionDto> handler, CancellationToken ct) =>
+            {
+                var r = await handler.Handle(new RegistrarEmpresaCommand(b.Empresa, b.Nit, b.EsTemporal, b.Sector, b.Tamano, b.Nombre, b.Correo, b.Contrasena,
+                    b.AceptaTerminos), ct);
+                if (r.IsFailure)
+                {
+                    return r.ToHttp();
+                }
+
+                var s = r.Value;
+                await Sesiones.IniciarAsync(http, s.UsuarioId, s.Nombre, s.Rol, s.EmpresaId, s.TodasLasEmpresasUsuarias, s.EmpresasUsuarias.Select(e => e.Id));
+                return Results.Ok(s);
+            })
+            .WithName("RegistrarEmpresa")
+            .AllowAnonymous()
+            .RequireRateLimiting(Sesiones.PoliticaIngreso)
+            .Produces<SesionDto>();
 
         sesion.MapGet("/", async (IQueryHandler<ObtenerSesionQuery, SesionDto> handler, CancellationToken ct) =>
                 (await handler.Handle(new ObtenerSesionQuery(), ct)).ToHttp())

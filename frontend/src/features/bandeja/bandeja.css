@@ -59,3 +59,30 @@ li.bandeja-item { cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   .agente-hoy, .bandeja-items > li, .bandeja-detalle, .nav-contador { animation: none; }
 }
+
+/* Recorrido guiado de una empresa nueva (sprint 10) */
+.primeros-pasos { padding: var(--espacio-4) var(--espacio-6); display: flex; flex-direction: column; gap: var(--espacio-3); margin-bottom: var(--espacio-4); }
+.primeros-pasos header { display: flex; gap: var(--espacio-4); align-items: center; }
+.primeros-pasos header > div { flex: 1; }
+.primeros-pasos h2 { margin: 0; font: 600 18px var(--fuente-display); }
+.primeros-pasos .ayuda { margin: 2px 0 0; }
+.primeros-avance {
+  width: 52px; height: 52px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(var(--color-primario) calc(var(--avance) * 360deg), var(--color-superficie-2) 0);
+  transition: background var(--duracion-larga) var(--curva-salida);
+}
+.primeros-avance b { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--color-superficie); font-size: 13px; }
+.primeros-pasos ol { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--espacio-2); }
+.primeros-pasos li {
+  display: flex; gap: var(--espacio-3); align-items: center; padding: 10px var(--espacio-3); border-radius: var(--radio-m); border: 1px solid var(--color-borde);
+  animation: primeros-entra var(--duracion-media) var(--curva-salida) both; animation-delay: calc(var(--i, 0) * 50ms);
+}
+.primeros-pasos li > div { flex: 1; display: flex; flex-direction: column; font-size: 13px; color: var(--color-texto-suave); }
+.primeros-pasos li b { font-size: 14px; color: var(--color-texto); }
+.primeros-pasos li.siguiente { border-color: var(--color-primario); background: var(--color-primario-suave); }
+.primeros-pasos li.hecho b { color: var(--color-texto-suave); text-decoration: line-through; text-decoration-color: var(--color-texto-tenue); }
+.primeros-marca { width: 28px; height: 28px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 12px; border: 1px solid var(--color-borde); background: var(--color-superficie); }
+.primeros-pasos li.hecho .primeros-marca { background: var(--color-exito); border-color: var(--color-exito); color: var(--color-superficie); }
+.primeros-marca svg { width: 14px; height: 14px; }
+@keyframes primeros-entra { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .primeros-pasos li { animation: none; } .primeros-avance { transition: none; } }

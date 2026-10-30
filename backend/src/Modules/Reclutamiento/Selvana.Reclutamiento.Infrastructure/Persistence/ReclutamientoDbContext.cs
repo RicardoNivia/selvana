@@ -64,6 +64,7 @@ internal sealed class VacanteConfiguration : IEntityTypeConfiguration<Vacante>
         builder.Property(v => v.JustificacionSalario).HasMaxLength(1000);
         builder.Property(v => v.SalarioMinimo).HasPrecision(14, 2);
         builder.Property(v => v.SalarioMaximo).HasPrecision(14, 2);
+        builder.Property(v => v.CostoIaUsd).HasPrecision(12, 6);
         builder.Property(v => v.Estado).HasConversion<string>().HasMaxLength(20);
         builder.Property(v => v.CreadaPor).HasMaxLength(200);
         builder.Property(v => v.ModeloIa).HasMaxLength(100);
@@ -120,6 +121,7 @@ internal sealed class PostulacionConfiguration : IEntityTypeConfiguration<Postul
     public void Configure(EntityTypeBuilder<Postulacion> builder)
     {
         builder.ToTable("postulaciones");
+        builder.Property(p => p.CostoIaUsd).HasPrecision(12, 6);
         builder.OwnsOne(p => p.Afinidad, a =>
         {
             a.ToJson();

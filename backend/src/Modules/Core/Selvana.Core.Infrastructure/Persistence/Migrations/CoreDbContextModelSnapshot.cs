@@ -250,8 +250,31 @@ namespace Selvana.Core.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("nombre");
 
+                    b.Property<DateTimeOffset?>("PruebaHasta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("prueba_hasta");
+
+                    b.Property<DateTimeOffset?>("RegistradaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("registrada_en");
+
+                    b.Property<string>("Sector")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("sector");
+
+                    b.Property<string>("Tamano")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("tamano");
+
                     b.HasKey("Id")
                         .HasName("pk_empresas");
+
+                    b.HasIndex("Nit")
+                        .HasDatabaseName("ix_empresas_nit");
 
                     b.ToTable("empresas", "core");
                 });
