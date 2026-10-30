@@ -27,6 +27,8 @@ public static class ClimaModule
         services.AddScoped<IEventosClima, EventosClima>();
         services.AddScoped<IBitacora, Bitacora>();
         services.AddScoped<Contracts.IPulsosDeLaPersona, PulsosDeLaPersona>();
+        services.AddScoped<Application.Pulsos.CalculoRiesgoRotacion>();
+        services.AddScoped<Contracts.IRiesgoDelEquipo>(sp => sp.GetRequiredService<Application.Pulsos.CalculoRiesgoRotacion>());
         services.AddHostedService<ProgramadorPulsos>();
 
         services.AddIntegrationEventConsumers<ClimaDbContext>(AssemblyReference.Assembly);

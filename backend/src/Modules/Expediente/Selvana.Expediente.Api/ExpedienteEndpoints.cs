@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Selvana.Expediente.Application.Empleados;
+using Selvana.Expediente.Application.Equipo;
 using Selvana.SharedKernel.Messaging;
 using Selvana.Web.Common;
 
@@ -24,6 +25,10 @@ public sealed record MotivoRequest(string Motivo);
 public sealed record CampanaResponse(int Pedidos);
 
 public sealed record AplicarLecturaRequest(IReadOnlyList<CambioAplicadoRequest> Cambios);
+
+public sealed record AsignarLiderRequest(Guid? LiderId, IReadOnlyList<Guid>? EmpleadoIds, string? Area);
+
+public sealed record LiderAsignadoResponse(int Personas);
 
 public static class ExpedienteEndpoints
 {
@@ -155,6 +160,24 @@ public static class ExpedienteEndpoints
                 return r.IsSuccess ? Results.Ok(r.Value) : r.ToHttp();
             })
             .WithName("CargarPlanta").DisableAntiforgery().Produces<PlantaCargadaDto>();
+
+        // E4 · «Mi equipo»: el líder ve a su gente; RRHH arma los equipos (líder por persona o por área)
+        var equipo = app.MapGroup("/expediente/equipo").WithTags("Empleados · Mi equipo");
+
+        equipo.MapGet("", async (Guid? lider, string? pregunta, string? filtro, int? pagina, int? tamano, IQueryHandler<ObtenerMiEquipoQuery, MiEquipoDto> h,
+                CancellationToken ct) => (await h.Handle(new ObtenerMiEquipoQuery(lider, pregunta, filtro, pagina, tamano), ct)).ToHttp())
+            .WithName("MiEquipo").Produces<MiEquipoDto>().RequireAuthorization(Politicas.DeAccion("VerMiEquipo"));
+
+        equipo.MapGet("/opciones", async (IQueryHandler<ObtenerOpcionesEquipoQuery, OpcionesEquipoDto> h, CancellationToken ct) =>
+                (await h.Handle(new ObtenerOpcionesEquipoQuery(), ct)).ToHttp())
+            .WithName("OpcionesEquipo").Produces<OpcionesEquipoDto>().RequireAuthorization(Politicas.DeAccion("GestionarEmpleados"));
+
+        equipo.MapPut("/lider", async (AsignarLiderRequest b, ICommandHandler<AsignarLiderCommand, int> h, CancellationToken ct) =>
+            {
+                var r = await h.Handle(new AsignarLiderCommand(b.LiderId, b.EmpleadoIds, b.Area), ct);
+                return r.IsSuccess ? Results.Ok(new LiderAsignadoResponse(r.Value)) : r.ToHttp();
+            })
+            .WithName("AsignarLider").Produces<LiderAsignadoResponse>().RequireAuthorization(Politicas.DeAccion("GestionarEmpleados"));
 
         return app;
     }

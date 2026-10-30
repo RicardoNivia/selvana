@@ -10,6 +10,14 @@ public interface IDesempenoReciente
     Task<IReadOnlyList<DesempenoReciente>> UltimosAsync(Guid empresaId, CancellationToken cancellationToken);
 }
 
+/// <summary>E4 · La evaluación de un ciclo abierto de cada persona del equipo, para «Mi equipo» del líder.</summary>
+public sealed record EvaluacionDelEquipo(Guid EmpleadoId, Guid EvaluacionId, string Ciclo, DateOnly Hasta, string Estado, decimal? Puntaje);
+
+public interface IEvaluacionesDelEquipo
+{
+    Task<IReadOnlyList<EvaluacionDelEquipo>> AbiertasAsync(Guid empresaId, IReadOnlyCollection<Guid> empleados, CancellationToken cancellationToken);
+}
+
 public sealed record CompetenciaParaAutoevaluar(string Nombre, string Descripcion, int? MiCalificacion);
 
 public sealed record ObjetivoDelEmpleado(string Descripcion, string Meta, int Avance);

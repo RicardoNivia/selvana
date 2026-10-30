@@ -35,6 +35,12 @@ internal static class SemillaEjemplo
         await UsuarioAsync(db, hasher, LogisticaCaribe, "mateo.herrera@logisticacaribe.co", "Mateo Herrera", Rol.Administrador, acceso.ContrasenaFicticios, ahora);
         await UsuarioAsync(db, hasher, ClinicaDelValle, "juliana.pardo@clinicadelvalle.co", "Juliana Pardo", Rol.Administrador, acceso.ContrasenaFicticios, ahora);
 
+        // Líderes de área para «Mi equipo» (E4): sus equipos los arma la semilla de Expediente por área
+        await UsuarioAsync(db, hasher, TalentoAndino, "andres.gomez@talentoandino.co", "Andrés Gómez", Rol.Lider, acceso.ContrasenaFicticios, ahora);
+        await UsuarioAsync(db, hasher, TalentoAndino, "carolina.mejia@talentoandino.co", "Carolina Mejía", Rol.Lider, acceso.ContrasenaFicticios, ahora);
+        await UsuarioAsync(db, hasher, LogisticaCaribe, "jorge.castro@logisticacaribe.co", "Jorge Castro", Rol.Lider, acceso.ContrasenaFicticios, ahora);
+        await UsuarioAsync(db, hasher, ClinicaDelValle, "diana.ruiz@clinicadelvalle.co", "Diana Ruiz", Rol.Lider, acceso.ContrasenaFicticios, ahora);
+
         await db.SaveChangesAsync();
         return [Resumen(talento), Resumen(logistica), Resumen(clinica)];
     }

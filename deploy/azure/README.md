@@ -76,6 +76,8 @@ postulantes en todas las etapas (recibida, ajustada, descartada, preselección, 
 
 **Desempeño y clima (29/10/2026).** Cada empresa tiene un ciclo 2025 cerrado y calibrado (con su 9-box) y un ciclo 2026 abierto de 180° con evaluaciones en curso, calificadas, autoevaluadas y algunas con borrador del copiloto; una encuesta de clima abierta con respuestas de casi toda la planta (un área con el clima bajo) y su análisis de comentarios, y pulsos de ingreso con alertas en la bandeja. El enlace de la encuesta se genera en Clima → la encuesta → «Generar enlace nuevo».
 
+**Mi equipo (30/10/2026).** Cada área tiene su líder: en Talento Andino `andres.gomez@talentoandino.co` (Comercial y Tiendas), `carolina.mejia@talentoandino.co` (Producción y Logística) y el dueño del ambiente (`EJEMPLO_CORREO`, Gestión humana); en Logística Caribe `jorge.castro@logisticacaribe.co` (Bodega) y `mateo.herrera@` (Transporte); en Clínica del Valle `diana.ruiz@clinicadelvalle.co` (Urgencias y Hospitalización) y `juliana.pardo@` (Admisiones y Farmacia). Los líderes entran con rol Líder y ven solo su equipo en «Mi equipo».
+
 Los usuarios ficticios usan la contraseña `CONTRASENA_PRUEBAS`. Además sigue la empresa de desarrollo «Servicios Andinos EST»
 (`laura.moreno@`, `admin@` y `camilo.duarte@serviciosandinos.co`, misma contraseña). Solo datos ficticios: nada real de candidatos.
 

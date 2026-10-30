@@ -30,7 +30,7 @@ Planeación ejecutable de las Etapas 2 a 5 del [plan de trabajo](../Selvana-Plan
 | P1 a P3b · Portal de la persona | Hecho y rediseñado; P4 y P5 después de E1 |
 | E1 · Expediente digital | Hecho (28/10): módulo `Expediente` y carga de la planta por CSV con previsualización |
 | E2 · Actualización inteligente | Hecho (28/10): la IA lee el documento, las reglas proponen y RRHH aplica o descarta |
-| **E4 · «Mi equipo» del líder** | **Sigue** |
+| E4 · «Mi equipo» del líder | Hecho (30/10/2026) |
 | Desempeño · Clima | Después |
 
 ## 0. Reclutamiento · Filtros ATS (pedido el 23 de octubre de 2026)
@@ -65,7 +65,7 @@ Se construye justo después de Vinculación V1 y antes de V2. Un ATS clásico de
 | --- | --- | --- |
 | **E1 · Expediente digital** *(hecho el 28/10/2026)* | Empleado con datos, contrato, cargo, salario, sede, área, centro de costo y empresa usuaria; historial de cargos, salarios y traslados; carpeta documental con versiones y vencimientos. Lista paginada y ficha del empleado. Entra desde Vinculación y desde la carga del archivo de planta. | Migración asistida de carpetas escaneadas |
 | **E2 · Actualización inteligente** *(hecho el 28/10/2026)* | RRHH o el empleado sube un documento; la IA identifica el tipo, extrae los datos y propone el cambio; RRHH aprueba en la bandeja. Alertas de documentos y certificados por vencer. | Campaña anual desde el portal del empleado (P5) |
-| **E4 · «Mi equipo» del líder** | Vista dentro de la consola para el rol Líder (no es un portal aparte): su equipo, pendientes y alertas; preguntas en lenguaje natural («¿quién tiene el curso de alturas vencido?»). | — |
+| **E4 · «Mi equipo» del líder** *(hecho el 30/10/2026)* | Vista dentro de la consola para el rol Líder (no es un portal aparte): su equipo, pendientes y alertas; preguntas en lenguaje natural («¿quién tiene el curso de alturas vencido?»). Líder directo en el empleado (RRHH lo asigna en la ficha o por área con «Armar equipos»); permiso `VerMiEquipo` (el líder solo ve su equipo, RRHH el de cualquier líder); alertas del expediente, evaluación abierta (Desempeño) y riesgo de rotación (Clima) por contratos; «Para atender esta semana» por reglas con su evidencia; preguntas interpretadas por reglas, sin IA, mostrando lo que se entendió. | Respuestas con IA a preguntas abiertas |
 
 ## 3. Desempeño (Etapa 4)
 

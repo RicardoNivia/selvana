@@ -12,6 +12,8 @@ import {
   tiposDocumento, useActualizarDatos, useAplicarDatosPropuestos, useDescartarDatosPropuestos, useEmpleado, useGuardarDocumento, usePedirActualizacion,
   useRegistrarNovedad, useRetirar,
 } from './api'
+import '../equipo/equipo.css'
+import { useAsignarLider, useOpcionesEquipo } from '../equipo/api'
 import './empleados.css'
 
 type Pestana = 'resumen' | 'hoja' | 'historial' | 'carpeta'
@@ -91,6 +93,7 @@ function Resumen({ e }: { e: Empleado }) {
             {s.empresaUsuaria && <><dt>Empresa usuaria</dt><dd>{s.empresaUsuaria}</dd></>}
             <dt>Contrato</dt><dd>{s.tipoContrato}{s.fechaFinContrato && <> · hasta <span className="mono">{fechaCorta(s.fechaFinContrato)}</span></>}</dd>
             <dt>Salario</dt><dd className="mono">{pesos.format(s.salarioCop)}</dd>
+            <dt>Líder directo</dt><dd><LiderDirecto e={e} /></dd>
           </dl>
           <p className="ayuda">Para cambiar el cargo, el salario, la sede o el contrato, registre una novedad en «Historial».</p>
         </section>
@@ -362,5 +365,33 @@ function CampanaDatos({ e }: { e: Empleado }) {
       {!e.actualizacionPedidaEn && <Boton pequeno cargando={pedir.isPending} textoCargando="Pidiendo…" onClick={() => pedir.mutate(undefined)}>Pedir actualización</Boton>}
       {pedir.error && <p role="alert" className="aviso aviso-error"><IconoAlerta />{pedir.error.message}</p>}
     </section>
+  )
+}
+
+/** Líder directo: RRHH lo elige entre los usuarios de la consola; el líder ve a la persona en «Mi equipo». */
+function LiderDirecto({ e }: { e: Empleado }) {
+  const [editando, setEditando] = useState(false)
+  const opciones = useOpcionesEquipo(editando)
+  const asignar = useAsignarLider()
+  const [lider, setLider] = useState(e.liderId ?? '')
+  if (!editando) {
+    return (
+      <span className="lider-directo">
+        {e.liderNombre ?? <span className="ayuda">Sin asignar</span>}
+        {e.estado === 'Activo' && <button type="button" className="enlace-boton" onClick={() => setEditando(true)}>{e.liderId ? 'Cambiar' : 'Asignar'}</button>}
+      </span>
+    )
+  }
+  return (
+    <span className="lider-directo">
+      <select className="selector" value={lider} onChange={(x) => setLider(x.target.value)} aria-label="Líder directo" disabled={opciones.isPending}>
+        <option value="">Sin líder</option>
+        {opciones.data?.usuarios.map((u) => <option key={u.id} value={u.id}>{u.nombre}{u.rol === 'Lider' ? ' · Líder' : ''}</option>)}
+      </select>
+      <Boton pequeno variante="primario" cargando={asignar.isPending} textoCargando="Guardando…"
+        onClick={() => asignar.mutate({ liderId: lider || null, empleadoIds: [e.id] }, { onSuccess: () => setEditando(false) })}>Guardar</Boton>
+      <Boton pequeno onClick={() => setEditando(false)} disabled={asignar.isPending}>Cancelar</Boton>
+      {asignar.error && <span role="alert" className="error-formulario">{asignar.error.message}</span>}
+    </span>
   )
 }

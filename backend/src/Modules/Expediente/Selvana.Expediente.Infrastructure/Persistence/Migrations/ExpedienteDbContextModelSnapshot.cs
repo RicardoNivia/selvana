@@ -132,6 +132,15 @@ namespace Selvana.Expediente.Infrastructure.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("fecha_retiro");
 
+                    b.Property<Guid?>("LiderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lider_id");
+
+                    b.Property<string>("LiderNombre")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("lider_nombre");
+
                     b.Property<string>("MotivoRetiro")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
@@ -188,6 +197,9 @@ namespace Selvana.Expediente.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("EmpresaId", "Documento")
                         .HasDatabaseName("ix_empleados_empresa_id_documento");
+
+                    b.HasIndex("EmpresaId", "LiderId")
+                        .HasDatabaseName("ix_empleados_empresa_id_lider_id");
 
                     b.HasIndex("EmpresaId", "Estado", "Nombre")
                         .HasDatabaseName("ix_empleados_empresa_id_estado_nombre");
