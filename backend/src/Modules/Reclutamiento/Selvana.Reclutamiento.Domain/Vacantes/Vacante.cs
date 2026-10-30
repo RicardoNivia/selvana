@@ -157,6 +157,11 @@ public sealed class Vacante : AggregateRoot<Guid>
     public DateTimeOffset? PublicadaEn { get; private set; }
     public DateTimeOffset? CerradaEn { get; private set; }
     public string? ModeloIa { get; private set; }
+
+    /// <summary>Lo que costó la IA en la vacante misma (redacción), en dólares. Lo de cada postulación se suma aparte.</summary>
+    public decimal CostoIaUsd { get; private set; }
+
+    public void SumarCostoIa(decimal costoUsd) => CostoIaUsd += Math.Max(0, costoUsd);
     public string? MensajeIa { get; private set; }
 
     /// <summary>

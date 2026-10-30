@@ -13,7 +13,7 @@ public sealed record BorradorVacanteRedactado(
     IReadOnlyList<string> Requisitos, IReadOnlyList<string> Competencias, IReadOnlyList<string> PreguntasFiltro,
     decimal SalarioMinimo, decimal SalarioMaximo, string JustificacionSalario,
     IReadOnlyList<RazonIa> Razones, IReadOnlyList<string> Supuestos, IReadOnlyList<string> RetiradosPorSesgo,
-    string Modelo, string? Error, IReadOnlyList<AclaracionIa>? Aclaraciones = null) : IIntegrationEvent;
+    string Modelo, string? Error, IReadOnlyList<AclaracionIa>? Aclaraciones = null, decimal CostoUsd = 0) : IIntegrationEvent;
 
 /// <summary>Pregunta de la IA antes de redactar, con opciones cortas para elegir (la persona también puede responder otra cosa).</summary>
 public sealed record AclaracionIa(string Pregunta, IReadOnlyList<string> Opciones);

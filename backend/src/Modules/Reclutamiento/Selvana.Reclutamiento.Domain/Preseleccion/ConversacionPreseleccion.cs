@@ -87,6 +87,11 @@ public sealed class ConversacionPreseleccion : AggregateRoot<Guid>
     public ResumenPreseleccion Resumen { get; private set; } = new();
     public string? MotivoEscalamiento { get; private set; }
     public string? Modelo { get; private set; }
+
+    /// <summary>Lo que costó la IA en la conversación (todos los turnos), en dólares.</summary>
+    public decimal CostoIaUsd { get; private set; }
+
+    public void SumarCostoIa(decimal costoUsd) => CostoIaUsd += Math.Max(0, costoUsd);
     public string InvitadaPor { get; private init; } = "";
     public DateTimeOffset CreadaEn { get; private init; }
     public DateTimeOffset ActualizadaEn { get; private set; }

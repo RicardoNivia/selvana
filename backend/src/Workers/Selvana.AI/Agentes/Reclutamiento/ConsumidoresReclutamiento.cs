@@ -32,7 +32,7 @@ internal sealed class VacanteSolicitadaConsumer(IRedactorVacantes redactor, IaDb
                 b.RangoSalarial.MinimoCop, b.RangoSalarial.MaximoCop, b.RangoSalarial.Justificacion,
                 [.. b.Razones.Select(x => new RazonIa(x.Evidencia == "Supuesto" ? "−" : "+", x.Texto, x.Evidencia))],
                 b.Supuestos, r.Value.RequisitosRetiradosPorSesgo, r.Value.Modelo, null,
-                [.. (b.Aclaraciones ?? []).Select(a => new AclaracionIa(a.Pregunta, a.Opciones))]));
+                [.. (b.Aclaraciones ?? []).Select(a => new AclaracionIa(a.Pregunta, a.Opciones))], r.Value.CostoUsd));
         }
 
         await db.SaveChangesAsync(cancellationToken);

@@ -20,6 +20,7 @@ import { ConversacionCandidato } from '../features/preseleccion/ConversacionCand
 import { PresentarPruebas } from '../features/pruebas/PresentarPruebas'
 import { PrivacidadAuditoria } from '../features/privacidad/PrivacidadAuditoria'
 import { UsuariosRoles } from '../features/usuarios/UsuariosRoles'
+import { TableroSeleccion } from '../features/vacantes/TableroSeleccion'
 import { VacanteDetalle } from '../features/vacantes/VacanteDetalle'
 import { VacanteNueva } from '../features/vacantes/VacanteNueva'
 import { VacantesLista } from '../features/vacantes/VacantesLista'
@@ -82,6 +83,7 @@ const router = createBrowserRouter([
       { path: 'bandeja', element: <Bandeja /> },
       { path: 'vacantes', element: <VacantesLista /> },
       { path: 'vacantes/nueva', element: <VacanteNueva /> },
+      { path: 'vacantes/tablero', element: <TableroSeleccion /> },
       { path: 'vacantes/:id', element: <VacanteDetalle /> },
       { path: 'candidatos', element: <BancoTalento /> },
       { path: 'candidatos/:id', element: <FichaCandidato /> },

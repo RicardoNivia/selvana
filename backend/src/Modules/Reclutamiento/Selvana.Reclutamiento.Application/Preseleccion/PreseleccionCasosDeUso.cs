@@ -183,6 +183,7 @@ internal sealed class RespuestaPreseleccionConsumer(IConversaciones conversacion
 
         var ahora = reloj.GetUtcNow();
         var estabaEscalada = c.Estado == EstadoConversacion.Escalada;
+        c.SumarCostoIa(e.CostoUsd);
         if (e.Error is not null)
         {
             c.FallaAgente($"La IA no pudo responder: {e.Error}", ahora);

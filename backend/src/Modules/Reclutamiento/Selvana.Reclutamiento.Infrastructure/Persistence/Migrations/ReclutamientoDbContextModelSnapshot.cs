@@ -185,6 +185,11 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("contratacion_aprobada_por");
 
+                    b.Property<decimal>("CostoIaUsd")
+                        .HasPrecision(12, 6)
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("costo_ia_usd");
+
                     b.Property<string>("Etapa")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -392,6 +397,11 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("CandidatoId")
                         .HasColumnType("uuid")
                         .HasColumnName("candidato_id");
+
+                    b.Property<decimal>("CostoIaUsd")
+                        .HasPrecision(12, 6)
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("costo_ia_usd");
 
                     b.Property<DateTimeOffset>("CreadaEn")
                         .HasColumnType("timestamp with time zone")
@@ -686,6 +696,11 @@ namespace Selvana.Reclutamiento.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text[]")
                         .HasColumnName("competencias");
+
+                    b.Property<decimal>("CostoIaUsd")
+                        .HasPrecision(12, 6)
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("costo_ia_usd");
 
                     b.Property<DateTimeOffset>("CreadaEn")
                         .HasColumnType("timestamp with time zone")

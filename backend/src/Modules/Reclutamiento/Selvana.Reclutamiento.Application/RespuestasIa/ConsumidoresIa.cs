@@ -23,6 +23,7 @@ internal sealed class BorradorVacanteRedactadoConsumer(
             return;
         }
 
+        vacante.SumarCostoIa(e.CostoUsd);
         if (e.Error is not null)
         {
             vacante.RegistrarFallaIa(e.Error);

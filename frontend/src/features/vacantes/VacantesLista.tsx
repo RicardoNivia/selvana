@@ -22,9 +22,12 @@ export function VacantesLista() {
 
   return (
     <>
-      <header className="encabezado">
-        <h1>Vacantes</h1>
-        <p>Escriba lo que necesita y la IA llena la vacante, o agréguela a mano. Cada vacante es de un solo cargo, con las posiciones disponibles que necesite.</p>
+      <header className="encabezado" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end', justifyContent: 'space-between' }}>
+        <div>
+          <h1>Vacantes</h1>
+          <p>Escriba lo que necesita y la IA llena la vacante, o agréguela a mano. Cada vacante es de un solo cargo, con las posiciones disponibles que necesite.</p>
+        </div>
+        <Link to="/consola/vacantes/tablero" className="boton boton-secundario">Tablero de selección</Link>
       </header>
 
       <NuevaVacante />

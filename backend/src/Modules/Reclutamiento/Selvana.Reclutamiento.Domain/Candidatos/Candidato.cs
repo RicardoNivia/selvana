@@ -173,6 +173,11 @@ public sealed class Postulacion : Entity<Guid>
 
     internal void PedirAfinidad() => Afinidad = new AfinidadPostulacion { Estado = EstadoAfinidad.Calculando };
 
+    /// <summary>Lo que costó la IA en esta postulación (ranking), en dólares; la preselección se suma en su conversación.</summary>
+    public decimal CostoIaUsd { get; private set; }
+
+    internal void SumarCostoIa(decimal costoUsd) => CostoIaUsd += Math.Max(0, costoUsd);
+
     internal void RegistrarAfinidad(int puntaje, IEnumerable<RazonPuntaje> razones, IEnumerable<string> cumplidos, IEnumerable<string> faltantes,
         string modelo, DateTimeOffset ahora, int razonesRetiradas = 0) =>
         Afinidad = new AfinidadPostulacion
@@ -366,6 +371,8 @@ public sealed partial class Candidato : AggregateRoot<Guid>
         p.PedirAfinidad();
         return p;
     }
+
+    public void SumarCostoIa(Guid postulacionId, decimal costoUsd) => _postulaciones.FirstOrDefault(x => x.Id == postulacionId)?.SumarCostoIa(costoUsd);
 
     public Result<Postulacion> RegistrarAfinidad(Guid postulacionId, int puntaje, IEnumerable<RazonPuntaje> razones, IEnumerable<string> cumplidos,
         IEnumerable<string> faltantes, string modelo, DateTimeOffset ahora, int razonesRetiradas = 0)

@@ -11,6 +11,7 @@ internal sealed class ConversacionPreseleccionConfiguration : IEntityTypeConfigu
     public void Configure(EntityTypeBuilder<ConversacionPreseleccion> builder)
     {
         builder.ToTable("conversaciones_preseleccion");
+        builder.Property(c => c.CostoIaUsd).HasPrecision(12, 6);
         builder.Property(c => c.Id).ValueGeneratedNever();
         builder.Ignore(c => c.DomainEvents);
         builder.Ignore(c => c.Activa);
