@@ -117,6 +117,11 @@ if (app.Configuration.GetValue<bool>("Ejemplo:Sembrar"))
     await app.Services.SembrarEjemploVinculacionAsync([.. contratables, .. ampliada.Contratables], "Valentina Ríos");
     var planta = await app.Services.SembrarEjemploExpedienteAsync(empresas, "Valentina Ríos");
     await app.Services.SembrarLideresEjemploAsync(empresas, ejemplo["CorreoDueno"] ?? "");
+    // Pruebas de carga (sprint 10): una vacante con cientos de postulaciones en la primera empresa de ejemplo, solo si se pide
+    if (app.Configuration.GetValue<int>("Carga:Postulaciones") is > 0 and var carga && empresas.Count > 0)
+    {
+        await app.Services.SembrarCargaReclutamientoAsync(empresas[0], Math.Min(carga, 5000));
+    }
     await app.Services.SembrarCuentasPortalEjemploAsync([.. ampliada.Personas, .. planta], ejemplo["ContrasenaFicticios"] ?? "");
     // Desempeño y clima sobre la planta: ciclos con evaluaciones y 9-box, encuesta con respuestas y pulsos de ingreso
     await app.Services.SembrarEjemploDesempenoAsync(empresas, "Valentina Ríos");

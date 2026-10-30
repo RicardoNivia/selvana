@@ -95,6 +95,15 @@ public static class ReclutamientoModule
             sp.GetRequiredService<ITokensPruebas>(), empresas, nombreDueno, sp.GetRequiredService<TimeProvider>());
     }
 
+    /// <summary>Sprint 10 · Vacante de selección masiva para las pruebas de carga (Carga:Postulaciones). Idempotente; devuelve cuántas postulaciones creó.</summary>
+    public static async Task<int> SembrarCargaReclutamientoAsync(this IServiceProvider services, Core.Contracts.Empresas.EmpresaResumen empresa, int postulaciones)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+        return await Ejemplo.SemillaCarga.SembrarAsync(sp.GetRequiredService<ReclutamientoDbContext>(), sp.GetRequiredService<IAlmacenHojasDeVida>(),
+            sp.GetRequiredService<ITokensPruebas>(), empresa, postulaciones, sp.GetRequiredService<TimeProvider>());
+    }
+
     /// <summary>Cuentas del portal de la persona para los candidatos y empleados de ejemplo (idempotente). Devuelve cuántas creó.</summary>
     public static async Task<int> SembrarCuentasPortalEjemploAsync(this IServiceProvider services,
         IReadOnlyList<Selvana.Infrastructure.Common.Ejemplo.PersonaPortalEjemplo> personas, string contrasena)
