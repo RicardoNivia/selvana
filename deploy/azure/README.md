@@ -27,6 +27,8 @@ la administra (regla `ssh-mi-ip` del NSG). Los secretos viven en `/opt/selvana/.
 
 El workflow entra a Azure con una identidad de servicio limitada al grupo `rg-selvana-pruebas`:
 
+Lo más simple es `.\scripts\configurar-cicd.ps1` (requiere `az login` y `gh auth login`): crea la identidad, guarda el secreto en GitHub sin mostrarlo y lanza el workflow. A mano:
+
 ```powershell
 az ad sp create-for-rbac --name sp-selvana-github --role Contributor `
   --scopes /subscriptions/<id-suscripcion>/resourceGroups/rg-selvana-pruebas --json-auth
